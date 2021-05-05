@@ -6,12 +6,8 @@ from cobra.core.dictlist import DictList
 
 logger = logging.getLogger(__name__)
 
-class MSGenome():
-    def __init__(self,)
-        self.features = DictList;
-        
-        
-    
-    
-    
-    
+
+class MSGenome:
+
+    def __init__(self):
+        self.features = DictList
