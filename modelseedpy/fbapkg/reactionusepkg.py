@@ -3,31 +3,23 @@
 from __future__ import absolute_import
 
 import logging
-import re
 from optlang.symbolics import Zero, add
-import json as _json
-from cobra.core import Gene, Metabolite, Model, Reaction
-from modelseedpy.core.basefbapkg import BaseFBAPkg
-
-#Adding a few exception classes to handle different types of errors
-class FeasibilityError(Exception):
-    """Error in FBA formulation"""
-    pass
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
 #Base class for FBA packages
 class ReactionUsePkg(BaseFBAPkg):
     def __init__(self,model):
-        BaseFBAPkg.__init__(self,"reaction use",{"fu":["reaction",0,1],"ru":["reaction",0,1]},{"fu":"reaction","ru":"reaction","exclusion":"other"})
+        BaseFBAPkg.__init__(self,model,"reaction use",{"fu":"reaction","ru":"reaction"},{"fu":"reaction","ru":"reaction","exclusion":"none","urev":"reaction"})
 
-    def build_package(self,filter = None):
+    def build_package(self,filter = None,reversibility = 0):
         for reaction in self.model.reactions:
             #Checking that reaction passes input filter if one is provided
             if filter == None:
                 self.build_variable(reaction,"=")
-                self.build_constraint(reaction)
+                self.build_constraint(reaction,reversibility)
             elif reaction.id in filter:
                 self.build_variable(reaction,filter[reaction.id])
-                self.build_constraint(reaction)
+                self.build_constraint(reaction,reversibility)
     
     def build_variable(self,object,direction):
         variable = None
@@ -37,12 +29,14 @@ class ReactionUsePkg(BaseFBAPkg):
             variable = BaseFBAPkg.build_variable(self,"ru",0,1,"binary",object)
         return variable
         
-    def build_constraint(self,object = None):
+    def build_constraint(self,object,reversibility):
         constraint = None
-        if object.id not in self.variables["fu"]:
+        if object.id not in self.constraints["fu"] and object.id in self.variables["fu"]:
             constraint = BaseFBAPkg.build_constraint(self,"fu",0,None,{self.variables["fu"][object.id]:1000,object.forward_variable:-1},object)
-        if object.id not in self.variables["ru"]:
+        if object.id not in self.constraints["ru"] and object.id in self.variables["ru"]:
             constraint = BaseFBAPkg.build_constraint(self,"ru",0,None,{self.variables["ru"][object.id]:1000,object.reverse_variable:-1},object)
+        if reversibility == 1 and object.id in self.variables["ru"] and object.id in self.variables["fu"]:
+            constraint = BaseFBAPkg.build_constraint(self,"urev",None,1,{self.variables["ru"][object.id]:1,self.variables["fu"][object.id]:1},object)
         return constraint
     
     def build_exclusion_constraint(self,flux_values):
@@ -61,8 +55,8 @@ class ReactionUsePkg(BaseFBAPkg):
             self.constraints["exclusion"][const_name] = self.model.problem.Constraint(
                 Zero,lb=None,ub=(solution_size-1),name=const_name
             )
-            self.cobramodel.add_cons_vars(self.constraints["exclusion"][const_name])
-            self.cobramodel.solver.update()
+            self.model.add_cons_vars(self.constraints["exclusion"][const_name])
+            self.model.solver.update()
             self.constraints["exclusion"][const_name].set_linear_coefficients(solution_coef)
             return self.constraints["exclusion"][const_name]
         return None
