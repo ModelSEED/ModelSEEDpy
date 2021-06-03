@@ -1,31 +1,9 @@
 from modelseedpy.core.rpcclient import RPCClient
-from modelseedpy.core.msgenome import Sequence
+from modelseedpy.core.msgenome import MSFeature
 import re
-from cobrakbase.core.kbasegenomesgenome import normalize_role #move this to this lib
+from modelseedpy.core.msgenome import MSGenome, read_fasta, normalize_role #move this to this lib
 
-def read_fasta(f, split='|'):
-    features = []
-    with open(f, 'r') as fh:
-        lines = fh.read().split('\n')
-        seq = None
-        for line in lines:
-            if line.startswith('>'):
-                if seq:
-                    features.append(seq)
-                seq_id = line[1:]
-                desc = ""
-                if split:
-                    header_data = line[1:].split(split)
-                    seq_id = header_data[0]
-                    desc = header_data[1]
-
-                seq = Sequence(seq_id, "", desc)
-            else:
-                if seq:
-                    seq.seq += line
-    return features
-
-
+### delete this after ####
 def aux_rast_result(res, g):
     search_name_to_genes = {}
     search_name_to_orginal = {}
@@ -46,7 +24,7 @@ def aux_rast_result(res, g):
 
     return search_name_to_genes, search_name_to_orginal
 
-
+### delete this after ####
 def aux_template(template):
     rxn_roles = {}
     roles = dict(map(lambda x: (x['id'], x), template.roles))
@@ -71,6 +49,31 @@ class RastClient:
             {"name": 'annotate_proteins_similarity', "similarity_parameters": {"annotate_hypothetical_only": 1}}
         ]
 
+    def annotate_genome(self, genome):
+        p_features = []
+        for f in genome.features:
+            if f.seq and len(f.seq) > 0:
+                p_features.append({
+                    "id": f.id,
+                    "protein_translation": f.seq
+                })
+        res = self.f(p_features)
+
+        for o in res[0]['features']:
+            feature = genome.features.get_by_id(o['id'])
+            if 'function' in o:
+                functions = re.split('; | / | @ | => ', o['function'])
+                for function in functions:
+                    feature.add_ontology_term('RAST', function)
+
+        return res[0]['analysis_events']
+
+    def annotate_genome_from_fasta(self, filepath, split='|'):
+        genome = MSGenome.from_fasta(filepath, split)
+        res = self.annotate_genome(genome)
+
+        return genome, res
+
     def f1(self, protein_id, protein_seq):
         p_features = [
             {
@@ -88,15 +91,3 @@ class RastClient:
         result = self.rpc_client.call("GenomeAnnotation.run_pipeline", params)
         return result
 
-    def fasta(self, filepath, split='|'):
-        seqs = read_fasta(filepath, split)
-        print(len(seqs))
-        seqs = list(filter(lambda x: len(x.seq) > 0, seqs))
-        print(len(seqs))
-        p_features = []
-        for s in seqs:
-            p_features.append({
-                'id': s.id,
-                'protein_translation': s.seq,
-            })
-        return self.f(p_features)

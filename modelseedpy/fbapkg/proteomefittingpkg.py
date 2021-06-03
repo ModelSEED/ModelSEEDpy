@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import logging
 from optlang.symbolics import Zero, add
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.fbapkg.fluxfittingpkg import FluxFittingPkg
 from modelseedpy.fbapkg.revbinpkg import RevBinPkg
 from modelseedpy.fbapkg.totalfluxpkg import TotalFluxPkg
 
@@ -74,6 +75,5 @@ class ProteomeFittingPkg(BaseFBAPkg):
         elif type == "kfitc" and object.id in self.parameters["kcat_values"]:
             #kfit(i) = kapp(i) - kcoef*kcat(i)
             rhs = -1*self.parameters["kcat_values"][object.id]*self.parameters["kcat_coef"]
-            coef = {self.variables["kvfit"][object.id]]:1,self.variables["kapp"][object.id]]:-1}
+            coef = {self.variables["kvfit"][object.id]:1,self.variables["kapp"][object.id]:-1}
             return BaseFBAPkg.build_constraint(self,type,rhs,rhs,coef,object)
-        
