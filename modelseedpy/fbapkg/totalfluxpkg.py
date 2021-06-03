@@ -7,7 +7,7 @@ import re
 from optlang.symbolics import Zero, add
 import json as _json
 from cobra.core import Gene, Metabolite, Model, Reaction
-from modelseedpy.core.basefbapkg import BaseFBAPkg
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
 #Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):

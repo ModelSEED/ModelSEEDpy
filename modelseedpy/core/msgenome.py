@@ -6,25 +6,35 @@ from cobra.core.dictlist import DictList
 
 logger = logging.getLogger(__name__)
 
->b0001|TERMKEY1:wathahshf @ asdasdas @ asdasds @ asdsdsd @ sdsds|TERMKEY2:wathahshf
+#Static factory functions:
+            
+#def build_from_kbase_gto:
+        
+#def build_from_kbase_id:
 
-input(KBASE) (INPUT?)  ??? >>>>MSGenome >>> (KBASE) (FASTA ?)????
+#def build_from_protein_sequence_hash:
 
-build_model_app(genome, template)
-build_model_rast_app(genome, template)
-build_model_ko_app(genome, template)
-build_model_ec_app(genome, template)
-
-class Sequence:
-
+class MSFeature:
     def __init__(self, feature_id, sequence, description=None):
         self.id = feature_id
         self.seq = sequence
         self.description = description
-        #self.ontology_terms = {'termkey' : []} :
+        self.ontology_terms = {}
 
 
 class MSGenome:
 
     def __init__(self):
         self.features = DictList()
+
+    @staticmethod
+    def from_fasta(filename, contigs=0):
+        pass
+
+    @staticmethod
+    def from_dna_fasta(filename):
+        pass
+
+    @staticmethod
+    def from_protein_sequence_hash(sequence):
+        pass

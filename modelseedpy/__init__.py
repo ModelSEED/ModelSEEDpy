@@ -32,9 +32,15 @@ if sys.version_info[0] == 2:
         FutureWarning,
     )
 
+import modelseedpy
 from modelseedpy.core import (
     RPCClient,
 )
+from modelseedpy.fbapkg import (
+    BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,ElementUptakePkg,BilevelPkg,
+    CommKineticPkg,KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg
+)
+
 #If there are parallel modules these should be imported in parallel as shown here:
 #from cobra import flux_analysis
 #from cobra import io
