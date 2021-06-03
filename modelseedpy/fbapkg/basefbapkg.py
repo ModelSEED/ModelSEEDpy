@@ -22,12 +22,23 @@ class BaseFBAPkg():
         self.parentpkg = parent
         self.constraints = dict()
         self.variables = dict()
+        self.parameters = dict()
         self.variable_types = variable_types
         self.constraint_types = constraint_types
         for type in variable_types:
             self.variables[type] = dict()
         for type in constraint_types:
             self.constraints[type] = dict()
+    
+    def validate_parameters(self,params,required,defaults):
+        for item in required:
+            if item not in params:
+                raise ValueError('Required argument '+item+' is missing!')
+        for key in params:
+            self.parameters[key] = params[key]
+        for key in defaults:
+            if key not in params:
+                self.parameters[key] = defaults[key]
     
     def clear(self):
         objects = []

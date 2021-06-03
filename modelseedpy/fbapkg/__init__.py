@@ -11,3 +11,5 @@ from modelseedpy.fbapkg.elementuptakepkg import ElementUptakePkg
 from modelseedpy.fbapkg.bilevelpkg import BilevelPkg
 from modelseedpy.fbapkg.commkineticpkg import CommKineticPkg
 from modelseedpy.fbapkg.kbasemediapkg import KBaseMediaPkg
+from modelseedpy.fbapkg.proteomefittingpkg import ProteomeFittingPkg
+from modelseedpy.fbapkg.fluxfittingpkg import FluxFittingPkg
