@@ -17,7 +17,6 @@ class MSBuilder:
     def gapfill_model(original_mdl,target_reaction,template,media):
         FBAHelper.set_objective_from_target_reaction(original_mdl,target_reaction)
         model = cobra.io.json.from_json(cobra.io.json.to_json(original_mdl))
-        model.solver = 'optlang-cplex'
         gfp = GapfillingPkg(model)
         gfp.build_package({
             "default_gapfill_templates":[template],
