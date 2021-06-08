@@ -17,6 +17,8 @@ class MSEditorAPI:
 
     @staticmethod
     def remove_reactions(model,rxn_id_list = []):
+        for rxnid in rxn_id_list:
+            pass
         pass
         
     @staticmethod    
