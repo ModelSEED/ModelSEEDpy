@@ -69,7 +69,7 @@ class BaseFBAPkg():
     def build_constraint(self,type,lower_bound,upper_bound,coef = {},object = None):
         name = None
         if self.constraint_types[type] == "none":
-            count = len(self.variables[type])
+            count = len(self.constraints[type])
             name = str(count+1)
         elif self.constraint_types[type] == "string":
             name = object

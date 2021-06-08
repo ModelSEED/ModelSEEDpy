@@ -13,3 +13,4 @@ from modelseedpy.fbapkg.commkineticpkg import CommKineticPkg
 from modelseedpy.fbapkg.kbasemediapkg import KBaseMediaPkg
 from modelseedpy.fbapkg.proteomefittingpkg import ProteomeFittingPkg
 from modelseedpy.fbapkg.fluxfittingpkg import FluxFittingPkg
+from modelseedpy.fbapkg.gapfillingpkg import GapfillingPkg
