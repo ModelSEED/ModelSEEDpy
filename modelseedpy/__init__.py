@@ -34,7 +34,7 @@ if sys.version_info[0] == 2:
 
 import modelseedpy
 from modelseedpy.core import (
-    RPCClient,FBAHelper,MSBuilder
+    RastClient, MSGenome, MSBuilder, FBAHelper
 )
 from modelseedpy.fbapkg import (
     BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,ElementUptakePkg,BilevelPkg,
