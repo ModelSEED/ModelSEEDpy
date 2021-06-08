@@ -12,7 +12,9 @@ from modelseedpy.fbapkg import GapfillingPkg, KBaseMediaPkg
 
 logger = logging.getLogger(__name__)
 
+
 class MSEditorAPI:
+
     @staticmethod
     def remove_reactions(model,rxn_id_list = []):
         pass
