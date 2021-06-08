@@ -305,94 +305,103 @@ def build_reaction(reaction_id, gpr, template, index='0'):
     return reaction
 
 
-def build_metabolic_model(model_id, genome, template, index='0',
-                          allow_all_non_grp_reactions=False, annotate_with_rast=True):
-
-    if annotate_with_rast:
-        rast = RastClient()
-        res = rast.annotate_genome(genome)
-
-    search_name_to_genes, search_name_to_orginal = aaaa(genome)
-    rxn_roles = aux_template(template)  # needs to be fixed to actually reflect template GPR rules
-
-    metabolic_reactions = {}
-    genome_search_names = set(search_name_to_genes)
-    for rxn_id in rxn_roles:
-        sn_set = set(genome_search_names & rxn_roles[rxn_id])
-        if len(sn_set) > 0:
-            genes = set()
-            # print(rxn_id, sn_set)
-            for sn in sn_set:
-                if sn in search_name_to_genes:
-                    genes |= search_name_to_genes[sn]
-            metabolic_reactions[rxn_id] = genes
-
-    # temporary hack until proper complexes from template
-    metabolic_reactions_2 = {}
-    cpx_random = 0
-    for rxn_id in metabolic_reactions:
-        metabolic_reactions_2[rxn_id] = {}
-        for gene_id in metabolic_reactions[rxn_id]:
-            metabolic_reactions_2[rxn_id]['complex' + str(cpx_random)] = {gene_id}
-            cpx_random += 1
-
-    reactions = []
-    for rxn_id in metabolic_reactions_2:
-        reaction = build_reaction(rxn_id, metabolic_reactions_2[rxn_id], template, index)
-        reactions.append(reaction)
-    cobra_model = Model(model_id)
-    cobra_model.add_reactions(reactions)
-
-    reactions_no_gpr = []
-    reactions_in_model = set(map(lambda x: x.id, cobra_model.reactions))
-    metabolites_in_model = set(map(lambda x: x.id, cobra_model.metabolites))
-
-    for rxn in template.reactions:
-        if rxn.data['type'] == 'universal' or rxn.data['type'] == 'spontaneous':
-            reaction = build_reaction(rxn.id, {}, template, index)
-            reaction_metabolite_ids = set(map(lambda x: x.id, set(reaction.metabolites)))
-            if (len(metabolites_in_model & reaction_metabolite_ids) > 0 or allow_all_non_grp_reactions) and \
-                    reaction.id not in reactions_in_model:
-                reactions_no_gpr.append(reaction)
-    cobra_model.add_reactions(reactions_no_gpr)
-
-    reactions_exchanges = []
-    for m in cobra_model.metabolites:
-        if m.compartment == 'e0':
-            rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
-            rxn_exchange.add_metabolites({m: -1})
-            reactions_exchanges.append(rxn_exchange)
-    cobra_model.add_reactions(reactions_exchanges)
-
-    if template.name.startswith('CoreModel'):
-        bio_rxn1 = build_biomass('bio1', cobra_model, template, core_biomass)
-        bio_rxn2 = build_biomass('bio2', cobra_model, template, core_atp)
-        cobra_model.add_reactions([bio_rxn1, bio_rxn2])
-        cobra_model.objective = 'bio1'
-    if template.name.startswith('GramNeg'):
-        bio_rxn1 = build_biomass('bio1', cobra_model, template, gramneg)
-        cobra_model.add_reactions([bio_rxn1])
-        cobra_model.objective = 'bio1'
-    if template.name.startswith('GramPos'):
-        bio_rxn1 = build_biomass('bio1', cobra_model, template, grampos)
-        cobra_model.add_reactions([bio_rxn1])
-        cobra_model.objective = 'bio1'
-
-    reactions_sinks = []
-    for cpd_id in ['cpd02701_c0', 'cpd11416_c0', 'cpd15302_c0']:
-        if cpd_id in cobra_model.metabolites:
-            m = cobra_model.metabolites.get_by_id(cpd_id)
-            rxn_exchange = Reaction('SK_' + m.id, 'Sink for ' + m.name, 'exchanges', 0, 1000)
-            rxn_exchange.add_metabolites({m: -1})
-            reactions_sinks.append(rxn_exchange)
-    cobra_model.add_reactions(reactions_sinks)
-
-    return cobra_model
-
 class MSBuilder:
+
+    def __init__(self, genome, template):
+        """
+        for future methods with better customization
+        """
+        self.genome = genome
+        self.template = template
+
     @staticmethod
-    def gapfill_model(original_mdl,target_reaction,template,media):
-        FBAHelper.set_objective_from_target_reaction(original_mdl,target_reaction)
+    def build_metabolic_model(model_id, genome, template, index='0',
+                              allow_all_non_grp_reactions=False, annotate_with_rast=True):
+
+        if annotate_with_rast:
+            rast = RastClient()
+            res = rast.annotate_genome(genome)
+
+        search_name_to_genes, search_name_to_orginal = aaaa(genome)
+        rxn_roles = aux_template(template)  # needs to be fixed to actually reflect template GPR rules
+
+        metabolic_reactions = {}
+        genome_search_names = set(search_name_to_genes)
+        for rxn_id in rxn_roles:
+            sn_set = set(genome_search_names & rxn_roles[rxn_id])
+            if len(sn_set) > 0:
+                genes = set()
+                # print(rxn_id, sn_set)
+                for sn in sn_set:
+                    if sn in search_name_to_genes:
+                        genes |= search_name_to_genes[sn]
+                metabolic_reactions[rxn_id] = genes
+
+        # temporary hack until proper complexes from template
+        metabolic_reactions_2 = {}
+        cpx_random = 0
+        for rxn_id in metabolic_reactions:
+            metabolic_reactions_2[rxn_id] = {}
+            for gene_id in metabolic_reactions[rxn_id]:
+                metabolic_reactions_2[rxn_id]['complex' + str(cpx_random)] = {gene_id}
+                cpx_random += 1
+
+        reactions = []
+        for rxn_id in metabolic_reactions_2:
+            reaction = build_reaction(rxn_id, metabolic_reactions_2[rxn_id], template, index)
+            reactions.append(reaction)
+        cobra_model = Model(model_id)
+        cobra_model.add_reactions(reactions)
+
+        reactions_no_gpr = []
+        reactions_in_model = set(map(lambda x: x.id, cobra_model.reactions))
+        metabolites_in_model = set(map(lambda x: x.id, cobra_model.metabolites))
+
+        for rxn in template.reactions:
+            if rxn.data['type'] == 'universal' or rxn.data['type'] == 'spontaneous':
+                reaction = build_reaction(rxn.id, {}, template, index)
+                reaction_metabolite_ids = set(map(lambda x: x.id, set(reaction.metabolites)))
+                if (len(metabolites_in_model & reaction_metabolite_ids) > 0 or allow_all_non_grp_reactions) and \
+                        reaction.id not in reactions_in_model:
+                    reactions_no_gpr.append(reaction)
+        cobra_model.add_reactions(reactions_no_gpr)
+
+        reactions_exchanges = []
+        for m in cobra_model.metabolites:
+            if m.compartment == 'e0':
+                rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
+                rxn_exchange.add_metabolites({m: -1})
+                reactions_exchanges.append(rxn_exchange)
+        cobra_model.add_reactions(reactions_exchanges)
+
+        if template.name.startswith('CoreModel'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, template, core_biomass)
+            bio_rxn2 = build_biomass('bio2', cobra_model, template, core_atp)
+            cobra_model.add_reactions([bio_rxn1, bio_rxn2])
+            cobra_model.objective = 'bio1'
+        if template.name.startswith('GramNeg'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, template, gramneg)
+            cobra_model.add_reactions([bio_rxn1])
+            cobra_model.objective = 'bio1'
+        if template.name.startswith('GramPos'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, template, grampos)
+            cobra_model.add_reactions([bio_rxn1])
+            cobra_model.objective = 'bio1'
+
+        reactions_sinks = []
+        for cpd_id in ['cpd02701_c0', 'cpd11416_c0', 'cpd15302_c0']:
+            if cpd_id in cobra_model.metabolites:
+                m = cobra_model.metabolites.get_by_id(cpd_id)
+                rxn_exchange = Reaction('SK_' + m.id, 'Sink for ' + m.name, 'exchanges', 0, 1000)
+                rxn_exchange.add_metabolites({m: -1})
+                reactions_sinks.append(rxn_exchange)
+        cobra_model.add_reactions(reactions_sinks)
+
+        return cobra_model
+
+    @staticmethod
+    def gapfill_model(original_mdl, target_reaction, template, media):
+        FBAHelper.set_objective_from_target_reaction(original_mdl, target_reaction)
         model = cobra.io.json.from_json(cobra.io.json.to_json(original_mdl))
         gfp = GapfillingPkg(model)
         gfp.build_package({
