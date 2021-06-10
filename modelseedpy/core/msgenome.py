@@ -16,31 +16,34 @@ def normalize_role(s):
 #Static factory functions:
             
 #def build_from_kbase_gto:
-        
-#def build_from_kbase_id:
 
-#def build_from_protein_sequence_hash:
 
 def read_fasta(f, split='|'):
-    features = []
     with open(f, 'r') as fh:
-        lines = fh.read().split('\n')
-        seq = None
-        for line in lines:
-            if line.startswith('>'):
-                if seq:
-                    features.append(seq)
-                seq_id = line[1:]
-                desc = ""
-                if split:
-                    header_data = line[1:].split(split, 1)
-                    seq_id = header_data[0]
-                    desc = header_data[1]
+        return parse_fasta_str(fh.read(), split)
 
-                seq = MSFeature(seq_id, "", desc)
-            else:
-                if seq:
-                    seq.seq += line
+
+def parse_fasta_str(faa_str, split='|'):
+    lines = faa_str.split('\n')
+    features = []
+    seq = None
+    for line in lines:
+        if line.startswith('>'):
+            if seq:
+                features.append(seq)
+            seq_id = line[1:]
+            desc = None
+            if split:
+                header_data = line[1:].split(split, 1)
+                seq_id = header_data[0]
+                desc = header_data[1]
+
+            seq = MSFeature(seq_id, "", desc)
+        else:
+            if seq:
+                seq.seq += line.strip()
+    if seq and seq.seq and len(seq.seq) > 0:
+        features.append(seq)
     return features
 
 
