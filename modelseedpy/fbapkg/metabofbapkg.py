@@ -54,3 +54,5 @@ class MetaboFBAPkg(BaseFBAPkg):
         
     def find_metabolites_matching_peak(self,data):
         #TODO: need to write this function
+        # chris you need to add a "pass" after the empty functions otherwise the lib crashes on import (syntax error)
+        pass
