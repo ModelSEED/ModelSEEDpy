@@ -32,7 +32,7 @@ def parse_fasta_str(faa_str, split='|'):
             if seq:
                 features.append(seq)
             seq_id = line[1:]
-            desc = ""
+            desc = None
             if split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]

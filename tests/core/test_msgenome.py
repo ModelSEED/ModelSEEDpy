@@ -46,6 +46,18 @@ GFRQARQAVAEIGAVASGISGSGPTLFALCDKPETAQRVADWLGKNYLQNQEGFVHICRLDTAGARVLEN
     assert len(features) == 2
 
 
+def test_parse_fasta_str3():
+    faa_str = """
+>NP_414543.1 fused aspartate kinase/homoserine dehydrogenase 1
+MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAA
+    """
+    features = parse_fasta_str(faa_str, None)
+    assert len(features) == 1
+    assert features[0].id == 'NP_414543.1 fused aspartate kinase/homoserine dehydrogenase 1'
+    assert features[0].description is None
+    assert len(features[0].seq) == 80
+
+
 def test_msfeature_add_ontology_term():
     feature = MSFeature('gene1', 'MKV')
     feature.add_ontology_term('ONTOLOGY', 'value1')
