@@ -24,10 +24,10 @@ class MSEditorAPI:
     def edit_biomass_compound(model,biomass_id,cpd_id,new_coef,rescale = 1):
         
     @staticmethod
-    def add_custom_reaction(model,rxn_id,MSEquation,gpr = None,genome = None):
+    def add_custom_reaction(model,rxn_id,MSEquation,gpr = None,genome = None):#Andrew
     
     @staticmethod  
-    def add_ms_reaction(model,rxn_id,compartments,modelseed):#Andrew
+    def add_ms_reaction(model,rxn_id,compartments,modelseed):
         
     @staticmethod  
     def copy_model_reactions(model,source_model,rxn_id_list = []):
@@ -35,5 +35,5 @@ class MSEditorAPI:
 class MSEquation:
     @staticmethod
     def build_from_palsson_string(equation_string):
-        #cpd00001 + cpd00002[e] => (2)cpd00003 + cpd00004
+        #cpd00001 + cpd00002[e] => (2) cpd00003 + cpd00004
         
