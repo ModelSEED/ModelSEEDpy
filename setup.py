@@ -17,5 +17,9 @@ setup(
     author_email='chenry@anl.gov',
     url='https://github.com/ModelSEED/ModelSEEDpy',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests', 'docs')),
+    install_requires=[
+        "networkx >= 2.4",
+        "cobra >= 0.17.1"
+    ]
 )
