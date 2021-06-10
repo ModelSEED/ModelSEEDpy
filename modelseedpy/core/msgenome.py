@@ -41,6 +41,8 @@ def read_fasta(f, split='|'):
             else:
                 if seq:
                     seq.seq += line
+        if seq:
+            features.append(seq)
     return features
 
 
