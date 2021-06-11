@@ -56,6 +56,7 @@ class MSEditorAPI:
         model.reactions.get_by_id(biomass_id).add_metabolites({model.metabolties.get_by_id(cpd_id): new_coef}, combine=False)
 
     @staticmethod
+
     def add_custom_reaction(model,rxn_id,MSEquation,gpr = None,genome = None):
         pass
         #mseqn = MSEquation.build_from_palsson_string("cpd00001 + cpd00002[e] => (2)cpd00003 + cpd00004")
