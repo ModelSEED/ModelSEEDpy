@@ -30,6 +30,7 @@ class MSEditorAPI:
         pass
 
     @staticmethod
+
     def add_custom_reaction(model,rxn_id,MSEquation,gpr = None,genome = None):
         pass
     
