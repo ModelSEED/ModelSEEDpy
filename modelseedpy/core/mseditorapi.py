@@ -80,6 +80,7 @@ class MSEditorAPI:
         return model.metabolites.get_by_id(metabolite_id).formula_weight
 
     @staticmethod
+
     def add_custom_reaction(model,rxn_id,MSEquation,gpr = None,genome = None):
         new_rxn = Reaction(id=rxn_id)
         # going on the assumption that all metabolites are present in the model

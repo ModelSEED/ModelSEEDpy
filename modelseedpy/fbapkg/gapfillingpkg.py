@@ -60,10 +60,13 @@ default_blacklist = ["rxn12985","rxn00238","rxn07058","rxn05305","rxn00154","rxn
         "rxn12006","rxn12007","rxn12014","rxn12017","rxn12022","rxn12160","rxn12161",
         "rxn01267","rxn05294","rxn04656"]
 
-#Base class for FBA packages
+
 class GapfillingPkg(BaseFBAPkg):
-    def __init__(self,model):
-        BaseFBAPkg.__init__(self,model,"gapfilling",{},{})
+    """
+
+    """
+    def __init__(self, model):
+        BaseFBAPkg.__init__(self, model, "gapfilling", {}, {})
         self.childpkgs["objective constraint"] = ObjConstPkg(model)
 
     def build_package(self,parameters):
@@ -131,9 +134,9 @@ class GapfillingPkg(BaseFBAPkg):
                     if highest_score < self.parameters["reaction_scores"][rxnid][gene]:
                         highest_score = self.parameters["reaction_scores"][rxnid][gene]
                 factor = 1-0.9*highest_score
-                if "reverse" in gapfilling_penalties[reaction]:
+                if "reverse" in self.gapfilling_penalties[reaction]:
                     penalties[reaction.id]["reverse"] = factor*penalties[reaction.id]["reverse"]
-                if "forward" in gapfilling_penalties[reaction]:
+                if "forward" in self.gapfilling_penalties[reaction]:
                     penalties[reaction.id]["forward"] = factor*penalties[reaction.id]["forward"]
         self.model.solver.update()
         if self.parameters["set_objective"] == 1:
