@@ -14,8 +14,8 @@ class FeasibilityError(Exception):
     pass
 
 #Base class for FBA packages
-class BaseFBAPkg():
-    def __init__(self,model,name,variable_types={},constraint_types={},parent = None):
+class BaseFBAPkg:
+    def __init__(self, model, name, variable_types={}, constraint_types={}, parent=None):
         self.model = model
         self.name = name
         self.childpkgs = dict()
