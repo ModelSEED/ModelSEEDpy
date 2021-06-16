@@ -1,14 +1,8 @@
 import logging
-
 import re
 import copy
 import cobra
-from optlang.symbolics import Zero, add
 from cobra.core import Gene, Metabolite, Model, Reaction
-from modelseedpy.core import FBAHelper
-from modelseedpy.fbapkg import GapfillingPkg, KBaseMediaPkg
-
-#from modelseedpy.core.msgenome import MSGenome
 
 logger = logging.getLogger(__name__)
 
@@ -124,8 +118,8 @@ class MSEditorAPI:
 class MSEquation:
 
     def __init__(self, stoichiometry, d):
-        equation = stoichiometry
-        direction = d
+        self.equation = stoichiometry
+        self.direction = d
 
     @staticmethod
     def build_from_palsson_string(equation_string, default_group='c'):  # add default group
@@ -188,17 +182,17 @@ class MSEquation:
         ret_str = ''
         reversible = equation_string.find('<=>') != -1
         if reversible:
-            ret_str = 'reversable'
+            ret_str = '='
         else:  # not two ways, so check right
             right = equation_string.find('=>') != -1
             if right:
-                ret_str = 'right'
+                ret_str = '>'
             else:  # if not right, check left
                 left = equation_string.find('<=') != -1
                 if left:
-                    ret_str = 'left'
+                    ret_str = '<'
                 else:  # if not left, error
-                    ret_str = "error - no direction found"
+                    ret_str = "?"
 
         # cpd00001 + cpd00002[e] => (2)cpd00003 + cpd00004
         # get substrings for either side of the euqation
@@ -218,4 +212,3 @@ class MSEquation:
         ret_mse = MSEquation(variables, ret_str)
 
         return ret_mse
-
