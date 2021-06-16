@@ -1,5 +1,6 @@
 from modelseedpy.core.msgenome import MSFeature, MSGenome, parse_fasta_str
 
+
 def test_parse_fasta_str1():
     faa_str = """
 >NP_414543.1 fused aspartate kinase/homoserine dehydrogenase 1

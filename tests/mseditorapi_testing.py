@@ -1,43 +1,13 @@
-from modelseedpy.core.mseditorapi import MSEditorAPI
-editor = MSEditorAPI()
-import pytest
 
-import cobra
-cobra_config = cobra.Configuration()
+#cobra_config = cobra.Configuration()
 
-from cobra import Model, Reaction, Metabolite
+#from cobra import Model, Reaction, Metabolite
 import cobra.test
 import os
 from os.path import join
 
 data_dir = cobra.test.data_dir
 
-model = cobra.io.load_json_model("iML1515.json")
-
-# testing for remove_reaction()
-def test_remove_reactions1():
-    # remove valid reactions
-    model2 = model
-    lst = ['XPPT','HXPRT']
-    editor.remove_reactions(model2,lst)
-    assert len(model2.reactions) == 2712 - len(lst)
-
-def test_remove_reactions2():
-    # remove invalid reactions
-    model3 = model
-    lst2 = ['C']
-    with pytest.raises(Exception):
-        editor.remove_reactions(model3,lst2)
-
-# testing for edit_reaction()
-def test_edit_reaction1():
-    # change a reversible reaction to a forward reaction and change the gpr
-    rxn = 'ICDHyr'
-    editor.edit_reaction(model, rxn, "=>", "(b0001 and b0002) or b1010")
-    assert model.reactions.get_by_id(rxn).reversibility == False
-    assert model.reactions.get_by_id(rxn).lower_bound == 0
-    assert model.reactions.get_by_id(rxn).upper_bound == 1000
-    assert model.reactions.get_by_id(rxn).gene_name_reaction_rule == '( and thrA) or rutC'
 
 def test_edit_reaction2():
     # change a forward reaction to a reversible reaction
@@ -132,24 +102,3 @@ def test_copy_model_reactions3(self):
     lst = ['C']
     with pytest.raises(Exception):
         editor.copy_model_reactions(model4, model, lst)
-
-# test for building a modelseed equaiton form a string
-def test_build_from_palsson_string_1():
-    test = editor.build_from_palsson_string('cpd00001 + cpd00002[e] <= (2)cpd00003 + cpd00004')
-    assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
-    assert(test.direction == "left")
-
-def test_build_from_palsson_string_2():
-    test = editor.build_from_palsson_string('cpd00001 + cpd00002[e] <=> (2)cpd00003 + cpd00004')
-    assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
-    assert(test.direction == "reversable")
-
-def test_build_from_palsson_string_3():
-    test = editor.build_from_palsson_string('cpd00001 + cpd00002[e] => (2)cpd00003 + cpd00004')
-    assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
-    assert(test.direction == "right")
-
-def test_build_from_palsson_string_4():
-    test = editor.build_from_palsson_string('cpd00001 + cpd00002[e] = (2)cpd00003 + cpd00004')
-    assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
-    assert(test.direction == "error - no direction found")

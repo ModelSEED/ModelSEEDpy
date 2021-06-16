@@ -7,10 +7,11 @@ from cobra.core.dictlist import DictList
 logger = logging.getLogger(__name__)
 
 class Template():
-    def __init__(self,)
-        self.compounds = DictList;
-        self.compcompounds = DictList;
-        self.reactions = DictList;
+
+    def __init__(self):
+        self.compounds = DictList()
+        self.compcompounds = DictList()
+        self.reactions = DictList()
         
     def convert_template_compound(self,cpdid,index):
         comp_compound = self.compcompounds.get_by_id(cpdid)
@@ -37,8 +38,8 @@ class Template():
         new_id = template_reaction["id"]
         new_id += str(index)
 
-        lower_bound = template_reaction["maxrevflux"];
-        upper_bound = template_reaction["maxforflux"];
+        lower_bound = template_reaction["maxrevflux"]
+        upper_bound = template_reaction["maxforflux"]
 
         direction = template_reaction["GapfillDirection"]
         if for_gapfilling == 0:
@@ -73,4 +74,3 @@ class Template():
         cobra_reaction.annotation["seed.reaction"] = base_id
 
         return cobra_reaction
-    

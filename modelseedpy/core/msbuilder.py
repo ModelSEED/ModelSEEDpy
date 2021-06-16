@@ -12,6 +12,8 @@ from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg import GapfillingPkg, KBaseMediaPkg
 
+SBO_ANNOTATION = "sbo"
+
 #from modelseedpy.core.msgenome import MSGenome
 
 logger = logging.getLogger(__name__)
@@ -242,6 +244,7 @@ def build_biomass(rxn_id, cobra_model, template, biomass_compounds):
             cpd = Metabolite(cpd_id, template_cpd.formula, template_cpd.name, ccpd.charge, compartment + str('0'))
             metabolites[cpd] = biomass_compounds[cpd_id]
     bio_rxn.add_metabolites(metabolites)
+    bio_rxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
     return bio_rxn
 
 
@@ -349,6 +352,8 @@ class MSBuilder:
         reactions = []
         for rxn_id in metabolic_reactions_2:
             reaction = build_reaction(rxn_id, metabolic_reactions_2[rxn_id], template, index)
+            reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
+            reaction.annotation["seed.reaction"] = rxn_id
             reactions.append(reaction)
         cobra_model = Model(model_id)
         cobra_model.add_reactions(reactions)
@@ -363,6 +368,8 @@ class MSBuilder:
                 reaction_metabolite_ids = set(map(lambda x: x.id, set(reaction.metabolites)))
                 if (len(metabolites_in_model & reaction_metabolite_ids) > 0 or allow_all_non_grp_reactions) and \
                         reaction.id not in reactions_in_model:
+                    reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
+                    reaction.annotation["seed.reaction"] = rxn_id
                     reactions_no_gpr.append(reaction)
         cobra_model.add_reactions(reactions_no_gpr)
 
@@ -371,6 +378,7 @@ class MSBuilder:
             if m.compartment == 'e0':
                 rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
                 rxn_exchange.add_metabolites({m: -1})
+                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
                 reactions_exchanges.append(rxn_exchange)
         cobra_model.add_reactions(reactions_exchanges)
 
@@ -394,6 +402,7 @@ class MSBuilder:
                 m = cobra_model.metabolites.get_by_id(cpd_id)
                 rxn_exchange = Reaction('SK_' + m.id, 'Sink for ' + m.name, 'exchanges', 0, 1000)
                 rxn_exchange.add_metabolites({m: -1})
+                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
                 reactions_sinks.append(rxn_exchange)
         cobra_model.add_reactions(reactions_sinks)
 
