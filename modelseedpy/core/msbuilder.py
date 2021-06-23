@@ -1,18 +1,14 @@
 import logging
+import itertools
+import cobra
 from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
-
-
-import re
-import copy
-import cobra
-from optlang.symbolics import Zero, add
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg import GapfillingPkg, KBaseMediaPkg
 
-#from modelseedpy.core.msgenome import MSGenome
+SBO_ANNOTATION = "sbo"
 
 logger = logging.getLogger(__name__)
 
@@ -242,6 +238,7 @@ def build_biomass(rxn_id, cobra_model, template, biomass_compounds):
             cpd = Metabolite(cpd_id, template_cpd.formula, template_cpd.name, ccpd.charge, compartment + str('0'))
             metabolites[cpd] = biomass_compounds[cpd_id]
     bio_rxn.add_metabolites(metabolites)
+    bio_rxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
     return bio_rxn
 
 
@@ -275,34 +272,29 @@ def aux_template(template):
     return rxn_roles
 
 
-def build_reaction(reaction_id, gpr, template, index='0'):
-    template_reaction = template.reactions.get_by_id(reaction_id)
-    reaction_compartment = 'c'
-    metabolites = {}
-    for o in template_reaction.templateReactionReagents:
-        comp_compound = template_reaction.template.compcompounds.get_by_id(o['templatecompcompound_ref'].split('/')[-1])
-        compound = template_reaction.template.compounds.get_by_id(comp_compound['templatecompound_ref'].split('/')[-1])
-        comparment = comp_compound.templatecompartment_ref.split('/')[-1] + str(index)
-        cpd = Metabolite(comp_compound.id + str(index), compound.formula, compound.name, comp_compound.charge,
-                         comparment)
-        metabolites[cpd] = o['coefficient']
-    lower_bound, upper_bound = get_reaction_constraints_from_direction(template_reaction.direction)
-    reaction = Reaction(
-        "{}{}".format(template_reaction.id, index),
-        "{}_{}{}".format(template_reaction.name, reaction_compartment, index),
-        '',
-        lower_bound, upper_bound
-    )
-    gpr_ll = []
-    for complex_id in gpr:
-        complex_set = set()
-        for gene_id in gpr[complex_id]:
-            complex_set.add(gene_id)
-        gpr_ll.append(list(complex_set))
+def build_gpr(cpx_gene_role):
+    """
+    example input:
+     {'sdh': [{'b0721': 'sdhC', 'b0722': 'sdhD', 'b0723': 'sdhA', 'b0724': 'sdhB'}]}
 
-    reaction.add_metabolites(metabolites)
-    reaction.gene_reaction_rule = get_gpr_string(gpr_ll)
-    return reaction
+     (b0721 and b0722 and b0724 and b0723)
+
+     {'cpx1': [{'g1': 'role1', 'g3': 'role2'}, {'g2': 'role1', 'g3': 'role2'}]}
+
+     (g1 and g3) or (g2 and g3)
+
+    :param cpx_gene_role:
+    :return:
+    """
+    # save cpx_id and role_id in reaction annotation for KBase object
+    gpr_or_ll = []
+    for cpx_id in cpx_gene_role:
+        # print(cpx_id)
+        for complex_set in cpx_gene_role[cpx_id]:
+            # print(complex_set)
+            gpr_or_ll.append("({})".format(' and '.join(set(complex_set))))
+
+    return ' or '.join(gpr_or_ll)
 
 
 class MSBuilder:
@@ -313,19 +305,140 @@ class MSBuilder:
         """
         self.genome = genome
         self.template = template
+        self.search_name_to_genes, self.search_name_to_original = aaaa(genome)
+
+    def get_template_reaction_complexes(self, template_reaction):
+        """
+        TODO: move this to template  (maybe not)
+        :param template_reaction:
+        :return:
+        """
+        template_reaction_complexes = {}
+        for cpx_id in template_reaction.get_complexes():
+            cpx = self.template.complexes.get_by_id(cpx_id)
+            template_reaction_complexes[cpx_id] = {}
+            for cpx_role in cpx['complexroles']:
+                role_id = cpx_role['templaterole_ref'].split('/')[-1]
+                role = self.template.roles.get_by_id(role_id)
+                template_reaction_complexes[cpx_id][role_id] = [
+                    normalize_role(role['name']),
+                    cpx_role['triggering'] == 1,
+                    cpx_role['optional_role'] == 1,
+                    set()
+                ]
+        return template_reaction_complexes
+
+    def map_gene(self, match_complex):
+        """
+        TODO: merge this with get_template_reaction_complexes and remove this function
+        search_name_to_genes, search_name_to_orginal
+        :param match_complex:
+        :return:
+        """
+        for cpx_id in match_complex:
+            for role_id in match_complex[cpx_id]:
+                t = match_complex[cpx_id][role_id]
+                if t[0] in self.search_name_to_genes:
+                    t[3] |= self.search_name_to_genes[t[0]]
 
     @staticmethod
-    def build_metabolic_model(model_id, genome, template, index='0',
-                              allow_all_non_grp_reactions=False, annotate_with_rast=True):
+    def build_reaction_complex_gpr_sets(match_complex, allow_incomplete_complexes=True):
+        complexes = {}
+        for cpx_id in match_complex:
+            complete = True
+            roles = set()
+            role_genes = {}
+            for role_id in match_complex[cpx_id]:
+                t = match_complex[cpx_id][role_id]
+                complete &= len(t[3]) > 0 or not t[1] or t[2]  # true if has genes or is not triggering or is optional
+                # print(t[3])
+                if len(t[3]) > 0:
+                    roles.add(role_id)
+                    role_genes[role_id] = t[3]
+                # print(t)
+            # it is never complete if has no genes, only needed if assuming a complex can have all
+            # roles be either non triggering or optional
+            logger.debug('[%s] maps to %s and complete: %s', cpx_id, roles, complete)
+            if len(roles) > 0 and (allow_incomplete_complexes or complete):
+                logger.debug('[%s] role_genes: %s', cpx_id, role_genes)
+                ll = []
+                for role_id in role_genes:
+                    role_gene_set = []
+                    for gene_id in role_genes[role_id]:
+                        role_gene_set.append({gene_id: role_id})
+                    ll.append(role_gene_set)
+                logger.debug('[%s] complex lists: %s', cpx_id, ll)
+                complexes[cpx_id] = list(
+                    map(lambda x: dict(map(lambda o: list(o.items())[0], x)), itertools.product(*ll)))
+        return complexes
+
+    def get_gpr_from_template_reaction(self, template_reaction, allow_incomplete_complexes=True):
+        template_reaction_complexes = self.get_template_reaction_complexes(template_reaction)
+        if len(template_reaction_complexes) == 0:
+            return None
+
+        self.map_gene(template_reaction_complexes)
+        # print(template_reaction_complexes)
+        gpr_set = self.build_reaction_complex_gpr_sets(template_reaction_complexes, allow_incomplete_complexes)
+        return gpr_set
+
+    @staticmethod
+    def build_reaction(reaction_id, gpr_set, template, index='0', sbo=None):
+        template_reaction = template.reactions.get_by_id(reaction_id)
+        # TODO: proper compartment detection
+        reaction_compartment = template_reaction.id[-1]
+        metabolites = {}
+        # TODO: wrap this ugly part inside template_reaction
+        for o in template_reaction.templateReactionReagents:
+            comp_compound = template_reaction.template.compcompounds.get_by_id(
+                o['templatecompcompound_ref'].split('/')[-1])
+            compound = template_reaction.template.compounds.get_by_id(
+                comp_compound['templatecompound_ref'].split('/')[-1])
+            compartment = comp_compound.templatecompartment_ref.split('/')[-1] + str(index)
+            cpd = Metabolite(comp_compound.id + str(index), compound.formula, compound.name, comp_compound.charge,
+                             compartment)
+            metabolites[cpd] = o['coefficient']
+        lower_bound, upper_bound = get_reaction_constraints_from_direction(template_reaction.direction)
+        reaction = Reaction(
+            "{}{}".format(template_reaction.id, index),
+            "{}_{}{}".format(template_reaction.name, reaction_compartment, index),
+            '',
+            lower_bound, upper_bound
+        )
+        """
+        gpr_ll = []
+        for complex_id in gpr:
+            complex_set = set()
+            for gene_id in gpr[complex_id]:
+                complex_set.add(gene_id)
+            gpr_ll.append(list(complex_set))
+        """
+        gpr_str = build_gpr(gpr_set)
+        reaction.add_metabolites(metabolites)
+        if gpr_str and len(gpr_str) > 0:
+            reaction.gene_reaction_rule = gpr_str  # get_gpr_string(gpr_ll)
+
+        reaction.annotation["seed.reaction"] = reaction_id  # FIXME: this is wrong! contains _c
+        if sbo:
+            reaction.annotation[SBO_ANNOTATION] = sbo
+        return reaction
+
+    def build(self, model_id, index='0', allow_all_non_grp_reactions=False, annotate_with_rast=True):
 
         if annotate_with_rast:
             rast = RastClient()
-            res = rast.annotate_genome(genome)
+            res = rast.annotate_genome(self.genome)
 
-        search_name_to_genes, search_name_to_orginal = aaaa(genome)
-        rxn_roles = aux_template(template)  # needs to be fixed to actually reflect template GPR rules
+        # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
 
         metabolic_reactions = {}
+        for template_reaction in self.template.reactions:
+            gpr_set = self.get_gpr_from_template_reaction(template_reaction)
+            if gpr_set:
+                metabolic_reactions[template_reaction.id] = gpr_set
+                logger.debug("[%s] gpr set: %s", template_reaction.id, gpr_set)
+
+        """
         genome_search_names = set(search_name_to_genes)
         for rxn_id in rxn_roles:
             sn_set = set(genome_search_names & rxn_roles[rxn_id])
@@ -345,11 +458,12 @@ class MSBuilder:
             for gene_id in metabolic_reactions[rxn_id]:
                 metabolic_reactions_2[rxn_id]['complex' + str(cpx_random)] = {gene_id}
                 cpx_random += 1
+        """
 
-        reactions = []
-        for rxn_id in metabolic_reactions_2:
-            reaction = build_reaction(rxn_id, metabolic_reactions_2[rxn_id], template, index)
-            reactions.append(reaction)
+        reactions = list(map(
+            lambda x: self.build_reaction(x[0], x[1], self.template, index, "SBO:0000176"),
+            metabolic_reactions.items()))
+
         cobra_model = Model(model_id)
         cobra_model.add_reactions(reactions)
 
@@ -357,12 +471,13 @@ class MSBuilder:
         reactions_in_model = set(map(lambda x: x.id, cobra_model.reactions))
         metabolites_in_model = set(map(lambda x: x.id, cobra_model.metabolites))
 
-        for rxn in template.reactions:
+        for rxn in self.template.reactions:
             if rxn.data['type'] == 'universal' or rxn.data['type'] == 'spontaneous':
-                reaction = build_reaction(rxn.id, {}, template, index)
+                reaction = self.build_reaction(rxn.id, {}, self.template, index, "SBO:0000176")
                 reaction_metabolite_ids = set(map(lambda x: x.id, set(reaction.metabolites)))
                 if (len(metabolites_in_model & reaction_metabolite_ids) > 0 or allow_all_non_grp_reactions) and \
                         reaction.id not in reactions_in_model:
+                    reaction.annotation["seed.reaction"] = rxn.id
                     reactions_no_gpr.append(reaction)
         cobra_model.add_reactions(reactions_no_gpr)
 
@@ -371,20 +486,21 @@ class MSBuilder:
             if m.compartment == 'e0':
                 rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
                 rxn_exchange.add_metabolites({m: -1})
+                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
                 reactions_exchanges.append(rxn_exchange)
         cobra_model.add_reactions(reactions_exchanges)
 
-        if template.name.startswith('CoreModel'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, template, core_biomass)
-            bio_rxn2 = build_biomass('bio2', cobra_model, template, core_atp)
+        if self.template.name.startswith('CoreModel'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, core_biomass)
+            bio_rxn2 = build_biomass('bio2', cobra_model, self.template, core_atp)
             cobra_model.add_reactions([bio_rxn1, bio_rxn2])
             cobra_model.objective = 'bio1'
-        if template.name.startswith('GramNeg'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, template, gramneg)
+        if self.template.name.startswith('GramNeg'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, gramneg)
             cobra_model.add_reactions([bio_rxn1])
             cobra_model.objective = 'bio1'
-        if template.name.startswith('GramPos'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, template, grampos)
+        if self.template.name.startswith('GramPos'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, grampos)
             cobra_model.add_reactions([bio_rxn1])
             cobra_model.objective = 'bio1'
 
@@ -394,10 +510,19 @@ class MSBuilder:
                 m = cobra_model.metabolites.get_by_id(cpd_id)
                 rxn_exchange = Reaction('SK_' + m.id, 'Sink for ' + m.name, 'exchanges', 0, 1000)
                 rxn_exchange.add_metabolites({m: -1})
+                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
                 reactions_sinks.append(rxn_exchange)
         cobra_model.add_reactions(reactions_sinks)
 
         return cobra_model
+
+    @staticmethod
+    def build_metabolic_model(model_id, genome, template, media=None, index='0',
+                              allow_all_non_grp_reactions=False, annotate_with_rast=True):
+        model = MSBuilder(genome, template).build(model_id, index, allow_all_non_grp_reactions, annotate_with_rast)
+        if media:
+            MSBuilder.gapfill_model(model, 'bio1', template, media)
+        return model
 
     @staticmethod
     def gapfill_model(original_mdl, target_reaction, template, media):
@@ -405,14 +530,14 @@ class MSBuilder:
         model = cobra.io.json.from_json(cobra.io.json.to_json(original_mdl))
         gfp = GapfillingPkg(model)
         gfp.build_package({
-            "default_gapfill_templates":[template],
-            "gapfill_all_indecies_with_default_templates":1,
-            "minimum_obj":0.01,
-            "set_objective":1
+            "default_gapfill_templates": [template],
+            "gapfill_all_indecies_with_default_templates": 1,
+            "minimum_obj": 0.01,
+            "set_objective": 1
         })
         kmp = KBaseMediaPkg(model)
         kmp.build_package(media)
-        sol=model.optimize()
+        sol = model.optimize()
         gfresults = gfp.compute_gapfilled_solution()
         for rxnid in gfresults["reversed"]:
             rxn = original_mdl.reactions.get_by_id(rxnid)

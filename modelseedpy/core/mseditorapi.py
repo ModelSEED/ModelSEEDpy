@@ -97,7 +97,11 @@ class MSEditorAPI:
             new_rxn.lower_bound = -1000
             new_rxn.upper_bound = 1000
     
+<<<<<<< HEAD
     @staticmethod
+=======
+    @staticmethod
+>>>>>>> 4cb664cd290de5c271162b239a38e6fd241c29d5
     def add_ms_reaction(model,rxn_id,compartments,modelseed):
         pass #Andrew
         
