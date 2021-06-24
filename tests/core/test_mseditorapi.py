@@ -17,6 +17,26 @@ def example_model():
 @pytest.fixture
 def example_model2():
     return cobra.test.create_test_model("textbook")
+    
+    
+def test_remove_reactions1(editor, example_model):
+    """
+    testing for remove_reaction()
+    """
+    # remove valid reactions
+    total_reactions = len(example_model.reactions)
+    lst = ['ACALD', 'MDH']
+    editor.remove_reactions(example_model, lst)
+    assert len(example_model.reactions) == total_reactions - len(lst)
+
+def test_remove_reactions2(editor, example_model):
+    """
+    remove invalid reactions
+    """
+    lst = ['C']
+    with pytest.raises(Exception):
+        editor.remove_reactions(example_model, lst)
+
 
 
 def test_edit_reaction1(editor, example_model):
@@ -30,7 +50,7 @@ def test_edit_reaction1(editor, example_model):
     assert reaction.reversibility is False
     assert reaction.lower_bound == 0
     assert reaction.upper_bound == 1000
-    assert reaction.gene_name_reaction_rule == '( and thrA) or rutC'
+    assert len(reaction.genes) == 3
 
 def test_edit_reaction2(editor, example_model):
     """
@@ -93,11 +113,39 @@ def test_copy_model_reactions3(editor,example_model,example_model2):
     
 def test_copy_all_model_reactions1(editor,example_model,example_model2):
     pass
-#    """
-#    testing for copy_all_model_reactions()
-#    copying all reactions from a source model that don't already exist in the receiving model
-#    """
-#    lst = ['ICDHyr']
-#    editor.remove_reactions(example_model2,lst)
-#    editor.copy_all_model_reactions(example_model2,example_model)
-#    assert len(example_model2) == 95
+    """
+    testing for copy_all_model_reactions()
+    copying all reactions from a source model that don't already exist in the receiving model
+    """
+    lst = ['ICDHyr']
+    editor.remove_reactions(example_model2,lst)
+    editor.copy_all_model_reactions(example_model2,example_model)
+    assert len(example_model2.reactions) == 95
+
+
+
+def test_build_from_palsson_string_1(editor):
+    """
+    test for building a modelseed equaiton form a string
+    """
+    eq = MSEquation.build_from_palsson_string('cpd00001 + cpd00002[e] <= (2)cpd00003 + cpd00004')
+    #assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
+    assert eq.direction == "<"
+
+
+def test_build_from_palsson_string_2(editor):
+    eq = MSEquation.build_from_palsson_string('cpd00001 + cpd00002[e] <=> (2)cpd00003 + cpd00004')
+    #assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
+    assert eq.direction == "="
+
+
+def test_build_from_palsson_string_3(editor):
+    eq = MSEquation.build_from_palsson_string('cpd00001 + cpd00002[e] => (2)cpd00003 + cpd00004')
+    #assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
+    assert eq.direction == ">"
+
+
+def test_build_from_palsson_string_4(editor):
+    eq = MSEquation.build_from_palsson_string('cpd00001 + cpd00002[e] = (2)cpd00003 + cpd00004')
+    #assert(test.equation == "{('cpd00001', 'c'): -1, ('cpd00002', 'e'): -1, ('cpd00003', 'c'): 2, ('cpd00004', 'c'): 1}")
+    assert eq.direction == "?"
