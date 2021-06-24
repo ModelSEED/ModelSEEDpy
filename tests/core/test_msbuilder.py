@@ -52,8 +52,8 @@ def test_some_gpr():
 def test_build():
     template = mock_template()
     genome = mock_genome_rast()
-    builder = MSBuilder(genome, template)
-    model = builder.build('test_model', '0', True, False)
+    #builder = MSBuilder(genome, template)
+    #model = builder.build('test_model', '0', True, False)
 
     expect = mock_model()
 
