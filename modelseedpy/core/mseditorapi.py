@@ -97,22 +97,22 @@ class MSEditorAPI:
             new_rxn.lower_bound = -1000
             new_rxn.upper_bound = 1000
     
-    @staticmethod  
+    @staticmethod
     def add_ms_reaction(model,rxn_id,compartments,modelseed):
         pass #Andrew
         
-    @staticmethod  
+    @staticmethod
     def copy_model_reactions(model,source_model,rxn_id_list = []):
         for rxnid in rxn_id_list:
             if rxnid in source_model.reactions:
-                model.add_reaction(source_model.reactions.get_by_id(rxnid))
+                model.add_reactions([source_model.reactions.get_by_id(rxnid)])
             else:
                 raise Exception('The reaction', rxnid, 'in the reaction list is not in the model.')
 
     @staticmethod
     def copy_all_model_reactions(model,source_model):  #new method that copies all reactions, may not be necessary
-        for rxnid in source_model.reactions:
-            model.add_reaction(source_model.reactions.get_by_id(rxnid))
+        for rxn in source_model.reactions:
+            model.add_reactions([source_model.reactions.get_by_id(rxn.id)])
 
 
 class MSEquation:
