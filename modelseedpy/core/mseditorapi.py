@@ -108,7 +108,7 @@ class MSEditorAPI:
         if MSEquation.direction == 'reversable':
             new_rxn.lower_bound = -1000
             new_rxn.upper_bound = 1000
-    
+
     @staticmethod  
     def add_ms_reaction(model, rxn_id, modelseed, compartment_equivalents = {'0':'c0', '1':'e0'}, direction = 'forward'):#Andrew
         ''' Add a reaction with ModelSEED parameters to the FBA simulation
@@ -154,18 +154,18 @@ class MSEditorAPI:
 
         model.add_reactions([cobra_reaction])
         
-    @staticmethod  
+    @staticmethod
     def copy_model_reactions(model,source_model,rxn_id_list = []):
         for rxnid in rxn_id_list:
             if rxnid in source_model.reactions:
-                model.add_reaction(source_model.reactions.get_by_id(rxnid))
+                model.add_reactions([source_model.reactions.get_by_id(rxnid)])
             else:
                 raise Exception('The reaction', rxnid, 'in the reaction list is not in the model.')
 
     @staticmethod
     def copy_all_model_reactions(model,source_model):  #new method that copies all reactions, may not be necessary
-        for rxnid in source_model.reactions:
-            model.add_reaction(source_model.reactions.get_by_id(rxnid))
+        for rxn in source_model.reactions:
+            model.add_reactions([source_model.reactions.get_by_id(rxn.id)])
 
 
 class MSEquation:
