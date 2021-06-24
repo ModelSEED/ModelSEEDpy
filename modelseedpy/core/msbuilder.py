@@ -389,6 +389,9 @@ class MSBuilder:
         reaction_compartment = template_reaction.id[-1]
         metabolites = {}
         # TODO: wrap this ugly part inside template_reaction
+        #for (cpd_id, compartment), value in template_reaction.cstoichiometry.items():
+        #    cpd = Metabolite(cpd_id + str(index), compound.formula, compound.name, comp_compound.charge,
+        #                     compartment)
         for o in template_reaction.templateReactionReagents:
             comp_compound = template_reaction.template.compcompounds.get_by_id(
                 o['templatecompcompound_ref'].split('/')[-1])

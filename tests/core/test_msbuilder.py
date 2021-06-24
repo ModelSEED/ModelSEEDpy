@@ -1,4 +1,6 @@
 from modelseedpy.core.msmodel import get_direction_from_constraints
+from modelseedpy.core.msbuilder import MSBuilder
+from tests.test_data.mock_data import mock_template, mock_genome_rast, mock_model
 
 
 def test_get_direction_from_constraints1():
@@ -48,4 +50,12 @@ def test_some_gpr():
 
 
 def test_build():
+    template = mock_template()
+    genome = mock_genome_rast()
+    builder = MSBuilder(genome, template)
+    model = builder.build('test_model', '0', True, False)
+
+    expect = mock_model()
+
+
     pass

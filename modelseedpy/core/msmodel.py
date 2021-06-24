@@ -34,6 +34,12 @@ def get_gpr_string(gpr):
     return gpr_string
 
 
+def split_compartment_from_index(cmp_str):
+    cmp_val = None
+    index_val = None
+    return cmp_val, index_val
+
+
 class MSModel(Model):
 
     def __init__(self, id_or_model=None, genome=None, template=None):
