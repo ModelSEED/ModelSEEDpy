@@ -22,10 +22,11 @@ class FlexibleBiomassPkg(BaseFBAPkg):
         
     def build_package(self,parameters):
         self.validate_parameters(parameters,["bio_rxn_id"],{
-            "use_rna_class":0.75,
-            "use_dna_class":0.75,
-            "use_protein_class":0.75,
-            "use_energy_class":0.1,
+            "flex_coefficient":0.75,
+            "use_rna_class":[-0.75,0.75],
+            "use_dna_class":[-0.75,0.75],
+            "use_protein_class":[-0.75,0.75],
+            "use_energy_class":[-0.1,0.1],
         })
         if self.parameters["bio_rxn_id"] not in self.model.reactions:
             raise ValueError(self.parameters["bio_rxn_id"]+" not found in model!")
@@ -46,7 +47,7 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                         if msid in classes[curr_class]:
                             met_class = curr_class
                             class_coef[curr_class][msid] = metabolite
-                if (met_class == "none" or self.class_complete(class_coef,met_class) == 0 or self.parameters["use_"+met_class+"_class"] == 0) and msid not in refcpd:
+                if (met_class == "none" or self.class_complete(class_coef,met_class) == 0 or self.parameters["use_"+met_class+"_class"] == None) and msid not in refcpd:
                     drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,1000,1000,"FLEX_")
                     if drain_reaction.id not in self.new_reactions:
                         self.new_reactions[drain_reaction.id] = drain_reaction
@@ -118,7 +119,7 @@ class FlexibleBiomassPkg(BaseFBAPkg):
         elif type == "flxcpd":
             #0.75 * abs(bio_coef) * vbio - vdrn,for >= 0
             #0.75 * abs(bio_coef) * vbio - vdrn,rev >= 0
-            coef = 0.75*abs(self.parameters["bio_rxn"].metabolites[object])
+            coef = self.parameters["flex_coefficient"]*abs(self.parameters["bio_rxn"].metabolites[object])
             if coef > 0.75:
                 coef = 0.75
             BaseFBAPkg.build_constraint(self,"f"+type,0,None,{
@@ -129,18 +130,62 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 self.parameters["bio_rxn"].forward_variable:coef,
                 self.model.reactions.get_by_id("FLEX_"+object.id).reverse_variable:-1
             },object)
-        elif type == "flxcls":
+        elif type == "flxcls" and object.id[0:-5] != None:
             #0.75 * vbio - vrxn,for >= 0
             #0.75 * vbio - vrxn,rev >= 0
-            BaseFBAPkg.build_constraint(self,"f"+type,0,None,{
-                self.parameters["bio_rxn"].forward_variable:self.parameters["use_"+object.id[0:-5]+"_class"],
-                object.forward_variable:-1
-            },object)
-            return BaseFBAPkg.build_constraint(self,"r"+type,0,None,{
-                self.parameters["bio_rxn"].forward_variable:self.parameters["use_"+object.id[0:-5]+"_class"],
-                object.reverse_variable:-1
-            },object)
-    
+            #First deal with the situation where the flux is locked into a particular value relative to biomass
+            const = None
+            if self.parameters["use_"+object.id[0:-5]+"_class"][0] == self.parameters["use_"+object.id[0:-5]+"_class"][1]:
+                #If the value is positive, lock in the forward variable and set the reverse to zero
+                if self.parameters["use_"+object.id[0:-5]+"_class"][0] > 0:
+                    const = BaseFBAPkg.build_constraint(self,"f"+type,0,0,{
+                        self.parameters["bio_rxn"].forward_variable:self.parameters["use_"+object.id[0:-5]+"_class"][1],
+                        object.forward_variable:-1
+                    },object)
+                    object.lower_bound = 0
+                #If the value is negative, lock in the reverse variable and set the forward to zero
+                elif self.parameters["use_"+object.id[0:-5]+"_class"][0] < 0:
+                    const = BaseFBAPkg.build_constraint(self,"r"+type,0,0,{
+                        self.parameters["bio_rxn"].forward_variable:-1*self.parameters["use_"+object.id[0:-5]+"_class"][0],
+                        object.reverse_variable:-1
+                    },object)
+                    object.upper_bound = 0            
+                #If the value is zero, lock both variables to zero
+                if self.parameters["use_"+object.id[0:-5]+"_class"][0] == 0:
+                    object.lower_bound = 0
+                    object.upper_bound = 0
+            elif self.parameters["use_"+object.id[0:-5]+"_class"][1] >= 0:
+                if self.parameters["use_"+object.id[0:-5]+"_class"][0] >= 0:
+                    const = BaseFBAPkg.build_constraint(self,"f"+type,0,None,{
+                        self.parameters["bio_rxn"].forward_variable:self.parameters["use_"+object.id[0:-5]+"_class"][1],
+                        object.forward_variable:-1
+                    },object)
+                    BaseFBAPkg.build_constraint(self,"r"+type,0,None,{
+                        self.parameters["bio_rxn"].forward_variable:-1*self.parameters["use_"+object.id[0:-5]+"_class"][0],
+                        object.forward_variable:1
+                    },object)
+                    object.lower_bound = 0
+                else:
+                    const = BaseFBAPkg.build_constraint(self,"f"+type,0,None,{
+                        self.parameters["bio_rxn"].forward_variable:self.parameters["use_"+object.id[0:-5]+"_class"][1],
+                        object.forward_variable:-1
+                    },object)
+                    BaseFBAPkg.build_constraint(self,"r"+type,0,None,{
+                        self.parameters["bio_rxn"].forward_variable:-1*self.parameters["use_"+object.id[0:-5]+"_class"][0],
+                        object.reverse_variable:-1
+                    },object)
+            else:
+                const = BaseFBAPkg.build_constraint(self,"f"+type,0,None,{
+                    self.parameters["bio_rxn"].forward_variable:self.parameters["use_"+object.id[0:-5]+"_class"][1],
+                    object.reverse_variable:1
+                },object)
+                BaseFBAPkg.build_constraint(self,"r"+type,0,None,{
+                    self.parameters["bio_rxn"].forward_variable:-1*self.parameters["use_"+object.id[0:-5]+"_class"][0],
+                    object.reverse_variable:-1
+                },object)
+                object.upper_bound = 0
+            return const
+            
     def class_complete(self,class_coef,met_class):
         for msid in classes[met_class]:
             if msid not in class_coef[met_class]:
