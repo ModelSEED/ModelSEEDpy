@@ -15,3 +15,5 @@ from modelseedpy.fbapkg.proteomefittingpkg import ProteomeFittingPkg
 from modelseedpy.fbapkg.fluxfittingpkg import FluxFittingPkg
 from modelseedpy.fbapkg.gapfillingpkg import GapfillingPkg
 from modelseedpy.fbapkg.metabofbapkg import MetaboFBAPkg
+from modelseedpy.fbapkg.flexiblebiomasspkg import FlexibleBiomassPkg
+from modelseedpy.fbapkg.problemreplicationpkg import ProblemReplicationPkg

@@ -8,6 +8,7 @@ from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.fbapkg.fluxfittingpkg import FluxFittingPkg
 from modelseedpy.fbapkg.revbinpkg import RevBinPkg
 from modelseedpy.fbapkg.totalfluxpkg import TotalFluxPkg
+from modelseedpy.core.fbahelper import FBAHelper
 
 #Base class for FBA packages
 class ProteomeFittingPkg(BaseFBAPkg):
@@ -22,7 +23,7 @@ class ProteomeFittingPkg(BaseFBAPkg):
             "prot_coef" : 0.1,
             "totalflux" : 1,
             "kcat_coef" : 0.333,
-            "obj_kfit":1,
+            "obj_kfit":10,
             "obj_kvfit":1,
             "obj_vfit":1,
             "set_objective":1
@@ -30,29 +31,30 @@ class ProteomeFittingPkg(BaseFBAPkg):
         objvars = []
         #Adding flux fitting variables and constraints
         self.childpkgs["flux fitting"].build_package({
-            "flux_values":self.parameters["flux_values"],
+            "target_flux":self.parameters["flux_values"],
             "totalflux":self.parameters["totalflux"],
             "set_objective":0
         })
         for rxnid in self.childpkgs["flux fitting"].variables["vfit"]:
-            objvars.append(objcoef["vfit"] * self.childpkgs["flux fitting"].variables["vfit"][rxnid] ** 2)
+            objvars.append(self.parameters["obj_vfit"] * self.childpkgs["flux fitting"].variables["vfit"][rxnid] ** 2)
         #Adding proteome fitting variables and constraints
-        for rxnid in rxn_proteome:
+        for rxnid in self.parameters["rxn_proteome"]:
             if rxnid in self.model.reactions:
                 rxnobj = self.model.reactions.get_by_id(rxnid)
                 self.build_variable(rxnobj,"kapp")
                 var = self.build_variable(rxnobj,"kvfit")
-                objvars.append(objcoef["kvfit"] * var ** 2)
+                objvars.append(self.parameters["obj_kvfit"] * var ** 2)
                 const = self.build_constraint(rxnobj,"vkapp") 
         #Adding kcat fitting variables and constraints
-        for rxnid in kcat_values:
-            if rxnid in self.model.reactions:
-                rxnobj = self.model.reactions.get_by_id(rxnid)
-                var = self.build_variable(rxnobj,"kfit")
-                const = self.build_constraint(rxnobj,"kfitc")
-                objvars.append(objcoef["kfit"] * var ** 2)
+        for rxnid in self.parameters["kcat_values"]:
+            for rxnobj in self.model.reactions:
+                if rxnid == FBAHelper.modelseed_id_from_cobra_reaction(rxnobj):
+                    print("kfit:"+rxnid)
+                    var = self.build_variable(rxnobj,"kfit")
+                    const = self.build_constraint(rxnobj,"kfitc")
+                    objvars.append(self.parameters["obj_kfit"] * var ** 2)
         #Creating objective function
-        if set_objective == 1:
+        if self.parameters["set_objective"] == 1:
             self.model.objective = self.model.problem.Objective(add(objvars), direction="min", sloppy=True)
                  
     def build_variable(self,object,type):
@@ -65,15 +67,18 @@ class ProteomeFittingPkg(BaseFBAPkg):
         if type == "vkapp" and object.id in self.parameters["rxn_proteome"]:
             #kvfit(i) = kapp(i)*ProtCoef*Prot(i) - v(i)
             prot = self.parameters["rxn_proteome"][object.id]*self.parameters["prot_coef"]
-            coef = {self.variables["kvfit"][object.id]:1,self.variables["kapp"][object.id]:-1*prot}
-            if self.parameters["totalflux"] == 1:
-                coef[self.childpkgs["flux fitting"].childpkgs["totalflux"].variables["tf"][object.id]] = 1
-            else:
-                coef[object.forward_variable] = 1
-                coef[object.reverse_variable] = 1
-            return BaseFBAPkg.build_constraint(self,type,0,0,coef,object)
-        elif type == "kfitc" and object.id in self.parameters["kcat_values"]:
+            if object.id in self.variables["kvfit"] and object.id in self.variables["kapp"]:
+                coef = {self.variables["kvfit"][object.id]:1,self.variables["kapp"][object.id]:-1*prot}
+                if self.parameters["totalflux"] == 1:
+                    coef[self.childpkgs["flux fitting"].childpkgs["totalflux"].variables["tf"][object.id]] = 1
+                else:
+                    coef[object.forward_variable] = 1
+                    coef[object.reverse_variable] = 1
+                return BaseFBAPkg.build_constraint(self,type,0,0,coef,object)
+        elif type == "kfitc":
             #kfit(i) = kapp(i) - kcoef*kcat(i)
-            rhs = -1*self.parameters["kcat_values"][object.id]*self.parameters["kcat_coef"]
+            msid = FBAHelper.modelseed_id_from_cobra_reaction(object)
+            print(self.parameters["kcat_values"][msid])
+            rhs = -1*self.parameters["kcat_values"][msid]*self.parameters["kcat_coef"]
             coef = {self.variables["kvfit"][object.id]:1,self.variables["kapp"][object.id]:-1}
             return BaseFBAPkg.build_constraint(self,type,rhs,rhs,coef,object)
