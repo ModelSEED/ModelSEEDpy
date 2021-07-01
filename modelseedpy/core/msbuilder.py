@@ -432,3 +432,17 @@ class MSBuilder:
                 rxn.upper_bound = 0
                 rxn.lower_bound = -100
         return original_mdl
+
+#User specifies global template
+#User specifies core template
+
+#Two apps: Build metabolic model; Build model from template and media
+
+#1: Classify genome: gram pos, gram neg, archea, cyano
+#1.5: Classify respiration: aerobe, anaerobe
+#2: Based on class pick a template set and pick a media set
+#3: Build core model in selected media
+#4: Gapfill core model in selected media
+#5: Compute ATP abundance
+#6: Expand to genome-scale
+

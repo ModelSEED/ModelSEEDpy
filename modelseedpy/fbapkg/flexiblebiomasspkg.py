@@ -111,10 +111,10 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                     for metabolite in rxn.metabolites:
                         mw = FBAHelper.metabolite_mw(metabolite)
                         massdiff += rxn.metabolites[metabolite]*mw
-                        print(met_class+":"+metabolite.id+":"+str(mw)+":"+str(massdiff)+":"+str(rxn.metabolites[metabolite]))
                     if abs(massdiff) > 0.00001:
                         coef[rxn.forward_variable] = massdiff
                         coef[rxn.reverse_variable] = -1*massdiff
+                    print(met_class+" mass diff:"+str(massdiff))
             return BaseFBAPkg.build_constraint(self,type,0,0,coef,object)
         elif type == "flxcpd":
             #0.75 * abs(bio_coef) * vbio - vdrn,for >= 0

@@ -22,17 +22,17 @@ class FluxFittingPkg(BaseFBAPkg):
             "set_objective":1
         })
         if self.parameters["totalflux"] == 0:
-            self.childpkgs["reversible binary"].build_package(target_flux)
+            self.childpkgs["reversible binary"].build_package(self.parameters["target_flux"])
         else:
-            self.childpkgs["totalflux"].build_package(target_flux)
+            self.childpkgs["totalflux"].build_package(self.parameters["target_flux"])
         objvars = []
         for rxnid in self.parameters["target_flux"]:
-            rxnobj = self.model.reactions.get_by_id(rxnid)
-            if rxnobj != None:
+            if rxnid in self.model.reactions:
+                rxnobj = self.model.reactions.get_by_id(rxnid)
                 var = self.build_variable(rxnobj)
                 objvars.append(var ** 2)
                 const = self.build_constraint(rxnobj)
-        if set_objective == 1:
+        if self.parameters["set_objective"] == 1:
             self.model.objective = self.model.problem.Objective(add(objvars), direction="min", sloppy=True)
                  
     def build_variable(self,object):
@@ -47,6 +47,6 @@ class FluxFittingPkg(BaseFBAPkg):
                 coef[object.forward_variable] = 1
                 coef[object.reverse_variable] = -1
             else:
-                self.childpkgs["totalflux"].variables["tf"][object.id] = 1
+                coef[self.childpkgs["totalflux"].variables["tf"][object.id]] = 1
                 flux = abs(flux)
-            return BaseFBAPkg.build_constraint(self,"vfit",flux,flux,coef,object)
+            return BaseFBAPkg.build_constraint(self,"vfitc",flux,flux,coef,object)

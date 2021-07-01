@@ -83,6 +83,14 @@ class FBAHelper:
         #TODO: should check to see if ModelSEED ID is in the annotations for the compound
         else:
             return None
+        
+    def modelseed_id_from_cobra_reaction(reaction):
+        if re.search('^(rxn\d+)', reaction.id) != None:
+            m = re.search('^(rxn\d+)', reaction.id)
+            return m[1]
+        #TODO: should check to see if ModelSEED ID is in the annotations for the compound
+        else:
+            return None
     
     @staticmethod    
     def metabolite_mw(metabolite):
