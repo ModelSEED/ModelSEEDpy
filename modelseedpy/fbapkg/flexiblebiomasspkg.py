@@ -114,7 +114,6 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                     if abs(massdiff) > 0.00001:
                         coef[rxn.forward_variable] = massdiff
                         coef[rxn.reverse_variable] = -1*massdiff
-                    print(met_class+" mass diff:"+str(massdiff))
             return BaseFBAPkg.build_constraint(self,type,0,0,coef,object)
         elif type == "flxcpd":
             #0.75 * abs(bio_coef) * vbio - vdrn,for >= 0
