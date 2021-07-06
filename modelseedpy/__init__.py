@@ -38,7 +38,8 @@ from modelseedpy.core import (
 )
 from modelseedpy.fbapkg import (
     BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,ElementUptakePkg,BilevelPkg,
-    CommKineticPkg,KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg
+    CommKineticPkg,KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg,FlexibleBiomassPkg,
+    ProblemReplicationPkg
 )
 
 #If there are parallel modules these should be imported in parallel as shown here:

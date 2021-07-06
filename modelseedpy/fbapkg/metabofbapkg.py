@@ -47,6 +47,7 @@ class MetaboFBAPkg(BaseFBAPkg):
     
     def build_constraint(self,object,type):
         #TODO: need to determine coefficients
+        coef = {self.variables["met"][object.id]:1}
         if type == "metc":
             return BaseFBAPkg.build_constraint(self,"metc",0,0,coef,object)
         elif type == "pkc":
