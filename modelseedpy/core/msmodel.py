@@ -1,3 +1,4 @@
+import re
 from cobra.core import Model
 
 
@@ -34,10 +35,46 @@ def get_gpr_string(gpr):
     return gpr_string
 
 
-def split_compartment_from_index(cmp_str):
-    cmp_val = None
+def split_compartment_from_index(cmp_str: str):
+    """
+    Splits index from compartment.
+    Example: c0 returns ('c', '0'), cm10 returns ('cm', '10)
+    :param cmp_str: a compartment string with or without index
+    :return:
+    """
+    s = re.split(r'(\d+)', cmp_str)
     index_val = None
+    cmp_val = None
+    if len(s) == 3 and len(s[0]) > 0:
+        cmp_val, index_val, empty = s
+        if empty > 0:
+            cmp_val = None  # set cmp_val to None to raise error if empty element is not empty
+    elif len(cmp_str) == 1:
+        cmp_val = s[0]
+    if cmp_val is None:
+        raise ValueError(f"Bad value {cmp_str} Value of compartment string must start with letter(s) \
+         and ending (optional) with digits")
     return cmp_val, index_val
+
+
+def get_cmp_token(compartments):
+    """
+
+    :param compartments:
+    :return:
+    """
+    if len(compartments) == 1:
+        return list(compartments)[0]
+    if len(compartments) == 2:
+        if 'b' in compartments and 'e' in compartments:
+            return 'b'
+        if 'e' in compartments and 'c' in compartments:
+            return 'c'
+        if 'k' in compartments:
+            return 'k'
+        if 'c' in compartments:
+            return list(filter(lambda x: not x == 'c', compartments))[0]
+    return None
 
 
 class MSModel(Model):
