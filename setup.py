@@ -21,6 +21,6 @@ setup(
     install_requires=[
         "networkx >= 2.4",
         "cobra >= 0.17.1",
-        "scipy >= 1.7.0"
+        "scipy >= 1.5.4"
     ]
 )
