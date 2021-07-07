@@ -3,10 +3,11 @@
 from __future__ import absolute_import
 
 import logging
-from scipy.constants import calorie
-from scipy.constants import physical_constants, kilo, R
-from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from scipy.constants import physical_constants, calorie, kilo, R
+from numpy import log as ln 
+
 from modelseedpy.fbapkg.simplethermopkg import SimpleThermoPkg
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 #Base class for FBA packages
@@ -75,11 +76,11 @@ class FullThermoPkg(BaseFBAPkg):
     
     def build_variable(self,object,type):
         if type == "logconc":
-            lb = self.parameters["default_min_conc"]#Need to log this
-            ub = self.parameters["default_max_conc"]#Need to log this
+            lb = ln(self.parameters["default_min_conc"])#Need to log this
+            ub = ln(self.parameters["default_max_conc"])#Need to log this
             if object.id in self.parameters["combined_custom_concentrations"]:
-                lb = self.parameters["combined_custom_concentrations"][object.id][0]
-                ub = self.parameters["combined_custom_concentrations"][object.id][1]
+                lb = ln(self.parameters["combined_custom_concentrations"][object.id][0])
+                ub = ln(self.parameters["combined_custom_concentrations"][object.id][1])
             return BaseFBAPkg.build_variable(self,"logconc",lb,ub,"continuous",object)
         elif type == "dgerr":
             ub = self.parameters["default_max_error"]
@@ -88,7 +89,7 @@ class FullThermoPkg(BaseFBAPkg):
             return BaseFBAPkg.build_variable(self,"dgerr",-1*ub,ub,"continuous",object)
     
     def build_constraint(self,object):
-        #potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potentil
+        #potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potential
         if object.id not in self.childpkgs["simple thermo"].variables["potential"]:
             return None
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(object)
@@ -106,10 +107,10 @@ class FullThermoPkg(BaseFBAPkg):
         compartment_potential = 0
         if object.compartment in self.parameters["combined_custom_comp_pot"]:
             compartment_potential = self.parameters["combined_custom_comp_pot"][object.compartment]
-        constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential/1000000
+        constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential*kilo
         coef = {
             self.childpkgs["simple thermo"].variables["potential"][object.id]:1,
-            self.variables["logconc"][object.id]:-1*R/1000*self.parameters["temperature"],
+            self.variables["logconc"][object.id]:-1*R*kilo*self.parameters["temperature"],
             self.variables["dgerr"][object.id]:-1
         }
         return BaseFBAPkg.build_constraint(self,"potc",constant,constant,coef,object)
