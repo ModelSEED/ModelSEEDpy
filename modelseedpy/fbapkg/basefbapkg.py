@@ -26,6 +26,7 @@ class BaseFBAPkg:
         self.new_reactions = dict()
         self.variable_types = variable_types
         self.constraint_types = constraint_types
+        self.pkgmgr = None
         for type in variable_types:
             self.variables[type] = dict()
         for type in constraint_types:
