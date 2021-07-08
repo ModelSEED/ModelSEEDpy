@@ -12,17 +12,22 @@ class SimpleThermoPkg(BaseFBAPkg):
         BaseFBAPkg.__init__(self,model,"simple thermo",{"potential":"metabolite"},{"thermo":"reaction"})
         self.childpkgs["reversible binary"] = RevBinPkg(model)
 
-    def build_package(self,filter = None):
-        self.childpkgs["reversible binary"].build_package(filter)
+    def build_package(self,parameters):
+        self.validate_parameters(parameters,[],{
+            "filter":None,
+            "min_potential":0,
+            "max_potential":1000
+        })
+        self.childpkgs["reversible binary"].build_package(self.parameters["filter"])
         for metabolite in self.model.metabolites:
             self.build_variable(metabolite)
         for reaction in self.model.reactions:
             #Checking that reaction passes input filter if one is provided
-            if filter == None or reaction.id in filter:
+            if self.parameters["filter"] == None or reaction.id in self.parameters["filter"]:
                 self.build_constraint(reaction)
     
     def build_variable(self,object):
-        return BaseFBAPkg.build_variable(self,"potential",0,1000,"continuous",object)
+        return BaseFBAPkg.build_variable(self,"potential",self.parameters["min_potential"],self.parameters["max_potential"],"continuous",object)
 
     def build_constraint(self,object):#Gibbs: dg = Sum(st(i,j)*p(j))
         #0 <= 1000*revbin(i) + Sum(st(i,j)*p(j)) <= 1000
