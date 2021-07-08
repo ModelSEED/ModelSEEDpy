@@ -40,19 +40,7 @@ class BaseFBAPkg:
         for key in defaults:
             if key not in params:
                 self.parameters[key] = defaults[key]
-    
-    def clear(self):
-        objects = []
-        for type in self.variables:
-            for object in self.variables[type]:
-                objects.append(self.variables[type][object])
-        for type in self.constraints:
-            for object in self.constraints[type]:
-                objects.append(self.constraints[type][object])
-        self.model.remove_cons_vars(objects)
-        self.variables = {}
-        self.constraints = {}
-        
+
     def build_variable(self,type,lower_bound,upper_bound,vartype,object = None):
         name = None
         if self.variable_types[type] == "none":
@@ -88,27 +76,55 @@ class BaseFBAPkg:
         return self.constraints[type][name]
     
     def all_variables(self):
-        allvars = self.all_child_variables()
-        for type in self.variables:
-            allvars[type] = self.variables[type]
-        return allvars
-    
-    def all_child_variables(self):
-        childvars = {}
+        '''Quantify the variables in the class
+        '''
+        vars = {}
         for child in self.childpkgs:
-            for type in child.variables:
-                childvars[type] = child.variables[type]
-        return childvars
+            for kind in child.variables:
+                vars[kind] = child.variables[kind]
+
+        for kind in self.variables:
+            vars[kind] = self.variables[kind]
+        
+        return vars
     
     def all_constraints(self):
-        allconst = self.all_child_constraints()
-        for type in self.constraints:
-            allconst[type] = self.constraints[type]
-        return allconst
-    
-    def all_child_constraints(self):
-        childconst = {}
+        '''Quantify the constraints in the class
+        '''
+        consts = {}
         for child in self.childpkgs:
-            for type in child.constraints:
-                childconst[type] = child.constraints[type]
-        return childconst
+            for kind in child.constraints:
+                consts[kind] = child.constraints[kind]
+
+        for kind in self.constraints:
+            consts[kind] = self.constraints[kind]
+            
+        return consts
+    
+    def write_lp_file(self, export_filename = 'test'):
+        '''Export the LP file of the COBRA model
+        'export_filename' (Python obj, string): The string of the lp file that will be exported
+        '''
+        from datetime import date
+        import os
+        
+        import_iteration = 0
+        lp_filename = '{}_{}_{}.lp'.format(date.today(), export_filename, import_iteration)
+        while os.path.exists(lp_filename):
+            import_iteration += 1
+            lp_filename = '{}_{}_{}.lp'.format(date.today(), export_filename, import_iteration)
+            
+        with open(lp_filename, 'w') as lp_file:
+            lp_file.write(str(model.solver))
+            
+    def clear(self):
+        objects = []
+        for type in self.variables:
+            for object in self.variables[type]:
+                objects.append(self.variables[type][object])
+        for type in self.constraints:
+            for object in self.constraints[type]:
+                objects.append(self.constraints[type][object])
+        self.model.remove_cons_vars(objects)
+        self.variables = {}
+        self.constraints = {}
