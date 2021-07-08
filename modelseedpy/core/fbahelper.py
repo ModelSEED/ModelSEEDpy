@@ -2,6 +2,7 @@ import logging
 
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction
+from modelseedpy.biochem import from_local
 
 logger = logging.getLogger(__name__)
 
@@ -106,4 +107,8 @@ class FBAHelper:
     @staticmethod    
     def elemental_mass():
         #Source:https://stackoverflow.com/questions/16699180/how-to-get-molecular-weight-of-a-compound-in-python/45557858
-        return elementmass    
+        return elementmass
+    
+    @staticmethod
+    def get_modelseed_db_api(modelseed_path):
+        return from_local(modelseed_path)   

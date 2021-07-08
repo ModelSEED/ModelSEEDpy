@@ -20,6 +20,7 @@ setup(
     packages=find_packages(exclude=('tests', 'docs')),
     install_requires=[
         "networkx >= 2.4",
-        "cobra >= 0.17.1"
+        "cobra >= 0.17.1",
+        "scipy >= 1.5.4"
     ]
 )
