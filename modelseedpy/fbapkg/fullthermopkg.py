@@ -132,15 +132,15 @@ class FullThermoPkg(BaseFBAPkg):
         compartment_potential = 0
         if object.compartment in self.parameters["combined_custom_comp_pot"]:
             compartment_potential = self.parameters["combined_custom_comp_pot"][object.compartment]
-        constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential*kilo
+        constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential/kilo
         coef = {
             self.childpkgs["simple thermo"].variables["potential"][object.id]:1,
 <<<<<<< HEAD
-            self.variables["logconc"][object.id]:-1*R*kilo*self.parameters["temperature"],
+            self.variables["logconc"][object.id]:-1*R/kilo*self.parameters["temperature"],
 =======
 >>>>>>> 1139f4666b3ebc18adc6bbfd2c0914994d249c81
             self.variables["dgerr"][object.id]:-1
         }
         if msid != "cpd00001":#Water concentration should not contribute to potential
-            coef[self.variables["logconc"][object.id]] = -1*R/1000*self.parameters["temperature"]
+            coef[self.variables["logconc"][object.id]] = -1*R/kilo*self.parameters["temperature"]
         return BaseFBAPkg.build_constraint(self,"potc",constant,constant,coef,object)
