@@ -50,7 +50,7 @@ class FullThermoPkg(BaseFBAPkg):
         self.validate_parameters(parameters,["modelseed_path"],{
             "default_max_conc":0.02,#M
             "default_min_conc":0.000001,#M
-            "default_max_error":100,#KJ/mol
+            "default_max_error":5,#KJ/mol
             "custom_concentrations":{},
             "custom_deltaG_error":{},
             "compartment_potential":{},
@@ -76,6 +76,8 @@ class FullThermoPkg(BaseFBAPkg):
         for metabolite in self.model.metabolites:
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
             if msid != None:
+                if msid not in msid_hash:
+                    msid_hash[msid] = {}
                 msid_hash[msid][metabolite.id] = metabolite
             #Build concentration variable
             self.build_variable(metabolite,"logconc")
