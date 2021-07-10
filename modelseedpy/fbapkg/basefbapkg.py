@@ -77,46 +77,30 @@ class BaseFBAPkg:
         return self.constraints[type][name]
     
     def all_variables(self):
-        '''Quantify the variables in the class
-        '''
-        vars = {}
+        allvars = self.all_child_variables()
+        for type in self.variables:
+            allvars[type] = self.variables[type]
+        return allvars
+    
+    def all_child_variables(self):
+        childvars = {}
         for child in self.childpkgs:
-            for kind in child.variables:
-                vars[kind] = child.variables[kind]
-
-        for kind in self.variables:
-            vars[kind] = self.variables[kind]
-        
-        return vars
+            for type in child.variables:
+                childvars[type] = child.variables[type]
+        return childvars
     
     def all_constraints(self):
-        '''Quantify the constraints in the class
-        '''
-        consts = {}
-        for child in self.childpkgs:
-            for kind in child.constraints:
-                consts[kind] = child.constraints[kind]
-
-        for kind in self.constraints:
-            consts[kind] = self.constraints[kind]
-            
-        return consts
+        allconst = self.all_child_constraints()
+        for type in self.constraints:
+            allconst[type] = self.constraints[type]
+        return allconst
     
-    def write_lp_file(self, export_filename = 'test'):
-        '''Export the LP file of the COBRA model
-        'export_filename' (Python obj, string): The string of the lp file that will be exported
-        '''
-        from datetime import date
-        import os
-        
-        import_iteration = 0
-        lp_filename = '{}_{}_{}.lp'.format(date.today(), export_filename, import_iteration)
-        while os.path.exists(lp_filename):
-            import_iteration += 1
-            lp_filename = '{}_{}_{}.lp'.format(date.today(), export_filename, import_iteration)
-            
-        with open(lp_filename, 'w') as lp_file:
-            lp_file.write(str(model.solver))
+    def all_child_constraints(self):
+        childconst = {}
+        for child in self.childpkgs:
+            for type in child.constraints:
+                childconst[type] = child.constraints[type]
+        return childconst
             
     def clear(self):
         objects = []
