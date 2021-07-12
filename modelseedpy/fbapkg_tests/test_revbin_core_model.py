@@ -6,7 +6,7 @@ token = '5QQKGJK7BYX7HF7M2TFI3EVJXC7NE67T'
 kbase = cobrakbase.KBaseAPI(token)
 
 # define the example individual model and associated API media package
-model = kbase.get_from_ws('E_iAH991V2', 93832)
+model = kbase.get_from_ws('e_coli_core.kb', 95098)
 model.solver = 'optlang-cplex'
 
 # import the modelseedpy packages

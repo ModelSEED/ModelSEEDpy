@@ -7,7 +7,7 @@ token = '5QQKGJK7BYX7HF7M2TFI3EVJXC7NE67T'
 kbase = cobrakbase.KBaseAPI(token)
 
 # define the example individual model and associated API media package
-model = kbase.get_from_ws('E_iAH991V2', 93832)
+model = kbase.get_from_ws('e_coli_core.kb', 95098)
 model.solver = 'optlang-cplex'
 
 # import the modelseedpy packages
@@ -38,7 +38,7 @@ def test_validate_parameters():
 
 def test_build_reaction_variable():
     # define the model instance of the test reaction
-    test_reaction = '3OAR140_c0'
+    test_reaction = 'rxn05297_c0'
     ub = 133
     lb = 10
     var_type = 'continuous'
@@ -59,7 +59,7 @@ def test_build_reaction_variable():
 
 def test_build_reaction_constraint():
     # define arbitrary argument content for the function test
-    test_reaction = '3OAR140_c0'
+    test_reaction = 'rxn05297_c0'
     ub = 133
     lb = 10
     constraint_type = 'concentration'
@@ -106,18 +106,6 @@ def test_all_constraints():
     
     # assert results of the function
     assert constraints_quantity == instance_constraints
-
-    
-'''def test_write_lp_file():   
-    # define arbitrary argument content for the function test
-    lp_name = 'unit_test_name'
-
-    # execute the function
-    base.write_lp_file(lp_name)
-    lp_filename = '{}_{}_0.lp'.format(date.today(), export_filename)
-    
-    # assert results of the function
-    assert os.path.exists(lp_name)'''
     
 
 def clear():

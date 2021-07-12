@@ -48,10 +48,12 @@ class FullThermoPkg(BaseFBAPkg):
             "c0":-160#mV = 0.33 (pHint - pHext) - 143.33 where pHint = 7 and pHext = 6.5
         }
     
-    def __init__(self,model,modelseed_path):
+    def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"full thermo",{"logconc":"metabolite","dgerr":"metabolite"},{"potc":"metabolite"})
         self.childpkgs["simple thermo"] = SimpleThermoPkg(model)
-        
+
+    def build_package(self,modelseed_path):
+
         # add parameters
         self.parameters['modelseed_path'] = modelseed_path
         self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_path"])
@@ -76,8 +78,9 @@ class FullThermoPkg(BaseFBAPkg):
         self.parameters["combined_custom_comp_pot"] = FullThermoPkg.default_compartment_potential()
         for cmp in self.parameters["compartment_potential"]:
             self.parameters["combined_custom_comp_pot"][cmp] = self.parameters["compartment_potential"][cmp]
-
-    def build_package(self):
+       
+        
+        # build the package
         self.childpkgs["simple thermo"].build_package({
             "filter":self.parameters["filter"],
             "min_potential":-100000,#KJ/mol
@@ -90,32 +93,32 @@ class FullThermoPkg(BaseFBAPkg):
                 if msid not in msid_hash:
                     msid_hash[msid] = {}
                 msid_hash[msid][metabolite.id] = metabolite
-            #Build concentration variable
+                
+            #Build the concentration and Gibbs error variables, and the potential constraint 
             self.variables["logconc"][metabolite.id] = self.build_variable(metabolite,"logconc")
-            #Build error variable
             self.variables["dgerr"][metabolite.id] = self.build_variable(metabolite,"dgerr")
-            #Build the potential constraint
             self.build_constraint(metabolite)
-
+            
+            
+    # define the requisite functions
     def build_variable(self,object,type):
-#<<<<<<< HEAD
         if type == "logconc":
-            lb = ln(self.parameters["default_min_conc"])#Need to log this
-            ub = ln(self.parameters["default_max_conc"])#Need to log this
-#=======
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(object)
             if object.id in self.parameters["combined_custom_concentrations"] and msid != "cpd00001":#Do not make a concentration variable for water
-#>>>>>>> 1139f4666b3ebc18adc6bbfd2c0914994d249c81
                 lb = ln(self.parameters["combined_custom_concentrations"][object.id][0])
                 ub = ln(self.parameters["combined_custom_concentrations"][object.id][1])
+            else:
+                lb = ln(self.parameters["default_min_conc"])#Need to log this
+                ub = ln(self.parameters["default_max_conc"])#Need to log this
+
             return BaseFBAPkg.build_variable(self,"logconc",lb,ub,"continuous",object)
-        
+
         elif type == "dgerr":
             ub = self.parameters["default_max_error"]
             if object.id in self.parameters["combined_custom_deltaG_error"]:
                 ub = self.parameters["combined_custom_deltaG_error"][object.id]
             return BaseFBAPkg.build_variable(self,"dgerr",-1*ub,ub,"continuous",object)
-    
+
     def build_constraint(self,object):
         #potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potential
         if object.id not in self.childpkgs["simple thermo"].variables["potential"]:
@@ -138,10 +141,6 @@ class FullThermoPkg(BaseFBAPkg):
         constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential/kilo
         coef = {
             self.childpkgs["simple thermo"].variables["potential"][object.id]:1,
-#<<<<<<< HEAD
-            self.variables["logconc"][object.id]:-1*R/kilo*self.parameters["temperature"],
-#=======
-#>>>>>>> 1139f4666b3ebc18adc6bbfd2c0914994d249c81
             self.variables["dgerr"][object.id]:-1
         }
         if msid != "cpd00001":#Water concentration should not contribute to potential
