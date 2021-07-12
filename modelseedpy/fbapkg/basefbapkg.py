@@ -7,6 +7,7 @@ import re
 from optlang.symbolics import Zero, add
 import json as _json
 from cobra.core import Gene, Metabolite, Model, Reaction
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 #Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):
@@ -18,15 +19,17 @@ class BaseFBAPkg:
     def __init__(self, model, name, variable_types={}, constraint_types={}, parent=None):
         self.model = model
         self.name = name
-        self.childpkgs = dict()
-        self.parentpkg = parent
+        self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        if self.pkgmgr == None:
+            self.pkgmgr = MSPackageManager.get_pkg_mgr(model,1)
+        self.pkgmgr.addpkgobj(self)
         self.constraints = dict()
         self.variables = dict()
         self.parameters = dict()
         self.new_reactions = dict()
         self.variable_types = variable_types
         self.constraint_types = constraint_types
-        self.pkgmgr = None
+        
         for type in variable_types:
             self.variables[type] = dict()
         for type in constraint_types:
@@ -89,27 +92,7 @@ class BaseFBAPkg:
         return self.constraints[type][name]
     
     def all_variables(self):
-        allvars = self.all_child_variables()
-        for type in self.variables:
-            allvars[type] = self.variables[type]
-        return allvars
-    
-    def all_child_variables(self):
-        childvars = {}
-        for child in self.childpkgs:
-            for type in child.variables:
-                childvars[type] = child.variables[type]
-        return childvars
+        return self.pkgmgr.all_variables()
     
     def all_constraints(self):
-        allconst = self.all_child_constraints()
-        for type in self.constraints:
-            allconst[type] = self.constraints[type]
-        return allconst
-    
-    def all_child_constraints(self):
-        childconst = {}
-        for child in self.childpkgs:
-            for type in child.constraints:
-                childconst[type] = child.constraints[type]
-        return childconst
+        return self.pkgmgr.all_constraints()

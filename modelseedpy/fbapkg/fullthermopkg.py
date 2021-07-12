@@ -6,7 +6,6 @@ import logging
 from scipy.constants import physical_constants, calorie, kilo, R
 from numpy import log as ln
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.fbapkg.simplethermopkg import SimpleThermoPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 #Base class for FBA packages
@@ -44,7 +43,7 @@ class FullThermoPkg(BaseFBAPkg):
     
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"full thermo",{"logconc":"metabolite","dgerr":"metabolite"},{"potc":"metabolite"})
-        self.childpkgs["simple thermo"] = SimpleThermoPkg(model)
+        self.pkgmgr.addpkgs(["SimpleThermoPkg"])
 
     def build_package(self,parameters):
         self.validate_parameters(parameters,["modelseed_path"],{
@@ -58,7 +57,7 @@ class FullThermoPkg(BaseFBAPkg):
             "filter":None
         })
         self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_path"])
-        self.childpkgs["simple thermo"].build_package({
+        self.pkgmgr.getpkg("SimpleThermoPkg").build_package({
             "filter":self.parameters["filter"],
             "min_potential":-100000,#KJ/mol
             "max_potential":100000#KJ/mol
@@ -103,7 +102,7 @@ class FullThermoPkg(BaseFBAPkg):
     
     def build_constraint(self,object):
         #potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potential
-        if object.id not in self.childpkgs["simple thermo"].variables["potential"]:
+        if object.id not in self.pkgmgr.getpkg("SimpleThermoPkg").variables["potential"]:
             return None
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(object)
         if msid == None:
@@ -122,7 +121,7 @@ class FullThermoPkg(BaseFBAPkg):
             compartment_potential = self.parameters["combined_custom_comp_pot"][object.compartment]
         constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential/1000000
         coef = {
-            self.childpkgs["simple thermo"].variables["potential"][object.id]:1,
+            self.pkgmgr.getpkg("SimpleThermoPkg").variables["potential"][object.id]:1,
             self.variables["dgerr"][object.id]:-1
         }
         if msid != "cpd00001":#Water concentration should not contribute to potential
