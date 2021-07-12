@@ -10,13 +10,13 @@ from modelseedpy.fbapkg.simplethermopkg import SimpleThermoPkg
 class MetaboFBAPkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"metabo fba",{"met":"metabolite","pk":"string"},{"metc":"metabolite","pkc":"string"})
-        self.childpkgs["simple thermo"] = SimpleThermoPkg(model)
+        self.pkgmgr.addpkgs(["SimpleThermoPkg"])
 
     def build_package(self,parameters):
         self.validate_parameters(parameters,["peaks"],{
             "set_objective":1,
         })
-        self.childpkgs["simple thermo"].build_package()
+        self.pkgmgr.getpkg("SimpleThermoPkg").build_package()
         peak_hash = {}
         for peak_data in peaks:
             peak_hash[peak_data["id"]] = peak_data

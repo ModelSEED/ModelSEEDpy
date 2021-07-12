@@ -7,7 +7,6 @@ import re
 from optlang.symbolics import Zero, add
 from cobra import Model, Reaction, Metabolite
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.fbapkg.objconstpkg import ObjConstPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 default_blacklist = ["rxn12985","rxn00238","rxn07058","rxn05305","rxn00154","rxn09037","rxn10643",
@@ -67,7 +66,7 @@ class GapfillingPkg(BaseFBAPkg):
     """
     def __init__(self, model):
         BaseFBAPkg.__init__(self, model, "gapfilling", {}, {})
-        self.childpkgs["objective constraint"] = ObjConstPkg(model)
+        self.pkgmgr.addpkgs(["ObjConstPkg"])
 
     def build_package(self,parameters):
         self.validate_parameters(parameters,[],{
@@ -88,7 +87,7 @@ class GapfillingPkg(BaseFBAPkg):
             "blacklist":default_blacklist
         })
         #Adding constraint for target reaction
-        self.childpkgs["objective constraint"].build_package(self.parameters["minimum_obj"],None)
+        self.pkgmgr.getpkg("ObjConstPkg").build_package(self.parameters["minimum_obj"],None)
         #Determine all indecies that should be gapfilled
         indexhash = {"none":0}
         for metabolite in self.model.metabolites:
