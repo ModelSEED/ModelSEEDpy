@@ -70,7 +70,7 @@ class GapfillingPkg(BaseFBAPkg):
 
     def build_package(self,parameters):
         self.validate_parameters(parameters,[],{
-            "auto_sink":["cpd02701_c", "cpd11416_c0", "cpd15302_c"],
+            "auto_sink":["cpd02701", "cpd11416", "cpd15302"],
             "extend_with_template":1,
             "model_penalty":1,
             "default_gapfill_models":[],
@@ -88,6 +88,15 @@ class GapfillingPkg(BaseFBAPkg):
         })
         #Adding constraint for target reaction
         self.pkgmgr.getpkg("ObjConstPkg").build_package(self.parameters["minimum_obj"],None)
+        
+        #Adding missing drains in the base model
+        for metabolite in self.model.metabolites:
+             msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+             if msid in self.parameters["auto_sink"]:
+                if msid != "cpd11416" or metabolite.compartment == "c0":
+                    if "EX_"+metabolite.id not in self.model.reactions and "DM_"+metabolite.id not in self.model.reactions and "SK_"+metabolite.id not in self.model.reactions:
+                        drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,self.parameters["default_uptake"],self.parameters["default_excretion"],"DM_")
+        
         #Determine all indecies that should be gapfilled
         indexhash = {"none":0}
         for metabolite in self.model.metabolites:
@@ -246,6 +255,7 @@ class GapfillingPkg(BaseFBAPkg):
         new_exchange = []
         new_demand = []
         new_penalties = dict()
+        
         for template_compound in template.compcompounds:
             tempindex = index
             compartment = template_compound.templatecompartment_ref.split("/").pop()
@@ -255,8 +265,10 @@ class GapfillingPkg(BaseFBAPkg):
             if cobra_metabolite.id not in self.model.metabolites and cobra_metabolite.id not in new_metabolites:
                 new_metabolites[cobra_metabolite.id] = cobra_metabolite
                 self.model.add_metabolites([cobra_metabolite])   
-                if cobra_metabolite.id in self.parameters["auto_sink"]:
-                    new_demand.append(cobra_metabolite.id)
+                msid = FBAHelper.modelseed_id_from_cobra_metabolite(cobra_metabolite)
+                if msid in self.parameters["auto_sink"]:
+                    if msid != "cpd11416" or cobra_metabolite.compartment == "c0":
+                        new_demand.append(cobra_metabolite.id)
                 if compartment == "e":
                     new_exchange.append(cobra_metabolite.id)
         #Adding all metabolites to model prior to adding reactions
@@ -297,7 +309,7 @@ class GapfillingPkg(BaseFBAPkg):
                 new_reactions[drain_reaction.id] = drain_reaction
         #Only run this on new demands so we don't readd for all exchanges
         for cpd_id in new_demand:
-            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,cpd_id,self.parameters["default_uptake"],self.parameters["default_excretion"])
+            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,cpd_id,self.parameters["default_uptake"],self.parameters["default_excretion"],"DM_")
             if drain_reaction != None and drain_reaction.id not in new_reactions:
                 new_penalties[drain_reaction.id] = dict();
                 new_penalties[drain_reaction.id]["added"] = 1
