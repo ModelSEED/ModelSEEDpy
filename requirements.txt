@@ -1,2 +1,4 @@
 sphinx
 cobra
+pandas
+numpy

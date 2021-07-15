@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.fbapkg.revbinpkg import RevBinPkg
 from modelseedpy.fbapkg.reactionusepkg import ReactionUsePkg

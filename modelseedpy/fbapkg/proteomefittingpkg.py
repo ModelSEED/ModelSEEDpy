@@ -3,18 +3,16 @@
 from __future__ import absolute_import
 
 import logging
+import math
 from optlang.symbolics import Zero, add
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.fbapkg.fluxfittingpkg import FluxFittingPkg
-from modelseedpy.fbapkg.revbinpkg import RevBinPkg
-from modelseedpy.fbapkg.totalfluxpkg import TotalFluxPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 #Base class for FBA packages
 class ProteomeFittingPkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"proteome fitting",{"kapp":"reaction","kvfit":"reaction","kfit":"reaction"},{"vkapp":"reaction","kfitc":"reaction"})
-        self.childpkgs["flux fitting"] = FluxFittingPkg(model)
+        self.pkgmgr.addpkgs(["FluxFittingPkg"])
         
     def build_package(self,parameters):
         self.validate_parameters(parameters,["rxn_proteome"],{
@@ -23,21 +21,25 @@ class ProteomeFittingPkg(BaseFBAPkg):
             "prot_coef" : 0.1,
             "totalflux" : 1,
             "kcat_coef" : 0.333,
-            "obj_kfit":10,
+            "obj_kfit":1,
             "obj_kvfit":1,
             "obj_vfit":1,
-            "set_objective":1
+            "set_objective":1,
+            "rescale_vfit_by_flux":True,
+            "default_rescaling":0.1
         })
         objvars = []
         #Adding flux fitting variables and constraints
-        self.childpkgs["flux fitting"].build_package({
+        self.pkgmgr.getpkg("FluxFittingPkg").build_package({
             "target_flux":self.parameters["flux_values"],
             "totalflux":self.parameters["totalflux"],
+            "rescale_vfit_by_flux":self.parameters["rescale_vfit_by_flux"],
+            "default_rescaling":self.parameters["default_rescaling"],
             "set_objective":0
-        })
-        self.childpkgs["flux fitting"].childpkgs["totalflux"].build_package()
-        for rxnid in self.childpkgs["flux fitting"].variables["vfit"]:
-            objvars.append(self.parameters["obj_vfit"] * self.childpkgs["flux fitting"].variables["vfit"][rxnid] ** 2)
+        })        
+        self.pkgmgr.getpkg("TotalFluxPkg").build_package()
+        for rxnid in self.pkgmgr.getpkg("FluxFittingPkg").variables["vfit"]:
+            objvars.append(self.parameters["obj_vfit"] * self.pkgmgr.getpkg("FluxFittingPkg").variables["vfit"][rxnid] ** 2)
         #Adding proteome fitting variables and constraints
         for rxnobj in self.model.reactions:
             if rxnobj.id not in self.parameters["rxn_proteome"]:
@@ -72,7 +74,7 @@ class ProteomeFittingPkg(BaseFBAPkg):
             if object.id in self.variables["kvfit"] and object.id in self.variables["kapp"]:
                 coef = {self.variables["kvfit"][object.id]:1,self.variables["kapp"][object.id]:-1*prot}
                 if self.parameters["totalflux"] == 1:
-                    coef[self.childpkgs["flux fitting"].childpkgs["totalflux"].variables["tf"][object.id]] = 1
+                    coef[self.pkgmgr.getpkg("TotalFluxPkg").variables["tf"][object.id]] = 1
                 else:
                     coef[object.forward_variable] = 1
                     coef[object.reverse_variable] = 1
