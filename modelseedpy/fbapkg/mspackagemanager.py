@@ -14,10 +14,10 @@ class MSPackageManager:
     pkgmgrs = {}
     
     @staticmethod
-    def get_pkg_mgr(model,create_if_missing = 0):
+    def get_pkg_mgr(model,create_if_missing = True):
         if model in MSPackageManager.pkgmgrs:
             return  MSPackageManager.pkgmgrs[model]
-        elif create_if_missing == 1:
+        elif create_if_missing:
             MSPackageManager.pkgmgrs[model] = MSPackageManager(model)
             return MSPackageManager.pkgmgrs[model]
         else:
@@ -52,9 +52,9 @@ class MSPackageManager:
             if package not in self.packages:
                 self.packages[package] = self.available_packages[package](self.model)
     
-    def getpkg(self,package,create_if_missing = 0):
+    def getpkg(self,package,create_if_missing = True):
         if package not in self.packages:
-            if create_if_missing == 1:
+            if create_if_missing:
                 self.addpkgs([package])
             else:
                 return None
