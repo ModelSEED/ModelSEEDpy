@@ -271,17 +271,11 @@ class GapfillingPkg(BaseFBAPkg):
             cobra_metabolite = self.convert_template_compound(template_compound, tempindex, template)
             if cobra_metabolite.id not in self.model.metabolites and cobra_metabolite.id not in new_metabolites:
                 new_metabolites[cobra_metabolite.id] = cobra_metabolite
-<<<<<<< HEAD
                 self.model.add_metabolites([cobra_metabolite])   
                 msid = FBAHelper.modelseed_id_from_cobra_metabolite(cobra_metabolite)
                 if msid in self.parameters["auto_sink"]:
                     if msid != "cpd11416" or cobra_metabolite.compartment == "c0":
                         new_demand.append(cobra_metabolite.id)
-=======
-                self.model.add_metabolites([cobra_metabolite])
-                if cobra_metabolite.id in self.parameters["auto_sink"]:
-                    new_demand.append(cobra_metabolite.id)
->>>>>>> 054c53278829a330f412de67716bf868bd5c93a8
                 if compartment == "e":
                     new_exchange.append(cobra_metabolite.id)
         # Adding all metabolites to model prior to adding reactions
@@ -328,13 +322,11 @@ class GapfillingPkg(BaseFBAPkg):
                 new_reactions[drain_reaction.id] = drain_reaction
         # Only run this on new demands so we don't readd for all exchanges
         for cpd_id in new_demand:
-<<<<<<< HEAD
-            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,cpd_id,self.parameters["default_uptake"],self.parameters["default_excretion"],"DM_")
-=======
             drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, cpd_id,
                                                                     self.parameters["default_uptake"],
-                                                                    self.parameters["default_excretion"])
->>>>>>> 054c53278829a330f412de67716bf868bd5c93a8
+                                                                    self.parameters["default_excretion"],
+                                                                    "DM_")
+
             if drain_reaction != None and drain_reaction.id not in new_reactions:
                 new_penalties[drain_reaction.id] = dict();
                 new_penalties[drain_reaction.id]["added"] = 1
