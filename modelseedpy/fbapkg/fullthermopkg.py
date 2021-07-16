@@ -4,13 +4,7 @@ from __future__ import absolute_import
 
 import logging
 from scipy.constants import physical_constants, calorie, kilo, R
-#<<<<<<< HEAD
 from numpy import log as ln 
-
-#=======
-from numpy import log as ln
-from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-#>>>>>>> 1139f4666b3ebc18adc6bbfd2c0914994d249c81
 from modelseedpy.fbapkg.simplethermopkg import SimpleThermoPkg
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
@@ -50,7 +44,7 @@ class FullThermoPkg(BaseFBAPkg):
     
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"full thermo",{"logconc":"metabolite","dgerr":"metabolite"},{"potc":"metabolite"})
-        self.childpkgs["simple thermo"] = SimpleThermoPkg(model)
+        self.pkgmgr.addpkgs(["SimpleThermoPkg"])
 
     def build_package(self,modelseed_path):
 
@@ -68,6 +62,13 @@ class FullThermoPkg(BaseFBAPkg):
             "filter":None
         }
         BaseFBAPkg.validate_parameters(self, self.parameters, ["modelseed_path"], parameters_to_add)
+        
+        self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_path"])
+        self.pkgmgr.getpkg("SimpleThermoPkg").build_package({
+            "filter":self.parameters["filter"],
+            "min_potential":-100000,#KJ/mol
+            "max_potential":100000#KJ/mol
+        })
         
         self.parameters["combined_custom_concentrations"] = FullThermoPkg.default_concentration()
         for cpd in self.parameters["custom_concentrations"]:
@@ -123,7 +124,7 @@ class FullThermoPkg(BaseFBAPkg):
 
     def build_constraint(self,object):
         #potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potential
-        if object.id not in self.childpkgs["simple thermo"].variables["potential"]:
+        if object.id not in self.pkgmgr.getpkg("SimpleThermoPkg").variables["potential"]:
             return None
         
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(object)
@@ -147,7 +148,7 @@ class FullThermoPkg(BaseFBAPkg):
             
         constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential/kilo
         coef = {
-            self.childpkgs["simple thermo"].variables["potential"][object.id]:1,
+            self.pkgmgr.getpkg("SimpleThermoPkg").variables["potential"][object.id]:1,
             self.variables["dgerr"][object.id]:-1
         }
         if msid != "cpd00001":#Water concentration should not contribute to potential

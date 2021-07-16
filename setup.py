@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='ModelSEEDpy',
-    version='0.2.0',
+    version='0.2.1',
     description='Python package for building and analyzing models using ModelSEED',
     long_description=readme,
     author='Christopher Henry',
@@ -21,6 +21,7 @@ setup(
     install_requires=[
         "networkx >= 2.4",
         "cobra >= 0.17.1",
+        "scikit-learn == 0.23.2",  # too support KBase pickle models
         "scipy >= 1.5.4"
     ]
 )

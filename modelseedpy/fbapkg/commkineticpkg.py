@@ -15,14 +15,15 @@ class CommKineticPkg(BaseFBAPkg):
     def build_package(self,kinetic_coef,abundances = None,predict_abundance = 0):
         biohash = dict()
         for reaction in self.model.reactions:
-            if reaction.id != "bio1" and re.search('^bio\d+$', reaction.id) != None:
+            if re.search('^bio\d+$', reaction.id) != None:
                 for metabolite in reaction.metabolites:
                     if metabolite.id[0:8] == "cpd11416":
                         biorxnid = reaction.id
                         index = metabolite.id[10:]
                         if index not in biohash:
                             biohash[index] = []
-                        biohash[index].append(reaction.id)
+                        if index == "0" or reaction.id != "bio1":
+                            biohash[index].append(reaction.id)
         if abundances != None:
             print("Warning:Community biomass reaction is being altered with input abundances")
             if "0" in biohash:
@@ -38,12 +39,12 @@ class CommKineticPkg(BaseFBAPkg):
                         if index != "0":
                             if index not in abundances:
                                 if int(index) in abundances:
-                                    primarybiomass.metabolites[metabolite] = abundances[int(index)]
+                                    primarybiomass.add_metabolites({metabolite:abundances[index]},combine=False)
                                 else:
                                     primarybiomass.metabolites[metabolite] = 0
                             else:
-                                primarybiomass.metabolites[metabolite] = abundances[index]
-                self.model.solver.update()    
+                                primarybiomass.add_metabolites({metabolite:abundances[index]},combine=False)
+                self.model.solver.update()
         for index in biohash:
             if index != "0":
                 self.build_constraint(index,biohash,kinetic_coef)
