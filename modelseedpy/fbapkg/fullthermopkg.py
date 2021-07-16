@@ -72,9 +72,11 @@ class FullThermoPkg(BaseFBAPkg):
         self.parameters["combined_custom_concentrations"] = FullThermoPkg.default_concentration()
         for cpd in self.parameters["custom_concentrations"]:
             self.parameters["combined_custom_concentrations"][cpd] = self.parameters["custom_concentrations"][cpd]
+            
         self.parameters["combined_custom_deltaG_error"] = FullThermoPkg.default_deltaG_error()
         for cpd in self.parameters["custom_deltaG_error"]:
             self.parameters["combined_custom_deltaG_error"][cpd] = self.parameters["custom_deltaG_error"][cpd]
+            
         self.parameters["combined_custom_comp_pot"] = FullThermoPkg.default_compartment_potential()
         for cmp in self.parameters["compartment_potential"]:
             self.parameters["combined_custom_comp_pot"][cmp] = self.parameters["compartment_potential"][cmp]
@@ -123,21 +125,26 @@ class FullThermoPkg(BaseFBAPkg):
         #potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potential
         if object.id not in self.childpkgs["simple thermo"].variables["potential"]:
             return None
+        
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(object)
         if msid == None:
             print(object.id+" has no modelseed ID!")
             return None
+        
         mscpd = self.parameters["modelseed_api"].get_seed_compound(msid)
         if mscpd is None:
             print(object.id+" has modelseed ID "+msid+" but cannot be found in ModelSEED DB!")
             return None
+        
         if mscpd.deltag == 10000000:
             print(object.id+" has modelseed ID "+msid+" but does not have a valid deltaG!")
             return None
+        
         Faraday = physical_constants['Faraday constant'][0]#C/mol
         compartment_potential = 0
         if object.compartment in self.parameters["combined_custom_comp_pot"]:
             compartment_potential = self.parameters["combined_custom_comp_pot"][object.compartment]
+            
         constant = mscpd.deltag/calorie + object.charge*Faraday*compartment_potential/kilo
         coef = {
             self.childpkgs["simple thermo"].variables["potential"][object.id]:1,
