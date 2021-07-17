@@ -490,6 +490,8 @@ class MSBuilder:
         })
         kmp = KBaseMediaPkg(model)
         kmp.build_package(media)
+        #with open('Gapfilling.lp', 'w') as out:
+        #    out.write(str(model.solver))
         sol = model.optimize()
         gfresults = gfp.compute_gapfilled_solution()
         for rxnid in gfresults["reversed"]:
