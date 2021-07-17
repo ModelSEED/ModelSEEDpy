@@ -20,6 +20,7 @@ class CommKineticPkg(BaseFBAPkg):
             "predict_abundance" : predict_abundance,
             "biohash" : {}
         })
+        biomass_drains = {}
         for reaction in self.model.reactions:
             if re.search('^bio\d+$', reaction.id) != None:
                 for metabolite in reaction.metabolites:
@@ -27,6 +28,11 @@ class CommKineticPkg(BaseFBAPkg):
                     if FBAHelper.modelseed_id_from_cobra_metabolite(metabolite) == "cpd11416" and re.search('[a-z](\d+)', metabolite.compartment) != None:
                         m = re.search('[a-z](\d+)', metabolite.compartment)
                         index = m[1]
+                        if index != "0" and index not in biomass_drains and self.parameters["predict_abundance"]:
+                            print("Making biomass drain:"+metabolite.id)
+                            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,0,100,"DM_")
+                            self.model.add_reactions([drain_reaction])
+                            biomass_drains[index] = drain_reaction
                         biorxnid = reaction.id
                         if index not in self.parameters["biohash"]:
                             self.parameters["biohash"][index] = []
@@ -47,14 +53,15 @@ class CommKineticPkg(BaseFBAPkg):
                         if index != "0":
                             if index not in abundances:
                                 if int(index) in abundances:
-                                    primarybiomass.add_metabolites({metabolite:abundances[index]},combine=False)
+                                    primarybiomass.add_metabolites({metabolite:-1*abundances[index]},combine=False)
                                 else:
                                     primarybiomass.metabolites[metabolite] = 0
                             else:
-                                primarybiomass.add_metabolites({metabolite:abundances[index]},combine=False)
+                                primarybiomass.add_metabolites({metabolite:-1*abundances[index]},combine=False)
                 self.model.solver.update()
         for index in self.parameters["biohash"]:
             if index != "0" and index in self.parameters["biohash"]:
+                print(index+":"+self.parameters["biohash"][index][0])
                 self.build_constraint(index)
         
     def build_constraint(self,index):
