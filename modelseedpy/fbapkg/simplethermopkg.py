@@ -15,7 +15,8 @@ class SimpleThermoPkg(BaseFBAPkg):
         self.validate_parameters(parameters,[],{
             "filter":None,
             "min_potential":0,
-            "max_potential":1000
+            "max_potential":1000,
+            "add_dgbin_variables": False,
         })
         self.pkgmgr.getpkg("RevBinPkg").build_package(self.parameters["filter"])
         for metabolite in self.model.metabolites:
@@ -29,7 +30,7 @@ class SimpleThermoPkg(BaseFBAPkg):
         return BaseFBAPkg.build_variable(self,"potential",self.parameters["min_potential"],self.parameters["max_potential"],"continuous",object)
 
     def build_constraint(self,object):#Gibbs: dg = Sum(st(i,j)*p(j))
-        #0 <= 1000*revbin(i) + Sum(st(i,j)*p(j)) <= 1000
+        #0 <= 1000*revbin(i) + 1000*dgbin,f - 1000*dgbin,r + Sum(st(i,j)*p(j)) <= 1000
         coef = {self.pkgmgr.getpkg("RevBinPkg").variables["revbin"][object.id] : 1000}
         for metabolite in object.metabolites:
             coef[self.variables["potential"][metabolite.id]] = object.metabolites[metabolite]
