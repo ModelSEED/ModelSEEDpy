@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
+import re
+
 #Base class for FBA packages
 class SimpleThermoPkg(BaseFBAPkg):
     def __init__(self,model):
@@ -12,8 +14,13 @@ class SimpleThermoPkg(BaseFBAPkg):
         self.pkgmgr.addpkgs(["RevBinPkg"])
 
     def build_package(self,parameters):
+        reaction_filter = []
+        for reaction in self.model.reactions:
+            if re.search('EX', reaction.id):
+                reaction_filter.append(reaction.id)
+        
         self.validate_parameters(parameters,[],{
-            "filter":None,
+            "filter":reaction_filter,
             "min_potential":0,
             "max_potential":1000,
             "dgbin": False,
@@ -24,7 +31,7 @@ class SimpleThermoPkg(BaseFBAPkg):
             self.build_variable(metabolite)
         for reaction in self.model.reactions:
             #Checking that reaction passes input filter if one is provided
-            if self.parameters["filter"] == None or reaction.id in self.parameters["filter"]:                    
+            if self.parameters["filter"] == None or reaction.id not in self.parameters["filter"]:                    
                 self.build_constraint(reaction)
                 
     def build_variable(self,object):
