@@ -35,11 +35,11 @@ class SimpleThermoPkg(BaseFBAPkg):
 
     def build_constraint(self,object):#Gibbs: dg = Sum(st(i,j)*p(j))
 
-        # 0 <= 1000*revbin(i) + 1000*dgbinR - 1000*dgbinF + Sum(st(i,j)*p(j)) <= 1000
+        # 0 <= 1000*revbin(i) - 1000*dgbinR + 1000*dgbinF + Sum(st(i,j)*p(j)) <= 1000
         coef = {self.pkgmgr.getpkg("RevBinPkg").variables["revbin"][object.id] : 1000}
         if self.parameters['dgbin'] == True:
-            coef[self.variables['dgbinF'][object.id]] = -1000
-            coef[self.variables['dgbinR'][object.id]] = 1000
+            coef[self.variables['dgbinF'][object.id]] = 1000
+            coef[self.variables['dgbinR'][object.id]] = -1000
         
         for metabolite in object.metabolites:
             coef[self.variables["potential"][metabolite.id]] = object.metabolites[metabolite]
