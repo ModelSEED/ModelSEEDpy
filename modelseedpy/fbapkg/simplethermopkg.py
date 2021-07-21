@@ -15,7 +15,8 @@ class SimpleThermoPkg(BaseFBAPkg):
         self.validate_parameters(parameters,[],{
             "filter":None,
             "min_potential":0,
-            "max_potential":1000
+            "max_potential":1000,
+            "dgbin": False
         })
         self.pkgmgr.getpkg("RevBinPkg").build_package(self.parameters["filter"])
         for metabolite in self.model.metabolites:
@@ -23,6 +24,10 @@ class SimpleThermoPkg(BaseFBAPkg):
         for reaction in self.model.reactions:
             #Checking that reaction passes input filter if one is provided
             if self.parameters["filter"] == None or reaction.id in self.parameters["filter"]:
+                if self.parameters['dgbin'] == True:
+                    BaseFBAPkg.build_variable(self,"dgbinF",0,1,"binary",object)
+                    BaseFBAPkg.build_variable(self,"dgbinR",0,1,"binary",object)
+                    
                 self.build_constraint(reaction)
                 
     def build_variable(self,object):
@@ -30,8 +35,12 @@ class SimpleThermoPkg(BaseFBAPkg):
 
     def build_constraint(self,object):#Gibbs: dg = Sum(st(i,j)*p(j))
 
-        #0 <= 1000*revbin(i) + Sum(st(i,j)*p(j)) <= 1000
+        # 0 <= 1000*revbin(i) + 1000*dgbinR - 1000*dgbinF + Sum(st(i,j)*p(j)) <= 1000
         coef = {self.pkgmgr.getpkg("RevBinPkg").variables["revbin"][object.id] : 1000}
+        if self.parameters['dgbin'] == True:
+            coef[self.variables['dgbinF'][object.id]] = -1000
+            coef[self.variables['dgbinR'][object.id]] = 1000
+        
         for metabolite in object.metabolites:
             coef[self.variables["potential"][metabolite.id]] = object.metabolites[metabolite]
         return BaseFBAPkg.build_constraint(self,"thermo",0,1000,coef,object)
