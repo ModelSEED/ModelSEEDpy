@@ -6,7 +6,7 @@ import optlang
 import os
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
 import cobrakbase
-token = '5QQKGJK7BYX7HF7M2TFI3EVJXC7NE67T'
+token = 'KCYWCM5Q3ZFAGQKDG3ESMJXGHQPK7UMN'
 kbase = cobrakbase.KBaseAPI(token)
 
 # define the example individual model and associated API media package
@@ -41,7 +41,7 @@ def test_init():
 def test_build_package():
    
     # execute the function
-    full_thermo.build_package(modelseed_path = modelseed_db_path)
+    full_thermo.build_package(parameters = {'modelseed_path':modelseed_db_path})
     
     # assert the addition of added parameters
     added_parameters = ["default_max_conc", "default_min_conc", "default_max_error", "custom_concentrations",'modelseed_api',
@@ -58,7 +58,7 @@ def test_build_package():
     for metabolite in full_thermo.model.metabolites:
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
         mscpd = full_thermo.parameters["modelseed_api"].get_seed_compound(msid)
-        if (msid and mscpd) != None and mscpd.deltag != 10000000:
+        if (msid and mscpd) != None and mscpd.deltag != 10000000 and msid != "cpd00001":
             assert full_thermo.variables['dgerr'][metabolite.id]
             assert full_thermo.variables['logconc'][metabolite.id]
             assert full_thermo.constraints['potc'][metabolite.id]
@@ -66,6 +66,7 @@ def test_build_package():
             
     from scipy.constants import physical_constants, calorie, kilo, R
     Faraday = physical_constants['Faraday constant'][0]#C/mol
+    from numpy import float64
     import re
     
     # define arbitrary initial conditions to test
@@ -85,15 +86,14 @@ def test_build_package():
             constant = mscpd.deltag/calorie + metabolite.charge*Faraday*compartment_potential/kilo
             
             assert type(constant) is float 
-    
-        import numpy
         
         # execute and assert the results of the function
-        kind = 'logconc'
-        full_thermo_conc_var = full_thermo.variables[kind][metabolite.id]
-        assert full_thermo_conc_var.type == 'continuous'
-        assert type(full_thermo_conc_var.lb) is numpy.float64
-        assert type(full_thermo_conc_var.ub) is numpy.float64
+        if msid != "cpd00001":
+            kind = 'logconc'
+            full_thermo_conc_var = full_thermo.variables[kind][metabolite.id]
+            assert full_thermo_conc_var.type == 'continuous'
+            assert type(full_thermo_conc_var.lb) is float64
+            assert type(full_thermo_conc_var.ub) is float64
         
         kind = 'dgerr'
         full_thermo_dgerr_var = full_thermo.variables[kind][metabolite.id]

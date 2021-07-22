@@ -3,7 +3,7 @@ import optlang
 import os
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
 import cobrakbase
-token = '5QQKGJK7BYX7HF7M2TFI3EVJXC7NE67T'
+token = 'KCYWCM5Q3ZFAGQKDG3ESMJXGHQPK7UMN'
 kbase = cobrakbase.KBaseAPI(token)
 
 # define the example individual model and associated API media package
@@ -79,9 +79,6 @@ def test_build_reaction_constraint():
 def test_all_variables():
     # define the initial conditions of the model
     variables_quantity = 0
-    for child in base.childpkgs:
-        for kind in child.variables:
-            variables_quantity += 1
     for var in base.variables:
         variables_quantity += 1
     
@@ -95,9 +92,6 @@ def test_all_variables():
 def test_all_constraints():
     # define the initial conditions of the model
     constraints_quantity = 0
-    for child in base.childpkgs:
-        for kind in child.constraints:
-            constraints_quantity += 1
     for var in base.constraints:
         constraints_quantity += 1
     
