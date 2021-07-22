@@ -44,7 +44,19 @@ class BaseFBAPkg:
         for key in defaults:
             if key not in params:
                 self.parameters[key] = defaults[key]
-
+    
+    def clear(self):
+        objects = []
+        for type in self.variables:
+            for object in self.variables[type]:
+                objects.append(self.variables[type][object])
+        for type in self.constraints:
+            for object in self.constraints[type]:
+                objects.append(self.constraints[type][object])
+        self.model.remove_cons_vars(objects)
+        self.variables = {}
+        self.constraints = {}
+        
     def build_variable(self,type,lower_bound,upper_bound,vartype,object = None):
         name = None
         if self.variable_types[type] == "none":
@@ -84,16 +96,3 @@ class BaseFBAPkg:
     
     def all_constraints(self):
         return self.pkgmgr.all_constraints()
-               
-    def clear(self):
-        objects = []
-        for type in self.variables:
-            for object in self.variables[type]:
-                objects.append(self.variables[type][object])
-        for type in self.constraints:
-            for object in self.constraints[type]:
-                objects.append(self.constraints[type][object])
-        self.model.remove_cons_vars(objects)
-        self.variables = {}
-        self.constraints = {}
-

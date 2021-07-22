@@ -67,36 +67,37 @@ class GapfillingPkg(BaseFBAPkg):
 
     def __init__(self, model):
         BaseFBAPkg.__init__(self, model, "gapfilling", {}, {})
-        self.pkgmgr.addpkgs(["ObjConstPkg"])
 
-    def build_package(self, parameters):
-        self.validate_parameters(parameters, [], {
-            "auto_sink": ["cpd02701_c", "cpd11416_c0", "cpd15302_c"],
-            "extend_with_template": 1,
-            "model_penalty": 1,
-            "default_gapfill_models": [],
-            "default_gapfill_templates": [],
-            "gapfill_templates_by_index": {},
-            "gapfill_models_by_index": {},
-            "reaction_scores": {},
-            "gapfill_all_indecies_with_default_templates": 1,
-            "gapfill_all_indecies_with_default_models": 1,
-            "default_excretion": 100,
-            "default_uptake": -100,
-            "minimum_obj": 0.01,
-            "set_objective": 1,
-            "blacklist": default_blacklist
+    def build_package(self,parameters):
+        self.validate_parameters(parameters,[],{
+            "auto_sink":["cpd02701", "cpd11416", "cpd15302"],
+            "extend_with_template":1,
+            "model_penalty":1,
+            "default_gapfill_models":[],
+            "default_gapfill_templates":[],
+            "gapfill_templates_by_index":{},
+            "gapfill_models_by_index":{},
+            "reaction_scores":{},
+            "gapfill_all_indecies_with_default_templates":1,
+            "gapfill_all_indecies_with_default_models":1,
+            "default_excretion":100,
+            "default_uptake":-100,
+            "minimum_obj":0.01,
+            "set_objective":1,
+            "blacklist":default_blacklist
         })
-        # Adding constraint for target reaction
-        self.pkgmgr.getpkg("ObjConstPkg").build_package(self.parameters["minimum_obj"], None)
-        # Determine all indecies that should be gapfilled
-        indexhash = {"none": 0}
+        #Adding constraint for target reaction
+        self.pkgmgr.getpkg("ObjConstPkg").build_package(self.parameters["minimum_obj"],None)
+                
+        #Determine all indecies that should be gapfilled
+        indexhash = {"none":0}
         for metabolite in self.model.metabolites:
             if re.search('_[a-z]\d+$', metabolite.id) != None:
-                m = re.search('_[a-z](\d+)$', metabolite.id)
-                if m[1] not in indexhash:
-                    indexhash[m[1]] = 0
-                indexhash[m[1]] += 1
+                m = re.search('_([a-z])(\d+)$', metabolite.id)
+                if m[1] != "e":
+                    if m[2] not in indexhash:
+                        indexhash[m[2]] = 0
+                    indexhash[m[2]] += 1
             else:
                 indexhash["none":0]
                 # Iterating over all indecies with more than 10 intracellular compounds:
@@ -110,17 +111,19 @@ class GapfillingPkg(BaseFBAPkg):
                     for gfmdl in self.parameters["default_gapfill_models"]:
                         new_penalties = self.extend_model_with_model_for_gapfilling(gfmdl, index)
                         self.gapfilling_penalties.update(new_penalties)
-                elif index in self.parameters["gapfill_templates_by_index"]:
+                if index in self.parameters["gapfill_templates_by_index"]:
                     for template in self.parameters["gapfill_templates_by_index"][index]:
                         new_penalties = self.extend_model_with_template_for_gapfilling(template, index)
                         self.gapfilling_penalties.update(new_penalties)
+                if index in self.parameters["gapfill_models_by_index"]:
                     for gfmdl in self.parameters["gapfill_models_by_index"]:
                         new_penalties = self.extend_model_with_model_for_gapfilling(gfmdl, index)
                         self.gapfilling_penalties.update(new_penalties)
-                elif self.parameters["gapfill_all_indecies_with_default_templates"]:
+                if self.parameters["gapfill_all_indecies_with_default_templates"]:
                     for template in self.parameters["default_gapfill_templates"]:
                         new_penalties = self.extend_model_with_template_for_gapfilling(template, index)
                         self.gapfilling_penalties.update(new_penalties)
+                if self.parameters["gapfill_all_indecies_with_default_models"]:
                     for gfmdl in self.parameters["default_gapfill_models"]:
                         new_penalties = self.extend_model_with_model_for_gapfilling(gfmdl, index)
                         self.gapfilling_penalties.update(new_penalties)
@@ -253,6 +256,7 @@ class GapfillingPkg(BaseFBAPkg):
         new_exchange = []
         new_demand = []
         new_penalties = dict()
+        
         for template_compound in template.compcompounds:
             tempindex = index
             compartment = template_compound.templatecompartment_ref.split("/").pop()
@@ -261,9 +265,11 @@ class GapfillingPkg(BaseFBAPkg):
             cobra_metabolite = self.convert_template_compound(template_compound, tempindex, template)
             if cobra_metabolite.id not in self.model.metabolites and cobra_metabolite.id not in new_metabolites:
                 new_metabolites[cobra_metabolite.id] = cobra_metabolite
-                self.model.add_metabolites([cobra_metabolite])
-                if cobra_metabolite.id in self.parameters["auto_sink"]:
-                    new_demand.append(cobra_metabolite.id)
+                self.model.add_metabolites([cobra_metabolite])   
+                msid = FBAHelper.modelseed_id_from_cobra_metabolite(cobra_metabolite)
+                if msid in self.parameters["auto_sink"]:
+                    if msid != "cpd11416" or cobra_metabolite.compartment == "c0":
+                        new_demand.append(cobra_metabolite.id)
                 if compartment == "e":
                     new_exchange.append(cobra_metabolite.id)
         # Adding all metabolites to model prior to adding reactions
@@ -312,7 +318,9 @@ class GapfillingPkg(BaseFBAPkg):
         for cpd_id in new_demand:
             drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, cpd_id,
                                                                     self.parameters["default_uptake"],
-                                                                    self.parameters["default_excretion"])
+                                                                    self.parameters["default_excretion"],
+                                                                    "DM_")
+
             if drain_reaction != None and drain_reaction.id not in new_reactions:
                 new_penalties[drain_reaction.id] = dict();
                 new_penalties[drain_reaction.id]["added"] = 1
@@ -384,7 +392,79 @@ class GapfillingPkg(BaseFBAPkg):
         cobra_reaction.annotation["seed.reaction"] = base_id
 
         return cobra_reaction
-
+    
+    def binary_check_gapfilling_solution(self,solution = None,flux_values = None):
+        if solution == None:
+            solution = self.compute_gapfilled_solution()
+        if flux_values == None:
+            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
+        filter = {}
+        for rxnid in solution["reversed"]:
+            filter[rxnid] = solution["reversed"][rxnid]
+        for rxnid in solution["new"]:
+            filter[rxnid] = solution["new"][rxnid]
+        self.pkgmgr.getpkg("ReactionUsePkg").build_package(filter)
+        objcoef = {}
+        for rxnid in filter:
+            if filter[rxnid] == ">":
+                objcoef[self.pkgmgr.getpkg("ReactionUsePkg").variables["fu"][rxnid]] = 1
+            if filter[rxnid] == "<":
+                objcoef[self.pkgmgr.getpkg("ReactionUsePkg").variables["ru"][rxnid]] = 1
+        new_solution = {}
+        with self.model:
+            #Setting all gapfilled reactions not in the solution to zero
+            self.knockout_gf_reactions_outside_solution(solution,flux_values)
+            #Setting the objective to be minimization of sum of binary variables
+            min_reaction_objective = self.model.problem.Objective(Zero,direction="min")
+            self.model.objective = min_reaction_objective
+            min_reaction_objective.set_linear_coefficients(objcoef)
+            self.model.optimize()
+            new_solution = self.compute_gapfilled_solution()
+        return new_solution
+    
+    #This function is designed to KO all gapfilled reactions not included in the solution
+    def knockout_gf_reactions_outside_solution(self,solution = None,flux_values = None):
+        if solution == None:
+            solution = self.compute_gapfilled_solution()
+        if flux_values == None:
+            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
+        for rxnobj in self.model.reactions:
+            if rxnobj.id in self.gapfilling_penalties:
+                if "reverse" in self.gapfilling_penalties[rxnobj.id] and flux_values[rxnobj.id]["reverse"] <= Zero:
+                    rxnobj.lower_bound = 0
+                if "forward" in self.gapfilling_penalties[rxnobj.id] and flux_values[rxnobj.id]["forward"] <= Zero:
+                    rxnobj.upper_bound = 0
+                rxnobj.update_variable_bounds()
+        
+    def run_test_conditions(self,condition_list,solution = None,max_iterations = 10):
+        if solution == None:
+            solution = self.compute_gapfilled_solution()
+        reaction_list = []
+        for rxnid in solution["reversed"]:
+            reaction_list.append([self.model.reactions.get_by_id(rxnid),solution["reversed"][rxnid]])
+        for rxnid in solution["new"]:
+            reaction_list.append([self.model.reactions.get_by_id(rxnid),solution["new"][rxnid]])
+        filtered_list = []
+        with self.model:
+            #Setting all gapfilled reactions not in the solution to zero
+            self.knockout_gf_reactions_outside_solution(solution)
+            filtered_list = FBAHelper.reaction_expansion_test(self.model,reaction_list,condition_list)
+        if len(filtered_list) > 0:
+            if max_iterations > 0:
+                #Forcing filtered reactions to zero
+                for item in filtered_list:
+                    if item[1] == ">":
+                        self.model.reactions.get_by_id(item[0]).upper_bound = 0
+                    else:
+                        self.model.reactions.get_by_id(item[0]).lower_bound = 0
+                #Eliminating current solution
+                self.pkgmgr.getpkg("ReactionUsePkg").build_exclusion_constraint()
+                #Reoptimizing
+                self.model.optimize()
+                return self.run_test_conditions(condition_list,None,max_iterations-1)
+            return False
+        return True
+    
     def compute_gapfilled_solution(self, flux_values=None):
         if flux_values == None:
             flux_values = FBAHelper.compute_flux_values_from_variables(self.model)

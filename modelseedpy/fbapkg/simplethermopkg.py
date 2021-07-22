@@ -14,13 +14,8 @@ class SimpleThermoPkg(BaseFBAPkg):
         self.pkgmgr.addpkgs(["RevBinPkg"])
 
     def build_package(self,parameters):
-        reaction_filter = []
-        for reaction in self.model.reactions:
-            if re.search('EX', reaction.id):
-                reaction_filter.append(reaction.id)
-        
         self.validate_parameters(parameters,[],{
-            "filter":reaction_filter,
+            "filter":None,
             "min_potential":0,
             "max_potential":1000,
             "dgbin": False,
@@ -30,9 +25,9 @@ class SimpleThermoPkg(BaseFBAPkg):
         for metabolite in self.model.metabolites:
             self.build_variable(metabolite)
         for reaction in self.model.reactions:
-            #Checking that reaction passes input filter if one is provided
-            if self.parameters["filter"] == None or reaction.id not in self.parameters["filter"]:                    
-                self.build_constraint(reaction)
+            if re.search('^EX_', reaction.id) == None and re.search('^SK', reaction.id) == None and re.search('^DM_', reaction.id) == None:
+                if self.parameters["filter"] == None or reaction.id in self.parameters["filter"]:                    
+                    self.build_constraint(reaction)
                 
     def build_variable(self,object):
         return BaseFBAPkg.build_variable(self,"potential",self.parameters["min_potential"],self.parameters["max_potential"],"continuous",object)
@@ -40,7 +35,11 @@ class SimpleThermoPkg(BaseFBAPkg):
     def build_constraint(self,object, coef = {}):
         # Gibbs: dg = Sum(st(i,j)*p(j))
         # 0 <= 1000*revbin(i) - 1000*dgbinR + 1000*dgbinF + Sum(st(i,j)*p(j)) <= 1000
+<<<<<<< HEAD
                  
+=======
+        # -1000 <= -1000*revbin + Sum(st(i,j)*p(j)) <= 0
+>>>>>>> 1265e755e35f832f6b0160b3e2160391a22b990b
         for metabolite in object.metabolites:
             coef[self.variables["potential"][metabolite.id]] = object.metabolites[metabolite]
             

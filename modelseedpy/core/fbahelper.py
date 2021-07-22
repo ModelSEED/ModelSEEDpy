@@ -3,6 +3,7 @@ import logging
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.biochem import from_local
+#from Carbon.Aliases import false
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,16 @@ elementmass = {'H': 1.00794, 'He': 4.002602, 'Li': 6.941, 'Be': 9.012182, 'B': 1
 
 class FBAHelper:
     @staticmethod
+    def add_autodrain_reactions_to_community_model(model,auto_sink = ["cpd02701", "cpd11416", "cpd15302"]):
+        #Adding missing drains in the base model
+        for metabolite in model.metabolites:
+             msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+             if msid in auto_sink:
+                if msid != "cpd11416" or metabolite.compartment == "c0":
+                    if "EX_"+metabolite.id not in self.model.reactions and "DM_"+metabolite.id not in self.model.reactions and "SK_"+metabolite.id not in self.model.reactions:
+                        drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,0,100,"DM_")
+
+    @staticmethod
     def add_drain_from_metabolite_id(model,cpd_id,uptake,excretion,prefix = 'EX_', prefix_name = 'Exchange for '):
         if cpd_id in model.metabolites:
             id = prefix + cpd_id
@@ -42,6 +53,48 @@ class FBAHelper:
             drain_reaction.annotation["sbo"] = 'SBO:0000627'    
             return drain_reaction
         return None
+    
+    @staticmethod
+    def test_condition_list(model,condition_list):
+        pkgmgr = MSPackageManager.get_pkg_mgr(base_model)
+        for condition in condition_list:
+            pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
+            model.objective = condition["objective"]
+            sol = model.optimize()
+            print("Testing "+condition["media"].name()+":"+str(sol.objective_value)+":"+str(condition["threshold"]))
+            if sol.objective_value >= condition["threshold"] and condition["is_max_threshold"]:
+                return False
+            elif sol.objective_value <= condition["threshold"] and not condition["is_max_threshold"]:
+                return False
+        return True
+        
+    @staticmethod
+    def reaction_expansion_test(model,reaction_list,condition_list):
+        #First knockout all reactions in the input list and save original bounds
+        original_bound = []
+        for item in reaction_list:
+            if item[1] == ">" :
+                original_bound.append(item[0].upper_bound)
+                item[0].upper_bound = 0
+            else:
+                original_bound.append(-1*item[0].lower_bound)
+                item[0].lower_bound = 0
+        #Now restore reactions one at a time
+        count = 0
+        filtered_list = []
+        for item in reaction_list:
+            if item[1] == ">" :
+                item[0].upper_bound = original_bound[count]
+                if not FBAHelper.test_condition_list(model,condition_list):
+                    item[0].upper_bound = 0
+                    filtered_list.append(item)
+            else:
+                item[0].lower_bound = original_bound[count]
+                if not FBAHelper.test_condition_list(model,condition_list):
+                    item[0].lower_bound = 0
+                    filtered_list.append(item)
+            count += 1
+        return filtered_list
 
     @staticmethod
     def set_reaction_bounds_from_direction(reaction,direction,add=0):
@@ -111,4 +164,6 @@ class FBAHelper:
     
     @staticmethod
     def get_modelseed_db_api(modelseed_path):
-        return from_local(modelseed_path)   
+        return from_local(modelseed_path)
+    
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
