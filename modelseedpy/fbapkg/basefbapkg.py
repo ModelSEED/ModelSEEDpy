@@ -35,15 +35,12 @@ class BaseFBAPkg:
         for type in constraint_types:
             self.constraints[type] = dict()
     
-    def validate_parameters(self,params,required,defaults):
+    def validate_parameters(self, params, required, defaults):
         for item in required:
             if item not in params:
-                raise ValueError('Required argument '+item+' is missing!')
-        for key in params:
-            self.parameters[key] = params[key]
-        for key in defaults:
-            if key not in params:
-                self.parameters[key] = defaults[key]
+                raise ValueError(f'Required argument {item} is missing!')
+        self.parameters.update(defaults)  # we assign all defaults
+        self.parameters.update(params)  # replace defaults with params
     
     def clear(self):
         objects = []
