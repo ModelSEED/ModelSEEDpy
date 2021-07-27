@@ -61,4 +61,4 @@ class KBaseMediaPkg(BaseFBAPkg):
     def find_model_compounds(self, cpd_id):
         if cpd_id in self.model.metabolites:
             return [self.model.metabolites.get_by_id(cpd_id)]
-        return [m for m in self.model.metabolites if FBAHelper.modelseed_id_from_cobra_metabolite(m) == cpdid]
+        return [m for m in self.model.metabolites if FBAHelper.modelseed_id_from_cobra_metabolite(m) == cpd_id]
