@@ -471,62 +471,15 @@ class MSBuilder:
 
     @staticmethod
     def build_metabolic_model(model_id, genome, template, gapfill_media=None, index='0',
-                              allow_all_non_grp_reactions=False, annotate_with_rast=True,
-                              coretemplate = None, atp_method = True, gapfill_model = True,atp_media = None):
+                              allow_all_non_grp_reactions=False, annotate_with_rast=True,gapfill_model = True):
         model = MSBuilder(genome, template).build(model_id, index, allow_all_non_grp_reactions, annotate_with_rast)
-        #Running ATP method if requested
-        NoCarbon = model = kbase_api.get_from_ws("NoCarbonMedia","KBaseMedia")
-        NoNitrogen = model = kbase_api.get_from_ws("NoNitrogenMedia","KBaseMedia")
-        gapfilling_tests = [
-            {"media":NoCarbon,"is_max_threshold": True,"threshold":0.000001},
-            {"media":NoNitrogen,"is_max_threshold": True,"threshold":0.000001}  
-        ]
-        if atp_method:
-            #Turning off all reactions not included in the specified core template
-            original_bounds = {}
-            noncore_reactions = []
-            for reaction in model.reactions:
-                if reaction.id not in coretemplate.reactions:
-                    original_bounds[reaction.id] = [reaction.lower_bound,reaction.upper_bound]
-                    if reaction.lower_bound < 0:
-                        noncore_reactions.append([reaction,"<"])
-                    if reaction.upper_bound > 0:
-                        noncore_reactions.append([reaction,">"])
-                    reaction.lower_bound = 0
-                    reaction.upper_bound = 0
-                    reaction.update_variable_bounds()
-            #Maximizing ATP production in model with only the core active
-            FBAHelper.set_objective_from_target_reaction(model, "bio2")
-            pkgmgr = MSPackageManager.get_pkg_mgr(model)
-            pkgmgr.getpkg("KBaseMediaPkg").build_package(atp_media)
-            solution = model.optimize()
-            if solution.objective_value == 0:
-                pass
-            gapfilling_tests.append({"media":atp_media,"is_max_threshold": True,"threshold":1.2*solution.objective_value})
-            #Extending model with noncore reactions while retaining ATP accuracy
-            filtered = FBAHelper.reaction_expansion_test(model,noncore_reactions,gapfilling_tests)
-            #Restoring original reaction bounds
-            for reaction in model.reactions:
-                if reaction.id in original_bounds:
-                    reaction.lower_bound = original_bounds[reaction.id][0]
-                    reaction.upper_bound = original_bounds[reaction.id][1]
-                    reaction.update_variable_bounds()
-            #Removing filtered reactions
-            for item in filtered:
-                if item[1] == ">":
-                    item[0].upper_bound = 0
-                else:
-                    item[0].lower_bound = 0
-                reaction.update_variable_bounds()
-                if item[0].lower_bound == 0 and item[0].upper_bound == 0:
-                    model.remove_reactions(item[0])
         #Gapfilling model 
         if gapfill_model:
-            model = MSBuilder.gapfill_model(model, 'bio1', template, gapfill_media,gapfilling_tests)    
+            model = MSBuilder.gapfill_model(model, 'bio1', template, gapfill_media)    
         return model
 
     @staticmethod
-    def gapfill_model(original_mdl, target_reaction, template, media, test_conditions = None):
+    def gapfill_model(original_mdl, target_reaction, template, media):
         FBAHelper.set_objective_from_target_reaction(original_mdl, target_reaction)
         model = cobra.io.json.from_json(cobra.io.json.to_json(original_mdl))
         pkgmgr = MSPackageManager.get_pkg_mgr(model)
@@ -540,12 +493,7 @@ class MSBuilder:
         #with open('Gapfilling.lp', 'w') as out:
         #    out.write(str(model.solver))
         sol = model.optimize()
-        gfresults = pkgmgr.getpkg("GapfillingPkg").binary_check_gapfilling_solution()
-        if test_conditions != None:
-            test_result = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(test_conditions,gfresults,10)
-            if not test_result:
-                print("Warning - no solution could be found that satisfied all specified test conditions in specified iterations!")
-                return None
+        gfresults = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         for rxnid in gfresults["reversed"]:
             rxn = original_mdl.reactions.get_by_id(rxnid)
             if gfresults["reversed"][rxnid] == ">":
