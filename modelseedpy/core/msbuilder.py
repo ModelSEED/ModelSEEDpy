@@ -6,7 +6,7 @@ from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.core import FBAHelper
-from modelseedpy.fbapkg import GapfillingPkg, KBaseMediaPkg
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 SBO_ANNOTATION = "sbo"
 
@@ -470,37 +470,36 @@ class MSBuilder:
         return cobra_model
 
     @staticmethod
-    def build_metabolic_model(model_id, genome, template, media=None, index='0',
-                              allow_all_non_grp_reactions=False, annotate_with_rast=True):
+    def build_metabolic_model(model_id, genome, template, gapfill_media=None, index='0',
+                              allow_all_non_grp_reactions=False, annotate_with_rast=True,gapfill_model = True):
         model = MSBuilder(genome, template).build(model_id, index, allow_all_non_grp_reactions, annotate_with_rast)
-        if media:
-            MSBuilder.gapfill_model(model, 'bio1', template, media)
+        #Gapfilling model 
+        if gapfill_model:
+            model = MSBuilder.gapfill_model(model, 'bio1', template, gapfill_media)    
         return model
 
     @staticmethod
     def gapfill_model(original_mdl, target_reaction, template, media):
         FBAHelper.set_objective_from_target_reaction(original_mdl, target_reaction)
         model = cobra.io.json.from_json(cobra.io.json.to_json(original_mdl))
-        gfp = GapfillingPkg(model)
-        gfp.build_package({
+        pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        pkgmgr.getpkg("GapfillingPkg").build_package({
             "default_gapfill_templates": [template],
             "gapfill_all_indecies_with_default_templates": 1,
             "minimum_obj": 0.01,
             "set_objective": 1
         })
-        kmp = KBaseMediaPkg(model)
-        kmp.build_package(media)
+        pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         #with open('Gapfilling.lp', 'w') as out:
         #    out.write(str(model.solver))
         sol = model.optimize()
-        gfresults = gfp.compute_gapfilled_solution()
+        gfresults = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         for rxnid in gfresults["reversed"]:
             rxn = original_mdl.reactions.get_by_id(rxnid)
             if gfresults["reversed"][rxnid] == ">":
                 rxn.upper_bound = 100
             else:
                 rxn.lower_bound = -100
-        
         for rxnid in gfresults["new"]:
             rxn = model.reactions.get_by_id(rxnid)
             rxn = rxn.copy()

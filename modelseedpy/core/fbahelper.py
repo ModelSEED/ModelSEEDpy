@@ -56,12 +56,12 @@ class FBAHelper:
     
     @staticmethod
     def test_condition_list(model,condition_list):
-        pkgmgr = MSPackageManager.get_pkg_mgr(base_model,1)
-        kmp = pkgmgr.getpkg("KBaseMediaPkg",1)
+        pkgmgr = MSPackageManager.get_pkg_mgr(base_model)
         for condition in condition_list:
-            kmp.build_package(condition["media"])
+            pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]
             sol = model.optimize()
+            print("Testing "+condition["media"].name()+":"+str(sol.objective_value)+":"+str(condition["threshold"]))
             if sol.objective_value >= condition["threshold"] and condition["is_max_threshold"]:
                 return False
             elif sol.objective_value <= condition["threshold"] and not condition["is_max_threshold"]:
@@ -71,29 +71,28 @@ class FBAHelper:
     @staticmethod
     def reaction_expansion_test(model,reaction_list,condition_list):
         #First knockout all reactions in the input list and save original bounds
-        original_lower = []
-        original_upper = []
-        for reaction in reaction_list:
-            original_lower.append(reaction.lower_bound)
-            reaction.lower_bound = 0
-            original_upper.append(reaction.upper_bound)
-            reaction.upper_bound = 0
+        original_bound = []
+        for item in reaction_list:
+            if item[1] == ">" :
+                original_bound.append(item[0].upper_bound)
+                item[0].upper_bound = 0
+            else:
+                original_bound.append(-1*item[0].lower_bound)
+                item[0].lower_bound = 0
         #Now restore reactions one at a time
         count = 0
         filtered_list = []
-        for reaction in reaction_list:
-            #Restore the lower bound:
-            if original_lower[count] != 0:
-                reaction.lower_bound = original_lower[count]
+        for item in reaction_list:
+            if item[1] == ">" :
+                item[0].upper_bound = original_bound[count]
                 if not FBAHelper.test_condition_list(model,condition_list):
-                    reaction.lower_bound = 0
-                    filtered_list.append([reaction.id,"<"])
-            #Restore the upper bound:
-            if original_upper[count] != 0:
-                reaction.upper_bound = original_upper[count]
+                    item[0].upper_bound = 0
+                    filtered_list.append(item)
+            else:
+                item[0].lower_bound = original_bound[count]
                 if not FBAHelper.test_condition_list(model,condition_list):
-                    reaction.upper_bound = 0
-                    filtered_list.append([reaction.id,">"])
+                    item[0].lower_bound = 0
+                    filtered_list.append(item)
             count += 1
         return filtered_list
 

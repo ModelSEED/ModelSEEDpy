@@ -39,7 +39,9 @@ class ReactionUsePkg(BaseFBAPkg):
             constraint = BaseFBAPkg.build_constraint(self,"urev",None,1,{self.variables["ru"][object.id]:1,self.variables["fu"][object.id]:1},object)
         return constraint
     
-    def build_exclusion_constraint(self,flux_values):
+    def build_exclusion_constraint(self,flux_values = None):
+        if flux_values == None:
+            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
         count = len(self.constraints["exclusion"])
         solution_coef = {}
         solution_size = 0
