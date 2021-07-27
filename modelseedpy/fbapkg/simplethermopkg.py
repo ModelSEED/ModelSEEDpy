@@ -10,7 +10,7 @@ import re
 #Base class for FBA packages
 class SimpleThermoPkg(BaseFBAPkg):
     def __init__(self,model):
-        BaseFBAPkg.__init__(self,model,"simple thermo",{"potential":"metabolite"},{"thermo":"reaction"})
+        BaseFBAPkg.__init__(self,model,"simple thermo",{"potential":"metabolite", 'dgbinF': 'reaction', 'dgbinR':'reaction'},{"thermo":"reaction"})
         self.pkgmgr.addpkgs(["RevBinPkg"])
 
     def build_package(self,parameters):
@@ -32,12 +32,12 @@ class SimpleThermoPkg(BaseFBAPkg):
     def build_variable(self,object):
         return BaseFBAPkg.build_variable(self,"potential",self.parameters["min_potential"],self.parameters["max_potential"],"continuous",object)
 
-    def build_constraint(self,object):
+    def build_constraint(self,object, coef = {}):
         # Gibbs: dg = Sum(st(i,j)*p(j))
         # 0 <= 1000*revbin(i) - 1000*dgbinR + 1000*dgbinF + Sum(st(i,j)*p(j)) <= 1000
-        # -1000 <= -1000*revbin + Sum(st(i,j)*p(j)) <= 0
+
         for metabolite in object.metabolites:
-            coef = {self.variables["potential"][metabolite.id]:object.metabolites[metabolite]}
+            coef[self.variables["potential"][metabolite.id]] = object.metabolites[metabolite]
             
         if not self.parameters['reduced_constraints']:
             coef[self.pkgmgr.getpkg("RevBinPkg").variables["revbin"][object.id]] = 1000

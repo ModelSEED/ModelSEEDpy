@@ -2,7 +2,7 @@
 import os
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
 import cobrakbase
-token = '5QQKGJK7BYX7HF7M2TFI3EVJXC7NE67T'
+token = 'KCYWCM5Q3ZFAGQKDG3ESMJXGHQPK7UMN'
 kbase = cobrakbase.KBaseAPI(token)
 
 # define the example individual model and associated API media package
