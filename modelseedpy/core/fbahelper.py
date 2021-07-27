@@ -56,7 +56,7 @@ class FBAHelper:
     
     @staticmethod
     def test_condition_list(model,condition_list):
-        pkgmgr = MSPackageManager.get_pkg_mgr(base_model)
+        pkgmgr = MSPackageManager.get_pkg_mgr(model)
         for condition in condition_list:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]

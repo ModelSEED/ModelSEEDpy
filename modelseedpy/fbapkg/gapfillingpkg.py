@@ -462,8 +462,8 @@ class GapfillingPkg(BaseFBAPkg):
                 #Reoptimizing
                 self.model.optimize()
                 return self.run_test_conditions(condition_list,None,max_iterations-1)
-            return False
-        return True
+            return None
+        return solution
     
     def compute_gapfilled_solution(self, flux_values=None):
         if flux_values == None:
