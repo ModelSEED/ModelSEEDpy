@@ -18,12 +18,12 @@ def normalize_role(s):
 #def build_from_kbase_gto:
 
 
-def read_fasta(f, split='|'):
+def read_fasta(f, split='|', h_func=None):
     with open(f, 'r') as fh:
-        return parse_fasta_str(fh.read(), split)
+        return parse_fasta_str(fh.read(), split, h_func)
 
 
-def parse_fasta_str(faa_str, split='|'):
+def parse_fasta_str(faa_str, split='|', h_func=None):
     lines = faa_str.split('\n')
     features = []
     seq = None
@@ -33,7 +33,9 @@ def parse_fasta_str(faa_str, split='|'):
                 features.append(seq)
             seq_id = line[1:]
             desc = None
-            if split:
+            if h_func:
+                seq_id, desc = h_func(seq_id)
+            elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
                 desc = header_data[1]
@@ -68,9 +70,9 @@ class MSGenome:
         self.features = DictList()
 
     @staticmethod
-    def from_fasta(filename, contigs=0, split='|'):
+    def from_fasta(filename, contigs=0, split='|', h_func=None):
         genome = MSGenome()
-        genome.features += read_fasta(filename, split)
+        genome.features += read_fasta(filename, split, h_func)
         return genome
 
     @staticmethod
