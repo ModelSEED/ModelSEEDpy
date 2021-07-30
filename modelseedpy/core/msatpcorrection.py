@@ -26,7 +26,7 @@ class MSATPCorrection:
         original_bounds = {}
         noncore_reactions = []
         for reaction in model.reactions:
-            if reaction.id not in coretemplate.reactions:
+            if reaction.id not in coretemplate.reactions and not FBAHelper.is_ex(reaction):
                 original_bounds[reaction.id] = [reaction.lower_bound,reaction.upper_bound]
                 if reaction.lower_bound < 0:
                     noncore_reactions.append([reaction,"<"])
@@ -81,13 +81,13 @@ class MSATPCorrection:
         return model
     
     #This function expands the model to genome-scale while preventing ATP overproduction
-    def expand_model_to_genome_scale(self,model,media_list,noncore_reactions):
+    def expand_model_to_genome_scale(self,model,media_list,noncore_reactions,atp_objective):
         gapfilling_tests = []
         pkgmgr = MSPackageManager.get_pkg_mgr(model)
         for media in media_list:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(media)    
             solution = model.optimize()
-            gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value})
+            gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value,"objective":atp_objective})
         #Extending model with noncore reactions while retaining ATP accuracy
         filtered = FBAHelper.reaction_expansion_test(model,noncore_reactions,gapfilling_tests)
         #Removing filtered reactions
@@ -120,7 +120,7 @@ class MSATPCorrection:
         media_gapfill_stats = self.evaluate_growth_media(model,atp_medias,atp_objective,genome_class)
         media_list = self.determine_growth_media(model,media_gapfill_stats,self.max_gapfilling,self.gapfilling_delta)
         model = self.apply_growth_media_gapfilling(model,media_list,media_gapfill_stats)
-        model = self.expand_model_to_genome_scale(model,media_list,noncore_reactions)
+        model = self.expand_model_to_genome_scale(model,media_list,noncore_reactions,atp_objective)
         model = self.restore_noncore_reactions(model,noncore_reactions,original_bounds)
         
     @staticmethod
