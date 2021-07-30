@@ -6,4 +6,6 @@ from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import MSGenome
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.core.msbuilder import MSBuilder
-from modelseedpy.core.mseditorapi import MSEditorAPI
+from modelseedpy.core.mseditorapi import MSEditorAPI,MSEquation
+from modelseedpy.core.msgapfill import MSGapfill
+from modelseedpy.core.msatpcorrection import MSATPCorrection
