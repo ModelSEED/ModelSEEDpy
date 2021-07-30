@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='ModelSEEDpy',
-    version='0.2.1',
+    version='0.2.2',
     description='Python package for building and analyzing models using ModelSEED',
     long_description=readme,
     author='Christopher Henry',
@@ -18,6 +18,9 @@ setup(
     url='https://github.com/ModelSEED/ModelSEEDpy',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
+    package_data={
+        'modelseedpy': ['config.cfg']
+    },
     install_requires=[
         "networkx >= 2.4",
         "cobra >= 0.17.1",
