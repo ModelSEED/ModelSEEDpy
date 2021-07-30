@@ -1,4 +1,7 @@
 # import cobrakbase
+# FIXME: COMMENTING ALL OF THIS will provide a model later
+"""
+
 import optlang
 import os
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
@@ -121,3 +124,5 @@ def clear():
     assert len(base.variables) == 0
     assert constraints_quantity > len(base.constraints)
     assert len(base.constraints) == 0
+
+"""

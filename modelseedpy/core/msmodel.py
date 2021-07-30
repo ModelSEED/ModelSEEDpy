@@ -1,5 +1,8 @@
 import re
 from cobra.core import Model
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_reaction_constraints_from_direction(direction):
@@ -63,6 +66,9 @@ def get_cmp_token(compartments):
     :param compartments:
     :return:
     """
+    if len(compartments) == 0:
+        logger.warning('compartments empty assume z')
+        return 'z'
     if len(compartments) == 1:
         return list(compartments)[0]
     if len(compartments) == 2:

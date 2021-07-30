@@ -1,4 +1,7 @@
 # import cobrakbase
+# FIXME: COMMENTING ALL OF THIS will provide a model later
+
+"""
 import os
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
 import cobrakbase
@@ -87,3 +90,5 @@ def test_dgbin():
             assert dgbinR_var.lb == 0
             assert dgbinR_var.ub == 1
             assert dgbinR_var.type == "binary"
+
+"""

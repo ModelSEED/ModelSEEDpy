@@ -259,7 +259,7 @@ class GapfillingPkg(BaseFBAPkg):
         
         for template_compound in template.compcompounds:
             tempindex = index
-            compartment = template_compound.templatecompartment_ref.split("/").pop()
+            compartment = template_compound.compartment
             if compartment == "e":
                 tempindex = "0"
             cobra_metabolite = self.convert_template_compound(template_compound, tempindex, template)
@@ -294,12 +294,12 @@ class GapfillingPkg(BaseFBAPkg):
                 # Adjusting directionality as needed for existing reactions
                 new_penalties[cobra_reaction.id]["reversed"] = 1
                 if self.model.reactions.get_by_id(cobra_reaction.id).lower_bound == 0:
-                    self.model.reactions.get_by_id(cobra_reaction.id).lower_bound = template_reaction.maxrevflux
+                    self.model.reactions.get_by_id(cobra_reaction.id).lower_bound = template_reaction.lower_bound
                     self.model.reactions.get_by_id(cobra_reaction.id).update_variable_bounds()
                     new_penalties[cobra_reaction.id][
                         "reverse"] = template_reaction.base_cost + template_reaction.reverse_penalty
                 if self.model.reactions.get_by_id(cobra_reaction.id).upper_bound == 0:
-                    self.model.reactions.get_by_id(cobra_reaction.id).upper_bound = template_reaction.maxforflux
+                    self.model.reactions.get_by_id(cobra_reaction.id).upper_bound = template_reaction.upper_bound
                     self.model.reactions.get_by_id(cobra_reaction.id).update_variable_bounds()
                     new_penalties[cobra_reaction.id][
                         "forward"] = template_reaction.base_cost + template_reaction.forward_penalty
@@ -337,7 +337,7 @@ class GapfillingPkg(BaseFBAPkg):
         base_compound = template.compounds.get_by_id(base_id)
         new_id = template_compound.id
         new_id += str(index)
-        compartment = template_compound.templatecompartment_ref.split("/").pop()
+        compartment = template_compound.compartment
         compartment += str(index)
 
         met = Metabolite(new_id,
@@ -356,8 +356,8 @@ class GapfillingPkg(BaseFBAPkg):
         new_id = template_reaction.id
         new_id += str(index)
 
-        lower_bound = template_reaction.maxrevflux;
-        upper_bound = template_reaction.maxforflux;
+        lower_bound = template_reaction.lower_bound
+        upper_bound = template_reaction.upper_bound
 
         direction = template_reaction.GapfillDirection
         if for_gapfilling == 0:
@@ -374,17 +374,16 @@ class GapfillingPkg(BaseFBAPkg):
                                   upper_bound=upper_bound)
 
         object_stoichiometry = {}
-        for item in template_reaction.templateReactionReagents:
-            metabolite_id = item["templatecompcompound_ref"].split("/").pop()
-            template_compound = template.compcompounds.get_by_id(metabolite_id)
-            compartment = template_compound.templatecompartment_ref.split("/").pop()
+        for m, value in template_reaction.metabolites.items():
+            metabolite_id = m.id
+            template_compound = template.compcompounds.get_by_id(m.id)
+            compartment = template_compound.compartment
             if compartment == "e":
-                metabolite_id = metabolite_id + "0"
+                metabolite_id = m.id + "0"
             else:
-                metabolite_id = metabolite_id + str(index)
-
+                metabolite_id = m.id + str(index)
             metabolite = self.model.metabolites.get_by_id(metabolite_id)
-            object_stoichiometry[metabolite] = item["coefficient"]
+            object_stoichiometry[metabolite] = value
 
         cobra_reaction.add_metabolites(object_stoichiometry)
 
