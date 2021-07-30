@@ -9,6 +9,11 @@ class MSGenomeClassifier:
 
     @staticmethod
     def extract_features_from_genome(genome):
+        """
+
+        :param genome: ModelSEED Genome to classify
+        :return:
+        """
         features = set()
         for f in genome.features:
             features |= set(f.functions)
