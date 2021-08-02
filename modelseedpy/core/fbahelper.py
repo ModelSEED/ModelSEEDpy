@@ -69,17 +69,17 @@ class FBAHelper:
         return True
         
     @staticmethod
-    def reaction_expansion_test(model,reaction_list,condition_list):
-        #First knockout all reactions in the input list and save original bounds
+    def reaction_expansion_test(model, reaction_list, condition_list):
+        # First knockout all reactions in the input list and save original bounds
         original_bound = []
         for item in reaction_list:
-            if item[1] == ">" :
+            if item[1] == ">":
                 original_bound.append(item[0].upper_bound)
                 item[0].upper_bound = 0
             else:
                 original_bound.append(-1*item[0].lower_bound)
                 item[0].lower_bound = 0
-        #Now restore reactions one at a time
+        # Now restore reactions one at a time
         count = 0
         filtered_list = []
         for item in reaction_list:
