@@ -10,8 +10,6 @@ logger = logging.getLogger(__name__)
 project_dir = os.path.abspath(os.path.dirname(__file__)) + '/'
 config = ConfigParser()
 config.read(project_dir + '/config.cfg')
-print(project_dir + '/config.cfg')
-print(config.sections())
 
 
 def get_or_download_file(filename, k, value, config):

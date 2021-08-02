@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class MSATPCorrection:
 
-    def __init__(self,template):
+    def __init__(self, template):
         self.max_gapfilling = None
         self.gapfilling_delta = 0
         self.default_coretemplate = template
@@ -26,7 +26,7 @@ class MSATPCorrection:
         original_bounds = {}
         noncore_reactions = []
         for reaction in model.reactions:
-            if reaction.id not in coretemplate.reactions:
+            if reaction.id[:-1] not in coretemplate.reactions:
                 original_bounds[reaction.id] = [reaction.lower_bound,reaction.upper_bound]
                 if reaction.lower_bound < 0:
                     noncore_reactions.append([reaction,"<"])
@@ -54,16 +54,16 @@ class MSATPCorrection:
         return media_gapfill_stats
     
     #This function decides which of the test media to use as growth conditions for this model
-    def determine_growth_media(self,model,media_gapfill_stats,max_gapfilling = None,gapfilling_delta = 0):
+    def determine_growth_media(self, media_gapfill_stats, max_gapfilling=None, gapfilling_delta=0):
         media_list = []
         best_score = None
         for media in media_gapfill_stats:
             gfscore = 0
-            if media_gapfill_stats[media] != None:
+            if media_gapfill_stats[media]:
                 gfscore = len(media_gapfill_stats[media]["new"].keys()) + 0.5*len(media_gapfill_stats[media]["reversed"].keys())
-            if best_score == None or gfscore < best_score:
+            if best_score is None or gfscore < best_score:
                 best_score = gfscore
-        if max_gapfilling == None:
+        if max_gapfilling is None:
             max_gapfilling = best_score
         for media in media_gapfill_stats:
             gfscore = 0
@@ -89,7 +89,7 @@ class MSATPCorrection:
             solution = model.optimize()
             gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value})
         #Extending model with noncore reactions while retaining ATP accuracy
-        filtered = FBAHelper.reaction_expansion_test(model,noncore_reactions,gapfilling_tests)
+        filtered = FBAHelper.reaction_expansion_test(model, noncore_reactions, gapfilling_tests)
         #Removing filtered reactions
         for item in filtered:
             if item[1] == ">":
@@ -118,7 +118,7 @@ class MSATPCorrection:
         coretemplate = self.default_coretemplate
         (noncore_reactions,original_bounds) = self.disable_noncore_reactions(model,coretemplate)
         media_gapfill_stats = self.evaluate_growth_media(model,atp_medias,atp_objective,genome_class)
-        media_list = self.determine_growth_media(model,media_gapfill_stats,self.max_gapfilling,self.gapfilling_delta)
+        media_list = self.determine_growth_media(media_gapfill_stats, self.max_gapfilling, self.gapfilling_delta)
         model = self.apply_growth_media_gapfilling(model,media_list,media_gapfill_stats)
         model = self.expand_model_to_genome_scale(model,media_list,noncore_reactions)
         model = self.restore_noncore_reactions(model,noncore_reactions,original_bounds)

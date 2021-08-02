@@ -299,7 +299,7 @@ def build_gpr(cpx_gene_role):
 
 class MSBuilder:
 
-    def __init__(self, genome, template):
+    def __init__(self, genome, template=None):
         """
         for future methods with better customization
         """
@@ -397,6 +397,7 @@ class MSBuilder:
             reaction.annotation[SBO_ANNOTATION] = sbo
         return reaction
 
+
     def build(self, model_id, index='0', allow_all_non_grp_reactions=False, annotate_with_rast=True):
 
         if annotate_with_rast:
@@ -405,6 +406,24 @@ class MSBuilder:
             self.search_name_to_genes, self.search_name_to_original = _aaaa(self.genome, 'RAST')
 
         # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
+        from modelseedpy.helpers import get_template, get_classifier
+        from modelseedpy.core.mstemplate import MSTemplateBuilder
+        genome_classifier = get_classifier('knn_filter')
+        genome_class = genome_classifier.classify(self.genome)
+
+        template_genome_scale_map = {
+            'N': 'template_gram_neg',
+            'P': 'template_gram_pos',
+        }
+        template_core_map = {
+            'N': 'template_core',
+            'P': 'template_core',
+        }
+
+        if self.template is None and genome_class in template_genome_scale_map and genome_class in template_core_map:
+            self.template = MSTemplateBuilder.from_dict(get_template(template_genome_scale_map[genome_class])).build()
+        elif self.template is None:
+            raise Exception(f'unable to select template for {genome_class}')
 
         metabolic_reactions = {}
         for template_reaction in self.template.reactions:
@@ -470,12 +489,13 @@ class MSBuilder:
         return cobra_model
 
     @staticmethod
-    def build_metabolic_model(model_id, genome, template, gapfill_media=None, index='0',
-                              allow_all_non_grp_reactions=False, annotate_with_rast=True,gapfill_model = True):
-        model = MSBuilder(genome, template).build(model_id, index, allow_all_non_grp_reactions, annotate_with_rast)
-        #Gapfilling model 
+    def build_metabolic_model(model_id, genome, gapfill_media=None, template=None, index='0',
+                              allow_all_non_grp_reactions=False, annotate_with_rast=True, gapfill_model=True):
+        builder = MSBuilder(genome, template)
+        model = builder.build(model_id, index, allow_all_non_grp_reactions, annotate_with_rast)
+        # Gapfilling model
         if gapfill_model:
-            model = MSBuilder.gapfill_model(model, 'bio1', template, gapfill_media)    
+            model = MSBuilder.gapfill_model(model, 'bio1', builder.template, gapfill_media)
         return model
 
     @staticmethod
