@@ -397,6 +397,36 @@ class MSBuilder:
             reaction.annotation[SBO_ANNOTATION] = sbo
         return reaction
 
+    @staticmethod
+    def build_exchanges(model, extra_cell='e0'):
+        """
+        Build exchange reactions for the "extra_cell" compartment
+        :param model: Cobra Model
+        :param extra_cell: compartment representing extracellular
+        :return:
+        """
+        reactions_exchanges = []
+        for m in model.metabolites:
+            if m.compartment == extra_cell:
+                rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
+                rxn_exchange.add_metabolites({m: -1})
+                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
+                reactions_exchanges.append(rxn_exchange)
+        model.add_reactions(reactions_exchanges)
+
+        return reactions_exchanges
+
+    @staticmethod
+    def build_biomasses(model, template, index):
+        res = []
+        if template.name.startswith('CoreModel'):
+            res.append(build_biomass('bio1', model, template, core_biomass, index))
+            res.append(build_biomass('bio2', model, template, core_atp, index))
+        if template.name.startswith('GramNeg'):
+            res.append(build_biomass('bio1', model, template, gramneg, index))
+        if template.name.startswith('GramPos'):
+            res.append(build_biomass('bio1', model, template, grampos, index))
+        return res
 
     def build(self, model_id, index='0', allow_all_non_grp_reactions=False, annotate_with_rast=True):
 
@@ -453,27 +483,11 @@ class MSBuilder:
                     reactions_no_gpr.append(reaction)
         cobra_model.add_reactions(reactions_no_gpr)
 
-        reactions_exchanges = []
-        for m in cobra_model.metabolites:
-            if m.compartment == 'e0':
-                rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
-                rxn_exchange.add_metabolites({m: -1})
-                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
-                reactions_exchanges.append(rxn_exchange)
-        cobra_model.add_reactions(reactions_exchanges)
+        cobra_model.add_reactions(self.build_exchanges(cobra_model))
 
-        if self.template.name.startswith('CoreModel'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, core_biomass, index)
-            bio_rxn2 = build_biomass('bio2', cobra_model, self.template, core_atp, index)
-            cobra_model.add_reactions([bio_rxn1, bio_rxn2])
-            cobra_model.objective = 'bio1'
-        if self.template.name.startswith('GramNeg'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, gramneg, index)
-            cobra_model.add_reactions([bio_rxn1])
-            cobra_model.objective = 'bio1'
-        if self.template.name.startswith('GramPos'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, grampos, index)
-            cobra_model.add_reactions([bio_rxn1])
+        if self.template.name.startswith('CoreModel') or \
+                self.template.name.startswith('GramNeg') or self.template.name.startswith('GramPos'):
+            cobra_model.add_reactions(self.build_biomasses(cobra_model, self.template, index))
             cobra_model.objective = 'bio1'
 
         reactions_sinks = []
