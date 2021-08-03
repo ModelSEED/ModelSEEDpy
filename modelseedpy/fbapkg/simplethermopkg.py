@@ -52,7 +52,10 @@ class SimpleThermoPkg(BaseFBAPkg):
                 # build constraints for the filtered reactions
                 if self.parameters["filter"] == None or reaction.id in self.parameters["filter"]:                    
                     self.build_constraint(reaction, max_energy_magnitude)
-                   
+
+        if self.parameters['dgbin']:
+            # define the model objective as the sum of the dgbin variables
+            self.optimize_dgbin()
                 
     def build_variable(self,object):
         return BaseFBAPkg.build_variable(self,"potential",self.parameters["min_potential"],self.parameters["max_potential"],"continuous",object)
@@ -75,8 +78,8 @@ class SimpleThermoPkg(BaseFBAPkg):
 
                 # define the dgbin coefficients
                 coef[self.variables['dgbinF'][object.id]] = max_energy_magnitude
-                coef[self.variables['dgbinR'][object.id]] = -max_energy_magnitude      
-            
+                coef[self.variables['dgbinR'][object.id]] = -max_energy_magnitude     
+                            
             # build the constraint
             built_constraint = BaseFBAPkg.build_constraint(self,"thermo",0,max_energy_magnitude,coef,object)
             
@@ -84,3 +87,16 @@ class SimpleThermoPkg(BaseFBAPkg):
             built_constraint = None
                 
         return built_constraint
+    
+    def optimize_dgbin(self):
+        # create the sum of dgbin variables
+        dgbin_sum_coef = {}
+        for reaction in self.variables['dgbinF']:
+            print(self.model.solver.status, '\t', reaction)
+            dgbin_sum_coef[self.variables['dgbinF'][reaction].primal] = 1 
+        for reaction in self.variables['dgbinR']:
+            dgbin_sum_coef[self.variables['dgbinR'][reaction].primal] = 1
+        
+        # set the dgbin sum as the model objective
+        self.model.objective = self.model.problem.Objective(Zero,direction='max')
+        self.model.objective.set_linear_coefficients(dgbin_sum_coef)

@@ -131,5 +131,5 @@ class FullThermoPkg(BaseFBAPkg):
             self.variables["dgerr"][object.id]:-1
         }
         if msid != "cpd00001":#Water concentration should not contribute to potential
-            coef[self.variables["logconc"][object.id]] = -1*R/kilo*self.parameters["temperature"]
+            coef[self.variables["logconc"][object.id]] = 1*R/kilo*self.parameters["temperature"]
         return BaseFBAPkg.build_constraint(self,"potc",constant,constant,coef,object)
