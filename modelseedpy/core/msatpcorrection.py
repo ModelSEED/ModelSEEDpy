@@ -68,7 +68,6 @@ class MSATPCorrection:
                 self.media_gapfill_stats[media] = None
                 if solution.objective_value == 0:
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media,self.atp_objective)
-                    print(media.id+":"+str(len(self.media_gapfill_stats[media]["new"].keys()) + 0.5*len(self.media_gapfill_stats[media]["reversed"].keys())))
     
     #This function decides which of the test media to use as growth conditions for this model
     def determine_growth_media(self):
@@ -87,14 +86,12 @@ class MSATPCorrection:
             if self.media_gapfill_stats[media] != None:
                 gfscore = len(self.media_gapfill_stats[media]["new"].keys()) + 0.5*len(self.media_gapfill_stats[media]["reversed"].keys())
             if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
-                print("Keeping:"+media.id)
                 self.selected_media.append(media)
         
     #This function applies the gapfilling to all selected growth media
     def apply_growth_media_gapfilling(self):
         for media in self.selected_media:
             if media in self.media_gapfill_stats and self.media_gapfill_stats[media] != None:
-                print("Merging gapfill for media "+media.id)
                 self.model = self.msgapfill.integrate_gapfill_solution(self.model,self.media_gapfill_stats[media])
     
     #This function expands the model to genome-scale while preventing ATP overproduction
@@ -106,7 +103,6 @@ class MSATPCorrection:
         for media in self.selected_media:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(media)    
             solution = self.model.optimize()
-            print("Objective in "+media.id+":"+str(solution.objective_value))
             self.gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value,"objective":self.atp_objective})
         #Extending model with noncore reactions while retaining ATP accuracy
         self.filtered_noncore = FBAHelper.reaction_expansion_test(self.model,self.noncore_reactions,self.gapfilling_tests)
