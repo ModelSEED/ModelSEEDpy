@@ -34,18 +34,15 @@ if sys.version_info[0] == 2:
 
 import modelseedpy
 from modelseedpy.core import (
-    RastClient, MSGenome, MSBuilder, FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation
+    RastClient, MSGenome, MSBuilder, MSMedia,
+    FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation
 )
+
 from modelseedpy.fbapkg import (
     BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,ElementUptakePkg,BilevelPkg,
     CommKineticPkg,KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg,FlexibleBiomassPkg,
     ProblemReplicationPkg,FullThermoPkg,MSPackageManager,ObjConstPkg
 )
 
-#If there are parallel modules these should be imported in parallel as shown here:
-#from cobra import flux_analysis
-#from cobra import io
-#from cobra import sampling
-#from cobra.util import show_versions
 
-__version__ = "0.1.0"
+__version__ = "0.2.2"
