@@ -63,35 +63,31 @@ default_blacklist = ["rxn12985", "rxn00238", "rxn07058", "rxn05305", "rxn00154",
 
 class MSGapfill:
 
-    def __init__(self):
+    def __init__(self,model,default_gapfill_templates = [],default_gapfill_models = [],test_conditions = [],reaction_scores = {},blacklist = []):
         self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]
+        self.model = model
+        self.gfmodel = None
         self.model_penalty = 1
-        self.default_gapfill_models = []
-        self.default_gapfill_templates = []
+        self.default_gapfill_models = default_gapfill_models
+        self.default_gapfill_templates = default_gapfill_templates
         self.gapfill_templates_by_index = {}
         self.gapfill_models_by_index = {}
         self.gapfill_all_indecies_with_default_templates = True
         self.gapfill_all_indecies_with_default_models = True
-        self.default_excretion = 100
-        self.default_uptake = 100
-        self.minimum_obj = 0.01
-        self.binary_check = False
-        self.blacklist = default_blacklist,
+        self.blacklist = default_blacklist
+        for rxnid in blacklist:
+            if rxnid not in self.blacklist:
+                self.blacklist.append(rxnid)
         self.lp_filename = None
         self.test_condition_iteration_limit = 10
-        #NoCarbon = kbase_api.get_from_ws("NoCarbonMedia","KBaseMedia")
-        #NoNitrogen = kbase_api.get_from_ws("NoNitrogenMedia","KBaseMedia")
-        gapfilling_tests = [
-        #    {"media":NoCarbon,"is_max_threshold": True,"threshold":0.000001,"objective":"bio1"},
-        #    {"media":NoNitrogen,"is_max_threshold": True,"threshold":0.000001,"objective":"bio1"}  
-        ]
-        self.test_conditions = gapfilling_tests
-        self.gfmodels = {}
+        self.test_conditions = test_conditions
+        self.reaction_scores = reaction_scores
+        self.solutions = {}
         
-    def run_gapfilling(self,model,media = None,target_reaction = "bio1",reaction_scores = {}):
-        FBAHelper.set_objective_from_target_reaction(model, target_reaction)
-        self.gfmodels[model] = cobra.io.json.from_json(cobra.io.json.to_json(model))
-        pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodels[model])
+    def run_gapfilling(self,media = None,target_reaction = "bio1",minimum_obj = 0.01,binary_check = False):
+        self.model.objective = target_reaction
+        self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
         pkgmgr.getpkg("GapfillingPkg").build_package({
             "auto_sink":self.auto_sink,
             "model_penalty":self.model_penalty,
@@ -101,51 +97,54 @@ class MSGapfill:
             "gapfill_models_by_index":self.gapfill_models_by_index,
             "gapfill_all_indecies_with_default_templates":self.gapfill_all_indecies_with_default_templates,
             "gapfill_all_indecies_with_default_models":self.gapfill_all_indecies_with_default_models,
-            "default_excretion":self.default_excretion,
-            "default_uptake":self.default_uptake,
-            "minimum_obj":self.minimum_obj,
+            "default_excretion":100,
+            "default_uptake":100,
+            "minimum_obj":minimum_obj,
             "blacklist":self.blacklist,
-            "reaction_scores":reaction_scores,
+            "reaction_scores":self.reaction_scores,
             "set_objective": 1
         })
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         if self.lp_filename != None:
             with open(self.lp_filename, 'w') as out:
-                out.write(str(self.gfmodels[model].solver))
-        sol = self.gfmodels[model].optimize()
-        gf_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
+                out.write(str(self.gfmodel.solver))
+        sol = self.gfmodel.optimize()
+        if media not in self.solutions:
+            self.solutions[media] = {}
+        self.solutions[media][target_reaction] = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         if self.test_conditions != None:
-            gf_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions,gf_solution,self.test_condition_iteration_limit)
-            if gf_solution == None:
+            self.solutions[media][target_reaction] = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions,self.solutions[media][target_reaction],self.test_condition_iteration_limit)
+            if self.solutions[media][target_reaction] == None:
                 print("Warning - no solution could be found that satisfied all specified test conditions in specified iterations!")
                 return None
-        if self.binary_check:
+        if binary_check:
             return pkgmgr.getpkg("GapfillingPkg").binary_check_gapfilling_solution()
-        return gf_solution 
+        return self.solutions[media][target_reaction] 
     
-    def integrate_gapfill_solution(self,model,solution):
-        if model not in self.gfmodels:
-            raise GapfillingError("Must run gapfilling on model before integrating solution")
+    def integrate_gapfill_solution(self,solution):
         for rxnid in solution["reversed"]:
-            rxn = model.reactions.get_by_id(rxnid)
+            rxn = self.model.reactions.get_by_id(rxnid)
             if gfresults["reversed"][rxnid] == ">":
                 rxn.upper_bound = 100
             else:
                 rxn.lower_bound = -100
         for rxnid in solution["new"]:
-            rxn = self.gfmodels[model].reactions.get_by_id(rxnid)
+            rxn = self.gfmodel.reactions.get_by_id(rxnid)
             rxn = rxn.copy()
-            model.add_reactions([rxn])
+            self.model.add_reactions([rxn])
             if solution["new"][rxnid] == ">":
                 rxn.upper_bound = 100
                 rxn.lower_bound = 0 
             else:
                 rxn.upper_bound = 0
                 rxn.lower_bound = -100
-        return model
+        return self.model
     
     @staticmethod
-    def gapfill(model,media = None,target_reaction = "bio1",reaction_scores = {}):
-        gapfiller = MSGapfill()
-        gfresults = gapfiller.gapfill(model,media = None,target_reaction = "bio1",reaction_scores = {})
-        return gapfiller.integrate_gapfill_solution(model,gfresults)
+    def gapfill(model,media = None,target_reaction = "bio1",default_gapfill_templates = [],default_gapfill_models = [],test_conditions = [],reaction_scores = {},blacklist = []):
+        gapfiller = MSGapfill(model,default_gapfill_templates,default_gapfill_models,test_conditions,reaction_scores,blacklist)
+        gfresults = gapfiller.run_gapfilling(media,target_reaction)
+        return gapfiller.integrate_gapfill_solution(gfresults)
+    
+    
+    

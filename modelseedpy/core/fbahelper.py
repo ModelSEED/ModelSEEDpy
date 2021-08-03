@@ -61,14 +61,12 @@ class FBAHelper:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]
             sol = model.optimize()
-            print("Testing "+condition["media"].name+":"+str(sol.objective_value)+":"+str(condition["threshold"]))
             if sol.objective_value >= condition["threshold"] and condition["is_max_threshold"]:
                 print("FAILED")
                 return False
             elif sol.objective_value <= condition["threshold"] and not condition["is_max_threshold"]:
                 print("FAILED")
                 return False
-        print("PASSED ALL TESTS")
         return True
         
     @staticmethod
