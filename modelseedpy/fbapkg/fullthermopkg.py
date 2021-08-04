@@ -54,14 +54,20 @@ class FullThermoPkg(BaseFBAPkg):
             "custom_deltaG_error":{},
             "compartment_potential":{},
             "temperature":298,#K
-            "filter":None
+            "filter":None,
+            "infeasible_model": False
         })
         self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_path"])
-        self.pkgmgr.getpkg("SimpleThermoPkg").build_package({
-            "filter":self.parameters["filter"],
-            "min_potential":-100000,#KJ/mol
-            "max_potential":100000#KJ/mol
-        })
+        
+        simple_thermo_parameters = {
+                "filter":self.parameters["filter"],
+                "min_potential":-100000,#KJ/mol
+                "max_potential":100000#KJ/mol
+            }
+        if self.parameters['infeasible_model']:
+            simple_thermo_parameters.update({'dgbin': True})
+        self.pkgmgr.getpkg("SimpleThermoPkg").build_package(simple_thermo_parameters)
+            
         self.parameters["combined_custom_concentrations"] = FullThermoPkg.default_concentration()
         for cpd in self.parameters["custom_concentrations"]:
             self.parameters["combined_custom_concentrations"][cpd] = self.parameters["custom_concentrations"][cpd]
@@ -125,5 +131,5 @@ class FullThermoPkg(BaseFBAPkg):
             self.variables["dgerr"][object.id]:-1
         }
         if msid != "cpd00001":#Water concentration should not contribute to potential
-            coef[self.variables["logconc"][object.id]] = -1*R/kilo*self.parameters["temperature"]
+            coef[self.variables["logconc"][object.id]] = 1*R/kilo*self.parameters["temperature"]
         return BaseFBAPkg.build_constraint(self,"potc",constant,constant,coef,object)

@@ -501,6 +501,49 @@ class MSBuilder:
         cobra_model.add_reactions(reactions_sinks)
 
         return cobra_model
+    
+    @staticmethod
+    def build_full_template_model(template):
+        model = Model(template.id)
+        all_reactions = []
+        for rxn in template.reactions:
+            reaction = MSBuilder._build_reaction(rxn.id, {}, template, "0", "SBO:0000176")
+            reaction.annotation["seed.reaction"] = rxn.id
+            all_reactions.append(reaction)
+        model.add_reactions(all_reactions)
+        reactions_exchanges = []
+        for m in model.metabolites:
+            if m.compartment == 'e0':
+                rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
+                rxn_exchange.add_metabolites({m: -1})
+                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
+                reactions_exchanges.append(rxn_exchange)
+        model.add_reactions(reactions_exchanges)
+        
+        if self.template.name.startswith('CoreModel'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, core_biomass, index)
+            bio_rxn2 = build_biomass('bio2', cobra_model, self.template, core_atp, index)
+            model.add_reactions([bio_rxn1, bio_rxn2])
+            model.objective = 'bio1'
+        if self.template.name.startswith('GramNeg'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, gramneg, index)
+            model.add_reactions([bio_rxn1])
+            model.objective = 'bio1'
+        if self.template.name.startswith('GramPos'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, grampos, index)
+            model.add_reactions([bio_rxn1])
+            model.objective = 'bio1'
+        
+        reactions_sinks = []
+        for cpd_id in ['cpd02701_c0', 'cpd11416_c0', 'cpd15302_c0']:
+            if cpd_id in model.metabolites:
+                m = model.metabolites.get_by_id(cpd_id)
+                rxn_exchange = Reaction('SK_' + m.id, 'Sink for ' + m.name, 'exchanges', 0, 1000)
+                rxn_exchange.add_metabolites({m: -1})
+                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
+                reactions_sinks.append(rxn_exchange)
+        model.add_reactions(reactions_sinks)
+        return model
 
     @staticmethod
     def build_metabolic_model(model_id, genome, gapfill_media=None, template=None, index='0',

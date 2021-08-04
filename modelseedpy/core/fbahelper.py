@@ -61,10 +61,11 @@ class FBAHelper:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]
             sol = model.optimize()
-            print("Testing "+condition["media"].name()+":"+str(sol.objective_value)+":"+str(condition["threshold"]))
             if sol.objective_value >= condition["threshold"] and condition["is_max_threshold"]:
+                print("FAILED")
                 return False
             elif sol.objective_value <= condition["threshold"] and not condition["is_max_threshold"]:
+                print("FAILED")
                 return False
         return True
         
@@ -166,4 +167,10 @@ class FBAHelper:
     def get_modelseed_db_api(modelseed_path):
         return from_local(modelseed_path)
     
+    @staticmethod
+    def is_ex(reaction):
+        if len(reaction.id) > 3 and (reaction.id[0:3] == "EX_" or reaction.id[0:3] == "DM_" or reaction.id[0:3] == "SK_"):
+            return True
+        return False
+        
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager

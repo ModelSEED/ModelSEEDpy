@@ -12,119 +12,134 @@ logger = logging.getLogger(__name__)
 
 class MSATPCorrection:
 
-    def __init__(self, template):
-        self.max_gapfilling = None
-        self.gapfilling_delta = 0
-        self.default_coretemplate = template
-        self.msgapfill = MSGapfill()
+    def __init__(self,model,coretemplate,atp_medias,atp_objective = "bio2",max_gapfilling = None,gapfilling_delta = 0):
+        self.atp_medias = atp_medias
+        self.atp_objective = atp_objective
+        self.max_gapfilling = max_gapfilling
+        self.gapfilling_delta = gapfilling_delta
+        self.coretemplate = coretemplate
+        self.msgapfill = MSGapfill(model)
         self.original_bounds = {}
+        self.noncore_reactions = []
+        self.model = model
+        self.media_gapfill_stats = {}
+        self.gapfilling_tests = []
+        self.selected_media = []
+        self.filtered_noncore = []
+        self.lp_filename = None
     
     #This function disables all noncore reactions in the model
-    def disable_noncore_reactions(self,model,coretemplate = None):
-        if coretemplate == None:
-            coretemplate = self.default_coretemplate
-        original_bounds = {}
-        noncore_reactions = []
-        for reaction in model.reactions:
-            if reaction.id[:-1] not in coretemplate.reactions:
-                original_bounds[reaction.id] = [reaction.lower_bound,reaction.upper_bound]
+    def disable_noncore_reactions(self):
+        self.original_bounds = {}
+        self.noncore_reactions = []
+        for reaction in self.model.reactions:
+            if reaction.id[0:-1] not in self.coretemplate.reactions and not FBAHelper.is_ex(reaction) and reaction.id[0:3] != "bio":
+                self.original_bounds[reaction.id] = [reaction.lower_bound,reaction.upper_bound]
                 if reaction.lower_bound < 0:
-                    noncore_reactions.append([reaction,"<"])
+                    self.noncore_reactions.append([reaction,"<"])
                 if reaction.upper_bound > 0:
-                    noncore_reactions.append([reaction,">"])
+                    self.noncore_reactions.append([reaction,">"])
                 reaction.lower_bound = 0
                 reaction.upper_bound = 0
                 reaction.update_variable_bounds()
-        return (noncore_reactions,original_bounds)
+            elif reaction.id[0:-1] in self.coretemplate.reactions:
+                self.original_bounds[reaction.id] = [reaction.lower_bound,reaction.upper_bound]
+                if reaction.lower_bound < 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).lower_bound >= 0:
+                    self.noncore_reactions.append([reaction,"<"])
+                    reaction.lower_bound = 0
+                    reaction.update_variable_bounds()
+                if reaction.upper_bound > 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).upper_bound <= 0:
+                    self.noncore_reactions.append([reaction,">"])
+                    reaction.upper_bound = 0
+                    reaction.update_variable_bounds()
     
     #This function determines how much gapfilling each input test media requires to make ATP
-    def evaluate_growth_media(self,model,test_medias = None,atp_objective = "bio2",genome_class = None):
-        if test_medias == None:
-            test_medias = self.compute_default_medias(genome_class)
-        media_gapfill_stats = {}
-        with model:
-            FBAHelper.set_objective_from_target_reaction(model,atp_objective)
-            pkgmgr = MSPackageManager.get_pkg_mgr(model)
-            for media in test_medias:
+    def evaluate_growth_media(self):
+        self.media_gapfill_stats = {}
+        self.msgapfill.default_gapfill_templates = [self.coretemplate]
+        if self.lp_filename != None:
+            self.msgapfill.lp_filename = self.lp_filename
+        with self.model:
+            self.model.objective = self.atp_objective
+            pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
+            for media in self.atp_medias:
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                solution = model.optimize()
-                media_gapfill_stats[media] = None
+                solution = self.model.optimize()
+                self.media_gapfill_stats[media] = None
                 if solution.objective_value == 0:
-                    media_gapfill_stats[media] = self.msgapfill.run_gapfilling(model,media,atp_objective)
-        return media_gapfill_stats
+                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media,self.atp_objective)
     
     #This function decides which of the test media to use as growth conditions for this model
-    def determine_growth_media(self, media_gapfill_stats, max_gapfilling=None, gapfilling_delta=0):
-        media_list = []
+    def determine_growth_media(self):
+        self.selected_media = []
         best_score = None
-        for media in media_gapfill_stats:
+        for media in self.media_gapfill_stats:
             gfscore = 0
-            if media_gapfill_stats[media]:
-                gfscore = len(media_gapfill_stats[media]["new"].keys()) + 0.5*len(media_gapfill_stats[media]["reversed"].keys())
-            if best_score is None or gfscore < best_score:
+            if self.media_gapfill_stats[media] != None:
+                gfscore = len(self.media_gapfill_stats[media]["new"].keys()) + 0.5*len(self.media_gapfill_stats[media]["reversed"].keys())
+            if best_score == None or gfscore < best_score:
                 best_score = gfscore
-        if max_gapfilling is None:
-            max_gapfilling = best_score
-        for media in media_gapfill_stats:
+        if self.max_gapfilling == None:
+            self.max_gapfilling = best_score
+        for media in self.media_gapfill_stats:
             gfscore = 0
-            if media_gapfill_stats[media] != None:
-                gfscore = len(media_gapfill_stats[media]["new"].keys()) + 0.5*len(media_gapfill_stats[media]["reversed"].keys())
-            if gfscore <= max_gapfilling and gfscore <= (best_score+gapfilling_delta):
-                media_list.append(media)
-        return media_list
+            if self.media_gapfill_stats[media] != None:
+                gfscore = len(self.media_gapfill_stats[media]["new"].keys()) + 0.5*len(self.media_gapfill_stats[media]["reversed"].keys())
+            if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
+                self.selected_media.append(media)
         
     #This function applies the gapfilling to all selected growth media
-    def apply_growth_media_gapfilling(self,model,media_list,media_gapfill_stats):
-        for media in media_list:
-            if media in media_gapfill_stats and media_gapfill_stats[media] != None:
-                model = self.msgapfill.integrate_gapfill_solution(model,media_gapfill_stats[media])
-        return model
+    def apply_growth_media_gapfilling(self):
+        for media in self.selected_media:
+            if media in self.media_gapfill_stats and self.media_gapfill_stats[media] != None:
+                self.model = self.msgapfill.integrate_gapfill_solution(self.model,self.media_gapfill_stats[media])
     
     #This function expands the model to genome-scale while preventing ATP overproduction
-    def expand_model_to_genome_scale(self,model,media_list,noncore_reactions):
-        gapfilling_tests = []
-        pkgmgr = MSPackageManager.get_pkg_mgr(model)
-        for media in media_list:
+    def expand_model_to_genome_scale(self):
+        self.gapfilling_tests = []
+        self.filtered_noncore = []
+        self.model.objective = self.atp_objective
+        pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
+        for media in self.selected_media:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(media)    
-            solution = model.optimize()
-            gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value})
+            solution = self.model.optimize()
+            self.gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value,"objective":self.atp_objective})
         #Extending model with noncore reactions while retaining ATP accuracy
-        filtered = FBAHelper.reaction_expansion_test(model, noncore_reactions, gapfilling_tests)
+        self.filtered_noncore = FBAHelper.reaction_expansion_test(self.model,self.noncore_reactions,self.gapfilling_tests)
         #Removing filtered reactions
-        for item in filtered:
+        for item in self.filtered_noncore:
             if item[1] == ">":
                 item[0].upper_bound = 0
             else:
                 item[0].lower_bound = 0
             reaction.update_variable_bounds()
             if item[0].lower_bound == 0 and item[0].upper_bound == 0:
-                model.remove_reactions(item[0])
-        return model
+                self.model.remove_reactions(item[0])
     
     #This function restores the bounds on all noncore reactions
-    def restore_noncore_reactions(self,model,noncore_reactions,original_bounds):
+    def restore_noncore_reactions(self):
         #Restoring original reaction bounds
-        for reaction in noncore_reactions:
-            if reaction.id in original_bounds and reaction in model.reactions:
-                reaction.lower_bound = original_bounds[reaction.id][0]
-                reaction.upper_bound = original_bounds[reaction.id][1]
+        for item in self.noncore_reactions:
+            reaction = item[0]
+            if reaction.id in self.original_bounds and reaction in self.model.reactions:
+                reaction.lower_bound = self.original_bounds[reaction.id][0]
+                reaction.upper_bound = self.original_bounds[reaction.id][1]
                 reaction.update_variable_bounds()
-        return model
     
     #This function runs the entire ATP method    
-    def run_atp_correction(self,model,atp_medias = None,atp_objective = "bio2",genome_class = None):
-        if atp_medias == None:
-            pass
-        coretemplate = self.default_coretemplate
-        (noncore_reactions,original_bounds) = self.disable_noncore_reactions(model,coretemplate)
-        media_gapfill_stats = self.evaluate_growth_media(model,atp_medias,atp_objective,genome_class)
-        media_list = self.determine_growth_media(media_gapfill_stats, self.max_gapfilling, self.gapfilling_delta)
-        model = self.apply_growth_media_gapfilling(model,media_list,media_gapfill_stats)
-        model = self.expand_model_to_genome_scale(model,media_list,noncore_reactions)
-        model = self.restore_noncore_reactions(model,noncore_reactions,original_bounds)
+    def run_atp_correction(self):
+        self.disable_noncore_reactions()
+        self.evaluate_growth_media()
+        self.determine_growth_media()
+        self.apply_growth_media_gapfilling()
+        self.expand_model_to_genome_scale()
+        self.restore_noncore_reactions()
         
     @staticmethod
-    def atp_correction(model,coretemplate,atp_medias = None,atp_objective = "bio2",genome_class = None):
-        return MSATPCorrection(coretemplate).run_atp_correction(model,atp_medias,atp_objective,genome_class)
+    def atp_correction(model,coretemplate,atp_medias = None,atp_objective = "bio2",max_gapfilling = None,gapfilling_delta = 0):
+        msatpobj = MSATPCorrection(model,coretemplate,atp_medias,atp_objective,max_gapfilling,gapfilling_delta)
+        msatpobj.run_atp_correction()
+        return msatpobj
+    
             
         
