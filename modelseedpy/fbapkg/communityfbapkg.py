@@ -1,4 +1,4 @@
-def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None):
+def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, lp_file = False):
     # import general modules
     from itertools import combinations
     from numpy import unique
@@ -14,20 +14,29 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
     model.solver = 'optlang-cplex'
     
     # applying uptake constraints
+    element_contraint_name = ''
     if element_uptake_limit is not None:
         from modelseedpy.fbapkg import elementuptakepkg
+        
+        element_contraint_name = 'eup'
         eup = elementuptakepkg.ElementUptakePkg(model)
         eup.build_package(element_uptake_limit)
     
     # applying kinetic constraints
+    kinetic_contraint_name = ''
     if kinetic_coeff is not None:
         from modelseedpy.fbapkg import commkineticpkg
+        
+        kinetic_contraint_name = 'ckp'
         ckp = commkineticpkg.CommKineticPkg(model)
         ckp.build_package(kinetic_coeff,abundances)
     
     # applying FullThermo constraints
+    thermo_contraint_name = ''
     if msdb_path_for_fullthermo is not None:
         from modelseedpy.fbapkg import fullthermopkg
+        
+        thermo_contraint_name = 'ftp'
         ftp = fullthermopkg.FullThermoPkg(model)
         ftp.build_package({'modelseed_path':msdb_path_for_fullthermo})
 
@@ -36,6 +45,21 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
         1 * model.reactions.bio1.flux_expression,
         direction='max')
     model.objective = biomass_objective
+    
+    # conditionally print the LP file of the model
+    if lp_file:
+        from os.path import exists
+        
+        count_iteration = 0
+        file_name = '_'.join([modelInfo[0], thermo_contraint_name, kinetic_contraint_name, element_contraint_name, str(count_iteration)])
+        file_name += '.lp'
+        while exists(file_name):
+            count_iteration += 1
+            file_name = re.sub('0', count_iteration, file_name)
+        
+        with open(file_name, 'w') as out:
+            out.write(str(model.solver))
+            out.close()
 
     # excute FBA
     solution = model.optimize()
