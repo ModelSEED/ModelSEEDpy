@@ -1,8 +1,9 @@
+from __future__ import absolute_import
+
 import logging
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.biochem import from_local
-from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 #from Carbon.Aliases import false
 
 logger = logging.getLogger(__name__)
@@ -28,7 +29,9 @@ elementmass = {'H': 1.00794, 'He': 4.002602, 'Li': 6.941, 'Be': 9.012182, 'B': 1
   'Ds': 281, 'Rg': 281, 'Cn': 285, 'Nh': 284, 'Fl': 289, 'Mc': 289, 'Lv': 292, 'Ts': 294, 'Og': 294,'R':0,
   'ZERO': 0} 
 
+
 class FBAHelper:
+
     @staticmethod
     def add_autodrain_reactions_to_community_model(model,auto_sink = ["cpd02701", "cpd11416", "cpd15302"]):
         #Adding missing drains in the base model
@@ -63,17 +66,16 @@ class FBAHelper:
         return None
     
     @staticmethod
-    def test_condition_list(model,condition_list):
-        pkgmgr = MSPackageManager.get_pkg_mgr(model)
+    def test_condition_list(model, condition_list, pkgmgr):
         for condition in condition_list:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]
             sol = model.optimize()
             if sol.objective_value >= condition["threshold"] and condition["is_max_threshold"]:
-                print("FAILED")
+                logger.info("FAILED")
                 return False
             elif sol.objective_value <= condition["threshold"] and not condition["is_max_threshold"]:
-                print("FAILED")
+                logger.info("FAILED")
                 return False
         return True
         
