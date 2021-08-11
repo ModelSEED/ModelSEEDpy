@@ -1,8 +1,8 @@
 import logging
-
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.biochem import from_local
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 #from Carbon.Aliases import false
 
 logger = logging.getLogger(__name__)
@@ -40,16 +40,24 @@ class FBAHelper:
                         drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,0,100,"DM_")
 
     @staticmethod
-    def add_drain_from_metabolite_id(model,cpd_id,uptake,excretion,prefix = 'EX_', prefix_name = 'Exchange for '):
+    def add_drain_from_metabolite_id(model, cpd_id, uptake, excretion, prefix='EX_', prefix_name='Exchange for '):
+        """
+
+        :param model:
+        :param cpd_id:
+        :param uptake:
+        :param excretion:
+        :param prefix:
+        :param prefix_name:
+        :return:
+        """
         if cpd_id in model.metabolites:
-            id = prefix + cpd_id
             cobra_metabolite = model.metabolites.get_by_id(cpd_id)
-            object_stoichiometry = {cobra_metabolite : -1}
-            drain_reaction = Reaction(id=id, 
-                                      name= prefix_name + cobra_metabolite.name, 
+            drain_reaction = Reaction(id=f'{prefix}{cpd_id}',
+                                      name=prefix_name + cobra_metabolite.name,
                                       lower_bound=-1*uptake, 
                                       upper_bound=excretion)
-            drain_reaction.add_metabolites(object_stoichiometry)
+            drain_reaction.add_metabolites({cobra_metabolite : -1})
             drain_reaction.annotation["sbo"] = 'SBO:0000627'    
             return drain_reaction
         return None
@@ -84,21 +92,21 @@ class FBAHelper:
         count = 0
         filtered_list = []
         for item in reaction_list:
-            if item[1] == ">" :
+            if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
-                if not FBAHelper.test_condition_list(model,condition_list):
+                if not FBAHelper.test_condition_list(model, condition_list):
                     item[0].upper_bound = 0
                     filtered_list.append(item)
             else:
                 item[0].lower_bound = original_bound[count]
-                if not FBAHelper.test_condition_list(model,condition_list):
+                if not FBAHelper.test_condition_list(model, condition_list):
                     item[0].lower_bound = 0
                     filtered_list.append(item)
             count += 1
         return filtered_list
 
     @staticmethod
-    def set_reaction_bounds_from_direction(reaction,direction,add=0):
+    def set_reaction_bounds_from_direction(reaction, direction, add=0):
         if direction == "<":
             reaction.lower_bound = -100
             if add == 0:
@@ -124,10 +132,12 @@ class FBAHelper:
     @staticmethod
     def compute_flux_values_from_variables(model):
         flux_values = {}
-        for rxnobj in model.reactions:
-            flux_values[rxnobj.id] = {}
-            flux_values[rxnobj.id]["reverse"] = rxnobj.reverse_variable.primal
-            flux_values[rxnobj.id]["forward"] = rxnobj.forward_variable.primal
+        for rxn in model.reactions:
+            flux_values[rxn.id] = {
+                'reverse': rxn.reverse_variable.primal,
+                'forward': rxn.forward_variable.primal
+            }
+
         return flux_values
     
     @staticmethod
@@ -147,7 +157,7 @@ class FBAHelper:
         else:
             return None
     
-    @staticmethod    
+    @staticmethod
     def metabolite_mw(metabolite):
         mw = 0
         elements = metabolite.elements
@@ -160,7 +170,7 @@ class FBAHelper:
     
     @staticmethod    
     def elemental_mass():
-        #Source:https://stackoverflow.com/questions/16699180/how-to-get-molecular-weight-of-a-compound-in-python/45557858
+        # Source:https://stackoverflow.com/questions/16699180/how-to-get-molecular-weight-of-a-compound-in-python/45557858
         return elementmass
     
     @staticmethod
@@ -169,8 +179,12 @@ class FBAHelper:
     
     @staticmethod
     def is_ex(reaction):
+        # TODO: check for SBO
         if len(reaction.id) > 3 and (reaction.id[0:3] == "EX_" or reaction.id[0:3] == "DM_" or reaction.id[0:3] == "SK_"):
             return True
         return False
-        
-from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+
+    @staticmethod
+    def is_biomass(reaction):
+        # TODO: check for SBO
+        return reaction.id[0:3] == "bio"
