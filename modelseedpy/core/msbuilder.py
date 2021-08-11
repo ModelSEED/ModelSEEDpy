@@ -438,14 +438,18 @@ class MSBuilder:
         # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
         from modelseedpy.helpers import get_template, get_classifier
         from modelseedpy.core.mstemplate import MSTemplateBuilder
-        genome_classifier = get_classifier('knn_filter')
+        genome_classifier = get_classifier('knn_ACNP_RAST_filter')
         genome_class = genome_classifier.classify(self.genome)
 
         template_genome_scale_map = {
+            'A': 'template_gram_neg',
+            'C': 'template_gram_neg',
             'N': 'template_gram_neg',
             'P': 'template_gram_pos',
         }
         template_core_map = {
+            'A': 'template_core',
+            'C': 'template_core',
             'N': 'template_core',
             'P': 'template_core',
         }
@@ -520,17 +524,17 @@ class MSBuilder:
                 reactions_exchanges.append(rxn_exchange)
         model.add_reactions(reactions_exchanges)
         
-        if self.template.name.startswith('CoreModel'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, core_biomass, index)
-            bio_rxn2 = build_biomass('bio2', cobra_model, self.template, core_atp, index)
+        if template.name.startswith('CoreModel'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, template, core_biomass, index)
+            bio_rxn2 = build_biomass('bio2', cobra_model, template, core_atp, index)
             model.add_reactions([bio_rxn1, bio_rxn2])
             model.objective = 'bio1'
-        if self.template.name.startswith('GramNeg'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, gramneg, index)
+        if template.name.startswith('GramNeg'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, template, gramneg, index)
             model.add_reactions([bio_rxn1])
             model.objective = 'bio1'
-        if self.template.name.startswith('GramPos'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, grampos, index)
+        if template.name.startswith('GramPos'):
+            bio_rxn1 = build_biomass('bio1', cobra_model, template, grampos, index)
             model.add_reactions([bio_rxn1])
             model.objective = 'bio1'
         
