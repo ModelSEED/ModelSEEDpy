@@ -5,7 +5,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_reaction_constraints_from_direction(direction):
+def get_reaction_constraints_from_direction(direction: str) -> (float, float):
+    """
+    Converts direction symbols ( > or <) to lower and upper bound, any other value is returned as reversible bounds
+
+    :param direction:
+    :return:
+    """
     if direction == '>':
         return 0, 1000
     elif direction == '<':
