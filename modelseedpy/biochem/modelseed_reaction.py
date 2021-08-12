@@ -1,5 +1,6 @@
 import math
 from modelseedpy.biochem.seed_object import ModelSEEDObject
+from cobra.core import Reaction
 
 
 def to_str2(rxn, cmp_replace=None, cpd_replace={}):
@@ -89,27 +90,99 @@ def get_stoichiometry(seed_reaction):
     return result_no_zero
 
 
-def get_cstoichiometry(seed_reaction):
+def get_cstoichiometry(stoichiometry):
+    if stoichiometry is None or len(stoichiometry) == 0:
+        return {}
     result = {}
     result_no_zero = {}
-    stoichiometry = seed_reaction['stoichiometry']
     # print(stoichiometry)
-    if type(stoichiometry) == str:
-        for reagent_str in stoichiometry.split(';'):
-            reagent_data = reagent_str.split(':')
-            value = reagent_data[0]
-            cpd_id = reagent_data[1]
-            cmp_index = reagent_data[2]
-            if not (cpd_id, cmp_index) in result:
-                result[(cpd_id, cmp_index)] = 0
-            result[(cpd_id, cmp_index)] += float(value)
+    for reagent_str in stoichiometry.split(';'):
+        reagent_data = reagent_str.split(':')
+        value = reagent_data[0]
+        cpd_id = reagent_data[1]
+        cmp_index = reagent_data[2]
+        if not (cpd_id, cmp_index) in result:
+            result[(cpd_id, cmp_index)] = 0
+        result[(cpd_id, cmp_index)] += float(value)
 
     for p in result:
-        if result[p] == 0:
-            print(f'{seed_reaction["id"]} contains compound bein transported {p}')
-        else:
-            result_no_zero[p] = result[p]
+        result_no_zero[p] = result[p]
+
     return result_no_zero
+
+
+class ModelSEEDReaction2(Reaction):
+    """
+    Reaction instance from ModelSEED database.
+    """
+
+    def __init__(self, rxn_id, name='', subsystem='', lower_bound=0.0, upper_bound=None,
+                 abbr=None, names=None,
+                 delta_g=None, delta_g_error=None,
+                 is_obsolete=False, is_abstract=False,
+                 status=None, source=None, flags=None):
+
+        super().__init__(rxn_id, name, subsystem, lower_bound, upper_bound)
+        self.abbr = abbr
+        self.names = set()
+        if names:
+            self.names |= set(names)
+
+        self.source = source
+        self.status = status
+
+        self.is_obsolete = is_obsolete
+        self.is_abstract = is_abstract
+
+        self.delta_g = delta_g
+        self.delta_g_error = delta_g_error
+
+        self.flags = set()
+        if flags:
+            self.flags |= set(flags)
+
+    @property
+    def compound_ids(self):
+        pass
+
+    def to_template_reaction(self, compartment_setup=None):
+        if compartment_setup is None:
+            raise ValueError('invalid compartment setup')
+        from modelseedpy.core.msmodel import get_cmp_token
+        reaction_compartment = get_cmp_token(compartment_setup.values())
+        rxn_id = f'{self.id}_{reaction_compartment}'
+        name = f'{self.name}'
+        metabolites = {}
+        for m, v in self.metabolites.items():
+            if m.compartment not in compartment_setup:
+                raise ValueError(f'invalid compartment setup missing key [{m.compartment}] in {compartment_setup}')
+            cpd = m.to_template_compartment_compound(compartment_setup[m.compartment])
+            metabolites[cpd] = v
+            print(m.id, m.compartment, cpd)
+
+            print(v)
+
+        # if len(str(index)) > 0:
+        #    name = f'{self.name} [{compartment}]'
+        reaction = Reaction(rxn_id, name, self.subsystem, self.lower_bound, self.upper_bound)
+        reaction.add_metabolites(metabolites)
+        return reaction
+
+    @property
+    def is_transport(self):
+        pass
+
+    @property
+    def is_translocation(self):
+        return len(self.compartments) > 1
+
+    @property
+    def ec_numbers(self):
+        return self.annotation['ec-code'] if 'ec-code' in self.annotation else []
+
+    @property
+    def aliases(self):
+        return self.annotation
 
 
 class ModelSEEDReaction(ModelSEEDObject):
@@ -126,7 +199,7 @@ class ModelSEEDReaction(ModelSEEDObject):
 
     @property
     def cstoichiometry(self):
-        return get_cstoichiometry(self.data)
+        return get_cstoichiometry(self.data['stoichiometry'])
 
     @property
     def ec_numbers(self):

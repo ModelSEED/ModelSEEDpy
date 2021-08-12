@@ -1,5 +1,51 @@
 from modelseedpy.biochem.seed_object import ModelSEEDObject
+from modelseedpy.core.mstemplate import NewModelTemplateCompCompound
+from cobra.core import Metabolite
 import pandas as pd
+
+
+class ModelSEEDCompound2(Metabolite):
+
+    def __init__(self, cpd_id=None, formula=None, name="", charge=None, compartment=None,
+                 abbr=None, names=None,
+                 mass=None, delta_g=None, delta_g_error=None,
+                 smiles=None, inchi_key=None, inchi=None,
+                 is_core=False, is_obsolete=False, is_cofactor=False, is_abstract=False,
+                 pka=None, pkb=None, source=None, flags=None):
+
+        super().__init__(cpd_id, formula, name, charge, compartment)
+        self.seed_id = cpd_id
+        self.abbr = abbr
+        self.names = set()
+        if names:
+            self.names |= set(names)
+        self.mass = mass
+        self.source = source
+
+        self.is_core = is_core
+        self.is_obsolete = is_obsolete
+        self.is_cofactor = is_cofactor
+        self.is_abstract = is_abstract
+
+        self.delta_g = delta_g
+        self.delta_g_error = delta_g_error
+
+        self.smiles = smiles
+        self.inchi_key = inchi_key
+        self.inchi = inchi
+
+        self.linked_compound = None
+        self.pka = pka
+        self.pkb = pkb
+        self.flags = set()
+        if flags:
+            self.flags |= set(flags)
+
+    def to_template_compartment_compound(self, compartment):
+        res = self.copy()
+        res.id = f'{self.seed_id}_{compartment}'
+        res.compartment = compartment
+        return res
 
 
 class ModelSEEDCompound(ModelSEEDObject):
@@ -57,3 +103,4 @@ class ModelSEEDCompound(ModelSEEDObject):
             else:
                 return True
         return False
+
