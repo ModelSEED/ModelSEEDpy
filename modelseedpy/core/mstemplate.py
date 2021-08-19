@@ -116,6 +116,22 @@ class NewModelTemplateCompCompound(Metabolite):
             if self.cpd_id in self._template.compounds:
                 self._template_compound = self._template.compounds.get_by_id(self.cpd_id)
 
+    def to_metabolite(self, index='0'):
+        """
+        Create cobra.core.Metabolite instance
+        :param index: compartment index
+        :return: cobra.core.Metabolite
+        """
+        if index is None:
+            index = ''
+        cpd_id = f'{self.id}{index}'
+        compartment = f'{self.compartment}{index}'
+        name = f'{self.name}'
+        if len(str(index)) > 0:
+            name = f'{self.name} [{compartment}]'
+        metabolite = Metabolite(cpd_id, self.formula, name, self.charge, compartment)
+        return metabolite
+
     @property
     def compound(self):
         return self._template_compound
@@ -218,6 +234,25 @@ class NewModelTemplateReaction(Reaction):
         :return:
         """
         return get_cmp_token(self.compartments)
+
+    def to_reaction(self, model=None, index='0'):
+        if index is None:
+            index = ''
+        rxn_id = f'{self.id}{index}'
+        compartment = f'{self.compartment}{index}'
+        name = f'{self.name}'
+        metabolites = {}
+        for m, v in self.metabolites.items():
+            if model and m.id in model.metabolites:
+                metabolites[model.metabolites.get_by_id(m.id)] = v
+            else:
+                metabolites[m.to_metabolite(index)] = v
+
+        if len(str(index)) > 0:
+            name = f'{self.name} [{compartment}]'
+        reaction = Reaction(rxn_id, name, self.subsystem, self.lower_bound, self.upper_bound)
+        reaction.add_metabolites(metabolites)
+        return reaction
 
     @staticmethod
     def from_dict(d, template):

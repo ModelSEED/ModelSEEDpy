@@ -428,33 +428,37 @@ class MSBuilder:
             res.append(build_biomass('bio1', model, template, grampos, index))
         return res
 
-    def build(self, model_id, index='0', allow_all_non_grp_reactions=False, annotate_with_rast=True):
+    def auto_select_template(self):
+        """
 
-        if annotate_with_rast:
-            rast = RastClient()
-            res = rast.annotate_genome(self.genome)
-            self.search_name_to_genes, self.search_name_to_original = _aaaa(self.genome, 'RAST')
-
-        # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
+        :return: genome class
+        """
         from modelseedpy.helpers import get_template, get_classifier
         from modelseedpy.core.mstemplate import MSTemplateBuilder
-        genome_classifier = get_classifier('knn_filter')
+        genome_classifier = get_classifier('knn_ACNP_RAST_filter')
         genome_class = genome_classifier.classify(self.genome)
 
         template_genome_scale_map = {
+            'A': 'template_gram_neg',
+            'C': 'template_gram_neg',
             'N': 'template_gram_neg',
             'P': 'template_gram_pos',
         }
         template_core_map = {
+            'A': 'template_core',
+            'C': 'template_core',
             'N': 'template_core',
             'P': 'template_core',
         }
 
-        if self.template is None and genome_class in template_genome_scale_map and genome_class in template_core_map:
+        if genome_class in template_genome_scale_map and genome_class in template_core_map:
             self.template = MSTemplateBuilder.from_dict(get_template(template_genome_scale_map[genome_class])).build()
         elif self.template is None:
             raise Exception(f'unable to select template for {genome_class}')
 
+        return genome_class
+
+    def build_metabolic_reactions(self, index='0'):
         metabolic_reactions = {}
         for template_reaction in self.template.reactions:
             gpr_set = self.get_gpr_from_template_reaction(template_reaction)
@@ -466,13 +470,12 @@ class MSBuilder:
             lambda x: self._build_reaction(x[0], x[1], self.template, index, "SBO:0000176"),
             metabolic_reactions.items()))
 
-        cobra_model = Model(model_id)
-        cobra_model.add_reactions(reactions)
+        return reactions
 
+    def build_non_metabolite_reactions(self, cobra_model, index='0', allow_all_non_grp_reactions=False):
         reactions_no_gpr = []
         reactions_in_model = set(map(lambda x: x.id, cobra_model.reactions))
         metabolites_in_model = set(map(lambda x: x.id, cobra_model.metabolites))
-
         for rxn in self.template.reactions:
             if rxn.type == 'universal' or rxn.type == 'spontaneous':
                 reaction = self._build_reaction(rxn.id, {}, self.template, index, "SBO:0000176")
@@ -481,8 +484,23 @@ class MSBuilder:
                         reaction.id not in reactions_in_model:
                     reaction.annotation["seed.reaction"] = rxn.id
                     reactions_no_gpr.append(reaction)
-        cobra_model.add_reactions(reactions_no_gpr)
 
+        return reactions_no_gpr
+
+    def build(self, model_id, index='0', allow_all_non_grp_reactions=False, annotate_with_rast=True):
+
+        if annotate_with_rast:
+            rast = RastClient()
+            res = rast.annotate_genome(self.genome)
+            self.search_name_to_genes, self.search_name_to_original = _aaaa(self.genome, 'RAST')
+
+        # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
+        if self.template is None:
+            self.auto_select_template()
+
+        cobra_model = Model(model_id)
+        cobra_model.add_reactions(self.build_metabolic_reactions(index=index))
+        cobra_model.add_reactions(self.build_non_metabolite_reactions(cobra_model, index, allow_all_non_grp_reactions))
         cobra_model.add_reactions(self.build_exchanges(cobra_model))
 
         if self.template.name.startswith('CoreModel') or \
@@ -503,34 +521,34 @@ class MSBuilder:
         return cobra_model
     
     @staticmethod
-    def build_full_template_model(template):
-        model = Model(template.id)
+    def build_full_template_model(template, model_id=None, index='0'):
+        """
+
+        :param template:
+        :param model_id: ID for the model otherwise template.id
+        :param index: index for the metabolites
+        :return:
+        """
+        model = Model(model_id if model_id else template.id)
         all_reactions = []
         for rxn in template.reactions:
-            reaction = MSBuilder._build_reaction(rxn.id, {}, template, "0", "SBO:0000176")
+            reaction = MSBuilder._build_reaction(rxn.id, {}, template, index, "SBO:0000176")
             reaction.annotation["seed.reaction"] = rxn.id
             all_reactions.append(reaction)
         model.add_reactions(all_reactions)
-        reactions_exchanges = []
-        for m in model.metabolites:
-            if m.compartment == 'e0':
-                rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
-                rxn_exchange.add_metabolites({m: -1})
-                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
-                reactions_exchanges.append(rxn_exchange)
-        model.add_reactions(reactions_exchanges)
+        model.add_reactions(MSBuilder.build_exchanges(model))
         
-        if self.template.name.startswith('CoreModel'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, core_biomass, index)
-            bio_rxn2 = build_biomass('bio2', cobra_model, self.template, core_atp, index)
+        if template.name.startswith('CoreModel'):
+            bio_rxn1 = build_biomass('bio1', model, template, core_biomass, index)
+            bio_rxn2 = build_biomass('bio2', model, template, core_atp, index)
             model.add_reactions([bio_rxn1, bio_rxn2])
             model.objective = 'bio1'
-        if self.template.name.startswith('GramNeg'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, gramneg, index)
+        if template.name.startswith('GramNeg'):
+            bio_rxn1 = build_biomass('bio1', model, template, gramneg, index)
             model.add_reactions([bio_rxn1])
             model.objective = 'bio1'
-        if self.template.name.startswith('GramPos'):
-            bio_rxn1 = build_biomass('bio1', cobra_model, self.template, grampos, index)
+        if template.name.startswith('GramPos'):
+            bio_rxn1 = build_biomass('bio1', model, template, grampos, index)
             model.add_reactions([bio_rxn1])
             model.objective = 'bio1'
         

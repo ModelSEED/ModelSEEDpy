@@ -9,18 +9,22 @@ import json as _json
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
+
 #Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):
     """Error in FBA formulation"""
     pass
 
-#Base class for FBA packages
+
 class BaseFBAPkg:
+    """
+    Base class for FBA packages
+    """
     def __init__(self, model, name, variable_types={}, constraint_types={},reaction_types = {}):
         self.model = model
         self.name = name
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
-        if self.pkgmgr == None:
+        if self.pkgmgr is None:
             self.pkgmgr = MSPackageManager.get_pkg_mgr(model,1)
         self.pkgmgr.addpkgobj(self)
         self.constraints = dict()

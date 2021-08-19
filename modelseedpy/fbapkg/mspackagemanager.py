@@ -2,15 +2,19 @@
 
 from __future__ import absolute_import
 
-import sys, inspect
-import modelseedpy
+import sys
+import inspect
+
 
 class PackageError(Exception):
     """Error in package manager"""
     pass
 
-#Class for organizing FBA package objects
+
 class MSPackageManager:
+    """
+    Class for organizing FBA package objects
+    """
     pkgmgrs = {}
     
     @staticmethod
