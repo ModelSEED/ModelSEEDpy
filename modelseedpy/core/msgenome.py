@@ -56,6 +56,7 @@ class MSFeature:
         self.seq = sequence
         self.description = description  # temporary replace with proper parsing
         self.ontology_terms = {}
+        self.aliases = []
 
     def add_ontology_term(self, ontology, value):
         if ontology not in self.ontology_terms:
@@ -90,3 +91,18 @@ class MSGenome:
         genome = MSGenome()
         genome.features += features
         return genome
+    
+    def alias_hash(self):
+        alias_hash = {}
+        for gene in self.features:
+            for alias in gene.aliases:
+                alias_hash[alias] = gene
+        return alias_hash
+    
+    def search_for_gene(self,query):
+        if query in self.features:
+            return self.features.get_by_id(query)
+        aliases = self.alias_hash()
+        if query in aliases:
+            return aliases[query]
+        return None

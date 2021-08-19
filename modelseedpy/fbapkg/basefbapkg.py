@@ -16,7 +16,7 @@ class FeasibilityError(Exception):
 
 #Base class for FBA packages
 class BaseFBAPkg:
-    def __init__(self, model, name, variable_types={}, constraint_types={}, parent=None):
+    def __init__(self, model, name, variable_types={}, constraint_types={},reaction_types = {}):
         self.model = model
         self.name = name
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
