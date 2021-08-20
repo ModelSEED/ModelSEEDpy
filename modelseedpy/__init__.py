@@ -3,34 +3,41 @@
 from __future__ import absolute_import
 
 # set the warning format to be on a single line
+import sys
+import logging
 import warnings as _warnings
 from os import name as _name
 from os.path import abspath as _abspath
 from os.path import dirname as _dirname
+from modelseedpy.helpers import config
 
-# set the warning format to be prettier and fit on one line
-_modelseedpy_path = _dirname(_abspath(__file__))
-if _name == "posix":
-    _warning_base = "%s:%s \x1b[1;31m%s\x1b[0m: %s\n"  # colors
-else:
-    _warning_base = "%s:%s %s: %s\n"
+logging_hash = {
+    "debug":logging.DEBUG,
+    "critical":logging.CRITICAL,
+    "error":logging.ERROR,
+    "warning":logging.WARNING,
+    "info":logging.INFO
+}
 
-def _warn_format(message, category, filename, lineno, file=None, line=None):
-    shortname = filename.replace(_modelseedpy_path, "modelseedpy", 1)
-    return _warning_base % (shortname, lineno, category.__name__, message)
-
-_warnings.formatwarning = _warn_format
-
-import sys
+#Configuing modelseedpy logger
+logger = logging.getLogger(__name__)
+c_handler = logging.StreamHandler()
+c_handler.setLevel(logging_hash[config.get("logging","console_level")])
+c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+c_handler.setFormatter(c_format)
+logger.addHandler(c_handler)
+if config.get("logging","log_file") == "yes":
+    f_handler = logging.FileHandler(config.get("logging","filename"),mode="w")
+    f_handler.setLevel(logging_hash[config.get("logging","file_level")])
+    f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    f_handler.setFormatter(f_format)
+    logger.addHandler(f_handler)
 
 if sys.version_info[0] == 2:
-    _warnings.warn(
-        "Python 2 is reaching end of life (see "
+    logger.warn("Python 2 is reaching end of life (see "
         "https://www.python.org/dev/peps/pep-0373/) and many cobra "
         "dependencies have already dropped support. At the moment it *should* "
-        "still work but we will no longer actively maintain Python 2 support.",
-        FutureWarning,
-    )
+        "still work but we will no longer actively maintain Python 2 support.")
 
 import modelseedpy
 from modelseedpy.core import (
@@ -44,5 +51,8 @@ from modelseedpy.fbapkg import (
     ProblemReplicationPkg,FullThermoPkg,MSPackageManager,ObjConstPkg
 )
 
+from modelseedpy.multiomics import (
+    MSProteome
+)
 
 __version__ = "0.2.2"
