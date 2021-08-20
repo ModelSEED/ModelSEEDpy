@@ -1,6 +1,7 @@
+import logging
 import re
 from cobra.core import Model
-import logging
+from pyeda.inter import expr
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,17 @@ def get_cmp_token(compartments):
         if 'c' in compartments:
             return list(filter(lambda x: not x == 'c', compartments))[0]
     return None
+
+
+def get_set_set(expr_str):
+
+    if len(expr_str.strip()) == 0:
+        return {}
+    dnf = expr(expr_str).to_dnf()
+    if len(dnf.inputs) == 1 or dnf.NAME == 'And':
+        return {frozenset(dnf.inputs)}
+    else:
+        return {frozenset(o.inputs) for o in dnf.xs}
 
 
 class MSModel(Model):
