@@ -52,7 +52,7 @@ from modelseedpy.fbapkg import (
 )
 
 from modelseedpy.multiomics import (
-    MSProteome
+    MSExpression
 )
 
 __version__ = "0.2.2"
