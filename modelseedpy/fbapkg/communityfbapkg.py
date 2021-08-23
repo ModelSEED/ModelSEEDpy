@@ -1,9 +1,7 @@
 def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, lp_file = False):
-    # import general modules
-    from itertools import combinations
-    from numpy import unique
+    
+    # ================================== GENERAL IMPORT =======================================
     import cplex
-    import re
     
     # import the model and media
     from modelseedpy.fbapkg import kbasemediapkg
@@ -13,6 +11,13 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
     kmp.build_package(media)
     model.solver = 'optlang-cplex'
     
+    # unambiguously defining the model objective as biomass growth
+    biomass_objective = model.problem.Objective(
+        1 * model.reactions.bio1.flux_expression,
+        direction='max')
+    model.objective = biomass_objective
+    
+    # ================================== APPLY CONSTRAINTS =======================================
     # applying uptake constraints
     element_contraint_name = ''
     if element_uptake_limit is not None:
@@ -39,16 +44,12 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
         thermo_contraint_name = 'ftp'
         ftp = fullthermopkg.FullThermoPkg(model)
         ftp.build_package({'modelseed_path':msdb_path_for_fullthermo})
+        
 
-    # unambiguously defining the model objective as biomass growth
-    biomass_objective = model.problem.Objective(
-        1 * model.reactions.bio1.flux_expression,
-        direction='max')
-    model.objective = biomass_objective
-    
     # conditionally print the LP file of the model
     if lp_file:
         from os.path import exists
+        import re
         
         count_iteration = 0
         file_name = '_'.join([modelInfo[0], thermo_contraint_name, kinetic_contraint_name, element_contraint_name, str(count_iteration)])
@@ -61,7 +62,7 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
             out.write(str(model.solver))
             out.close()
 
-    # excute FBA
+    # ================================== CALCULATE FLUXES ======================================= 
     solution = model.optimize()
     '''pfba_solution = cobra.flux_analysis.pfba(model)'''
     
@@ -79,46 +80,43 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
                     flux = solution.fluxes[rxn.id]
                     if flux != 0:
                         rate_law += rxn.metabolites[metabolite]*flux
-                        metabolite_uptake[(metabolite.id,compartment_number)] = rate_law
+                        metabolite_uptake[metabolite.id] = rate_law
 
-    compartment_numbers = unique(compartment_numbers)
-    number_of_compartments = len(compartment_numbers)
-
-    # calculate cross feeding of extracellular metabolites      # production[donor_compartment_number][receiver_compartment_number]
-    production = [[0] * number_of_compartments for loop in range(number_of_compartments)] 
-    consumption = [[0] * number_of_compartments for loop in range(number_of_compartments)]
-    boundary_fluxes = []
+    # create empty matrices      # production[donor_compartment_number][receiver_compartment_number]
+    from numpy import zeros
+    
+    number_of_compartments = len(set(compartment_numbers))
+    production = zeros((number_of_compartments, number_of_compartments)) 
+    consumption = zeros((number_of_compartments, number_of_compartments))
+    
+    # calculate cross feeding of extracellular metabolites   
     cross_all = []
     for rxn in model.reactions:
         for metabolite in rxn.metabolites:
             if metabolite.compartment == "e0":
                 # determine each directional flux rate 
-                rate_out = {compartment_number: rate for (metabolite_id, compartment_number), rate in metabolite_uptake.items() if metabolite_id == metabolite.id and rate > 0}
-                rate_in = {compartment_number: abs(rate) for (metabolite_id, compartment_number), rate in metabolite_uptake.items() if metabolite_id == metabolite.id and rate < 0}
+                rate_out = {compartment_number: rate for metabolite_id, rate in metabolite_uptake.items() if metabolite_id == metabolite.id and rate > 0}
+                rate_in = {compartment_number: abs(rate) for metabolite_id, rate in metabolite_uptake.items() if metabolite_id == metabolite.id and rate < 0}
 
                 # determine total directional flux rate 
                 total_in = sum(rate_in.values())
                 total_out = sum(rate_out.values())
                 max_total_rate = max(total_in, total_out)
-
+                
                 # determine net flux 
-                if total_in > total_out:
-                    rate_out[None] = total_in - total_out
-                if total_in < total_out:
-                    rate_in[None] = total_out - total_in
+                net_flux = total_in - total_out
+                if net_flux > 0:
+                    rate_out[None] = net_flux
+                if net_flux < 0:
+                    rate_in[None] = abs(net_flux)
 
                 # establish the metabolites that partake in cross feeding 
                 for donor, rate_1 in rate_out.items():
-                    if donor is None:
-                        receiver = list(rate_in.keys())[0]
-                        boundary_fluxes.append(receiver)
-                    else:
+                    if donor is not None:
                         donor_index = int(donor) - 1
                         
                         for receiver, rate_2 in rate_in.items():
-                            if receiver is None:
-                                boundary_fluxes.append(donor)
-                            else:
+                            if receiver is not None:
                                 receiver_index = int(receiver) - 1
                         
                                 # assign calculated feeding rates to the production and consumption matrices
@@ -127,8 +125,8 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
                                 consumption[receiver_index][donor_index] += rate
 
                                 
-    # graph the resultant community interaction       
-    from matplotlib import pyplot
+    # ================================== VISUALIZE FLUXES ======================================= 
+    from itertools import combinations
     import networkx
     
     graph = networkx.Graph()
@@ -137,13 +135,15 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
     for com in combinations(compartment_numbers, 2):
         species_1 = int(com[0])-1
         species_2 = int(com[1])-1
-        
-        interaction_flux = max(production[species_1][species_2], consumption[species_2][species_1])
-        graph.add_edge(com[0],com[1],weight=interaction_flux)
+
+        interaction_net_flux = production[species_1][species_2] - consumption[species_1][species_2]
+        if species_1 < species_2:
+            graph.add_edge(com[0],com[1],flux = interaction_net_flux)
+        elif species_1 > species_2:
+            graph.add_edge(com[0],com[1],flux = -interaction_net_flux)
 
     pos = networkx.circular_layout(graph)
     networkx.draw_networkx(graph,pos)
-    labels = networkx.get_edge_attributes(graph,'weight')
+    labels = networkx.get_edge_attributes(graph,'flux')
     networkx.draw_networkx_edge_labels(graph,pos,edge_labels=labels)
-    pyplot.show()
     return production, consumption, graph
