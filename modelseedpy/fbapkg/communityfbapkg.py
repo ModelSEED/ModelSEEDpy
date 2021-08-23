@@ -129,6 +129,8 @@ def CommunityFBAPkg(modelInfo, mediaInfo, kbase, element_uptake_limit = None, ki
     from itertools import combinations
     import networkx
     
+    #test
+    
     graph = networkx.Graph()
     for num in compartment_numbers:
         graph.add_node(num)
