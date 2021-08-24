@@ -4,7 +4,8 @@ import cobra
 from numpy import zeros
 from itertools import combinations
 import networkx
-from modelseedpy.core import FBAHelper, MSGapfill
+from modelseedpy.core.msgapfill import MSGapfill
+from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 
@@ -35,8 +36,8 @@ class MSCommunity:
         sense = "min"
         if maximize:
             sense = "max"
-        model.objective = model.problem.Objective(
-            1 * model.reactions.get_by_id(target).flux_expression,
+        self.model.objective = self.model.problem.Objective(
+            1 * self.model.reactions.get_by_id(target).flux_expression,
             direction=sense)
     
     def gapfill(self,media = None,target_reaction = "bio1",maximize = True,default_gapfill_templates = [],default_gapfill_models = [],test_conditions = [],reaction_scores = {},blacklist = []):
@@ -46,14 +47,14 @@ class MSCommunity:
         return gapfiller.integrate_gapfill_solution(gfresults)
     
     def run(self,target = "bio1",maximize = True,pfba = True):
-        self.set_objective(self,target,maximize)
+        self.set_objective(target,maximize)
         # conditionally print the LP file of the model
         if self.print_lp:
             count_iteration = 0
-            file_name = self.suffix
+            file_name = re.sub('.lp', f'_{counter_iteration}.lp', self.suffix)
             while exists(file_name):
                 count_iteration += 1
-                file_name = re.sub('(_\d)', f'_{count_iteration}', file_name)
+                file_name = re.sub('(_\d).lp', f'_{count_iteration}', file_name)
             with open(file_name, 'w') as out:
                 out.write(str(self.model.solver))
                 out.close()
@@ -69,29 +70,32 @@ class MSCommunity:
         
     def compute_interactions(self,solution):
         # calculate the metabolic exchanges
-        self.compartments = set
+        self.compartments = set()
         self.metabolite_uptake = {}
         for rxn in self.model.reactions:
             cmp = rxn.id.split("_").pop()
-            comp_index = int(comp_index[1:])
-            compartments.add(comp_index)
-            for metabolite in rxn.metabolites:
-                if metabolite.compartment == "e0":
-                    flux = solution.fluxes[rxn.id]
-                    if flux != 0:
-                        rate_law = rxn.metabolites[metabolite]*flux
-                        self.metabolite_uptake[(metabolite.id, comp_index)] = rate_law
+            comp_index = cmp[1:]
+            if comp_index.isnumeric():
+                comp_index = int(comp_index)
+                self.compartments.add(comp_index)
+                for metabolite in rxn.metabolites:
+                    if metabolite.compartment == "e0":
+                        flux = solution.fluxes[rxn.id]
+                        if flux != 0:
+                            rate_law = rxn.metabolites[metabolite]*flux
+                            self.metabolite_uptake[(metabolite.id, comp_index)] = rate_law
         # calculate cross feeding of extracellular metabolites 
-        self.number_of_compartments = len(compartments)
-        self.production = zeros((number_of_compartments, number_of_compartments)) 
-        self.consumption = zeros((number_of_compartments, number_of_compartments))
+        self.number_of_compartments = len(self.compartments)
+        self.production = zeros((self.number_of_compartments, self.number_of_compartments)) 
+        self.consumption = zeros((self.number_of_compartments, self.number_of_compartments))
+        
         cross_all = []
         for rxn in self.model.reactions:
             for metabolite in rxn.metabolites:
                 if metabolite.compartment == "e0":
                     # determine each directional flux rate 
-                    rate_out = {compartment_number: rate for (metabolite_id, compartment_number), rate in metabolite_uptake.items() if metabolite_id == metabolite.id and rate > 0}
-                    rate_in = {compartment_number: abs(rate) for (metabolite_id, compartment_number), rate in metabolite_uptake.items() if metabolite_id == metabolite.id and rate < 0}
+                    rate_out = {compartment_number: rate for (metabolite_id, compartment_number), rate in self.metabolite_uptake.items() if metabolite_id == metabolite.id and rate > 0}
+                    rate_in = {compartment_number: abs(rate) for (metabolite_id, compartment_number), rate in self.metabolite_uptake.items() if metabolite_id == metabolite.id and rate < 0}
                     # determine total directional flux rate 
                     total_in = sum(rate_in.values())
                     total_out = sum(rate_out.values())
@@ -133,7 +137,7 @@ class MSCommunity:
         if msdb_path_for_fullthermo is not None:
             self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_path':msdb_path_for_fullthermo})
             thermo_contraint_name = 'ftp'
-        self.suffix = '_'.join([self.model.id, thermo_contraint_name, kinetic_contraint_name, element_contraint_name, str(count_iteration)])+".lp"
+        self.suffix = '_'.join([self.model.id, thermo_contraint_name, kinetic_contraint_name, element_contraint_name])+".lp"
         
     def visualize(self, graph = True, table = True):
         ''' VISUALIZE FLUXES ''' 
