@@ -21,7 +21,7 @@ class CommunityFBAPkg():
         self.model.objective = biomass_objective
     
 
-    def constrain(element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, lp_file = False):
+    def constrain(self, element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, lp_file = False):
         ''' APPLY CONSTRAINTS '''
         # applying uptake constraints
         element_contraint_name = ''
@@ -147,7 +147,7 @@ class CommunityFBAPkg():
                 species_1 = int(com[0])-1
                 species_2 = int(com[1])-1
 
-                interaction_net_flux = self.variables['production'][species_1][species_2] - self.variables['consumption'][species_1][species_2]
+                interaction_net_flux = round(self.variables['production'][species_1][species_2] - self.variables['consumption'][species_1][species_2], 4)
                 if species_1 < species_2:
                     graph.add_edge(com[0],com[1],flux = interaction_net_flux)
                 elif species_1 > species_2:
