@@ -22,11 +22,11 @@ class CommKineticPkg(BaseFBAPkg):
         })
         biomass_drains = {}
         for reaction in self.model.reactions:
-            if re.search('^bio\d+$', reaction.id) != None:
+            if re.search('^bio\d+$', reaction.id):
                 for metabolite in reaction.metabolites:
                     msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
-                    if FBAHelper.modelseed_id_from_cobra_metabolite(metabolite) == "cpd11416" and re.search('[a-z](\d+)', metabolite.compartment) != None:
-                        m = re.search('[a-z](\d+)', metabolite.compartment)
+                    m = re.search('[a-z](\d+)', metabolite.compartment)
+                    if msid == "cpd11416" and m != None:
                         index = m[1]
                         if index != "0" and index not in biomass_drains and self.parameters["predict_abundance"]:
                             print("Making biomass drain:"+metabolite.id)
