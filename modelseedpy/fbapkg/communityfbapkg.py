@@ -21,7 +21,7 @@ class CommunityFBAPkg():
         self.model.objective = biomass_objective
     
 
-    def constrain(element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, lp_file = False):
+    def constrain(self, element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, lp_file = False):
         ''' APPLY CONSTRAINTS '''
         # applying uptake constraints
         element_contraint_name = ''
