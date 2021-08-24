@@ -165,7 +165,7 @@ class MSCommunity:
         if table:
             from pandas import DataFrame as df
 
-            species = [num+1 for num in range(len(self.production))]
+            species = [num for num in range(len(self.production))]
 
             print('\nProduction matrix:')
             prod_df = df(self.production)
