@@ -81,10 +81,10 @@ class MSGapfill:
             return pkgmgr.getpkg("GapfillingPkg").binary_check_gapfilling_solution()
         return self.solutions[media][target_reaction] 
     
-    def integrate_gapfill_solution(self, solution, gf_results):
+    def integrate_gapfill_solution(self, solution):
         for rxn_id in solution["reversed"]:
             rxn = self.model.reactions.get_by_id(rxn_id)
-            if gf_results["reversed"][rxn_id] == ">":
+            if solution["reversed"][rxn_id] == ">":
                 rxn.upper_bound = 100
             else:
                 rxn.lower_bound = -100
