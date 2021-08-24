@@ -40,11 +40,11 @@ class MSCommunity:
             1 * self.model.reactions.get_by_id(target).flux_expression,
             direction=sense)
     
-    def gapfill(self,media = None,target_reaction = "bio1",maximize = True,default_gapfill_templates = [],default_gapfill_models = [],test_conditions = [],reaction_scores = {},blacklist = []):
-        self.set_objective(self,target,maximize)
+    def gapfill(self, media = None, target_reaction = "bio1", maximize = True, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
+        self.set_objective(target_reaction,maximize)
         self.gapfilling = MSGapfill(self.model,default_gapfill_templates,default_gapfill_models,test_conditions,reaction_scores,blacklist)
-        gfresults = gapfiller.run_gapfilling(media,target_reaction)
-        return gapfiller.integrate_gapfill_solution(gfresults)
+        gfresults = self.gapfilling.run_gapfilling(media,target_reaction)
+        return self.gapfilling.integrate_gapfill_solution(gfresults)
     
     def run(self,target = "bio1",maximize = True,pfba = True):
         self.set_objective(target,maximize)
@@ -75,7 +75,7 @@ class MSCommunity:
         for rxn in self.model.reactions:
             cmp = rxn.id.split("_").pop()
             comp_index = cmp[1:]
-            if comp_index.isnumeric():
+            if comp_index.isnumeric() and comp_index != '0':
                 comp_index = int(comp_index)
                 self.compartments.add(comp_index)
                 for metabolite in rxn.metabolites:
@@ -165,7 +165,7 @@ class MSCommunity:
         if table:
             from pandas import DataFrame as df
 
-            species = [num for num in range(len(self.production))]
+            species = [num+1 for num in range(len(self.production))]
 
             print('\nProduction matrix:')
             prod_df = df(self.production)
