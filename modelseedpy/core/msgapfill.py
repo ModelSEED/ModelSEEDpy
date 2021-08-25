@@ -65,7 +65,7 @@ class MSGapfill:
         sol = self.gfmodel.optimize()
         logger.debug('gapfill solution objective value %f (%s) for media %s', sol.objective_value, sol.status, media)
 
-        if sol.objective_value == 0 or sol.status != 'optimal':
+        if sol.status != 'optimal':
             logger.warning("No solution found for %s", media)
             return None
 
