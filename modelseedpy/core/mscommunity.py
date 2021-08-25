@@ -42,7 +42,7 @@ class MSCommunity:
     
     def gapfill(self, media = None, target_reaction = "bio1", maximize = True, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
         self.set_objective(target_reaction,maximize)
-        self.gapfilling = MSGapfill(self.model,default_gapfill_templates,default_gapfill_models,test_conditions,reaction_scores,blacklist)
+        self.gapfilling = MSGapfill(self.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist)
         gfresults = self.gapfilling.run_gapfilling(media,target_reaction)
         return self.gapfilling.integrate_gapfill_solution(gfresults)
     
@@ -63,10 +63,33 @@ class MSCommunity:
         if pfba:
             solution = cobra.flux_analysis.pfba(self.model)
         #Checking that an optimal solution exists
-        if solution.objective_value == 0 or solution.status != 'optimal':
+        if solution.status != 'optimal':
             logger.warning("No solution found for %s", media)
             return None
         return solution
+    
+    def drain_fluxes(predict_abundance = False):
+        biomass_drains = {}
+        # parse the metabolites in the biomass reactions
+        for reaction in self.model.reactions:
+            if re.search('^bio\d+$', reaction.id):
+                for metabolite in reaction.metabolites:
+                    #identify the biomass metabolites
+                    msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+                    m = re.search('[a-z](\d+)', metabolite.compartment)
+                    if msid == "cpd11416" and m != None:
+                        index = m[1]
+                        if index != "0" and index not in biomass_drains and self.parameters["predict_abundance"]:
+                            print(f"Making biomass drain:{metabolite.id}")
+                            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,0,100,"DM_")
+                            self.model.add_reactions([drain_reaction])
+                            biomass_drains[index] = drain_reaction
+
+        for i in range(1,8,1):
+            FBAHelper.set_objective_from_target_reaction(model,f"DM_cpd11416_c{i}")
+            sol=model.optimize()
+            print(f"{i}:{sol.objective_value}")
+        return biomass_drain
         
     def compute_interactions(self,solution):
         # calculate the metabolic exchanges
