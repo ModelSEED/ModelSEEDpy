@@ -30,7 +30,6 @@ class MSCommunity:
         self.model = model
         self.gapfilling  = None
         self.metabolite_uptake = {}
-        self.print_lp = False
         self.compartments = None
         self.production = None
         self.consumption = None
@@ -47,10 +46,10 @@ class MSCommunity:
             1 * self.model.reactions.get_by_id(target).flux_expression,
             direction=sense)
     
-    def gapfill(self, media = None, target_reaction = "bio1", maximize = True, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
-        self.set_objective(target_reaction,maximize)
+    def gapfill(self, media = None, target = "bio1", maximize = True, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
+        self.set_objective(target,maximize)
         self.gapfilling = MSGapfill(self.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist)
-        gfresults = self.gapfilling.run_gapfilling(media,target_reaction)
+        gfresults = self.gapfilling.run_gapfilling(media,target)
         if gfresults is None:
             print('\n--> ERROR: The simulation lacks a solution, and cannot be gapfilled.')
             #raise NoSolutionExists()
@@ -58,9 +57,9 @@ class MSCommunity:
         else:
             return self.gapfilling.integrate_gapfill_solution(gfresults)
     
-    def run(self,target = "bio1",maximize = True,pfba = True):
-        self.set_objective(target,maximize)
+    def run(self,target = "bio1",maximize = True,pfba = True,print_lp = False):
         # conditionally print the LP file of the model
+        self.print_lp = print_lp
         if self.print_lp:
             count_iteration = 0
             file_name = re.sub('.lp', f'_{counter_iteration}.lp', self.suffix)
@@ -70,7 +69,9 @@ class MSCommunity:
             with open(file_name, 'w') as out:
                 out.write(str(self.model.solver))
                 out.close()
+                
         #Solving model
+        self.set_objective(target,maximize)
         solution = self.model.optimize()
         if pfba:
             solution = cobra.flux_analysis.pfba(self.model)
@@ -80,25 +81,26 @@ class MSCommunity:
             solution = None
         return solution
     
-    def drain_fluxes(self, predict_abundance = False):
+    def drain_fluxes(self, predict_abundance = True):
         biomass_drains = {}
-        # parse the metabolites in the biomass reactions
-        for reaction in self.model.reactions:
-            if re.search('^bio\d+$', reaction.id):
-                for metabolite in reaction.metabolites:
-                    # identify the biomass metabolites
-                    msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
-                    m = re.search('[a-z](\d+)', metabolite.compartment).group()
-                    if msid == "cpd11416" and m != None:
-                        # evaluate only cross-feeding
-                        index = m[1]
-                        if index != "0" and index not in biomass_drains and predict_abundance:
-                            print(f"Making biomass drain: {metabolite.id}")
-                            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, metabolite.id,0,100,"DM_")
-                            self.model.add_reactions([drain_reaction])
-                            biomass_drains[index] = drain_reaction
+        if predict_abundances:
+            # parse the metabolites in the biomass reactions
+            for reaction in self.model.reactions:
+                if re.search('^bio\d+$', reaction.id):
+                    for metabolite in reaction.metabolites:
+                        # identify the biomass metabolites
+                        msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+                        m = re.search('[a-z](\d+)', metabolite.compartment).group()
+                        if msid == "cpd11416" and m != None:
+                            # evaluate only cross-feeding
+                            index = m[1]
+                            if index != "0" and index not in biomass_drains:
+                                print(f"Making biomass drain: {metabolite.id}")
+                                drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, metabolite.id,0,100,"DM_")
+                                self.model.add_reactions([drain_reaction])
+                                biomass_drains[index] = drain_reaction
 
-        # print the objective value for each specie in the model
+        # print each optimal drain flux in the model
         for i in range(1,len(biomass_drains)+1):
             FBAHelper.set_objective_from_target_reaction(self.model,f"DM_cpd11416_c{i}")
             sol=self.model.optimize()
