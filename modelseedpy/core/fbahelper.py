@@ -36,8 +36,8 @@ class FBAHelper:
     def add_autodrain_reactions_to_community_model(model,auto_sink = ["cpd02701", "cpd11416", "cpd15302"]):
         #Adding missing drains in the base model
         for metabolite in model.metabolites:
-             msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
-             if msid in auto_sink:
+            msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+            if msid in auto_sink:
                 if msid != "cpd11416" or metabolite.compartment == "c0":
                     if "EX_"+metabolite.id not in self.model.reactions and "DM_"+metabolite.id not in self.model.reactions and "SK_"+metabolite.id not in self.model.reactions:
                         drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,0,100,"DM_")

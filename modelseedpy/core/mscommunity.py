@@ -1,6 +1,7 @@
 import logging
 import itertools
 import cobra
+import re
 from numpy import zeros
 from itertools import combinations
 import networkx
@@ -16,6 +17,12 @@ class CommunityError(Exception):
     """Error in community FBA"""
     pass
 
+class NoSolutionExists(Exception):
+    """Error execution in gapfilling."""   
+    def __str__(self):
+        return 'The simulation lacks a solution, and cannot be gapfilled.'
+
+
 
 class MSCommunity:
 
@@ -23,7 +30,6 @@ class MSCommunity:
         self.model = model
         self.gapfilling  = None
         self.metabolite_uptake = {}
-        self.print_lp = False
         self.compartments = None
         self.production = None
         self.consumption = None
@@ -40,15 +46,20 @@ class MSCommunity:
             1 * self.model.reactions.get_by_id(target).flux_expression,
             direction=sense)
     
-    def gapfill(self, media = None, target_reaction = "bio1", maximize = True, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
-        self.set_objective(target_reaction,maximize)
-        self.gapfilling = MSGapfill(self.model,default_gapfill_templates,default_gapfill_models,test_conditions,reaction_scores,blacklist)
-        gfresults = self.gapfilling.run_gapfilling(media,target_reaction)
-        return self.gapfilling.integrate_gapfill_solution(gfresults)
-    
-    def run(self,target = "bio1",maximize = True,pfba = True):
+    def gapfill(self, media = None, target = "bio1", maximize = True, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
         self.set_objective(target,maximize)
+        self.gapfilling = MSGapfill(self.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist)
+        gfresults = self.gapfilling.run_gapfilling(media,target)
+        if gfresults is None:
+            print('\n--> ERROR: The simulation lacks a solution, and cannot be gapfilled.')
+            #raise NoSolutionExists()
+            return None
+        else:
+            return self.gapfilling.integrate_gapfill_solution(gfresults)
+    
+    def run(self,target = "bio1",maximize = True,pfba = True,print_lp = False):
         # conditionally print the LP file of the model
+        self.print_lp = print_lp
         if self.print_lp:
             count_iteration = 0
             file_name = re.sub('.lp', f'_{counter_iteration}.lp', self.suffix)
@@ -58,15 +69,44 @@ class MSCommunity:
             with open(file_name, 'w') as out:
                 out.write(str(self.model.solver))
                 out.close()
+                
         #Solving model
+        self.set_objective(target,maximize)
         solution = self.model.optimize()
         if pfba:
             solution = cobra.flux_analysis.pfba(self.model)
         #Checking that an optimal solution exists
-        if solution.objective_value == 0 or solution.status != 'optimal':
-            logger.warning("No solution found for %s", media)
-            return None
+        if solution.status != 'optimal':
+            logger.warning("No solution found for the simulation.")
+            solution = None
         return solution
+    
+    def drain_fluxes(self, predict_abundance = True):
+        biomass_drains = {}
+        if predict_abundances:
+            # parse the metabolites in the biomass reactions
+            for reaction in self.model.reactions:
+                if re.search('^bio\d+$', reaction.id):
+                    for metabolite in reaction.metabolites:
+                        # identify the biomass metabolites
+                        msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+                        m = re.search('[a-z](\d+)', metabolite.compartment).group()
+                        if msid == "cpd11416" and m != None:
+                            # evaluate only cross-feeding
+                            index = m[1]
+                            if index != "0" and index not in biomass_drains:
+                                print(f"Making biomass drain: {metabolite.id}")
+                                drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, metabolite.id,0,100,"DM_")
+                                self.model.add_reactions([drain_reaction])
+                                biomass_drains[index] = drain_reaction
+
+        # print each optimal drain flux in the model
+        for i in range(1,len(biomass_drains)+1):
+            FBAHelper.set_objective_from_target_reaction(self.model,f"DM_cpd11416_c{i}")
+            sol=self.model.optimize()
+            print(f"species {i} objective value: {sol.objective_value}")
+            
+        return biomass_drains
         
     def compute_interactions(self,solution):
         # calculate the metabolic exchanges
@@ -119,7 +159,7 @@ class MSCommunity:
                                     self.production[donor_index][receiver_index] += rate
                                     self.consumption[receiver_index][donor_index] += rate
     
-    def constrain(self,media = None,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None):
+    def constrain(self,media = None,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, verbose = True):
         # applying media constraints
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         # applying uptake constraints
@@ -135,7 +175,7 @@ class MSCommunity:
         # applying FullThermo constraints
         thermo_contraint_name = ''
         if msdb_path_for_fullthermo is not None:
-            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_path':msdb_path_for_fullthermo})
+            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_path':msdb_path_for_fullthermo}, verbose)
             thermo_contraint_name = 'ftp'
         self.suffix = '_'.join([self.model.id, thermo_contraint_name, kinetic_contraint_name, element_contraint_name])+".lp"
         
@@ -150,7 +190,7 @@ class MSCommunity:
                 species_1 = int(com[0])-1
                 species_2 = int(com[1])-1
 
-                interaction_net_flux = round(self.production[species_1][species_2] - self.consumption[species_1][species_2], 4)
+                interaction_net_flux = round(self.production[species_1][species_2] - self.consumption[species_1][species_2])
                 if species_1 < species_2:
                     graph.add_edge(com[0],com[1],flux = interaction_net_flux)
                 elif species_1 > species_2:
