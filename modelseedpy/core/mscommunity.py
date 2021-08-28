@@ -2,6 +2,7 @@ import logging
 import itertools
 import cobra
 import re
+import os
 from numpy import zeros
 from itertools import combinations
 import networkx
@@ -29,7 +30,6 @@ class MSCommunity:
     def __init__(self,model):
         self.model = model
         self.gapfilling  = None
-        self.metabolite_uptake = {}
         self.compartments = None
         self.production = None
         self.consumption = None
@@ -59,13 +59,13 @@ class MSCommunity:
     
     def run(self,target = "bio1",maximize = True,pfba = True,print_lp = False):
         # conditionally print the LP file of the model
-        self.print_lp = print_lp
-        if self.print_lp:
+        if print_lp:
             count_iteration = 0
-            file_name = re.sub('.lp', f'_{counter_iteration}.lp', self.suffix)
-            while exists(file_name):
+            file_name = re.sub('.lp', f'_{count_iteration}.lp', self.suffix)
+            while os.path.exists(file_name):
                 count_iteration += 1
-                file_name = re.sub('(_\d).lp', f'_{count_iteration}', file_name)
+                file_name = re.sub('(_\d).lp', f'_{count_iteration}.lp', file_name)
+                print(count_iteration)
             with open(file_name, 'w') as out:
                 out.write(str(self.model.solver))
                 out.close()
@@ -81,7 +81,7 @@ class MSCommunity:
             solution = None
         return solution
     
-    def drain_fluxes(self, predict_abundance = True):
+    def drain_fluxes(self, predict_abundances = True):
         biomass_drains = {}
         if predict_abundances:
             # parse the metabolites in the biomass reactions
@@ -220,7 +220,7 @@ class MSCommunity:
             print(cons_df)
 
     @staticmethod
-    def community_fba(model,media = None,target_reaction = "bio1",maximize = True,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None):
+    def community_fba(model,media = None,target = "bio1",maximize = True,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None):
         community = MSCommunity(model)
         community.constrain(media,element_uptake_limit, kinetic_coeff, abundances, msdb_path_for_fullthermo)
         self.solution = community.run(target,maximize)
