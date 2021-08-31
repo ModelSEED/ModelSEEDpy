@@ -79,26 +79,31 @@ def get_cmp_token(compartments):
     if len(compartments) == 1:
         return list(compartments)[0]
     if len(compartments) == 2:
-        if 'b' in compartments and 'e' in compartments:
+        if set(compartments) == {'e', 'p'}:
+            return 'e'
+        elif 'b' in compartments and 'e' in compartments:
             return 'b'
-        if 'e' in compartments and 'c' in compartments:
+        elif 'e' in compartments and 'c' in compartments:
             return 'c'
-        if 'k' in compartments:
+        elif 'k' in compartments:
             return 'k'
-        if 'c' in compartments:
+        elif 'c' in compartments:
             return list(filter(lambda x: not x == 'c', compartments))[0]
     return None
 
 
 def get_set_set(expr_str):
-
+    if ' or ' in expr_str:
+        expr_str = expr_str.replace(' or ', ' | ')
+    if ' and ' in expr_str:
+        expr_str = expr_str.replace(' and ', ' & ')
     if len(expr_str.strip()) == 0:
         return {}
     dnf = expr(expr_str).to_dnf()
     if len(dnf.inputs) == 1 or dnf.NAME == 'And':
-        return {frozenset(dnf.inputs)}
+        return {frozenset({str(x) for x in dnf.inputs})}
     else:
-        return {frozenset(o.inputs) for o in dnf.xs}
+        return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
 
 
 class MSModel(Model):
