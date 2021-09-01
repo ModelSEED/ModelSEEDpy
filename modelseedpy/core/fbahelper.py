@@ -19,17 +19,18 @@ class FBAHelper:
     @staticmethod
     def add_autodrain_reactions_to_community_model(model,auto_sink = ["cpd02701", "cpd11416", "cpd15302"]):
         #Adding missing drains in the base model
+        #drain_reactions = []
         for metabolite in model.metabolites:
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
             if msid in auto_sink:
                 if msid != "cpd11416" or metabolite.compartment == "c0":
-                    if "EX_"+metabolite.id not in self.model.reactions and "DM_"+metabolite.id not in self.model.reactions and "SK_"+metabolite.id not in self.model.reactions:
-                        drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,metabolite.id,0,100,"DM_")
-
+                    met_id = metabolite.id
+                    if all(rxn not in model.reactions for rxn in [f"EX_{met_id}", f"DM_{met_id}", f"SK_{met_id}"]):
+                        drain_reaction = FBAHelper.add_drain_from_metabolite_id(model,metabolite.id,0,100,"DM_")
+        
     @staticmethod
     def add_drain_from_metabolite_id(model, cpd_id, uptake, excretion, prefix='EX_', prefix_name='Exchange for '):
         """
-
         :param model:
         :param cpd_id:
         :param uptake:
@@ -46,6 +47,7 @@ class FBAHelper:
                                       upper_bound=excretion)
             drain_reaction.add_metabolites({cobra_metabolite : -1})
             drain_reaction.annotation["sbo"] = 'SBO:0000627'    
+            model.add_reactions([drain_reaction])
             return drain_reaction
         return None
     
@@ -64,7 +66,7 @@ class FBAHelper:
         return True
         
     @staticmethod
-    def reaction_expansion_test(model, reaction_list, condition_list):
+    def reaction_expansion_test(model, reaction_list, condition_list, pkgmgr):
         # First knockout all reactions in the input list and save original bounds
         original_bound = []
         for item in reaction_list:
@@ -80,12 +82,12 @@ class FBAHelper:
         for item in reaction_list:
             if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
-                if not FBAHelper.test_condition_list(model, condition_list):
+                if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
                     item[0].upper_bound = 0
                     filtered_list.append(item)
             else:
                 item[0].lower_bound = original_bound[count]
-                if not FBAHelper.test_condition_list(model, condition_list):
+                if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
                     item[0].lower_bound = 0
                     filtered_list.append(item)
             count += 1
@@ -104,10 +106,10 @@ class FBAHelper:
         reaction.update_variable_bounds()
 
     @staticmethod
-    def set_objective_from_target_reaction(model,target_reaction,maximize = 1):
+    def set_objective_from_target_reaction(model,target_reaction,maximize = True):
         target_reaction = model.reactions.get_by_id(target_reaction)
         sense = "max"
-        if maximize == 0:
+        if not maximize:
             sense = "min"
         target_objective = model.problem.Objective(
             1 * target_reaction.flux_expression,
@@ -128,15 +130,16 @@ class FBAHelper:
     
     @staticmethod
     def modelseed_id_from_cobra_metabolite(metabolite):
-        if re.search('^(cpd\d+)', metabolite.id) != None:
+        if re.search('^(cpd\d+)', metabolite.id):
             m = re.search('^(cpd\d+)', metabolite.id)
             return m[1]
         #TODO: should check to see if ModelSEED ID is in the annotations for the compound
         else:
             return None
         
+    @staticmethod
     def modelseed_id_from_cobra_reaction(reaction):
-        if re.search('^(rxn\d+)', reaction.id) != None:
+        if re.search('^(rxn\d+)', reaction.id):
             m = re.search('^(rxn\d+)', reaction.id)
             return m[1]
         #TODO: should check to see if ModelSEED ID is in the annotations for the compound
@@ -156,7 +159,6 @@ class FBAHelper:
     
     @staticmethod    
     def elemental_mass():
-        # Source:https://stackoverflow.com/questions/16699180/how-to-get-molecular-weight-of-a-compound-in-python/45557858
         return elementmass
     
     @staticmethod
@@ -166,7 +168,7 @@ class FBAHelper:
     @staticmethod
     def is_ex(reaction):
         # TODO: check for SBO
-        if len(reaction.id) > 3 and (reaction.id[0:3] == "EX_" or reaction.id[0:3] == "DM_" or reaction.id[0:3] == "SK_"):
+        if len(reaction.id) > 3 and reaction.id[0:3] in ["EX_", "DM_", "SK_"]:
             return True
         return False
 
