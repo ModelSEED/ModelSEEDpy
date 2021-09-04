@@ -36,8 +36,8 @@ class KBaseMediaPkg(BaseFBAPkg):
             self.parameters["default_uptake"] = 100
 
         exchange_reactions = {}
-        for reaction in self.model.reactions:  # FIXME: self.model.exchanges use cobrapy exchange method
-            if reaction.id[0:3].lower() == "ex_":  # FIXME: see above
+        for reaction in self.model.exchanges:
+            if reaction.id[:3] == 'EX_':
                 compound = reaction.id[3:]
                 exchange_reactions[compound] = reaction                
                 reaction.lower_bound = -1*self.parameters["default_uptake"]

@@ -5,6 +5,7 @@ import re
 import os
 from numpy import zeros
 from itertools import combinations
+from optlang.symbolics import Zero
 import networkx
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
@@ -37,27 +38,28 @@ class MSCommunity:
         self.suffix = ""
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)     
     
-    def set_objective(self,target = "bio1",maximize = True):
+    def set_objective(self,target = "bio1",minimize = False):
         #Setting objective function
-        sense = "min"
-        if maximize:
-            sense = "max"
+        sense = "max"
+        if minimize:
+            sense = "min"
         self.model.objective = self.model.problem.Objective(
-            1 * self.model.reactions.get_by_id(target).flux_expression,
-            direction=sense)
+            self.model.reactions.get_by_id(target).flux_expression, 
+            direction=sense
+        )
     
-    def gapfill(self, media = None, target = "bio1", maximize = True, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
-        self.set_objective(target,maximize)
+    def gapfill(self, media = None, target = "bio1", minimize = False, default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
+        self.set_objective(target,minimize)
         self.gapfilling = MSGapfill(self.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist)
         gfresults = self.gapfilling.run_gapfilling(media,target)
         if gfresults is None:
-            print('\n--> ERROR: The simulation lacks a solution, and cannot be gapfilled.')
+            print('\n--> ERROR: The simulation lacks a solution, and cannot be gapfilled.\n')
             #raise NoSolutionExists()
             return None
         else:
             return self.gapfilling.integrate_gapfill_solution(gfresults)
     
-    def run(self,target = "bio1",maximize = True,pfba = True,print_lp = False):
+    def run(self,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False):
         # conditionally print the LP file of the model
         if print_lp:
             count_iteration = 0
@@ -71,8 +73,10 @@ class MSCommunity:
                 out.close()
                 
         #Solving model
-        self.set_objective(target,maximize)
+        self.set_objective(target,minimize)
         solution = self.model.optimize()
+        if summary:
+            print(self.model.summary())
         if pfba:
             solution = cobra.flux_analysis.pfba(self.model)
         #Checking that an optimal solution exists
@@ -97,14 +101,14 @@ class MSCommunity:
                             if index != "0" and index not in biomass_drains:
                                 print(f"Making biomass drain: {metabolite.id}")
                                 drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, metabolite.id,0,100,"DM_")
-                                self.model.add_reactions([drain_reaction])
                                 biomass_drains[index] = drain_reaction
 
         # print each optimal drain flux in the model
         for i in range(1,len(biomass_drains)+1):
             FBAHelper.set_objective_from_target_reaction(self.model,f"DM_cpd11416_c{i}")
             sol=self.model.optimize()
-            print(f"species {i} objective value: {sol.objective_value}")
+            print(f"species {i} drain-flux objective value: {sol.objective_value}")
+            
             
         return biomass_drains
         
