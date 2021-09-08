@@ -27,7 +27,7 @@ class SimpleThermoPkg(BaseFBAPkg):
         for metabolite in self.model.metabolites:
             self.build_variable(metabolite)
         for reaction in self.model.reactions:
-            if re.search('^EX_', reaction.id) == None and re.search('^SK', reaction.id) == None and re.search('^DM_', reaction.id) == None:                       
+            if reaction.id[:3] not in ['EX_', 'SK_', 'DM_']:                       
                 # determine the range of Delta_rG values 
                 objective_coefficient = {}
                 for metabolite in reaction.metabolites:

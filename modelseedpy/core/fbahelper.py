@@ -47,7 +47,7 @@ class FBAHelper:
                                       upper_bound=excretion)
             drain_reaction.add_metabolites({cobra_metabolite : -1})
             drain_reaction.annotation["sbo"] = 'SBO:0000627'    
-            model.add_reactions([drain_reaction])
+            #model.add_reactions([drain_reaction])
             return drain_reaction
         return None
     
@@ -106,15 +106,14 @@ class FBAHelper:
         reaction.update_variable_bounds()
 
     @staticmethod
-    def set_objective_from_target_reaction(model,target_reaction,maximize = True):
+    def set_objective_from_target_reaction(model,target_reaction,minimize = False):
         target_reaction = model.reactions.get_by_id(target_reaction)
         sense = "max"
-        if not maximize:
+        if minimize:
             sense = "min"
-        target_objective = model.problem.Objective(
+        model.objective = model.problem.Objective(
             1 * target_reaction.flux_expression,
             direction=sense)
-        model.objective = target_objective
         return target_reaction
 
     @staticmethod

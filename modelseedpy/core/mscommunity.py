@@ -31,6 +31,7 @@ class MSCommunity:
     def __init__(self,model):
         self.model = model
         self.gapfilling  = None
+        self.constrained = False
         self.compartments = None
         self.production = None
         self.consumption = None
@@ -59,31 +60,27 @@ class MSCommunity:
         else:
             return self.gapfilling.integrate_gapfill_solution(gfresults)
     
-    def run(self,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False):
-        # conditionally print the LP file of the model
-        if print_lp:
-            count_iteration = 0
-            file_name = re.sub('.lp', f'_{count_iteration}.lp', self.suffix)
-            while os.path.exists(file_name):
-                count_iteration += 1
-                file_name = re.sub('(_\d).lp', f'_{count_iteration}.lp', file_name)
-                print(count_iteration)
-            with open(file_name, 'w') as out:
-                out.write(str(self.model.solver))
-                out.close()
-                
-        #Solving model
-        self.set_objective(target,minimize)
-        solution = self.model.optimize()
-        if summary:
-            print(self.model.summary())
-        if pfba:
-            solution = cobra.flux_analysis.pfba(self.model)
-        #Checking that an optimal solution exists
-        if solution.status != 'optimal':
-            logger.warning("No solution found for the simulation.")
-            solution = None
-        return solution
+    def constrain(self,media = None,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, verbose = True):
+        self.constrained = True
+        # applying media constraints
+        if not self.gapfilling:
+            self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        # applying uptake constraints
+        element_contraint_name = ''
+        if element_uptake_limit is not None:
+            self.pkgmgr.getpkg("ElementUptakePkg").build_package(element_uptake_limit)
+            element_contraint_name = 'eup'
+        # applying kinetic constraints
+        kinetic_contraint_name = ''
+        if kinetic_coeff is not None:
+            self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff,abundances)
+            kinetic_contraint_name = 'ckp'
+        # applying FullThermo constraints
+        thermo_contraint_name = ''
+        if msdb_path_for_fullthermo is not None:
+            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_path':msdb_path_for_fullthermo}, verbose)
+            thermo_contraint_name = 'ftp'
+        self.suffix = '_'.join([self.model.id, thermo_contraint_name, kinetic_contraint_name, element_contraint_name])+".lp"
     
     def drain_fluxes(self, predict_abundances = True):
         biomass_drains = {}
@@ -101,16 +98,48 @@ class MSCommunity:
                             if index != "0" and index not in biomass_drains:
                                 print(f"Making biomass drain: {metabolite.id}")
                                 drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, metabolite.id,0,100,"DM_")
+                                self.model.add_reactions([drain_reaction])
                                 biomass_drains[index] = drain_reaction
 
         # print each optimal drain flux in the model
         for i in range(1,len(biomass_drains)+1):
+            if f'DM_cpd11416_c{i}' not in self.model.reactions:
+                print(f'--> ERROR: the reaction < DM_cpd11416_c{i} > is malformed.')
             FBAHelper.set_objective_from_target_reaction(self.model,f"DM_cpd11416_c{i}")
+            print(self.model.objective)
             sol=self.model.optimize()
             print(f"species {i} drain-flux objective value: {sol.objective_value}")
             
             
         return biomass_drains
+    
+    def run(self,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False):
+        # conditionally print the LP file of the model
+        if print_lp:
+            count_iteration = 0
+            file_name = re.sub('.lp', f'_{count_iteration}.lp', self.suffix)
+            while os.path.exists(file_name):
+                count_iteration += 1
+                file_name = re.sub('(_\d).lp', f'_{count_iteration}.lp', file_name)
+                print(count_iteration)
+            with open(file_name, 'w') as out:
+                out.write(str(self.model.solver))
+                out.close()
+                
+        #Solving model
+        self.set_objective(target,minimize)
+        print(self.model.objective)
+        solution = self.model.optimize()
+        print('\n')
+        if summary:
+            print(self.model.summary())
+        if pfba:
+            solution = cobra.flux_analysis.pfba(self.model)
+        #Checking that an optimal solution exists
+        if solution.status != 'optimal':
+            logger.warning("No solution found for the simulation.")
+            solution = None
+        return solution
         
     def compute_interactions(self,solution):
         # calculate the metabolic exchanges
@@ -162,26 +191,6 @@ class MSCommunity:
                                     rate = rate_1 * rate_2 / max_total_rate
                                     self.production[donor_index][receiver_index] += rate
                                     self.consumption[receiver_index][donor_index] += rate
-    
-    def constrain(self,media = None,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, verbose = True):
-        # applying media constraints
-        self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-        # applying uptake constraints
-        element_contraint_name = ''
-        if element_uptake_limit is not None:
-            self.pkgmgr.getpkg("ElementUptakePkg").build_package(element_uptake_limit)
-            element_contraint_name = 'eup'
-        # applying kinetic constraints
-        kinetic_contraint_name = ''
-        if kinetic_coeff is not None:
-            self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff,abundances)
-            kinetic_contraint_name = 'ckp'
-        # applying FullThermo constraints
-        thermo_contraint_name = ''
-        if msdb_path_for_fullthermo is not None:
-            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_path':msdb_path_for_fullthermo}, verbose)
-            thermo_contraint_name = 'ftp'
-        self.suffix = '_'.join([self.model.id, thermo_contraint_name, kinetic_contraint_name, element_contraint_name])+".lp"
         
     def visualize(self, graph = True, table = True):
         ''' VISUALIZE FLUXES ''' 
@@ -224,10 +233,11 @@ class MSCommunity:
             print(cons_df)
 
     @staticmethod
-    def community_fba(model,media = None,target = "bio1",maximize = True,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None):
-        community = MSCommunity(model)
-        community.constrain(media,element_uptake_limit, kinetic_coeff, abundances, msdb_path_for_fullthermo)
-        self.solution = community.run(target,maximize)
-        community.compute_interactions(self.solution)
-        community.visualize()
+    def community_fba(model,media = None,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
+        cfba = MSCommunity(model)
+        cfba.constrain(media,element_uptake_limit, kinetic_coeff, abundances, msdb_path_for_fullthermo)
+        cfba.gapfill(media,target,minimize,default_gapfill_templates,default_gapfill_models,test_conditions,reaction_scores,blacklist)
+        self.solution = cfba.run(target,minimize,pfba,print_lp,summary)
+        cfba.compute_interactions(self.solution)
+        cfba.visualize()
         return community
