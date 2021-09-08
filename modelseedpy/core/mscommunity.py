@@ -61,10 +61,8 @@ class MSCommunity:
             return self.gapfilling.integrate_gapfill_solution(gfresults)
     
     def constrain(self,media = None,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None, verbose = True):
-        self.constrained = True
         # applying media constraints
-        if not self.gapfilling:
-            self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         # applying uptake constraints
         element_contraint_name = ''
         if element_uptake_limit is not None:

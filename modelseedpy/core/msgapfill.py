@@ -38,8 +38,11 @@ class MSGapfill:
         self.reaction_scores = reaction_scores
         self.solutions = {}
         
-    def run_gapfilling(self, media=None, target_reaction="bio1", minimum_obj=0.01, binary_check=False):
-        self.model.objective = target_reaction
+    def run_gapfilling(self, media=None, target="bio1", minimum_obj=0.01, binary_check=False):
+        self.model.objective = self.model.problem.Objective(
+            self.model.reactions.get_by_id(target).flux_expression, 
+            direction='max'
+        )
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
         pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
         pkgmgr.getpkg("GapfillingPkg").build_package({
@@ -71,15 +74,15 @@ class MSGapfill:
 
         if media not in self.solutions:
             self.solutions[media] = {}
-        self.solutions[media][target_reaction] = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
+        self.solutions[media][target] = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         if self.test_conditions:
-            self.solutions[media][target_reaction] = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions,self.solutions[media][target_reaction],self.test_condition_iteration_limit)
-            if self.solutions[media][target_reaction] is None:
+            self.solutions[media][target] = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions,self.solutions[media][target],self.test_condition_iteration_limit)
+            if self.solutions[media][target] is None:
                 logger.warning("no solution could be found that satisfied all specified test conditions in specified iterations!")
                 return None
         if binary_check:
             return pkgmgr.getpkg("GapfillingPkg").binary_check_gapfilling_solution()
-        return self.solutions[media][target_reaction] 
+        return self.solutions[media][target] 
     
     def integrate_gapfill_solution(self, solution):
         for rxn_id in solution["reversed"]:
