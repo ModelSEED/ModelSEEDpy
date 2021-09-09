@@ -80,7 +80,7 @@ class MSCommunity:
             thermo_contraint_name = 'ftp'
         self.suffix = '_'.join([self.model.id, thermo_contraint_name, kinetic_contraint_name, element_contraint_name])+".lp"
     
-    def drain_fluxes(self, predict_abundances = True):
+    def drain_fluxes(self, media = None, predict_abundances = True):
         biomass_drains = {}
         if predict_abundances:
             # parse the metabolites in the biomass reactions
@@ -104,7 +104,7 @@ class MSCommunity:
             if f'DM_cpd11416_c{i}' not in self.model.reactions:
                 print(f'--> ERROR: the reaction < DM_cpd11416_c{i} > is malformed.')
             FBAHelper.set_objective_from_target_reaction(self.model,f"DM_cpd11416_c{i}")
-            print(self.model.objective)
+            self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
             sol=self.model.optimize()
             print(f"species {i} drain-flux objective value: {sol.objective_value}")
             
