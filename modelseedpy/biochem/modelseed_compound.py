@@ -1,5 +1,5 @@
 from modelseedpy.biochem.seed_object import ModelSEEDObject
-from modelseedpy.core.mstemplate import NewModelTemplateCompCompound
+from modelseedpy.core.mstemplate import MSTemplateSpecies
 from cobra.core import Metabolite
 import pandas as pd
 

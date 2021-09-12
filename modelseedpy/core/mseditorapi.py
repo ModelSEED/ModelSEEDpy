@@ -178,17 +178,22 @@ class MSEquation:
     def build_from_palsson_string(equation_string, default_group='c'):  # add default group
 
         def clean_ends(lst):
+            """
+            FIXME: use .strip
+            :param lst:
+            :return:
+            """
             for i in range(len(lst)):
                 # remove whitespace from the front
-                while (lst[i][0] == ' '):
+                while lst[i][0] == ' ':
                     lst[i] = lst[i][1:]
                 # remove whitespace from the back
-                while (lst[i][-1] == ' '):
+                while lst[i][-1] == ' ':
                     lst[i] = lst[i][:-1]
             return lst
 
-        def get_coef_and_group(lst, return_dict,
-                               side):  # for side variable, -1 is left side, 1 is right side, for coeficients
+        def get_coef_and_group(lst, return_dict, side):
+            # for side variable, -1 is left side, 1 is right side, for coeficients
             for reactant in lst:
                 coeficient = side
                 if reactant.find('(') != -1 or reactant.find(
@@ -202,7 +207,7 @@ class MSEquation:
                     while reactant[position] != ')':
                         number += reactant[position]
                         position += 1
-                    coeficient = side * int(number)
+                    coeficient = side * float(number)
                     reactant = reactant[position + 1:]
 
                 identifier = default_group
@@ -221,7 +226,7 @@ class MSEquation:
                     identifier = s
                     reactant = reactant[:position]
 
-                return_dict[(reactant, identifier)] = coeficient
+                return_dict[(reactant.strip(), identifier)] = coeficient
             return return_dict
 
         # check for the '=' character, throw exception otherwise
@@ -253,8 +258,8 @@ class MSEquation:
         products_substring_list = equation_string[equation_string.find('=') + 2:len(equation_string)].split('+')
 
         # clean up our substrings:
-        clean_ends(reactants_substring_list)
-        clean_ends(products_substring_list)
+        reactants_substring_list = list(map(lambda x: x.strip(), reactants_substring_list))
+        products_substring_list = list(map(lambda x: x.strip(), products_substring_list))
 
         variables = {}
         # add reactants to the dictionary
