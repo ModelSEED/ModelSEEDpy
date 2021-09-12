@@ -1,4 +1,5 @@
 sphinx
 cobra
 pandas
+networkx
 numpy
