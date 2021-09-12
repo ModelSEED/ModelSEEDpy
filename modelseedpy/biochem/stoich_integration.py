@@ -1,9 +1,10 @@
 import logging
-logger = logging.getLogger(__name__)
 import copy
 import math
 import networkx as nx
 from itertools import permutations
+
+logger = logging.getLogger(__name__)
 
 
 def get_permutations(n):
@@ -73,47 +74,31 @@ class CStoichiometryHashLibrary(StoichiometryHashLibrary):
         return match
 
 
-def multi_hasher(s, ex1 = []):
-    s_copy = copy.deepcopy(s)
-    #print(s_copy)
-    std = hash(frozenset(s_copy.items()))
-    for a in s_copy:
-        s_copy[a] = -1 * s_copy[a]
-    rev = hash(frozenset(s_copy.items()))
+def multi_hasher(stoichiometry, exclude=[]):
+    s = copy.deepcopy(stoichiometry)
+    s_rev = dict(map(lambda x: (x[0], -1 * x[1]), s.items()))  # reverse values
+    s_x = dict(filter(lambda x: x[0][0] not in exclude, s.items()))  # exclude compounds in exclude
+    s_rev_x = dict(map(lambda x: (x[0], -1 * x[1]), s_x.items()))  # reverse exclude stoichiometry
 
-    s_copy = copy.deepcopy(s)
-    delete = []
-    for o in ex1:
-        for p in s_copy:
-            if o == p[0]:
-                delete.append(p)
-                
-    for p in delete:
-        del s_copy[p]
-        
-    #print(s_copy)
-    h_std = hash(frozenset(s_copy.items()))
-    for a in s_copy:
-        s_copy[a] = -1 * s_copy[a]
-    h_rev = hash(frozenset(s_copy.items()))
-    
     hashes = {
-        'std' : std,
-        'rev' : rev,
+        'std': hash(frozenset(s.items())),
+        'rev': hash(frozenset(s_rev.items())),
+        'x_std': hash(frozenset(s_x.items())),
+        'x_rev': hash(frozenset(s_rev_x.items())),
     }
-    
-    return hashes    
+
+    return hashes
 
 
-def single_hasher(s, ex1 = []):
-    s_copy = copy.deepcopy(s)
+def single_hasher(stoichiometry, ex1=[]):
+    s_copy = copy.deepcopy(stoichiometry)
     #print(s_copy)
     std = hash(frozenset(s_copy.items()))
     for a in s_copy:
         s_copy[a] = -1 * s_copy[a]
     rev = hash(frozenset(s_copy.items()))
 
-    s_copy = copy.deepcopy(s)
+    s_copy = copy.deepcopy(stoichiometry)
     delete = []
     for o in ex1:
         for p in s_copy:
