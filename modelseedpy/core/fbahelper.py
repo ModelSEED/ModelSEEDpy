@@ -27,6 +27,7 @@ class FBAHelper:
                     met_id = metabolite.id
                     if all(rxn not in model.reactions for rxn in [f"EX_{met_id}", f"DM_{met_id}", f"SK_{met_id}"]):
                         drain_reaction = FBAHelper.add_drain_from_metabolite_id(model,metabolite.id,0,100,"DM_")
+                        return drain_reaction
         
     @staticmethod
     def add_drain_from_metabolite_id(model, cpd_id, uptake, excretion, prefix='EX_', prefix_name='Exchange for '):

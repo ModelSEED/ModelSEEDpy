@@ -28,7 +28,9 @@ def test_drain_functions():
     met_id = auto_sink_compound + '_c0'
     cobra_id = model.metabolites.get_by_id(met_id)
     
-    FBAHelper.add_autodrain_reactions_to_community_model(model, [auto_sink_compound])
+    drain_reaction = FBAHelper.add_autodrain_reactions_to_community_model(model, [auto_sink_compound])
+    print(drain_reaction)
+    model.add_reactions([drain_reaction])
     for reaction in model.reactions:
         if re.search('DM_', reaction.id):
             assert reaction.id == f'DM_{met_id}'
@@ -129,7 +131,7 @@ def test_elemental_mass():
     assert type(elementmass) is dict
     
 def test_get_modelseed_db_api():
-    msdb_path = 'C:/Users/Andrew Freiburger/Dropbox/My PC (DESKTOP-M302P50)/Documents/UVic Civil Engineering/Biofilm growth code/GSWL code/ModelSEEDDatabase'
+    msdb_path = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\TFA\\ModelSEEDDatabase'
     db_api = FBAHelper.get_modelseed_db_api(msdb_path)
     
     assert type(db_api) is modelseedpy.biochem.modelseed_biochem.ModelSEEDBiochem 

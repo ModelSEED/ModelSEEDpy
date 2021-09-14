@@ -1,7 +1,7 @@
 import logging
 import re
 from cobra.core import Model
-from pyeda.inter import expr
+# from pyeda.inter import expr
 
 logger = logging.getLogger(__name__)
 
