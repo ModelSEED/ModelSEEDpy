@@ -111,7 +111,7 @@ class MSCommunity:
             
         return biomass_drains
     
-    def run(self,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False):
+    def run(self,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False,objective_value=True):
         # conditionally print the LP file of the model
         if print_lp:
             count_iteration = 0
@@ -126,8 +126,9 @@ class MSCommunity:
                 
         #Solving model
         self.set_objective(target,minimize)
-        print(self.model.objective)
         solution = self.model.optimize()
+        if objective_value:
+            print('\nCommunity objective value:', solution.objective_value)
         print('\n')
         if summary:
             print(self.model.summary())
@@ -229,6 +230,7 @@ class MSCommunity:
             cons_df.index = cons_df.columns = species
             cons_df.index.name = 'Receiver'
             print(cons_df)
+            print('\n')
 
     @staticmethod
     def community_fba(model,media = None,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
