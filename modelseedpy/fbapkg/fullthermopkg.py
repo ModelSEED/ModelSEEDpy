@@ -55,17 +55,19 @@ class FullThermoPkg(BaseFBAPkg):
             "compartment_potential":{},
             "temperature":298,#K
             "filter":None,
-            "infeasible_model": False
+            "infeasible_model": False,
+            'dgbin':False
         })
         self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_path"])
         
         simple_thermo_parameters = {
                 "filter":self.parameters["filter"],
                 "min_potential":-100000,#KJ/mol
-                "max_potential":100000#KJ/mol
+                "max_potential":100000,#KJ/mol
+                'dgbin':self.parameters['dgbin']
             }
         if self.parameters['infeasible_model']:
-            simple_thermo_parameters.update({'dgbin': True})
+            simple_thermo_parameters['dgbin'] = True
         self.pkgmgr.getpkg("SimpleThermoPkg").build_package(simple_thermo_parameters)
             
         self.parameters["combined_custom_concentrations"] = FullThermoPkg.default_concentration()

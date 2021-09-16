@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
-
 import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from optlang.symbolics import Zero
-
 import re
 
 #Base class for FBA packages
@@ -13,7 +11,6 @@ class SimpleThermoPkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"simple thermo",{"potential":"metabolite", 'dgbinF': 'reaction', 'dgbinR':'reaction'},{"thermo":"reaction"})
         self.pkgmgr.addpkgs(["RevBinPkg"])
-        
         
     def build_package(self,parameters):
         self.validate_parameters(parameters,[],{
@@ -59,7 +56,6 @@ class SimpleThermoPkg(BaseFBAPkg):
                 
     def build_variable(self,object):
         return BaseFBAPkg.build_variable(self,"potential",self.parameters["min_potential"],self.parameters["max_potential"],"continuous",object)
-
     
     def build_constraint(self,object, max_energy_magnitude):
         # Gibbs: dg = Sum(st(i,j)*p(j))
@@ -82,7 +78,6 @@ class SimpleThermoPkg(BaseFBAPkg):
                             
             # build the constraint
             built_constraint = BaseFBAPkg.build_constraint(self,"thermo",0,max_energy_magnitude,coef,object)
-            
         else:
             built_constraint = None
                 
@@ -93,9 +88,16 @@ class SimpleThermoPkg(BaseFBAPkg):
         dgbin_sum_coef = {}
         for reaction in self.variables['dgbinF']:
             print(self.model.solver.status, '\t', reaction)
-            dgbin_sum_coef[self.variables['dgbinF'][reaction].primal] = 1 
+            try:
+                dgbin_sum_coef[self.variables['dgbinF'][reaction].primal] = 1 
+            except:
+                print('--> ERROR: The simulation lack a solution.')
         for reaction in self.variables['dgbinR']:
-            dgbin_sum_coef[self.variables['dgbinR'][reaction].primal] = 1
+            print(self.model.solver.status, '\t', reaction)
+            try:
+                dgbin_sum_coef[self.variables['dgbinR'][reaction].primal] = 1
+            except:
+                print('--> ERROR: The simulation lack a solution.')
         
         # set the dgbin sum as the model objective
         self.model.objective = self.model.problem.Objective(Zero,direction='max')
