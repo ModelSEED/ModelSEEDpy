@@ -11,6 +11,8 @@ from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
+from to_precision import auto_notation
+from matplotlib import pyplot
 
 logger = logging.getLogger(__name__)
 
@@ -191,28 +193,7 @@ class MSCommunity:
                                     self.production[donor_index][receiver_index] += rate
                                     self.consumption[receiver_index][donor_index] += rate
         
-    def visualize(self, graph = True, table = True):
-        ''' VISUALIZE FLUXES ''' 
-        # graph the community network
-        if graph:
-            graph = networkx.Graph()
-            for num in self.compartments:
-                graph.add_node(num)
-            for com in combinations(self.compartments, 2):
-                species_1 = int(com[0])-1
-                species_2 = int(com[1])-1
-
-                interaction_net_flux = round(self.production[species_1][species_2] - self.consumption[species_1][species_2])
-                if species_1 < species_2:
-                    graph.add_edge(com[0],com[1],flux = interaction_net_flux)
-                elif species_1 > species_2:
-                    graph.add_edge(com[0],com[1],flux = -interaction_net_flux)
-
-            pos = networkx.circular_layout(graph)
-            networkx.draw_networkx(graph,pos)
-            labels = networkx.get_edge_attributes(graph,'flux')
-            networkx.draw_networkx_edge_labels(graph,pos,edge_labels=labels)
-        
+    def visualize(self, graph = True, table = True): 
         # view the cross feeding matrices
         if table:
             from pandas import DataFrame as df
@@ -231,6 +212,28 @@ class MSCommunity:
             cons_df.index.name = 'Receiver'
             print(cons_df)
             print('\n')
+            
+        # graph the community network
+        if graph:
+            graph = networkx.Graph()
+            for num in self.compartments:
+                graph.add_node(num)
+            for com in combinations(self.compartments, 2):
+                species_1 = int(com[0])-1
+                species_2 = int(com[1])-1
+
+                interaction_net_flux = auto_notation((self.production[species_1][species_2] - self.consumption[species_1][species_2]), 3)
+                if species_1 < species_2:
+                    graph.add_edge(com[0],com[1],flux = interaction_net_flux)
+                elif species_1 > species_2:
+                    graph.add_edge(com[0],com[1],flux = -interaction_net_flux)
+
+            pos = networkx.circular_layout(graph)
+            networkx.draw_networkx(graph,pos)
+            labels = networkx.get_edge_attributes(graph,'flux')
+            networkx.draw_networkx_edge_labels(graph,pos,edge_labels=labels)
+            pyplot.show()
+            return graph, pos, labels
 
     @staticmethod
     def community_fba(model,media = None,target = "bio1",minimize = False,pfba = True,print_lp = False,summary = False,element_uptake_limit = None, kinetic_coeff = None, abundances = None, msdb_path_for_fullthermo = None,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
