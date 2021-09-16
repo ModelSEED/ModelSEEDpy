@@ -2,7 +2,7 @@
 \Problem name: 
 
 Minimize
- _e1819792m1055m11ecma58em50eb71d9aedf#0: - 1.496 cpd00169_c0_potential#286
+ _77358bb8m1647m11ecm92a7m0242ac110001#0: - 1.496 cpd00169_c0_potential#286
                                  - 2.8328 cpd00020_c0_potential#287
                                  - 4.9414 cpd00023_c0_potential#294
                                  - 0.129 cpd00102_c0_potential#295
@@ -27,8 +27,8 @@ Minimize
                                  - 0.5191 cpd00061_c0_potential#356
 Subject To
  cpd00020_e0#0:               - rxn05469_c0#142 + rxn05469_c0_reverse_dd2b1#143
-                              - _EX_cpd00020_e0#172
-                              + _EX_cpd00020_e0_reverse_addb0#173  = 0
+                              - _EX_cpd00020_e0#158
+                              + _EX_cpd00020_e0_reverse_addb0#159  = 0
  cpd00169_c0#1:               - rxn01100_c0#64 + rxn01100_c0_reverse_2daa7#65
                               + rxn01106_c0#102 - rxn01106_c0_reverse_bc17a#103
                               - 1.496 bio1#148 + 1.496 bio1_reverse_b18f7#149
@@ -51,8 +51,8 @@ Subject To
                               + rxn08972_c0#98 - rxn08972_c0_reverse_63645#99
                                = 0
  cpd00009_e0#4:               - rxn05312_c0#2 + rxn05312_c0_reverse_cb01b#3
-                              - _EX_cpd00009_e0#170
-                              + _EX_cpd00009_e0_reverse_97c79#171  = 0
+                              - _EX_cpd00009_e0#154
+                              + _EX_cpd00009_e0_reverse_97c79#155  = 0
  cpd00198_c0#5:               - rxn01200_c0#10 + rxn01200_c0_reverse_327cb#11
                               - rxn00785_c0#112 + rxn00785_c0_reverse_f6e32#113
                               + rxn01116_c0#146 - rxn01116_c0_reverse_042bd#147
@@ -61,8 +61,8 @@ Subject To
                               - rxn01106_c0#102 + rxn01106_c0_reverse_bc17a#103
                                = 0
  cpd00023_e0#7:               - rxn05297_c0#76 + rxn05297_c0_reverse_a5479#77
-                              - _EX_cpd00023_e0#158
-                              + _EX_cpd00023_e0_reverse_63bef#159  = 0
+                              - _EX_cpd00023_e0#176
+                              + _EX_cpd00023_e0_reverse_63bef#177  = 0
  cpd00027_e0#8:               - rxn05226_c0#134 + rxn05226_c0_reverse_80d79#135
                               - _EX_cpd00027_e0#160
                               + _EX_cpd00027_e0_reverse_e5681#161  = 0
@@ -103,8 +103,8 @@ Subject To
                               - rxn01476_c0#106 + rxn01476_c0_reverse_d3c6c#107
                                = 0
  cpd00221_e0#14:              - rxn08350_c0#56 + rxn08350_c0_reverse_2eca6#57
-                              - _EX_cpd00221_e0#168
-                              + _EX_cpd00221_e0_reverse_fb570#169  = 0
+                              - _EX_cpd00221_e0#162
+                              + _EX_cpd00221_e0_reverse_fb570#163  = 0
  cpd00331_c0#15:              rxn00974_c0#126 - rxn00974_c0_reverse_d835d#127
                               - rxn32587_c0#144 + rxn32587_c0_reverse_e1760#145
                                = 0
@@ -162,8 +162,8 @@ Subject To
                               - _EX_cpd00007_e0#156
                               + _EX_cpd00007_e0_reverse_97979#157  = 0
  cpd00053_e0#23:              - rxn05155_c0#136 + rxn05155_c0_reverse_0e20e#137
-                              - _EX_cpd00053_e0#186
-                              + _EX_cpd00053_e0_reverse_69f44#187  = 0
+                              - _EX_cpd00053_e0#164
+                              + _EX_cpd00053_e0_reverse_69f44#165  = 0
  cpd00007_c0#24:              - 0.5 rxn08288_c0#22
                               + 0.5 rxn08288_c0_reverse_cd20c#23
                               + rxn05468_c0#44 - rxn05468_c0_reverse_64ab5#45
@@ -185,8 +185,8 @@ Subject To
                               + 13.0279 bio1#148
                               - 13.0279 bio1_reverse_b18f7#149  = 0
  cpd00071_e0#27:              - rxn08032_c0#114 + rxn08032_c0_reverse_56079#115
-                              - _EX_cpd00071_e0#188
-                              + _EX_cpd00071_e0_reverse_84711#189  = 0
+                              - _EX_cpd00071_e0#150
+                              + _EX_cpd00071_e0_reverse_84711#151  = 0
  cpd00067_c0#28:              rxn05312_c0#2 - rxn05312_c0_reverse_cb01b#3
                               + 2 rxn08865_c0#8 - 2 rxn08865_c0_reverse_a38d9#9
                               + rxn00545_c0#16 - rxn00545_c0_reverse_61bfe#17
@@ -233,8 +233,8 @@ Subject To
                               + rxn08032_c0#114 - rxn08032_c0_reverse_56079#115
                                = 0
  cpd00013_e0#30:              - rxn39085_c0#66 + rxn39085_c0_reverse_b247f#67
-                              - _EX_cpd00013_e0#166
-                              + _EX_cpd00013_e0_reverse_e8652#167  = 0
+                              - _EX_cpd00013_e0#174
+                              + _EX_cpd00013_e0_reverse_e8652#175  = 0
  cpd00067_e0#31:              - rxn05312_c0#2 + rxn05312_c0_reverse_cb01b#3
                               - 2 rxn08865_c0#8 + 2 rxn08865_c0_reverse_a38d9#9
                               - rxn09270_c0#18 + rxn09270_c0_reverse_d06f3#19
@@ -255,8 +255,8 @@ Subject To
                               - rxn05493_c0#128 + rxn05493_c0_reverse_a7c32#129
                               - rxn08427_c0#138 + rxn08427_c0_reverse_d73d4#139
                               - rxn05469_c0#142 + rxn05469_c0_reverse_dd2b1#143
-                              - _EX_cpd00067_e0#184
-                              + _EX_cpd00067_e0_reverse_45677#185  = 0
+                              - _EX_cpd00067_e0#152
+                              + _EX_cpd00067_e0_reverse_45677#153  = 0
  cpd00005_c0#32:              - rxn00083_c0#26 + rxn00083_c0_reverse_7aa1e#27
                               + rxn01115_c0#50 - rxn01115_c0_reverse_9c13c#51
                               + rxn00161_c0#72 - rxn00161_c0_reverse_23eac#73
@@ -273,11 +273,11 @@ Subject To
                               + rxn00184_c0#140 - rxn00184_c0_reverse_bf801#141
                                = 0
  cpd00001_e0#34:              - rxn05319_c0#40 + rxn05319_c0_reverse_b72db#41
-                              - _EX_cpd00001_e0#152
-                              + _EX_cpd00001_e0_reverse_a9266#153  = 0
+                              - _EX_cpd00001_e0#170
+                              + _EX_cpd00001_e0_reverse_a9266#171  = 0
  cpd00011_e0#35:              - rxn05467_c0#78 + rxn05467_c0_reverse_434a2#79
-                              - _EX_cpd00011_e0#182
-                              + _EX_cpd00011_e0_reverse_b9a0b#183  = 0
+                              - _EX_cpd00011_e0#166
+                              + _EX_cpd00011_e0_reverse_b9a0b#167  = 0
  cpd00001_c0#36:              - rxn00549_c0#0 + rxn00549_c0_reverse_1ff19#1
                               + rxn08288_c0#22 - rxn08288_c0_reverse_cd20c#23
                               + rxn00459_c0#24 - rxn00459_c0_reverse_7f5be#25
@@ -348,8 +348,8 @@ Subject To
                               - 0.0709 bio1#148 + 0.0709 bio1_reverse_b18f7#149
                                = 0
  cpd00106_e0#44:              - rxn08542_c0#100 + rxn08542_c0_reverse_15e7b#101
-                              - _EX_cpd00106_e0#150
-                              + _EX_cpd00106_e0_reverse_008e2#151  = 0
+                              - _EX_cpd00106_e0#180
+                              + _EX_cpd00106_e0_reverse_008e2#181  = 0
  cpd00101_c0#45:              - rxn01200_c0#10 + rxn01200_c0_reverse_327cb#11
                               - rxn00777_c0#130 + rxn00777_c0_reverse_4ab24#131
                               - 0.8977 bio1#148 + 0.8977 bio1_reverse_b18f7#149
@@ -376,8 +376,8 @@ Subject To
                                = 0
  cpd00047_e0#51:              - rxn08525_c0#12 + rxn08525_c0_reverse_2469b#13
                               - rxn05559_c0#90 + rxn05559_c0_reverse_d8f77#91
-                              - _EX_cpd00047_e0#178
-                              + _EX_cpd00047_e0_reverse_564ff#179  = 0
+                              - _EX_cpd00047_e0#172
+                              + _EX_cpd00047_e0_reverse_564ff#173  = 0
  cpd00003_c0#52:              - rxn00083_c0#26 + rxn00083_c0_reverse_7aa1e#27
                               - rxn00154_c0#32 + rxn00154_c0_reverse_67f30#33
                               - rxn00500_c0#54 + rxn00500_c0_reverse_abe43#55
@@ -392,8 +392,8 @@ Subject To
                               - 3.547 bio1#148 + 3.547 bio1_reverse_b18f7#149
                                = 0
  cpd00024_e0#53:              - rxn05493_c0#128 + rxn05493_c0_reverse_a7c32#129
-                              - _EX_cpd00024_e0#180
-                              + _EX_cpd00024_e0_reverse_32520#181  = 0
+                              - _EX_cpd00024_e0#186
+                              + _EX_cpd00024_e0_reverse_32520#187  = 0
  cpd00047_c0#54:              rxn08525_c0#12 - rxn08525_c0_reverse_2469b#13
                               + rxn34258_c0#86 - rxn34258_c0_reverse_f90ff#87
                               + rxn05559_c0#90 - rxn05559_c0_reverse_d8f77#91
@@ -406,8 +406,8 @@ Subject To
                                = 0
  cpd00036_e0#57:              rxn09270_c0#18 - rxn09270_c0_reverse_d06f3#19
                               - rxn09269_c0#122 + rxn09269_c0_reverse_de27d#123
-                              - _EX_cpd00036_e0#176
-                              + _EX_cpd00036_e0_reverse_d1c26#177  = 0
+                              - _EX_cpd00036_e0#182
+                              + _EX_cpd00036_e0_reverse_d1c26#183  = 0
  cpd00040_c0#58:              - rxn20162_c0#58 + rxn20162_c0_reverse_befb2#59
                               + rxn00336_c0#118 - rxn00336_c0_reverse_aa1a4#119
                                = 0
@@ -430,8 +430,8 @@ Subject To
                               - rxn00248_c0#124 + rxn00248_c0_reverse_0818d#125
                                = 0
  cpd00130_e0#62:              - rxn08865_c0#8 + rxn08865_c0_reverse_a38d9#9
-                              - _EX_cpd00130_e0#154
-                              + _EX_cpd00130_e0_reverse_5cc7b#155  = 0
+                              - _EX_cpd00130_e0#168
+                              + _EX_cpd00130_e0_reverse_5cc7b#169  = 0
  cpd15560_c0#63:              FRD7_c0#14 - FRD7_c0_reverse_40984#15
                               + rxn08288_c0#22 - rxn08288_c0_reverse_cd20c#23
                               - rxn09272_c0#92 + rxn09272_c0_reverse_40d41#93
@@ -441,8 +441,8 @@ Subject To
                               + rxn00225_c0#52 - rxn00225_c0_reverse_bc53a#53
                                = 0
  cpd00082_e0#65:              - rxn08535_c0#48 + rxn08535_c0_reverse_14cd1#49
-                              - _EX_cpd00082_e0#174
-                              + _EX_cpd00082_e0_reverse_fe63a#175  = 0
+                              - _EX_cpd00082_e0#178
+                              + _EX_cpd00082_e0_reverse_fe63a#179  = 0
  cpd00079_c0#66:              - rxn00558_c0#38 + rxn00558_c0_reverse_c4809#39
                               - rxn00604_c0#94 + rxn00604_c0_reverse_035b9#95
                               + rxn05226_c0#134 - rxn05226_c0_reverse_80d79#135
@@ -455,11 +455,11 @@ Subject To
                               - rxn01333_c0#60 + rxn01333_c0_reverse_15140#61
                                = 0
  cpd00029_e0#69:              - rxn05488_c0#80 + rxn05488_c0_reverse_7eb12#81
-                              - _EX_cpd00029_e0#162
-                              + _EX_cpd00029_e0_reverse_7bbb8#163  = 0
+                              - _EX_cpd00029_e0#188
+                              + _EX_cpd00029_e0_reverse_7bbb8#189  = 0
  cpd00363_e0#70:              - rxn08427_c0#138 + rxn08427_c0_reverse_d73d4#139
-                              - _EX_cpd00363_e0#164
-                              + _EX_cpd00363_e0_reverse_f681d#165  = 0
+                              - _EX_cpd00363_e0#184
+                              + _EX_cpd00363_e0_reverse_f681d#185  = 0
  cpd00061_c0#71:              rxn00247_c0#4 - rxn00247_c0_reverse_e4ba5#5
                               + rxn00459_c0#24 - rxn00459_c0_reverse_7f5be#25
                               - rxn32421_c0#30 + rxn32421_c0_reverse_5e221#31
@@ -718,86 +718,86 @@ Subject To
  bio1_revbinF#220:            bio1#148 - 1000 bio1_revbin#264 <= 0
  bio1_revbinR#221:            bio1_reverse_b18f7#149 + 1000 bio1_revbin#264
                               <= 1000
- _EX_cpd00106_e0_revbinF#222: _EX_cpd00106_e0#150
-                              - 1000 _EX_cpd00106_e0_revbin#265 <= 0
- _EX_cpd00106_e0_revbinR#223: _EX_cpd00106_e0_reverse_008e2#151
-                              + 1000 _EX_cpd00106_e0_revbin#265 <= 1000
- _EX_cpd00001_e0_revbinF#224: _EX_cpd00001_e0#152
-                              - 1000 _EX_cpd00001_e0_revbin#266 <= 0
- _EX_cpd00001_e0_revbinR#225: _EX_cpd00001_e0_reverse_a9266#153
-                              + 1000 _EX_cpd00001_e0_revbin#266 <= 1000
- _EX_cpd00130_e0_revbinF#226: _EX_cpd00130_e0#154
-                              - 1000 _EX_cpd00130_e0_revbin#267 <= 0
- _EX_cpd00130_e0_revbinR#227: _EX_cpd00130_e0_reverse_5cc7b#155
-                              + 1000 _EX_cpd00130_e0_revbin#267 <= 1000
+ _EX_cpd00071_e0_revbinF#222: _EX_cpd00071_e0#150
+                              - 1000 _EX_cpd00071_e0_revbin#265 <= 0
+ _EX_cpd00071_e0_revbinR#223: _EX_cpd00071_e0_reverse_84711#151
+                              + 1000 _EX_cpd00071_e0_revbin#265 <= 1000
+ _EX_cpd00067_e0_revbinF#224: _EX_cpd00067_e0#152
+                              - 1000 _EX_cpd00067_e0_revbin#266 <= 0
+ _EX_cpd00067_e0_revbinR#225: _EX_cpd00067_e0_reverse_45677#153
+                              + 1000 _EX_cpd00067_e0_revbin#266 <= 1000
+ _EX_cpd00009_e0_revbinF#226: _EX_cpd00009_e0#154
+                              - 1000 _EX_cpd00009_e0_revbin#267 <= 0
+ _EX_cpd00009_e0_revbinR#227: _EX_cpd00009_e0_reverse_97c79#155
+                              + 1000 _EX_cpd00009_e0_revbin#267 <= 1000
  _EX_cpd00007_e0_revbinF#228: _EX_cpd00007_e0#156
                               - 1000 _EX_cpd00007_e0_revbin#268 <= 0
  _EX_cpd00007_e0_revbinR#229: _EX_cpd00007_e0_reverse_97979#157
                               + 1000 _EX_cpd00007_e0_revbin#268 <= 1000
- _EX_cpd00023_e0_revbinF#230: _EX_cpd00023_e0#158
-                              - 1000 _EX_cpd00023_e0_revbin#269 <= 0
- _EX_cpd00023_e0_revbinR#231: _EX_cpd00023_e0_reverse_63bef#159
-                              + 1000 _EX_cpd00023_e0_revbin#269 <= 1000
+ _EX_cpd00020_e0_revbinF#230: _EX_cpd00020_e0#158
+                              - 1000 _EX_cpd00020_e0_revbin#269 <= 0
+ _EX_cpd00020_e0_revbinR#231: _EX_cpd00020_e0_reverse_addb0#159
+                              + 1000 _EX_cpd00020_e0_revbin#269 <= 1000
  _EX_cpd00027_e0_revbinF#232: _EX_cpd00027_e0#160
                               - 1000 _EX_cpd00027_e0_revbin#270 <= 0
  _EX_cpd00027_e0_revbinR#233: _EX_cpd00027_e0_reverse_e5681#161
                               + 1000 _EX_cpd00027_e0_revbin#270 <= 1000
- _EX_cpd00029_e0_revbinF#234: _EX_cpd00029_e0#162
-                              - 1000 _EX_cpd00029_e0_revbin#271 <= 0
- _EX_cpd00029_e0_revbinR#235: _EX_cpd00029_e0_reverse_7bbb8#163
-                              + 1000 _EX_cpd00029_e0_revbin#271 <= 1000
- _EX_cpd00363_e0_revbinF#236: _EX_cpd00363_e0#164
-                              - 1000 _EX_cpd00363_e0_revbin#272 <= 0
- _EX_cpd00363_e0_revbinR#237: _EX_cpd00363_e0_reverse_f681d#165
-                              + 1000 _EX_cpd00363_e0_revbin#272 <= 1000
- _EX_cpd00013_e0_revbinF#238: _EX_cpd00013_e0#166
-                              - 1000 _EX_cpd00013_e0_revbin#273 <= 0
- _EX_cpd00013_e0_revbinR#239: _EX_cpd00013_e0_reverse_e8652#167
-                              + 1000 _EX_cpd00013_e0_revbin#273 <= 1000
- _EX_cpd00221_e0_revbinF#240: _EX_cpd00221_e0#168
-                              - 1000 _EX_cpd00221_e0_revbin#274 <= 0
- _EX_cpd00221_e0_revbinR#241: _EX_cpd00221_e0_reverse_fb570#169
-                              + 1000 _EX_cpd00221_e0_revbin#274 <= 1000
- _EX_cpd00009_e0_revbinF#242: _EX_cpd00009_e0#170
-                              - 1000 _EX_cpd00009_e0_revbin#275 <= 0
- _EX_cpd00009_e0_revbinR#243: _EX_cpd00009_e0_reverse_97c79#171
-                              + 1000 _EX_cpd00009_e0_revbin#275 <= 1000
- _EX_cpd00020_e0_revbinF#244: _EX_cpd00020_e0#172
-                              - 1000 _EX_cpd00020_e0_revbin#276 <= 0
- _EX_cpd00020_e0_revbinR#245: _EX_cpd00020_e0_reverse_addb0#173
-                              + 1000 _EX_cpd00020_e0_revbin#276 <= 1000
- _EX_cpd00082_e0_revbinF#246: _EX_cpd00082_e0#174
-                              - 1000 _EX_cpd00082_e0_revbin#277 <= 0
- _EX_cpd00082_e0_revbinR#247: _EX_cpd00082_e0_reverse_fe63a#175
-                              + 1000 _EX_cpd00082_e0_revbin#277 <= 1000
- _EX_cpd00036_e0_revbinF#248: _EX_cpd00036_e0#176
-                              - 1000 _EX_cpd00036_e0_revbin#278 <= 0
- _EX_cpd00036_e0_revbinR#249: _EX_cpd00036_e0_reverse_d1c26#177
-                              + 1000 _EX_cpd00036_e0_revbin#278 <= 1000
- _EX_cpd00047_e0_revbinF#250: _EX_cpd00047_e0#178
-                              - 1000 _EX_cpd00047_e0_revbin#279 <= 0
- _EX_cpd00047_e0_revbinR#251: _EX_cpd00047_e0_reverse_564ff#179
-                              + 1000 _EX_cpd00047_e0_revbin#279 <= 1000
- _EX_cpd00024_e0_revbinF#252: _EX_cpd00024_e0#180
-                              - 1000 _EX_cpd00024_e0_revbin#280 <= 0
- _EX_cpd00024_e0_revbinR#253: _EX_cpd00024_e0_reverse_32520#181
-                              + 1000 _EX_cpd00024_e0_revbin#280 <= 1000
- _EX_cpd00011_e0_revbinF#254: _EX_cpd00011_e0#182
-                              - 1000 _EX_cpd00011_e0_revbin#281 <= 0
- _EX_cpd00011_e0_revbinR#255: _EX_cpd00011_e0_reverse_b9a0b#183
-                              + 1000 _EX_cpd00011_e0_revbin#281 <= 1000
- _EX_cpd00067_e0_revbinF#256: _EX_cpd00067_e0#184
-                              - 1000 _EX_cpd00067_e0_revbin#282 <= 0
- _EX_cpd00067_e0_revbinR#257: _EX_cpd00067_e0_reverse_45677#185
-                              + 1000 _EX_cpd00067_e0_revbin#282 <= 1000
- _EX_cpd00053_e0_revbinF#258: _EX_cpd00053_e0#186
-                              - 1000 _EX_cpd00053_e0_revbin#283 <= 0
- _EX_cpd00053_e0_revbinR#259: _EX_cpd00053_e0_reverse_69f44#187
-                              + 1000 _EX_cpd00053_e0_revbin#283 <= 1000
- _EX_cpd00071_e0_revbinF#260: _EX_cpd00071_e0#188
-                              - 1000 _EX_cpd00071_e0_revbin#284 <= 0
- _EX_cpd00071_e0_revbinR#261: _EX_cpd00071_e0_reverse_84711#189
-                              + 1000 _EX_cpd00071_e0_revbin#284 <= 1000
+ _EX_cpd00221_e0_revbinF#234: _EX_cpd00221_e0#162
+                              - 1000 _EX_cpd00221_e0_revbin#271 <= 0
+ _EX_cpd00221_e0_revbinR#235: _EX_cpd00221_e0_reverse_fb570#163
+                              + 1000 _EX_cpd00221_e0_revbin#271 <= 1000
+ _EX_cpd00053_e0_revbinF#236: _EX_cpd00053_e0#164
+                              - 1000 _EX_cpd00053_e0_revbin#272 <= 0
+ _EX_cpd00053_e0_revbinR#237: _EX_cpd00053_e0_reverse_69f44#165
+                              + 1000 _EX_cpd00053_e0_revbin#272 <= 1000
+ _EX_cpd00011_e0_revbinF#238: _EX_cpd00011_e0#166
+                              - 1000 _EX_cpd00011_e0_revbin#273 <= 0
+ _EX_cpd00011_e0_revbinR#239: _EX_cpd00011_e0_reverse_b9a0b#167
+                              + 1000 _EX_cpd00011_e0_revbin#273 <= 1000
+ _EX_cpd00130_e0_revbinF#240: _EX_cpd00130_e0#168
+                              - 1000 _EX_cpd00130_e0_revbin#274 <= 0
+ _EX_cpd00130_e0_revbinR#241: _EX_cpd00130_e0_reverse_5cc7b#169
+                              + 1000 _EX_cpd00130_e0_revbin#274 <= 1000
+ _EX_cpd00001_e0_revbinF#242: _EX_cpd00001_e0#170
+                              - 1000 _EX_cpd00001_e0_revbin#275 <= 0
+ _EX_cpd00001_e0_revbinR#243: _EX_cpd00001_e0_reverse_a9266#171
+                              + 1000 _EX_cpd00001_e0_revbin#275 <= 1000
+ _EX_cpd00047_e0_revbinF#244: _EX_cpd00047_e0#172
+                              - 1000 _EX_cpd00047_e0_revbin#276 <= 0
+ _EX_cpd00047_e0_revbinR#245: _EX_cpd00047_e0_reverse_564ff#173
+                              + 1000 _EX_cpd00047_e0_revbin#276 <= 1000
+ _EX_cpd00013_e0_revbinF#246: _EX_cpd00013_e0#174
+                              - 1000 _EX_cpd00013_e0_revbin#277 <= 0
+ _EX_cpd00013_e0_revbinR#247: _EX_cpd00013_e0_reverse_e8652#175
+                              + 1000 _EX_cpd00013_e0_revbin#277 <= 1000
+ _EX_cpd00023_e0_revbinF#248: _EX_cpd00023_e0#176
+                              - 1000 _EX_cpd00023_e0_revbin#278 <= 0
+ _EX_cpd00023_e0_revbinR#249: _EX_cpd00023_e0_reverse_63bef#177
+                              + 1000 _EX_cpd00023_e0_revbin#278 <= 1000
+ _EX_cpd00082_e0_revbinF#250: _EX_cpd00082_e0#178
+                              - 1000 _EX_cpd00082_e0_revbin#279 <= 0
+ _EX_cpd00082_e0_revbinR#251: _EX_cpd00082_e0_reverse_fe63a#179
+                              + 1000 _EX_cpd00082_e0_revbin#279 <= 1000
+ _EX_cpd00106_e0_revbinF#252: _EX_cpd00106_e0#180
+                              - 1000 _EX_cpd00106_e0_revbin#280 <= 0
+ _EX_cpd00106_e0_revbinR#253: _EX_cpd00106_e0_reverse_008e2#181
+                              + 1000 _EX_cpd00106_e0_revbin#280 <= 1000
+ _EX_cpd00036_e0_revbinF#254: _EX_cpd00036_e0#182
+                              - 1000 _EX_cpd00036_e0_revbin#281 <= 0
+ _EX_cpd00036_e0_revbinR#255: _EX_cpd00036_e0_reverse_d1c26#183
+                              + 1000 _EX_cpd00036_e0_revbin#281 <= 1000
+ _EX_cpd00363_e0_revbinF#256: _EX_cpd00363_e0#184
+                              - 1000 _EX_cpd00363_e0_revbin#282 <= 0
+ _EX_cpd00363_e0_revbinR#257: _EX_cpd00363_e0_reverse_f681d#185
+                              + 1000 _EX_cpd00363_e0_revbin#282 <= 1000
+ _EX_cpd00024_e0_revbinF#258: _EX_cpd00024_e0#186
+                              - 1000 _EX_cpd00024_e0_revbin#283 <= 0
+ _EX_cpd00024_e0_revbinR#259: _EX_cpd00024_e0_reverse_32520#187
+                              + 1000 _EX_cpd00024_e0_revbin#283 <= 1000
+ _EX_cpd00029_e0_revbinF#260: _EX_cpd00029_e0#188
+                              - 1000 _EX_cpd00029_e0_revbin#284 <= 0
+ _EX_cpd00029_e0_revbinR#261: _EX_cpd00029_e0_reverse_7bbb8#189
+                              + 1000 _EX_cpd00029_e0_revbin#284 <= 1000
  rxn00549_c0_thermo#262:      2000 rxn00549_c0_revbin#190
                               + cpd00009_c0_potential#297
                               - cpd00001_c0_potential#321
@@ -1439,46 +1439,46 @@ Bounds
  0 <= rxn01116_c0_reverse_042bd#147 <= 1000
  0 <= bio1#148 <= 1000
       bio1_reverse_b18f7#149 = 0
- 0 <= _EX_cpd00106_e0#150 <= 1000
- 0 <= _EX_cpd00106_e0_reverse_008e2#151 <= 1000
- 0 <= _EX_cpd00001_e0#152 <= 1000
- 0 <= _EX_cpd00001_e0_reverse_a9266#153 <= 1000
- 0 <= _EX_cpd00130_e0#154 <= 1000
- 0 <= _EX_cpd00130_e0_reverse_5cc7b#155 <= 1000
+ 0 <= _EX_cpd00071_e0#150 <= 1000
+ 0 <= _EX_cpd00071_e0_reverse_84711#151 <= 1000
+ 0 <= _EX_cpd00067_e0#152 <= 1000
+ 0 <= _EX_cpd00067_e0_reverse_45677#153 <= 1000
+ 0 <= _EX_cpd00009_e0#154 <= 1000
+ 0 <= _EX_cpd00009_e0_reverse_97c79#155 <= 1000
  0 <= _EX_cpd00007_e0#156 <= 1000
  0 <= _EX_cpd00007_e0_reverse_97979#157 <= 1000
- 0 <= _EX_cpd00023_e0#158 <= 1000
- 0 <= _EX_cpd00023_e0_reverse_63bef#159 <= 1000
+ 0 <= _EX_cpd00020_e0#158 <= 1000
+ 0 <= _EX_cpd00020_e0_reverse_addb0#159 <= 1000
  0 <= _EX_cpd00027_e0#160 <= 1000
  0 <= _EX_cpd00027_e0_reverse_e5681#161 <= 1000
- 0 <= _EX_cpd00029_e0#162 <= 1000
- 0 <= _EX_cpd00029_e0_reverse_7bbb8#163 <= 1000
- 0 <= _EX_cpd00363_e0#164 <= 1000
- 0 <= _EX_cpd00363_e0_reverse_f681d#165 <= 1000
- 0 <= _EX_cpd00013_e0#166 <= 1000
- 0 <= _EX_cpd00013_e0_reverse_e8652#167 <= 1000
- 0 <= _EX_cpd00221_e0#168 <= 1000
- 0 <= _EX_cpd00221_e0_reverse_fb570#169 <= 1000
- 0 <= _EX_cpd00009_e0#170 <= 1000
- 0 <= _EX_cpd00009_e0_reverse_97c79#171 <= 1000
- 0 <= _EX_cpd00020_e0#172 <= 1000
- 0 <= _EX_cpd00020_e0_reverse_addb0#173 <= 1000
- 0 <= _EX_cpd00082_e0#174 <= 1000
- 0 <= _EX_cpd00082_e0_reverse_fe63a#175 <= 1000
- 0 <= _EX_cpd00036_e0#176 <= 1000
- 0 <= _EX_cpd00036_e0_reverse_d1c26#177 <= 1000
- 0 <= _EX_cpd00047_e0#178 <= 1000
- 0 <= _EX_cpd00047_e0_reverse_564ff#179 <= 1000
- 0 <= _EX_cpd00024_e0#180 <= 1000
- 0 <= _EX_cpd00024_e0_reverse_32520#181 <= 1000
- 0 <= _EX_cpd00011_e0#182 <= 1000
- 0 <= _EX_cpd00011_e0_reverse_b9a0b#183 <= 1000
- 0 <= _EX_cpd00067_e0#184 <= 1000
- 0 <= _EX_cpd00067_e0_reverse_45677#185 <= 1000
- 0 <= _EX_cpd00053_e0#186 <= 1000
- 0 <= _EX_cpd00053_e0_reverse_69f44#187 <= 1000
- 0 <= _EX_cpd00071_e0#188 <= 1000
- 0 <= _EX_cpd00071_e0_reverse_84711#189 <= 1000
+ 0 <= _EX_cpd00221_e0#162 <= 1000
+ 0 <= _EX_cpd00221_e0_reverse_fb570#163 <= 1000
+ 0 <= _EX_cpd00053_e0#164 <= 1000
+ 0 <= _EX_cpd00053_e0_reverse_69f44#165 <= 1000
+ 0 <= _EX_cpd00011_e0#166 <= 1000
+ 0 <= _EX_cpd00011_e0_reverse_b9a0b#167 <= 1000
+ 0 <= _EX_cpd00130_e0#168 <= 1000
+ 0 <= _EX_cpd00130_e0_reverse_5cc7b#169 <= 1000
+ 0 <= _EX_cpd00001_e0#170 <= 1000
+ 0 <= _EX_cpd00001_e0_reverse_a9266#171 <= 1000
+ 0 <= _EX_cpd00047_e0#172 <= 1000
+ 0 <= _EX_cpd00047_e0_reverse_564ff#173 <= 1000
+ 0 <= _EX_cpd00013_e0#174 <= 1000
+ 0 <= _EX_cpd00013_e0_reverse_e8652#175 <= 1000
+ 0 <= _EX_cpd00023_e0#176 <= 1000
+ 0 <= _EX_cpd00023_e0_reverse_63bef#177 <= 1000
+ 0 <= _EX_cpd00082_e0#178 <= 1000
+ 0 <= _EX_cpd00082_e0_reverse_fe63a#179 <= 1000
+ 0 <= _EX_cpd00106_e0#180 <= 1000
+ 0 <= _EX_cpd00106_e0_reverse_008e2#181 <= 1000
+ 0 <= _EX_cpd00036_e0#182 <= 1000
+ 0 <= _EX_cpd00036_e0_reverse_d1c26#183 <= 1000
+ 0 <= _EX_cpd00363_e0#184 <= 1000
+ 0 <= _EX_cpd00363_e0_reverse_f681d#185 <= 1000
+ 0 <= _EX_cpd00024_e0#186 <= 1000
+ 0 <= _EX_cpd00024_e0_reverse_32520#187 <= 1000
+ 0 <= _EX_cpd00029_e0#188 <= 1000
+ 0 <= _EX_cpd00029_e0_reverse_7bbb8#189 <= 1000
  0 <= rxn00549_c0_revbin#190 <= 1
  0 <= rxn05312_c0_revbin#191 <= 1
  0 <= rxn00247_c0_revbin#192 <= 1
@@ -1554,26 +1554,26 @@ Bounds
  0 <= rxn32587_c0_revbin#262 <= 1
  0 <= rxn01116_c0_revbin#263 <= 1
  0 <= bio1_revbin#264 <= 1
- 0 <= _EX_cpd00106_e0_revbin#265 <= 1
- 0 <= _EX_cpd00001_e0_revbin#266 <= 1
- 0 <= _EX_cpd00130_e0_revbin#267 <= 1
+ 0 <= _EX_cpd00071_e0_revbin#265 <= 1
+ 0 <= _EX_cpd00067_e0_revbin#266 <= 1
+ 0 <= _EX_cpd00009_e0_revbin#267 <= 1
  0 <= _EX_cpd00007_e0_revbin#268 <= 1
- 0 <= _EX_cpd00023_e0_revbin#269 <= 1
+ 0 <= _EX_cpd00020_e0_revbin#269 <= 1
  0 <= _EX_cpd00027_e0_revbin#270 <= 1
- 0 <= _EX_cpd00029_e0_revbin#271 <= 1
- 0 <= _EX_cpd00363_e0_revbin#272 <= 1
- 0 <= _EX_cpd00013_e0_revbin#273 <= 1
- 0 <= _EX_cpd00221_e0_revbin#274 <= 1
- 0 <= _EX_cpd00009_e0_revbin#275 <= 1
- 0 <= _EX_cpd00020_e0_revbin#276 <= 1
- 0 <= _EX_cpd00082_e0_revbin#277 <= 1
- 0 <= _EX_cpd00036_e0_revbin#278 <= 1
- 0 <= _EX_cpd00047_e0_revbin#279 <= 1
- 0 <= _EX_cpd00024_e0_revbin#280 <= 1
- 0 <= _EX_cpd00011_e0_revbin#281 <= 1
- 0 <= _EX_cpd00067_e0_revbin#282 <= 1
- 0 <= _EX_cpd00053_e0_revbin#283 <= 1
- 0 <= _EX_cpd00071_e0_revbin#284 <= 1
+ 0 <= _EX_cpd00221_e0_revbin#271 <= 1
+ 0 <= _EX_cpd00053_e0_revbin#272 <= 1
+ 0 <= _EX_cpd00011_e0_revbin#273 <= 1
+ 0 <= _EX_cpd00130_e0_revbin#274 <= 1
+ 0 <= _EX_cpd00001_e0_revbin#275 <= 1
+ 0 <= _EX_cpd00047_e0_revbin#276 <= 1
+ 0 <= _EX_cpd00013_e0_revbin#277 <= 1
+ 0 <= _EX_cpd00023_e0_revbin#278 <= 1
+ 0 <= _EX_cpd00082_e0_revbin#279 <= 1
+ 0 <= _EX_cpd00106_e0_revbin#280 <= 1
+ 0 <= _EX_cpd00036_e0_revbin#281 <= 1
+ 0 <= _EX_cpd00363_e0_revbin#282 <= 1
+ 0 <= _EX_cpd00024_e0_revbin#283 <= 1
+ 0 <= _EX_cpd00029_e0_revbin#284 <= 1
  0 <= cpd00020_e0_potential#285 <= 1000
  0 <= cpd00169_c0_potential#286 <= 1000
  0 <= cpd00020_c0_potential#287 <= 1000
@@ -1747,14 +1747,14 @@ Binaries
  rxn08094_c0_revbin#256  rxn05226_c0_revbin#257  rxn05155_c0_revbin#258 
  rxn08427_c0_revbin#259  rxn00184_c0_revbin#260  rxn05469_c0_revbin#261 
  rxn32587_c0_revbin#262  rxn01116_c0_revbin#263  bio1_revbin#264 
- _EX_cpd00106_e0_revbin#265  _EX_cpd00001_e0_revbin#266 
- _EX_cpd00130_e0_revbin#267  _EX_cpd00007_e0_revbin#268 
- _EX_cpd00023_e0_revbin#269  _EX_cpd00027_e0_revbin#270 
- _EX_cpd00029_e0_revbin#271  _EX_cpd00363_e0_revbin#272 
- _EX_cpd00013_e0_revbin#273  _EX_cpd00221_e0_revbin#274 
- _EX_cpd00009_e0_revbin#275  _EX_cpd00020_e0_revbin#276 
- _EX_cpd00082_e0_revbin#277  _EX_cpd00036_e0_revbin#278 
- _EX_cpd00047_e0_revbin#279  _EX_cpd00024_e0_revbin#280 
- _EX_cpd00011_e0_revbin#281  _EX_cpd00067_e0_revbin#282 
- _EX_cpd00053_e0_revbin#283  _EX_cpd00071_e0_revbin#284 
+ _EX_cpd00071_e0_revbin#265  _EX_cpd00067_e0_revbin#266 
+ _EX_cpd00009_e0_revbin#267  _EX_cpd00007_e0_revbin#268 
+ _EX_cpd00020_e0_revbin#269  _EX_cpd00027_e0_revbin#270 
+ _EX_cpd00221_e0_revbin#271  _EX_cpd00053_e0_revbin#272 
+ _EX_cpd00011_e0_revbin#273  _EX_cpd00130_e0_revbin#274 
+ _EX_cpd00001_e0_revbin#275  _EX_cpd00047_e0_revbin#276 
+ _EX_cpd00013_e0_revbin#277  _EX_cpd00023_e0_revbin#278 
+ _EX_cpd00082_e0_revbin#279  _EX_cpd00106_e0_revbin#280 
+ _EX_cpd00036_e0_revbin#281  _EX_cpd00363_e0_revbin#282 
+ _EX_cpd00024_e0_revbin#283  _EX_cpd00029_e0_revbin#284 
 End

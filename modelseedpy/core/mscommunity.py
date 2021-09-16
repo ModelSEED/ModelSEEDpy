@@ -128,7 +128,7 @@ class MSCommunity:
         self.set_objective(target,minimize)
         solution = self.model.optimize()
         if objective_value:
-            print('\nCommunity objective value:', solution.objective_value)
+            print('\nModel objective value:', solution.objective_value)
         print('\n')
         if summary:
             print(self.model.summary())
