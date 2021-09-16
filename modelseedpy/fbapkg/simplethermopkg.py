@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
-
 import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from optlang.symbolics import Zero
-
 import re
 
 #Base class for FBA packages
@@ -13,7 +11,6 @@ class SimpleThermoPkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"simple thermo",{"potential":"metabolite", 'dgbinF': 'reaction', 'dgbinR':'reaction'},{"thermo":"reaction"})
         self.pkgmgr.addpkgs(["RevBinPkg"])
-        
         
     def build_package(self,parameters):
         self.validate_parameters(parameters,[],{
@@ -27,7 +24,7 @@ class SimpleThermoPkg(BaseFBAPkg):
         for metabolite in self.model.metabolites:
             self.build_variable(metabolite)
         for reaction in self.model.reactions:
-            if re.search('^EX_', reaction.id) == None and re.search('^SK', reaction.id) == None and re.search('^DM_', reaction.id) == None:                       
+            if reaction.id[:3] not in ['EX_', 'SK_', 'DM_']:                       
                 # determine the range of Delta_rG values 
                 objective_coefficient = {}
                 for metabolite in reaction.metabolites:
@@ -59,7 +56,6 @@ class SimpleThermoPkg(BaseFBAPkg):
                 
     def build_variable(self,object):
         return BaseFBAPkg.build_variable(self,"potential",self.parameters["min_potential"],self.parameters["max_potential"],"continuous",object)
-
     
     def build_constraint(self,object, max_energy_magnitude):
         # Gibbs: dg = Sum(st(i,j)*p(j))
@@ -82,7 +78,6 @@ class SimpleThermoPkg(BaseFBAPkg):
                             
             # build the constraint
             built_constraint = BaseFBAPkg.build_constraint(self,"thermo",0,max_energy_magnitude,coef,object)
-            
         else:
             built_constraint = None
                 
@@ -92,10 +87,17 @@ class SimpleThermoPkg(BaseFBAPkg):
         # create the sum of dgbin variables
         dgbin_sum_coef = {}
         for reaction in self.variables['dgbinF']:
-            print(self.model.solver.status, '\t', reaction)
-            dgbin_sum_coef[self.variables['dgbinF'][reaction].primal] = 1 
+            print(f'{self.model.solver.status} status for {reaction}')
+            try:
+                dgbin_sum_coef[self.variables['dgbinF'][reaction].primal] = 1 
+            except:
+                print('--> ERROR: The simulation lack a solution.')
         for reaction in self.variables['dgbinR']:
-            dgbin_sum_coef[self.variables['dgbinR'][reaction].primal] = 1
+            print(f'{self.model.solver.status} status for {reaction}')
+            try:
+                dgbin_sum_coef[self.variables['dgbinR'][reaction].primal] = 1
+            except:
+                print('--> ERROR: The simulation lack a solution.')
         
         # set the dgbin sum as the model objective
         self.model.objective = self.model.problem.Objective(Zero,direction='max')

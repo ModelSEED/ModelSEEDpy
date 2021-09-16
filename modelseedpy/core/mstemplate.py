@@ -104,7 +104,7 @@ class NewModelTemplateCompound:
                                ', '.join(r.id for r in self.species), 200))
 
 
-class NewModelTemplateCompCompound(Metabolite):
+class MSTemplateSpecies(Metabolite):
 
     def __init__(self, comp_cpd_id, charge, compartment, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
@@ -160,7 +160,7 @@ class NewModelTemplateCompCompound(Metabolite):
 
     @staticmethod
     def from_dict(d, template=None):
-        return NewModelTemplateCompCompound(
+        return MSTemplateSpecies(
             d['id'],
             d['charge'],
             d['templatecompartment_ref'].split('/')[-1],
@@ -179,7 +179,7 @@ class NewModelTemplateCompCompound(Metabolite):
         }
 
 
-class NewModelTemplateReaction(Reaction):
+class MSTemplateReaction(Reaction):
 
     def __init__(self, rxn_id: str, reference_id: str, name='', subsystem='', lower_bound=0.0, upper_bound=None,
                  reaction_type=TemplateReactionType.CONDITIONAL, gapfill_direction='=',
@@ -268,7 +268,7 @@ class NewModelTemplateReaction(Reaction):
         if 'lower_bound' in d and 'upper_bound' in d:
             lower_bound = d['lower_bound']
             upper_bound = d['upper_bound']
-        reaction = NewModelTemplateReaction(
+        reaction = MSTemplateReaction(
             d['id'], d['reaction_ref'].split('/')[-1], d['name'], '', lower_bound, upper_bound,
             d['type'], d['GapfillDirection'],
             d['base_cost'], d['reverse_penalty'], d['forward_penalty'],
@@ -894,12 +894,12 @@ class MSTemplateBuilder:
         template = MSTemplate(self.id, self.name, self.domain, self.template_type, self.version)
         template.add_compounds(list(map(lambda x: NewModelTemplateCompound.from_dict(x), self.compounds)))
         template.add_comp_compounds(
-            list(map(lambda x: NewModelTemplateCompCompound.from_dict(x), self.compartment_compounds)))
+            list(map(lambda x: MSTemplateSpecies.from_dict(x), self.compartment_compounds)))
         template.add_roles(list(map(lambda x: NewModelTemplateRole.from_dict(x), self.roles)))
         template.add_complexes(
             list(map(lambda x: NewModelTemplateComplex.from_dict(x, template), self.complexes)))
         template.add_reactions(
-            list(map(lambda x: NewModelTemplateReaction.from_dict(x, template), self.reactions)))
+            list(map(lambda x: MSTemplateReaction.from_dict(x, template), self.reactions)))
         template.biomasses += list(map(lambda x: AttrDict(x), self.biomasses))  # TODO: biomass object
 
         return template

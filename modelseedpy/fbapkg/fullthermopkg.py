@@ -45,7 +45,7 @@ class FullThermoPkg(BaseFBAPkg):
         BaseFBAPkg.__init__(self,model,"full thermo",{"logconc":"metabolite","dgerr":"metabolite"},{"potc":"metabolite"})
         self.pkgmgr.addpkgs(["SimpleThermoPkg"])
 
-    def build_package(self,parameters):
+    def build_package(self,parameters, verbose = True):
         self.validate_parameters(parameters,["modelseed_path"],{
             "default_max_conc":0.02,#M
             "default_min_conc":0.000001,#M
@@ -55,17 +55,18 @@ class FullThermoPkg(BaseFBAPkg):
             "compartment_potential":{},
             "temperature":298,#K
             "filter":None,
-            "infeasible_model": False
+            "infeasible_model": False,
+            'dgbin':False
         })
         self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_path"])
-        
         simple_thermo_parameters = {
                 "filter":self.parameters["filter"],
                 "min_potential":-100000,#KJ/mol
-                "max_potential":100000#KJ/mol
+                "max_potential":100000,#KJ/mol
+                'dgbin':self.parameters['dgbin']
             }
         if self.parameters['infeasible_model']:
-            simple_thermo_parameters.update({'dgbin': True})
+            simple_thermo_parameters['dgbin'] = True
         self.pkgmgr.getpkg("SimpleThermoPkg").build_package(simple_thermo_parameters)
             
         self.parameters["combined_custom_concentrations"] = FullThermoPkg.default_concentration()
@@ -89,7 +90,7 @@ class FullThermoPkg(BaseFBAPkg):
             #Build error variable
             self.build_variable(metabolite,"dgerr")
             #Build the potential constraint
-            self.build_constraint(metabolite)
+            self.build_constraint(metabolite, verbose)
 
     def build_variable(self,object,type):
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(object)
@@ -106,20 +107,23 @@ class FullThermoPkg(BaseFBAPkg):
                 ub = self.parameters["combined_custom_deltaG_error"][object.id]
             return BaseFBAPkg.build_variable(self,"dgerr",-1*ub,ub,"continuous",object)
     
-    def build_constraint(self,object):
+    def build_constraint(self,object, verbose):
         #potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potential
         if object.id not in self.pkgmgr.getpkg("SimpleThermoPkg").variables["potential"]:
             return None
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(object)
         if msid == None:
-            print(object.id+" has no modelseed ID!")
+            if verbose:
+                print(object.id+" has no modelseed ID!")
             return None
         mscpd = self.parameters["modelseed_api"].get_seed_compound(msid)
         if mscpd is None:
-            print(object.id+" has modelseed ID "+msid+" but cannot be found in ModelSEED DB!")
+            if verbose:
+                print(object.id+" has modelseed ID "+msid+" but cannot be found in ModelSEED DB!")
             return None
         if mscpd.deltag == 10000000:
-            print(object.id+" has modelseed ID "+msid+" but does not have a valid deltaG!")
+            if verbose:
+                print(object.id+" has modelseed ID "+msid+" but does not have a valid deltaG!")
             return None
         Faraday = physical_constants['Faraday constant'][0]#C/mol
         compartment_potential = 0
