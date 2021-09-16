@@ -190,3 +190,20 @@ class FBAHelper:
     def is_biomass(reaction):
         # TODO: check for SBO
         return reaction.id[0:3] == "bio"
+    
+    @staticmethod
+    def exchange_hash(model):
+        exchange_hash = {}
+        for reaction in model.reactions:
+            if len(reaction.metabolites) == 1:
+                for metabolite in reaction.metabolites:
+                    (base,comp,index) = FBAHelper.parse_id(metabolite)
+                    #exchange_hash[base][comp]
+                    
+        
+    @staticmethod
+    def parse_id(object):
+        if re.search('(.+)_([a-z])(\d+)$', object.id) != None:
+            m = re.search('(.+)_([a-z])(\d+)$', object.id)
+            return (m[1],m[2],int(m[3]))
+        return None
