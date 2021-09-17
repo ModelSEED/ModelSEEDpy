@@ -59,7 +59,6 @@ class FullThermoPkg(BaseFBAPkg):
             'dgbin':False
         })
         self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_path"])
-        
         simple_thermo_parameters = {
                 "filter":self.parameters["filter"],
                 "min_potential":-100000,#KJ/mol

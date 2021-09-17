@@ -87,13 +87,13 @@ class SimpleThermoPkg(BaseFBAPkg):
         # create the sum of dgbin variables
         dgbin_sum_coef = {}
         for reaction in self.variables['dgbinF']:
-            print(self.model.solver.status, '\t', reaction)
+            print(f'{self.model.solver.status} status for {reaction}')
             try:
                 dgbin_sum_coef[self.variables['dgbinF'][reaction].primal] = 1 
             except:
                 print('--> ERROR: The simulation lack a solution.')
         for reaction in self.variables['dgbinR']:
-            print(self.model.solver.status, '\t', reaction)
+            print(f'{self.model.solver.status} status for {reaction}')
             try:
                 dgbin_sum_coef[self.variables['dgbinR'][reaction].primal] = 1
             except:

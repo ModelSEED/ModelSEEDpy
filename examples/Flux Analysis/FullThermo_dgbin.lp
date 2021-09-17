@@ -2,7 +2,7 @@
 \Problem name: 
 
 Maximize
- _5e410d58m1714m11ecmbb50m0242ac110001#0:
+ _7d699e48m1714m11ecmbb50m0242ac110001#0:
 Subject To
  cpd00020_e0#0:               - rxn05469_c0#142 + rxn05469_c0_reverse_dd2b1#143
                               - _EX_cpd00020_e0#176
@@ -776,156 +776,156 @@ Subject To
                               - 1000 _EX_cpd00082_e0_revbin#284 <= 0
  _EX_cpd00082_e0_revbinR#261: _EX_cpd00082_e0_reverse_fe63a#189
                               + 1000 _EX_cpd00082_e0_revbin#284 <= 1000
- rxn00549_c0_thermo#262:      2000 rxn00549_c0_revbin#190
+ rxn00549_c0_thermo#262:      400000 rxn00549_c0_revbin#190
                               + cpd00009_c0_potential#297
                               - cpd00001_c0_potential#321
                               + cpd00072_c0_potential#328
                               - cpd00290_c0_potential#334
-                              + 2000 rxn00549_c0_dgbinF#357
-                              - 2000 rxn00549_c0_dgbinR#358
+                              + 400000 rxn00549_c0_dgbinF#357
+                              - 400000 rxn00549_c0_dgbinR#358
                               - Rgrxn00549_c0_thermo#262  = 0
- rxn05312_c0_thermo#263:      2000 rxn05312_c0_revbin#191
+ rxn05312_c0_thermo#263:      400000 rxn05312_c0_revbin#191
                               - cpd00009_e0_potential#289
                               + cpd00009_c0_potential#297
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
-                              + 2000 rxn05312_c0_dgbinF#359
-                              - 2000 rxn05312_c0_dgbinR#360
+                              + 400000 rxn05312_c0_dgbinF#359
+                              - 400000 rxn05312_c0_dgbinR#360
                               - Rgrxn05312_c0_thermo#263  = 0
- rxn00247_c0_thermo#264:      3000 rxn00247_c0_revbin#192
+ rxn00247_c0_thermo#264:      500000 rxn00247_c0_revbin#192
                               - cpd00032_c0_potential#302
                               - cpd00002_c0_potential#305
                               + cpd00011_c0_potential#322
                               + cpd00008_c0_potential#324
                               + cpd00061_c0_potential#356
-                              + 3000 rxn00247_c0_dgbinF#361
-                              - 3000 rxn00247_c0_dgbinR#362
+                              + 500000 rxn00247_c0_dgbinF#361
+                              - 500000 rxn00247_c0_dgbinR#362
                               - Rgrxn00247_c0_thermo#264  = 0
- rxn00786_c0_thermo#265:      2000 rxn00786_c0_revbin#193
+ rxn00786_c0_thermo#265:      300000 rxn00786_c0_revbin#193
                               + cpd00102_c0_potential#295
                               + cpd00095_c0_potential#325
                               - cpd00290_c0_potential#334
-                              + 2000 rxn00786_c0_dgbinF#363
-                              - 2000 rxn00786_c0_dgbinR#364
+                              + 300000 rxn00786_c0_dgbinF#363
+                              - 300000 rxn00786_c0_dgbinR#364
                               - Rgrxn00786_c0_thermo#265  = 0
- rxn08865_c0_thermo#266:      3000 rxn08865_c0_revbin#194
+ rxn08865_c0_thermo#266:      600000 rxn08865_c0_revbin#194
                               + 2 cpd00067_c0_potential#313
                               - 2 cpd00067_e0_potential#316
                               + cpd00130_c0_potential#346
                               - cpd00130_e0_potential#347
-                              + 3000 rxn08865_c0_dgbinF#365
-                              - 3000 rxn08865_c0_dgbinR#366
+                              + 600000 rxn08865_c0_dgbinF#365
+                              - 600000 rxn08865_c0_dgbinR#366
                               - Rgrxn08865_c0_thermo#266  = 0
- rxn01200_c0_thermo#267:      2000 rxn01200_c0_revbin#195
+ rxn01200_c0_thermo#267:      400000 rxn01200_c0_revbin#195
                               - cpd00198_c0_potential#290
                               + cpd00102_c0_potential#295
                               - cpd00101_c0_potential#330
                               + cpd00238_c0_potential#353
-                              + 2000 rxn01200_c0_dgbinF#367
-                              - 2000 rxn01200_c0_dgbinR#368
+                              + 400000 rxn01200_c0_dgbinF#367
+                              - 400000 rxn01200_c0_dgbinR#368
                               - Rgrxn01200_c0_thermo#267  = 0
- rxn08525_c0_thermo#268:      1000 rxn08525_c0_revbin#196
+ rxn08525_c0_thermo#268:      200000 rxn08525_c0_revbin#196
                               - cpd00047_e0_potential#336
                               + cpd00047_c0_potential#339
-                              + 1000 rxn08525_c0_dgbinF#369
-                              - 1000 rxn08525_c0_dgbinR#370
+                              + 200000 rxn08525_c0_dgbinF#369
+                              - 200000 rxn08525_c0_dgbinR#370
                               - Rgrxn08525_c0_thermo#268  = 0
- FRD7_c0_thermo#269:          2000 FRD7_c0_revbin#197
+ FRD7_c0_thermo#269:          400000 FRD7_c0_revbin#197
                               - cpd15561_c0_potential#288
                               - cpd00106_c0_potential#327
                               + cpd00036_c0_potential#344
                               + cpd15560_c0_potential#348
-                              + 2000 FRD7_c0_dgbinF#371
-                              - 2000 FRD7_c0_dgbinR#372 - RgFRD7_c0_thermo#269
-                               = 0
- rxn00545_c0_thermo#270:      3000 rxn00545_c0_revbin#198
+                              + 400000 FRD7_c0_dgbinF#371
+                              - 400000 FRD7_c0_dgbinR#372
+                              - RgFRD7_c0_thermo#269  = 0
+ rxn00545_c0_thermo#270:      500000 rxn00545_c0_revbin#198
                               - cpd00002_c0_potential#305
                               + cpd00067_c0_potential#313
                               + cpd00008_c0_potential#324
                               - cpd00072_c0_potential#328
                               + cpd00290_c0_potential#334
-                              + 3000 rxn00545_c0_dgbinF#373
-                              - 3000 rxn00545_c0_dgbinR#374
+                              + 500000 rxn00545_c0_dgbinF#373
+                              - 500000 rxn00545_c0_dgbinR#374
                               - Rgrxn00545_c0_thermo#270  = 0
- rxn09270_c0_thermo#271:      2000 rxn09270_c0_revbin#199
+ rxn09270_c0_thermo#271:      400000 rxn09270_c0_revbin#199
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
                               + cpd00036_e0_potential#342
                               - cpd00036_c0_potential#344
-                              + 2000 rxn09270_c0_dgbinF#375
-                              - 2000 rxn09270_c0_dgbinR#376
+                              + 400000 rxn09270_c0_dgbinF#375
+                              - 400000 rxn09270_c0_dgbinR#376
                               - Rgrxn09270_c0_thermo#271  = 0
- rxn00173_c0_thermo#272:      2000 rxn00173_c0_revbin#200
+ rxn00173_c0_thermo#272:      400000 rxn00173_c0_revbin#200
                               - cpd00009_c0_potential#297
                               + cpd00010_c0_potential#303
                               - cpd00022_c0_potential#323
                               + cpd00196_c0_potential#349
-                              + 2000 rxn00173_c0_dgbinF#377
-                              - 2000 rxn00173_c0_dgbinR#378
+                              + 400000 rxn00173_c0_dgbinF#377
+                              - 400000 rxn00173_c0_dgbinR#378
                               - Rgrxn00173_c0_thermo#272  = 0
- rxn08288_c0_thermo#273:      4000 rxn08288_c0_revbin#201
+ rxn08288_c0_thermo#273:      750000 rxn08288_c0_revbin#201
                               - cpd15561_c0_potential#288
                               - 0.5 cpd00007_c0_potential#309
                               - 2 cpd00067_c0_potential#313
                               + 2 cpd00067_e0_potential#316
                               + cpd00001_c0_potential#321
                               + cpd15560_c0_potential#348
-                              + 4000 rxn08288_c0_dgbinF#379
-                              - 4000 rxn08288_c0_dgbinR#380
+                              + 750000 rxn08288_c0_dgbinF#379
+                              - 750000 rxn08288_c0_dgbinR#380
                               - Rgrxn08288_c0_thermo#273  = 0
- rxn00459_c0_thermo#274:      2000 rxn00459_c0_revbin#202
+ rxn00459_c0_thermo#274:      300000 rxn00459_c0_revbin#202
                               - cpd00482_c0_potential#291
                               + cpd00001_c0_potential#321
                               + cpd00061_c0_potential#356
-                              + 2000 rxn00459_c0_dgbinF#381
-                              - 2000 rxn00459_c0_dgbinR#382
+                              + 300000 rxn00459_c0_dgbinF#381
+                              - 300000 rxn00459_c0_dgbinR#382
                               - Rgrxn00459_c0_thermo#274  = 0
- rxn00083_c0_thermo#275:      2000 rxn00083_c0_revbin#203
+ rxn00083_c0_thermo#275:      400000 rxn00083_c0_revbin#203
                               + cpd00004_c0_potential#306
                               + cpd00006_c0_potential#311
                               - cpd00005_c0_potential#317
                               - cpd00003_c0_potential#337
-                              + 2000 rxn00083_c0_dgbinF#383
-                              - 2000 rxn00083_c0_dgbinR#384
+                              + 400000 rxn00083_c0_dgbinF#383
+                              - 400000 rxn00083_c0_dgbinR#384
                               - Rgrxn00083_c0_thermo#275  = 0
- rxn00097_c0_thermo#276:      2000 rxn00097_c0_revbin#204
+ rxn00097_c0_thermo#276:      400000 rxn00097_c0_revbin#204
                               - cpd00002_c0_potential#305
                               + 2 cpd00008_c0_potential#324
                               - cpd00018_c0_potential#335
-                              + 2000 rxn00097_c0_dgbinF#385
-                              - 2000 rxn00097_c0_dgbinR#386
+                              + 400000 rxn00097_c0_dgbinF#385
+                              - 400000 rxn00097_c0_dgbinR#386
                               - Rgrxn00097_c0_thermo#276  = 0
- rxn32421_c0_thermo#277:      3000 rxn32421_c0_revbin#205
+ rxn32421_c0_thermo#277:      600000 rxn32421_c0_revbin#205
                               + cpd00009_c0_potential#297
                               + cpd00032_c0_potential#302
                               + cpd00067_c0_potential#313
                               - cpd00001_c0_potential#321
                               - cpd00011_c0_potential#322
                               - cpd00061_c0_potential#356
-                              + 3000 rxn32421_c0_dgbinF#387
-                              - 3000 rxn32421_c0_dgbinR#388
+                              + 600000 rxn32421_c0_dgbinF#387
+                              - 600000 rxn32421_c0_dgbinR#388
                               - Rgrxn32421_c0_thermo#277  = 0
- rxn00154_c0_thermo#278:      3000 rxn00154_c0_revbin#206
+ rxn00154_c0_thermo#278:      600000 rxn00154_c0_revbin#206
                               - cpd00020_c0_potential#287
                               - cpd00010_c0_potential#303
                               + cpd00004_c0_potential#306
                               + cpd00011_c0_potential#322
                               + cpd00022_c0_potential#323
                               - cpd00003_c0_potential#337
-                              + 3000 rxn00154_c0_dgbinF#389
-                              - 3000 rxn00154_c0_dgbinR#390
+                              + 600000 rxn00154_c0_dgbinF#389
+                              - 600000 rxn00154_c0_dgbinR#390
                               - Rgrxn00154_c0_thermo#278  = 0
- rxn19316_c0_thermo#279:      3000 rxn19316_c0_revbin#207
+ rxn19316_c0_thermo#279:      600000 rxn19316_c0_revbin#207
                               - cpd00032_c0_potential#302
                               + cpd00010_c0_potential#303
                               + cpd00067_c0_potential#313
                               - cpd00001_c0_potential#321
                               - cpd00022_c0_potential#323
                               + cpd00137_c0_potential#326
-                              + 3000 rxn19316_c0_dgbinF#391
-                              - 3000 rxn19316_c0_dgbinR#392
+                              + 600000 rxn19316_c0_dgbinF#391
+                              - 600000 rxn19316_c0_dgbinR#392
                               - Rgrxn19316_c0_thermo#279  = 0
- rxn00187_c0_thermo#280:      4000 rxn00187_c0_revbin#208
+ rxn00187_c0_thermo#280:      700000 rxn00187_c0_revbin#208
                               - cpd00023_c0_potential#294
                               + cpd00009_c0_potential#297
                               - cpd00002_c0_potential#305
@@ -933,345 +933,345 @@ Subject To
                               + cpd00067_c0_potential#313
                               - cpd00013_c0_potential#318
                               + cpd00008_c0_potential#324
-                              + 4000 rxn00187_c0_dgbinF#393
-                              - 4000 rxn00187_c0_dgbinR#394
+                              + 700000 rxn00187_c0_dgbinF#393
+                              - 700000 rxn00187_c0_dgbinR#394
                               - Rgrxn00187_c0_thermo#280  = 0
- rxn00558_c0_thermo#281:      1000 rxn00558_c0_revbin#209
+ rxn00558_c0_thermo#281:      200000 rxn00558_c0_revbin#209
                               + cpd00072_c0_potential#328
                               - cpd00079_c0_potential#351
-                              + 1000 rxn00558_c0_dgbinF#395
-                              - 1000 rxn00558_c0_dgbinR#396
+                              + 200000 rxn00558_c0_dgbinF#395
+                              - 200000 rxn00558_c0_dgbinR#396
                               - Rgrxn00558_c0_thermo#281  = 0
- rxn05319_c0_thermo#282:      1000 rxn05319_c0_revbin#210
+ rxn05319_c0_thermo#282:      200000 rxn05319_c0_revbin#210
                               - cpd00001_e0_potential#319
                               + cpd00001_c0_potential#321
-                              + 1000 rxn05319_c0_dgbinF#397
-                              - 1000 rxn05319_c0_dgbinR#398
+                              + 200000 rxn05319_c0_dgbinF#397
+                              - 200000 rxn05319_c0_dgbinR#398
                               - Rgrxn05319_c0_thermo#282  = 0
- rxn00747_c0_thermo#283:      1000 rxn00747_c0_revbin#211
+ rxn00747_c0_thermo#283:      200000 rxn00747_c0_revbin#211
                               + cpd00102_c0_potential#295
                               - cpd00095_c0_potential#325
-                              + 1000 rxn00747_c0_dgbinF#399
-                              - 1000 rxn00747_c0_dgbinR#400
+                              + 200000 rxn00747_c0_dgbinF#399
+                              - 200000 rxn00747_c0_dgbinR#400
                               - Rgrxn00747_c0_thermo#283  = 0
- rxn05468_c0_thermo#284:      1000 rxn05468_c0_revbin#212
+ rxn05468_c0_thermo#284:      200000 rxn05468_c0_revbin#212
                               - cpd00007_e0_potential#307
                               + cpd00007_c0_potential#309
-                              + 1000 rxn05468_c0_dgbinF#401
-                              - 1000 rxn05468_c0_dgbinR#402
+                              + 200000 rxn05468_c0_dgbinF#401
+                              - 200000 rxn05468_c0_dgbinR#402
                               - Rgrxn05468_c0_thermo#284  = 0
- rxn35242_c0_thermo#285:      3000 rxn35242_c0_revbin#213
+ rxn35242_c0_thermo#285:      500000 rxn35242_c0_revbin#213
                               + cpd00020_c0_potential#287
                               + cpd00002_c0_potential#305
                               - cpd00067_c0_potential#313
                               - cpd00008_c0_potential#324
                               - cpd00061_c0_potential#356
-                              + 3000 rxn35242_c0_dgbinF#403
-                              - 3000 rxn35242_c0_dgbinR#404
+                              + 500000 rxn35242_c0_dgbinF#403
+                              - 500000 rxn35242_c0_dgbinR#404
                               - Rgrxn35242_c0_thermo#285  = 0
- rxn08535_c0_thermo#286:      2000 rxn08535_c0_revbin#214
+ rxn08535_c0_thermo#286:      400000 rxn08535_c0_revbin#214
                               + cpd00020_c0_potential#287
                               + cpd00072_c0_potential#328
                               - cpd00082_e0_potential#350
                               - cpd00061_c0_potential#356
-                              + 2000 rxn08535_c0_dgbinF#405
-                              - 2000 rxn08535_c0_dgbinR#406
+                              + 400000 rxn08535_c0_dgbinF#405
+                              - 400000 rxn08535_c0_dgbinR#406
                               - Rgrxn08535_c0_thermo#286  = 0
- rxn01115_c0_thermo#287:      3000 rxn01115_c0_revbin#215
+ rxn01115_c0_thermo#287:      500000 rxn01115_c0_revbin#215
                               + cpd00171_c0_potential#304
                               - cpd00006_c0_potential#311
                               + cpd00005_c0_potential#317
                               + cpd00011_c0_potential#322
                               - cpd00284_c0_potential#332
-                              + 3000 rxn01115_c0_dgbinF#407
-                              - 3000 rxn01115_c0_dgbinR#408
+                              + 500000 rxn01115_c0_dgbinF#407
+                              - 500000 rxn01115_c0_dgbinR#408
                               - Rgrxn01115_c0_thermo#287  = 0
- rxn00225_c0_thermo#288:      2000 rxn00225_c0_revbin#216
+ rxn00225_c0_thermo#288:      400000 rxn00225_c0_revbin#216
                               - cpd00002_c0_potential#305
                               + cpd00008_c0_potential#324
                               + cpd00196_c0_potential#349
                               - cpd00029_c0_potential#352
-                              + 2000 rxn00225_c0_dgbinF#409
-                              - 2000 rxn00225_c0_dgbinR#410
+                              + 400000 rxn00225_c0_dgbinF#409
+                              - 400000 rxn00225_c0_dgbinR#410
                               - Rgrxn00225_c0_thermo#288  = 0
- rxn00500_c0_thermo#289:      3000 rxn00500_c0_revbin#217
+ rxn00500_c0_thermo#289:      500000 rxn00500_c0_revbin#217
                               + cpd00020_c0_potential#287
                               - cpd00221_c0_potential#301
                               + cpd00004_c0_potential#306
                               + cpd00067_c0_potential#313
                               - cpd00003_c0_potential#337
-                              + 3000 rxn00500_c0_dgbinF#411
-                              - 3000 rxn00500_c0_dgbinR#412
+                              + 500000 rxn00500_c0_dgbinF#411
+                              - 500000 rxn00500_c0_dgbinR#412
                               - Rgrxn00500_c0_thermo#289  = 0
- rxn08350_c0_thermo#290:      2000 rxn08350_c0_revbin#218
+ rxn08350_c0_thermo#290:      400000 rxn08350_c0_revbin#218
                               - cpd00221_e0_potential#299
                               + cpd00221_c0_potential#301
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
-                              + 2000 rxn08350_c0_dgbinF#413
-                              - 2000 rxn08350_c0_dgbinR#414
+                              + 400000 rxn08350_c0_dgbinF#413
+                              - 400000 rxn08350_c0_dgbinR#414
                               - Rgrxn08350_c0_thermo#290  = 0
- rxn20162_c0_thermo#291:      3000 rxn20162_c0_revbin#219
+ rxn20162_c0_thermo#291:      600000 rxn20162_c0_revbin#219
                               + cpd00010_c0_potential#303
                               + cpd00067_c0_potential#313
                               - cpd00001_c0_potential#321
                               - cpd00022_c0_potential#323
                               - cpd00040_c0_potential#343
                               + cpd00130_c0_potential#346
-                              + 3000 rxn20162_c0_dgbinF#415
-                              - 3000 rxn20162_c0_dgbinR#416
+                              + 600000 rxn20162_c0_dgbinF#415
+                              - 600000 rxn20162_c0_dgbinR#416
                               - Rgrxn20162_c0_thermo#291  = 0
- rxn01333_c0_thermo#292:      2000 rxn01333_c0_revbin#220
+ rxn01333_c0_thermo#292:      400000 rxn01333_c0_revbin#220
                               - cpd00102_c0_potential#295
                               + cpd00236_c0_potential#296
                               + cpd00072_c0_potential#328
                               - cpd00238_c0_potential#353
-                              + 2000 rxn01333_c0_dgbinF#417
-                              - 2000 rxn01333_c0_dgbinR#418
+                              + 400000 rxn01333_c0_dgbinF#417
+                              - 400000 rxn01333_c0_dgbinR#418
                               - Rgrxn01333_c0_thermo#292  = 0
- rxn30674_c0_thermo#293:      2000 rxn30674_c0_revbin#221
+ rxn30674_c0_thermo#293:      300000 rxn30674_c0_revbin#221
                               - cpd00001_c0_potential#321
                               - cpd00106_c0_potential#327
                               + cpd00130_c0_potential#346
-                              + 2000 rxn30674_c0_dgbinF#419
-                              - 2000 rxn30674_c0_dgbinR#420
+                              + 300000 rxn30674_c0_dgbinF#419
+                              - 300000 rxn30674_c0_dgbinR#420
                               - Rgrxn30674_c0_thermo#293  = 0
- rxn01100_c0_thermo#294:      2000 rxn01100_c0_revbin#222
+ rxn01100_c0_thermo#294:      400000 rxn01100_c0_revbin#222
                               - cpd00169_c0_potential#286
                               - cpd00002_c0_potential#305
                               + cpd00008_c0_potential#324
                               + cpd00203_c0_potential#340
-                              + 2000 rxn01100_c0_dgbinF#421
-                              - 2000 rxn01100_c0_dgbinR#422
+                              + 400000 rxn01100_c0_dgbinF#421
+                              - 400000 rxn01100_c0_dgbinR#422
                               - Rgrxn01100_c0_thermo#294  = 0
- rxn39085_c0_thermo#295:      1000 rxn39085_c0_revbin#223
+ rxn39085_c0_thermo#295:      200000 rxn39085_c0_revbin#223
                               - cpd00013_e0_potential#315
                               + cpd00013_c0_potential#318
-                              + 1000 rxn39085_c0_dgbinF#423
-                              - 1000 rxn39085_c0_dgbinR#424
+                              + 200000 rxn39085_c0_dgbinF#423
+                              - 200000 rxn39085_c0_dgbinR#424
                               - Rgrxn39085_c0_thermo#295  = 0
- rxn08173_c0_thermo#296:      6000 rxn08173_c0_revbin#224
+ rxn08173_c0_thermo#296:      1100000 rxn08173_c0_revbin#224
                               - cpd00009_c0_potential#297
                               + cpd00002_c0_potential#305
                               + 3 cpd00067_c0_potential#313
                               - 4 cpd00067_e0_potential#316
                               + cpd00001_c0_potential#321
                               - cpd00008_c0_potential#324
-                              + 6000 rxn08173_c0_dgbinF#425
-                              - 6000 rxn08173_c0_dgbinR#426
+                              + 1100000 rxn08173_c0_dgbinF#425
+                              - 1100000 rxn08173_c0_dgbinR#426
                               - Rgrxn08173_c0_thermo#296  = 0
- rxn00285_c0_thermo#297:      3000 rxn00285_c0_revbin#225
+ rxn00285_c0_thermo#297:      600000 rxn00285_c0_revbin#225
                               + cpd00009_c0_potential#297
                               - cpd00010_c0_potential#303
                               - cpd00002_c0_potential#305
                               + cpd00008_c0_potential#324
                               + cpd00078_c0_potential#341
                               - cpd00036_c0_potential#344
-                              + 3000 rxn00285_c0_dgbinF#427
-                              - 3000 rxn00285_c0_dgbinR#428
+                              + 600000 rxn00285_c0_dgbinF#427
+                              - 600000 rxn00285_c0_dgbinR#428
                               - Rgrxn00285_c0_thermo#297  = 0
- rxn00161_c0_thermo#298:      3000 rxn00161_c0_revbin#226
+ rxn00161_c0_thermo#298:      500000 rxn00161_c0_revbin#226
                               + cpd00020_c0_potential#287
                               - cpd00006_c0_potential#311
                               + cpd00005_c0_potential#317
                               + cpd00011_c0_potential#322
                               - cpd00130_c0_potential#346
-                              + 3000 rxn00161_c0_dgbinF#429
-                              - 3000 rxn00161_c0_dgbinR#430
+                              + 500000 rxn00161_c0_dgbinF#429
+                              - 500000 rxn00161_c0_dgbinR#430
                               - Rgrxn00161_c0_thermo#298  = 0
- rxn00543_c0_thermo#299:      3000 rxn00543_c0_revbin#227
+ rxn00543_c0_thermo#299:      500000 rxn00543_c0_revbin#227
                               + cpd00004_c0_potential#306
                               + cpd00067_c0_potential#313
                               + cpd00071_c0_potential#314
                               - cpd00363_c0_potential#331
                               - cpd00003_c0_potential#337
-                              + 3000 rxn00543_c0_dgbinF#431
-                              - 3000 rxn00543_c0_dgbinR#432
+                              + 500000 rxn00543_c0_dgbinF#431
+                              - 500000 rxn00543_c0_dgbinR#432
                               - Rgrxn00543_c0_thermo#299  = 0
- rxn05297_c0_thermo#300:      2000 rxn05297_c0_revbin#228
+ rxn05297_c0_thermo#300:      400000 rxn05297_c0_revbin#228
                               - cpd00023_e0_potential#292
                               + cpd00023_c0_potential#294
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
-                              + 2000 rxn05297_c0_dgbinF#433
-                              - 2000 rxn05297_c0_dgbinR#434
+                              + 400000 rxn05297_c0_dgbinF#433
+                              - 400000 rxn05297_c0_dgbinR#434
                               - Rgrxn05297_c0_thermo#300  = 0
- rxn05467_c0_thermo#301:      1000 rxn05467_c0_revbin#229
+ rxn05467_c0_thermo#301:      200000 rxn05467_c0_revbin#229
                               - cpd00011_e0_potential#320
                               + cpd00011_c0_potential#322
-                              + 1000 rxn05467_c0_dgbinF#435
-                              - 1000 rxn05467_c0_dgbinR#436
+                              + 200000 rxn05467_c0_dgbinF#435
+                              - 200000 rxn05467_c0_dgbinR#436
                               - Rgrxn05467_c0_thermo#301  = 0
- rxn05488_c0_thermo#302:      2000 rxn05488_c0_revbin#230
+ rxn05488_c0_thermo#302:      400000 rxn05488_c0_revbin#230
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
                               + cpd00029_c0_potential#352
                               - cpd00029_e0_potential#354
-                              + 2000 rxn05488_c0_dgbinF#437
-                              - 2000 rxn05488_c0_dgbinR#438
+                              + 400000 rxn05488_c0_dgbinF#437
+                              - 400000 rxn05488_c0_dgbinR#438
                               - Rgrxn05488_c0_thermo#302  = 0
- rxn00085_c0_thermo#303:      4000 rxn00085_c0_revbin#231
+ rxn00085_c0_thermo#303:      700000 rxn00085_c0_revbin#231
                               + 2 cpd00023_c0_potential#294
                               - cpd00053_c0_potential#310
                               + cpd00006_c0_potential#311
                               - cpd00067_c0_potential#313
                               - cpd00005_c0_potential#317
                               - cpd00024_c0_potential#333
-                              + 4000 rxn00085_c0_dgbinF#439
-                              - 4000 rxn00085_c0_dgbinR#440
+                              + 700000 rxn00085_c0_dgbinF#439
+                              - 700000 rxn00085_c0_dgbinR#440
                               - Rgrxn00085_c0_thermo#303  = 0
- rxn00062_c0_thermo#304:      3000 rxn00062_c0_revbin#232
+ rxn00062_c0_thermo#304:      500000 rxn00062_c0_revbin#232
                               + cpd00009_c0_potential#297
                               - cpd00002_c0_potential#305
                               + cpd00067_c0_potential#313
                               - cpd00001_c0_potential#321
                               + cpd00008_c0_potential#324
-                              + 3000 rxn00062_c0_dgbinF#441
-                              - 3000 rxn00062_c0_dgbinR#442
+                              + 500000 rxn00062_c0_dgbinF#441
+                              - 500000 rxn00062_c0_dgbinR#442
                               - Rgrxn00062_c0_thermo#304  = 0
- rxn34258_c0_thermo#305:      2000 rxn34258_c0_revbin#233
+ rxn34258_c0_thermo#305:      400000 rxn34258_c0_revbin#233
                               - cpd00020_c0_potential#287
                               - cpd00010_c0_potential#303
                               + cpd00022_c0_potential#323
                               + cpd00047_c0_potential#339
-                              + 2000 rxn34258_c0_dgbinF#443
-                              - 2000 rxn34258_c0_dgbinR#444
+                              + 400000 rxn34258_c0_dgbinF#443
+                              - 400000 rxn34258_c0_dgbinR#444
                               - Rgrxn34258_c0_thermo#305  = 0
- rxn00171_c0_thermo#306:      3000 rxn00171_c0_revbin#234
+ rxn00171_c0_thermo#306:      600000 rxn00171_c0_revbin#234
                               - cpd00010_c0_potential#303
                               + cpd00004_c0_potential#306
                               + cpd00067_c0_potential#313
                               - cpd00071_c0_potential#314
                               + cpd00022_c0_potential#323
                               - cpd00003_c0_potential#337
-                              + 3000 rxn00171_c0_dgbinF#445
-                              - 3000 rxn00171_c0_dgbinR#446
+                              + 600000 rxn00171_c0_dgbinF#445
+                              - 600000 rxn00171_c0_dgbinR#446
                               - Rgrxn00171_c0_thermo#306  = 0
- rxn05559_c0_thermo#307:      2000 rxn05559_c0_revbin#235
+ rxn05559_c0_thermo#307:      400000 rxn05559_c0_revbin#235
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
                               - cpd00047_e0_potential#336
                               + cpd00047_c0_potential#339
-                              + 2000 rxn05559_c0_dgbinF#447
-                              - 2000 rxn05559_c0_dgbinR#448
+                              + 400000 rxn05559_c0_dgbinF#447
+                              - 400000 rxn05559_c0_dgbinR#448
                               - Rgrxn05559_c0_thermo#307  = 0
- rxn09272_c0_thermo#308:      2000 rxn09272_c0_revbin#236
+ rxn09272_c0_thermo#308:      400000 rxn09272_c0_revbin#236
                               + cpd15561_c0_potential#288
                               + cpd00106_c0_potential#327
                               - cpd00036_c0_potential#344
                               - cpd15560_c0_potential#348
-                              + 2000 rxn09272_c0_dgbinF#449
-                              - 2000 rxn09272_c0_dgbinR#450
+                              + 400000 rxn09272_c0_dgbinF#449
+                              - 400000 rxn09272_c0_dgbinR#450
                               - Rgrxn09272_c0_thermo#308  = 0
- rxn00604_c0_thermo#309:      3000 rxn00604_c0_revbin#237
+ rxn00604_c0_thermo#309:      500000 rxn00604_c0_revbin#237
                               + cpd00911_c0_potential#298
                               - cpd00006_c0_potential#311
                               + cpd00067_c0_potential#313
                               + cpd00005_c0_potential#317
                               - cpd00079_c0_potential#351
-                              + 3000 rxn00604_c0_dgbinF#451
-                              - 3000 rxn00604_c0_dgbinR#452
+                              + 500000 rxn00604_c0_dgbinF#451
+                              - 500000 rxn00604_c0_dgbinR#452
                               - Rgrxn00604_c0_thermo#309  = 0
- rxn00159_c0_thermo#310:      3000 rxn00159_c0_revbin#238
+ rxn00159_c0_thermo#310:      500000 rxn00159_c0_revbin#238
                               + cpd00020_c0_potential#287
                               + cpd00004_c0_potential#306
                               + cpd00011_c0_potential#322
                               - cpd00003_c0_potential#337
                               - cpd00130_c0_potential#346
-                              + 3000 rxn00159_c0_dgbinF#453
-                              - 3000 rxn00159_c0_dgbinR#454
+                              + 500000 rxn00159_c0_dgbinF#453
+                              - 500000 rxn00159_c0_dgbinR#454
                               - Rgrxn00159_c0_thermo#310  = 0
- rxn08972_c0_thermo#311:      6000 rxn08972_c0_revbin#239
+ rxn08972_c0_thermo#311:      1100000 rxn08972_c0_revbin#239
                               + cpd15561_c0_potential#288
                               - cpd00004_c0_potential#306
                               - 4 cpd00067_c0_potential#313
                               + 3 cpd00067_e0_potential#316
                               + cpd00003_c0_potential#337
                               - cpd15560_c0_potential#348
-                              + 6000 rxn08972_c0_dgbinF#455
-                              - 6000 rxn08972_c0_dgbinR#456
+                              + 1100000 rxn08972_c0_dgbinF#455
+                              - 1100000 rxn08972_c0_dgbinR#456
                               - Rgrxn08972_c0_thermo#311  = 0
- rxn08542_c0_thermo#312:      3000 rxn08542_c0_revbin#240
+ rxn08542_c0_thermo#312:      600000 rxn08542_c0_revbin#240
                               + 2 cpd00067_c0_potential#313
                               - 2 cpd00067_e0_potential#316
                               + cpd00106_c0_potential#327
                               - cpd00106_e0_potential#329
-                              + 3000 rxn08542_c0_dgbinF#457
-                              - 3000 rxn08542_c0_dgbinR#458
+                              + 600000 rxn08542_c0_dgbinF#457
+                              - 600000 rxn08542_c0_dgbinR#458
                               - Rgrxn08542_c0_thermo#312  = 0
- rxn01106_c0_thermo#313:      1000 rxn01106_c0_revbin#241
+ rxn01106_c0_thermo#313:      200000 rxn01106_c0_revbin#241
                               + cpd00169_c0_potential#286
                               - cpd00482_c0_potential#291
-                              + 1000 rxn01106_c0_dgbinF#459
-                              - 1000 rxn01106_c0_dgbinR#460
+                              + 200000 rxn01106_c0_dgbinF#459
+                              - 200000 rxn01106_c0_dgbinR#460
                               - Rgrxn01106_c0_thermo#313  = 0
- rxn00198_c0_thermo#314:      3000 rxn00198_c0_revbin#242
+ rxn00198_c0_thermo#314:      500000 rxn00198_c0_revbin#242
                               - cpd00006_c0_potential#311
                               + cpd00005_c0_potential#317
                               + cpd00011_c0_potential#322
                               + cpd00024_c0_potential#333
                               - cpd00260_c0_potential#345
-                              + 3000 rxn00198_c0_dgbinF#461
-                              - 3000 rxn00198_c0_dgbinR#462
+                              + 500000 rxn00198_c0_dgbinF#461
+                              - 500000 rxn00198_c0_dgbinR#462
                               - Rgrxn00198_c0_thermo#314  = 0
- rxn01476_c0_thermo#315:      2000 rxn01476_c0_revbin#243
+ rxn01476_c0_thermo#315:      400000 rxn01476_c0_revbin#243
                               - cpd00911_c0_potential#298
                               + cpd00067_c0_potential#313
                               - cpd00001_c0_potential#321
                               + cpd00284_c0_potential#332
-                              + 2000 rxn01476_c0_dgbinF#463
-                              - 2000 rxn01476_c0_dgbinR#464
+                              + 400000 rxn01476_c0_dgbinF#463
+                              - 400000 rxn01476_c0_dgbinR#464
                               - Rgrxn01476_c0_thermo#315  = 0
- rxn00781_c0_thermo#316:      3000 rxn00781_c0_revbin#244
+ rxn00781_c0_thermo#316:      600000 rxn00781_c0_revbin#244
                               - cpd00102_c0_potential#295
                               - cpd00009_c0_potential#297
                               + cpd00004_c0_potential#306
                               + cpd00067_c0_potential#313
                               - cpd00003_c0_potential#337
                               + cpd00203_c0_potential#340
-                              + 3000 rxn00781_c0_dgbinF#465
-                              - 3000 rxn00781_c0_dgbinR#466
+                              + 600000 rxn00781_c0_dgbinF#465
+                              - 600000 rxn00781_c0_dgbinR#466
                               - Rgrxn00781_c0_thermo#316  = 0
- rxn09295_c0_thermo#317:      4000 rxn09295_c0_revbin#245
+ rxn09295_c0_thermo#317:      800000 rxn09295_c0_revbin#245
                               - cpd00004_c0_potential#306
                               - cpd00006_c0_potential#311
                               + 2 cpd00067_c0_potential#313
                               - 2 cpd00067_e0_potential#316
                               + cpd00005_c0_potential#317
                               + cpd00003_c0_potential#337
-                              + 4000 rxn09295_c0_dgbinF#467
-                              - 4000 rxn09295_c0_dgbinR#468
+                              + 800000 rxn09295_c0_dgbinF#467
+                              - 800000 rxn09295_c0_dgbinR#468
                               - Rgrxn09295_c0_thermo#317  = 0
- rxn00785_c0_thermo#318:      2000 rxn00785_c0_revbin#246
+ rxn00785_c0_thermo#318:      400000 rxn00785_c0_revbin#246
                               - cpd00198_c0_potential#290
                               + cpd00102_c0_potential#295
                               - cpd00236_c0_potential#296
                               + cpd00072_c0_potential#328
-                              + 2000 rxn00785_c0_dgbinF#469
-                              - 2000 rxn00785_c0_dgbinR#470
+                              + 400000 rxn00785_c0_dgbinF#469
+                              - 400000 rxn00785_c0_dgbinR#470
                               - Rgrxn00785_c0_thermo#318  = 0
- rxn08032_c0_thermo#319:      1000 rxn08032_c0_revbin#247
+ rxn08032_c0_thermo#319:      200000 rxn08032_c0_revbin#247
                               - cpd00071_e0_potential#312
                               + cpd00071_c0_potential#314
-                              + 1000 rxn08032_c0_dgbinF#471
-                              - 1000 rxn08032_c0_dgbinR#472
+                              + 200000 rxn08032_c0_dgbinF#471
+                              - 200000 rxn08032_c0_dgbinR#472
                               - Rgrxn08032_c0_thermo#319  = 0
- rxn00189_c0_thermo#320:      2000 rxn00189_c0_revbin#248
+ rxn00189_c0_thermo#320:      400000 rxn00189_c0_revbin#248
                               + cpd00023_c0_potential#294
                               - cpd00053_c0_potential#310
                               + cpd00013_c0_potential#318
                               - cpd00001_c0_potential#321
-                              + 2000 rxn00189_c0_dgbinF#473
-                              - 2000 rxn00189_c0_dgbinR#474
+                              + 400000 rxn00189_c0_dgbinF#473
+                              - 400000 rxn00189_c0_dgbinR#474
                               - Rgrxn00189_c0_thermo#320  = 0
- rxn00336_c0_thermo#321:      2000 rxn00336_c0_revbin#249
+ rxn00336_c0_thermo#321:      300000 rxn00336_c0_revbin#249
                               + cpd00040_c0_potential#343
                               + cpd00036_c0_potential#344
                               - cpd00260_c0_potential#345
-                              + 2000 rxn00336_c0_dgbinF#475
-                              - 2000 rxn00336_c0_dgbinR#476
+                              + 300000 rxn00336_c0_dgbinF#475
+                              - 300000 rxn00336_c0_dgbinR#476
                               - Rgrxn00336_c0_thermo#321  = 0
- rxn00147_c0_thermo#322:      5000 rxn00147_c0_revbin#250
+ rxn00147_c0_thermo#322:      800000 rxn00147_c0_revbin#250
                               - cpd00020_c0_potential#287
                               + cpd00009_c0_potential#297
                               - cpd00002_c0_potential#305
@@ -1279,66 +1279,66 @@ Subject To
                               - cpd00001_c0_potential#321
                               + cpd00018_c0_potential#335
                               + cpd00061_c0_potential#356
-                              + 5000 rxn00147_c0_dgbinF#477
-                              - 5000 rxn00147_c0_dgbinR#478
+                              + 800000 rxn00147_c0_dgbinF#477
+                              - 800000 rxn00147_c0_dgbinR#478
                               - Rgrxn00147_c0_thermo#322  = 0
- rxn09269_c0_thermo#323:      3000 rxn09269_c0_revbin#251
+ rxn09269_c0_thermo#323:      600000 rxn09269_c0_revbin#251
                               + 2 cpd00067_c0_potential#313
                               - 2 cpd00067_e0_potential#316
                               - cpd00036_e0_potential#342
                               + cpd00036_c0_potential#344
-                              + 3000 rxn09269_c0_dgbinF#479
-                              - 3000 rxn09269_c0_dgbinR#480
+                              + 600000 rxn09269_c0_dgbinF#479
+                              - 600000 rxn09269_c0_dgbinR#480
                               - Rgrxn09269_c0_thermo#323  = 0
- rxn00248_c0_thermo#324:      3000 rxn00248_c0_revbin#252
+ rxn00248_c0_thermo#324:      500000 rxn00248_c0_revbin#252
                               + cpd00032_c0_potential#302
                               + cpd00004_c0_potential#306
                               + cpd00067_c0_potential#313
                               - cpd00003_c0_potential#337
                               - cpd00130_c0_potential#346
-                              + 3000 rxn00248_c0_dgbinF#481
-                              - 3000 rxn00248_c0_dgbinR#482
+                              + 500000 rxn00248_c0_dgbinF#481
+                              - 500000 rxn00248_c0_dgbinR#482
                               - Rgrxn00248_c0_thermo#324  = 0
- rxn00974_c0_thermo#325:      2000 rxn00974_c0_revbin#253
+ rxn00974_c0_thermo#325:      300000 rxn00974_c0_revbin#253
                               + cpd00331_c0_potential#300
                               + cpd00001_c0_potential#321
                               - cpd00137_c0_potential#326
-                              + 2000 rxn00974_c0_dgbinF#483
-                              - 2000 rxn00974_c0_dgbinR#484
+                              + 300000 rxn00974_c0_dgbinF#483
+                              - 300000 rxn00974_c0_dgbinR#484
                               - Rgrxn00974_c0_thermo#325  = 0
- rxn05493_c0_thermo#326:      2000 rxn05493_c0_revbin#254
+ rxn05493_c0_thermo#326:      400000 rxn05493_c0_revbin#254
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
                               + cpd00024_c0_potential#333
                               - cpd00024_e0_potential#338
-                              + 2000 rxn05493_c0_dgbinF#485
-                              - 2000 rxn05493_c0_dgbinR#486
+                              + 400000 rxn05493_c0_dgbinF#485
+                              - 400000 rxn05493_c0_dgbinR#486
                               - Rgrxn05493_c0_thermo#326  = 0
- rxn00777_c0_thermo#327:      1000 rxn00777_c0_revbin#255
+ rxn00777_c0_thermo#327:      200000 rxn00777_c0_revbin#255
                               + cpd00171_c0_potential#304
                               - cpd00101_c0_potential#330
-                              + 1000 rxn00777_c0_dgbinF#487
-                              - 1000 rxn00777_c0_dgbinR#488
+                              + 200000 rxn00777_c0_dgbinF#487
+                              - 200000 rxn00777_c0_dgbinR#488
                               - Rgrxn00777_c0_thermo#327  = 0
- rxn08094_c0_thermo#328:      3000 rxn08094_c0_revbin#256
+ rxn08094_c0_thermo#328:      600000 rxn08094_c0_revbin#256
                               - cpd00010_c0_potential#303
                               + cpd00004_c0_potential#306
                               + cpd00011_c0_potential#322
                               - cpd00024_c0_potential#333
                               - cpd00003_c0_potential#337
                               + cpd00078_c0_potential#341
-                              + 3000 rxn08094_c0_dgbinF#489
-                              - 3000 rxn08094_c0_dgbinR#490
+                              + 600000 rxn08094_c0_dgbinF#489
+                              - 600000 rxn08094_c0_dgbinR#490
                               - Rgrxn08094_c0_thermo#328  = 0
- rxn05226_c0_thermo#329:      2000 rxn05226_c0_revbin#257
+ rxn05226_c0_thermo#329:      400000 rxn05226_c0_revbin#257
                               + cpd00020_c0_potential#287
                               - cpd00027_e0_potential#293
                               + cpd00079_c0_potential#351
                               - cpd00061_c0_potential#356
-                              + 2000 rxn05226_c0_dgbinF#491
-                              - 2000 rxn05226_c0_dgbinR#492
+                              + 400000 rxn05226_c0_dgbinF#491
+                              - 400000 rxn05226_c0_dgbinR#492
                               - Rgrxn05226_c0_thermo#329  = 0
- rxn05155_c0_thermo#330:      4000 rxn05155_c0_revbin#258
+ rxn05155_c0_thermo#330:      700000 rxn05155_c0_revbin#258
                               + cpd00009_c0_potential#297
                               - cpd00002_c0_potential#305
                               - cpd00053_e0_potential#308
@@ -1346,18 +1346,18 @@ Subject To
                               + cpd00067_c0_potential#313
                               - cpd00001_c0_potential#321
                               + cpd00008_c0_potential#324
-                              + 4000 rxn05155_c0_dgbinF#493
-                              - 4000 rxn05155_c0_dgbinR#494
+                              + 700000 rxn05155_c0_dgbinF#493
+                              - 700000 rxn05155_c0_dgbinR#494
                               - Rgrxn05155_c0_thermo#330  = 0
- rxn08427_c0_thermo#331:      2000 rxn08427_c0_revbin#259
+ rxn08427_c0_thermo#331:      400000 rxn08427_c0_revbin#259
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
                               + cpd00363_c0_potential#331
                               - cpd00363_e0_potential#355
-                              + 2000 rxn08427_c0_dgbinF#495
-                              - 2000 rxn08427_c0_dgbinR#496
+                              + 400000 rxn08427_c0_dgbinF#495
+                              - 400000 rxn08427_c0_dgbinR#496
                               - Rgrxn08427_c0_thermo#331  = 0
- rxn00184_c0_thermo#332:      4000 rxn00184_c0_revbin#260
+ rxn00184_c0_thermo#332:      700000 rxn00184_c0_revbin#260
                               - cpd00023_c0_potential#294
                               - cpd00006_c0_potential#311
                               + cpd00067_c0_potential#313
@@ -1365,31 +1365,31 @@ Subject To
                               + cpd00013_c0_potential#318
                               - cpd00001_c0_potential#321
                               + cpd00024_c0_potential#333
-                              + 4000 rxn00184_c0_dgbinF#497
-                              - 4000 rxn00184_c0_dgbinR#498
+                              + 700000 rxn00184_c0_dgbinF#497
+                              - 700000 rxn00184_c0_dgbinR#498
                               - Rgrxn00184_c0_thermo#332  = 0
- rxn05469_c0_thermo#333:      2000 rxn05469_c0_revbin#261
+ rxn05469_c0_thermo#333:      400000 rxn05469_c0_revbin#261
                               - cpd00020_e0_potential#285
                               + cpd00020_c0_potential#287
                               + cpd00067_c0_potential#313
                               - cpd00067_e0_potential#316
-                              + 2000 rxn05469_c0_dgbinF#499
-                              - 2000 rxn05469_c0_dgbinR#500
+                              + 400000 rxn05469_c0_dgbinF#499
+                              - 400000 rxn05469_c0_dgbinR#500
                               - Rgrxn05469_c0_thermo#333  = 0
- rxn32587_c0_thermo#334:      2000 rxn32587_c0_revbin#262
+ rxn32587_c0_thermo#334:      300000 rxn32587_c0_revbin#262
                               - cpd00331_c0_potential#300
                               - cpd00001_c0_potential#321
                               + cpd00260_c0_potential#345
-                              + 2000 rxn32587_c0_dgbinF#501
-                              - 2000 rxn32587_c0_dgbinR#502
+                              + 300000 rxn32587_c0_dgbinF#501
+                              - 300000 rxn32587_c0_dgbinR#502
                               - Rgrxn32587_c0_thermo#334  = 0
- rxn01116_c0_thermo#335:      1000 rxn01116_c0_revbin#263
+ rxn01116_c0_thermo#335:      200000 rxn01116_c0_revbin#263
                               + cpd00198_c0_potential#290
                               - cpd00171_c0_potential#304
-                              + 1000 rxn01116_c0_dgbinF#503
-                              - 1000 rxn01116_c0_dgbinR#504
+                              + 200000 rxn01116_c0_dgbinF#503
+                              - 200000 rxn01116_c0_dgbinR#504
                               - Rgrxn01116_c0_thermo#335  = 0
- bio1_thermo#336:             203870.9 bio1_revbin#264
+ bio1_thermo#336:             35730890 bio1_revbin#264
                               - 1.496 cpd00169_c0_potential#286
                               - 2.8328 cpd00020_c0_potential#287
                               - 4.9414 cpd00023_c0_potential#294
@@ -1413,9 +1413,223 @@ Subject To
                               - 3.547 cpd00003_c0_potential#337
                               - 0.205 cpd00079_c0_potential#351
                               - 0.5191 cpd00061_c0_potential#356
-                              + 203870.9 bio1_dgbinF#505
-                              - 203870.9 bio1_dgbinR#506 - Rgbio1_thermo#336
+                              + 35730890 bio1_dgbinF#505
+                              - 35730890 bio1_dgbinR#506 - Rgbio1_thermo#336
                                = 0
+ cpd00020_e0_potc#337:        cpd00020_e0_potential#285
+                              - 2.477709860164 cpd00020_e0_logconc#507
+                              - cpd00020_e0_dgerr#508  = -19.7323135755258
+ cpd00169_c0_potc#338:        cpd00169_c0_potential#286
+                              - 2.477709860164 cpd00169_c0_logconc#509
+                              - cpd00169_c0_dgerr#510  = -92.4954925273453
+ cpd00020_c0_potc#339:        cpd00020_c0_potential#287
+                              - 2.477709860164 cpd00020_c0_logconc#511
+                              - cpd00020_c0_dgerr#512  = -35.1699667147258
+ cpd15561_c0_potc#340:        cpd15561_c0_potential#288
+                              - 2.477709860164 cpd15561_c0_logconc#513
+                              - cpd15561_c0_dgerr#514  = 173.355367893305
+ cpd00009_e0_potc#341:        cpd00009_e0_potential#289
+                              - 2.477709860164 cpd00009_e0_logconc#515
+                              - cpd00009_e0_dgerr#516  = -60.3513384321224
+ cpd00198_c0_potc#342:        cpd00198_c0_potential#290
+                              - 2.477709860164 cpd00198_c0_logconc#517
+                              - cpd00198_c0_dgerr#518  = -86.0112669059304
+ cpd00482_c0_potc#343:        cpd00482_c0_potential#291
+                              - 2.477709860164 cpd00482_c0_logconc#519
+                              - cpd00482_c0_dgerr#520  = -92.2564867912077
+ cpd00023_e0_potc#344:        cpd00023_e0_potential#292
+                              - 2.477709860164 cpd00023_e0_logconc#521
+                              - cpd00023_e0_dgerr#522  = -20.9536328871893
+ cpd00027_e0_potc#345:        cpd00027_e0_potential#293
+                              - 2.477709860164 cpd00027_e0_logconc#523
+                              - cpd00027_e0_dgerr#524  = -24.4072657743786
+ cpd00023_c0_potc#346:        cpd00023_c0_potential#294
+                              - 2.477709860164 cpd00023_c0_logconc#525
+                              - cpd00023_c0_dgerr#526  = -36.3912860263893
+ cpd00102_c0_potc#347:        cpd00102_c0_potential#295
+                              - 2.477709860164 cpd00102_c0_logconc#527
+                              - cpd00102_c0_dgerr#528  = -77.646066141112
+ cpd00236_c0_potc#348:        cpd00236_c0_potential#296
+                              - 2.477709860164 cpd00236_c0_logconc#529
+                              - cpd00236_c0_dgerr#530  = -81.630291762527
+ cpd00009_c0_potc#349:        cpd00009_c0_potential#297
+                              - 2.477709860164 cpd00009_c0_logconc#531
+                              - cpd00009_c0_dgerr#532  = -75.7889915713224
+ cpd00911_c0_potc#350:        cpd00911_c0_potential#298
+                              - 2.477709860164 cpd00911_c0_logconc#533
+                              - cpd00911_c0_dgerr#534  = -94.5867927185499
+ cpd00221_e0_potc#351:        cpd00221_e0_potential#299
+                              - 2.477709860164 cpd00221_e0_logconc#535
+                              - cpd00221_e0_dgerr#536  = -17.4450286806883
+ cpd00331_c0_potc#352:        cpd00331_c0_potential#300
+                              - 2.477709860164 cpd00331_c0_logconc#537
+                              - cpd00331_c0_dgerr#538  = -61.2096416669247
+ cpd00221_c0_potc#353:        cpd00221_c0_potential#301
+                              - 2.477709860164 cpd00221_c0_logconc#539
+                              - cpd00221_c0_dgerr#540  = -32.8826818198883
+ cpd00032_c0_potc#354:        cpd00032_c0_potential#302
+                              - 2.477709860164 cpd00032_c0_logconc#541
+                              - cpd00032_c0_dgerr#542  = -56.2741732156818
+ cpd00010_c0_potc#355:        cpd00010_c0_potential#303
+                              - 2.477709860164 cpd00010_c0_logconc#543
+                              - cpd00010_c0_dgerr#544  = -118.097786982412
+ cpd00171_c0_potc#356:        cpd00171_c0_potential#304
+                              - 2.477709860164 cpd00171_c0_logconc#545
+                              - cpd00171_c0_dgerr#546  = -85.8176722596589
+ cpd00002_c0_potc#357:        cpd00002_c0_potential#305
+                              - 2.477709860164 cpd00002_c0_logconc#547
+                              - cpd00002_c0_dgerr#548  = -146.615951418359
+ cpd00004_c0_potc#358:        cpd00004_c0_potential#306
+                              - 2.477709860164 cpd00004_c0_logconc#549
+                              - cpd00004_c0_dgerr#550  = -80.2440584929285
+ cpd00007_e0_potc#359:        cpd00007_e0_potential#307
+                              - 2.477709860164 cpd00007_e0_logconc#551
+                              - cpd00007_e0_dgerr#552  = 0.936902485659656
+ cpd00053_e0_potc#360:        cpd00053_e0_potential#308
+                              - 2.477709860164 cpd00053_e0_logconc#553
+                              - cpd00053_e0_dgerr#554  = -6.75669216061185
+ cpd00007_c0_potc#361:        cpd00007_c0_potential#309
+                              - 2.477709860164 cpd00007_c0_logconc#555
+                              - cpd00007_c0_dgerr#556  = -14.5007506535403
+ cpd00053_c0_potc#362:        cpd00053_c0_potential#310
+                              - 2.477709860164 cpd00053_c0_logconc#557
+                              - cpd00053_c0_dgerr#558  = -22.1943452998119
+ cpd00006_c0_potc#363:        cpd00006_c0_potential#311
+                              - 2.477709860164 cpd00006_c0_logconc#559
+                              - cpd00006_c0_dgerr#560  = -134.548551800768
+ cpd00071_e0_potc#364:        cpd00071_e0_potential#312
+                              - 2.477709860164 cpd00071_e0_logconc#561
+                              - cpd00071_e0_dgerr#562  = 1.2906309751434
+ cpd00067_c0_potc#365:        cpd00067_c0_potential#313
+                              - 2.477709860164 cpd00067_c0_logconc#563
+                              - cpd00067_c0_dgerr#564  = -15.4376531392
+ cpd00071_c0_potc#366:        cpd00071_c0_potential#314
+                              - 2.477709860164 cpd00071_c0_logconc#565
+                              - cpd00071_c0_dgerr#566  = -14.1470221640566
+ cpd00013_e0_potc#367:        cpd00013_e0_potential#315
+                              - 2.477709860164 cpd00013_e0_logconc#567
+                              - cpd00013_e0_dgerr#568  = 4.55305927342256
+ cpd00067_e0_potc#368:        cpd00067_e0_potential#316
+                              - 2.477709860164 cpd00067_e0_logconc#569
+                              - cpd00067_e0_dgerr#570  = 0
+ cpd00005_c0_potc#369:        cpd00005_c0_potential#317
+                              - 2.477709860164 cpd00005_c0_logconc#571
+                              - cpd00005_c0_dgerr#572  = -130.901324267307
+ cpd00013_c0_potc#370:        cpd00013_c0_potential#318
+                              - 2.477709860164 cpd00013_c0_logconc#573
+                              - cpd00013_c0_dgerr#574  = -10.8845938657774
+ cpd00001_e0_potc#371:        cpd00001_e0_potential#319 - cpd00001_e0_dgerr#575
+                               = -8.97227533460803
+ cpd00011_e0_potc#372:        cpd00011_e0_potential#320
+                              - 2.477709860164 cpd00011_e0_logconc#576
+                              - cpd00011_e0_dgerr#577  = -22.0506692160612
+ cpd00001_c0_potc#373:        cpd00001_c0_potential#321 - cpd00001_c0_dgerr#578
+                               = -24.409928473808
+ cpd00011_c0_potc#374:        cpd00011_c0_potential#322
+                              - 2.477709860164 cpd00011_c0_logconc#579
+                              - cpd00011_c0_dgerr#580  = -37.4883223552612
+ cpd00022_c0_potc#375:        cpd00022_c0_potential#323
+                              - 2.477709860164 cpd00022_c0_logconc#581
+                              - cpd00022_c0_dgerr#582  = -121.451037460424
+ cpd00008_c0_potc#376:        cpd00008_c0_potential#324
+                              - 2.477709860164 cpd00008_c0_logconc#583
+                              - cpd00008_c0_dgerr#584  = -96.7091636554524
+ cpd00095_c0_potc#377:        cpd00095_c0_potential#325
+                              - 2.477709860164 cpd00095_c0_logconc#585
+                              - cpd00095_c0_dgerr#586  = -77.9591636554524
+ cpd00137_c0_potc#378:        cpd00137_c0_potential#326
+                              - 2.477709860164 cpd00137_c0_logconc#587
+                              - cpd00137_c0_dgerr#588  = -70.6575384164466
+ cpd00106_c0_potc#379:        cpd00106_c0_potential#327
+                              - 2.477709860164 cpd00106_c0_logconc#589
+                              - cpd00106_c0_dgerr#590  = -45.1532363131962
+ cpd00072_c0_potc#380:        cpd00072_c0_potential#328
+                              - 2.477709860164 cpd00072_c0_logconc#591
+                              - cpd00072_c0_dgerr#592  = -90.3779017051656
+ cpd00106_e0_potc#381:        cpd00106_e0_potential#329
+                              - 2.477709860164 cpd00106_e0_logconc#593
+                              - cpd00106_e0_dgerr#594  = -29.7155831739962
+ cpd00101_c0_potc#382:        cpd00101_c0_potential#330
+                              - 2.477709860164 cpd00101_c0_logconc#595
+                              - cpd00101_c0_dgerr#596  = -109.634593865777
+ cpd00363_c0_potc#383:        cpd00363_c0_potential#331
+                              - 2.477709860164 cpd00363_c0_logconc#597
+                              - cpd00363_c0_dgerr#598  = -11.7043835407296
+ cpd00284_c0_potc#384:        cpd00284_c0_potential#332
+                              - 2.477709860164 cpd00284_c0_logconc#599
+                              - cpd00284_c0_dgerr#600  = -104.828188512049
+ cpd00024_c0_potc#385:        cpd00024_c0_potential#333
+                              - 2.477709860164 cpd00024_c0_logconc#601
+                              - cpd00024_c0_dgerr#602  = -51.4821082061216
+ cpd00290_c0_potc#386:        cpd00290_c0_potential#334
+                              - 2.477709860164 cpd00290_c0_logconc#603
+                              - cpd00290_c0_dgerr#604  = -141.393676083751
+ cpd00018_c0_potc#387:        cpd00018_c0_potential#335
+                              - 2.477709860164 cpd00018_c0_logconc#605
+                              - cpd00018_c0_dgerr#606  = -46.6996034260069
+ cpd00047_e0_potc#388:        cpd00047_e0_potential#336
+                              - 2.477709860164 cpd00047_e0_logconc#607
+                              - cpd00047_e0_dgerr#608  = -17.5597514340344
+ cpd00003_c0_potc#389:        cpd00003_c0_potential#337
+                              - 2.477709860164 cpd00003_c0_logconc#609
+                              - cpd00003_c0_dgerr#610  = -83.8912860263893
+ cpd00024_e0_potc#390:        cpd00024_e0_potential#338
+                              - 2.477709860164 cpd00024_e0_logconc#611
+                              - cpd00024_e0_dgerr#612  = -36.0444550669216
+ cpd00047_c0_potc#391:        cpd00047_c0_potential#339
+                              - 2.477709860164 cpd00047_c0_logconc#613
+                              - cpd00047_c0_dgerr#614  = -32.9974045732344
+ cpd00203_c0_potc#392:        cpd00203_c0_potential#340
+                              - 2.477709860164 cpd00203_c0_logconc#615
+                              - cpd00203_c0_dgerr#616  = -141.345874936523
+ cpd00078_c0_potc#393:        cpd00078_c0_potential#341
+                              - 2.477709860164 cpd00078_c0_logconc#617
+                              - cpd00078_c0_dgerr#618  = -137.395110118167
+ cpd00036_e0_potc#394:        cpd00036_e0_potential#342
+                              - 2.477709860164 cpd00036_e0_logconc#619
+                              - cpd00036_e0_dgerr#620  = -29.6247609942639
+ cpd00040_c0_potc#395:        cpd00040_c0_potential#343
+                              - 2.477709860164 cpd00040_c0_logconc#621
+                              - cpd00040_c0_dgerr#622  = -40.0576340187411
+ cpd00036_c0_potc#396:        cpd00036_c0_potential#344
+                              - 2.477709860164 cpd00036_c0_logconc#623
+                              - cpd00036_c0_dgerr#624  = -45.0624141334639
+ cpd00260_c0_potc#397:        cpd00260_c0_potential#345
+                              - 2.477709860164 cpd00260_c0_logconc#625
+                              - cpd00260_c0_dgerr#626  = -70.2225479766761
+ cpd00130_c0_potc#398:        cpd00130_c0_potential#346
+                              - 2.477709860164 cpd00130_c0_logconc#627
+                              - cpd00130_c0_dgerr#628  = -54.3214963514371
+ cpd00130_e0_potc#399:        cpd00130_e0_potential#347
+                              - 2.477709860164 cpd00130_e0_logconc#629
+                              - cpd00130_e0_dgerr#630  = -38.8838432122371
+ cpd15560_c0_potc#400:        cpd15560_c0_potential#348
+                              - 2.477709860164 cpd15560_c0_logconc#631
+                              - cpd15560_c0_dgerr#632  = 177.327643227913
+ cpd00196_c0_potc#401:        cpd00196_c0_potential#349
+                              - 2.477709860164 cpd00196_c0_logconc#633
+                              - cpd00196_c0_dgerr#634  = -78.6020890856627
+ cpd00082_e0_potc#402:        cpd00082_e0_potential#350
+                              - 2.477709860164 cpd00082_e0_logconc#635
+                              - cpd00082_e0_dgerr#636  = -24.3618546845124
+ cpd00079_c0_potc#403:        cpd00079_c0_potential#351
+                              - 2.477709860164 cpd00079_c0_logconc#637
+                              - cpd00079_c0_dgerr#638  = -90.7125097357583
+ cpd00029_c0_potc#404:        cpd00029_c0_potential#352
+                              - 2.477709860164 cpd00029_c0_logconc#639
+                              - cpd00029_c0_dgerr#640  = -29.5103108829859
+ cpd00238_c0_potc#405:        cpd00238_c0_potential#353
+                              - 2.477709860164 cpd00238_c0_logconc#641
+                              - cpd00238_c0_dgerr#642  = -94.5150909977086
+ cpd00029_e0_potc#406:        cpd00029_e0_potential#354
+                              - 2.477709860164 cpd00029_e0_logconc#643
+                              - cpd00029_e0_dgerr#644  = -14.0726577437859
+ cpd00363_e0_potc#407:        cpd00363_e0_potential#355
+                              - 2.477709860164 cpd00363_e0_logconc#645
+                              - cpd00363_e0_dgerr#646  = 3.73326959847036
+ cpd00061_c0_potc#408:        cpd00061_c0_potential#356
+                              - 2.477709860164 cpd00061_c0_logconc#647
+                              - cpd00061_c0_dgerr#648  = -83.5160470206532
 Bounds
  0 <= rxn00549_c0#0 <= 1000
       rxn00549_c0_reverse_1ff19#1 = 0
@@ -1702,78 +1916,78 @@ Bounds
  0 <= _EX_cpd00363_e0_revbin#282 <= 1
  0 <= _EX_cpd00036_e0_revbin#283 <= 1
  0 <= _EX_cpd00082_e0_revbin#284 <= 1
- 0 <= cpd00020_e0_potential#285 <= 1000
- 0 <= cpd00169_c0_potential#286 <= 1000
- 0 <= cpd00020_c0_potential#287 <= 1000
- 0 <= cpd15561_c0_potential#288 <= 1000
- 0 <= cpd00009_e0_potential#289 <= 1000
- 0 <= cpd00198_c0_potential#290 <= 1000
- 0 <= cpd00482_c0_potential#291 <= 1000
- 0 <= cpd00023_e0_potential#292 <= 1000
- 0 <= cpd00027_e0_potential#293 <= 1000
- 0 <= cpd00023_c0_potential#294 <= 1000
- 0 <= cpd00102_c0_potential#295 <= 1000
- 0 <= cpd00236_c0_potential#296 <= 1000
- 0 <= cpd00009_c0_potential#297 <= 1000
- 0 <= cpd00911_c0_potential#298 <= 1000
- 0 <= cpd00221_e0_potential#299 <= 1000
- 0 <= cpd00331_c0_potential#300 <= 1000
- 0 <= cpd00221_c0_potential#301 <= 1000
- 0 <= cpd00032_c0_potential#302 <= 1000
- 0 <= cpd00010_c0_potential#303 <= 1000
- 0 <= cpd00171_c0_potential#304 <= 1000
- 0 <= cpd00002_c0_potential#305 <= 1000
- 0 <= cpd00004_c0_potential#306 <= 1000
- 0 <= cpd00007_e0_potential#307 <= 1000
- 0 <= cpd00053_e0_potential#308 <= 1000
- 0 <= cpd00007_c0_potential#309 <= 1000
- 0 <= cpd00053_c0_potential#310 <= 1000
- 0 <= cpd00006_c0_potential#311 <= 1000
- 0 <= cpd00071_e0_potential#312 <= 1000
- 0 <= cpd00067_c0_potential#313 <= 1000
- 0 <= cpd00071_c0_potential#314 <= 1000
- 0 <= cpd00013_e0_potential#315 <= 1000
- 0 <= cpd00067_e0_potential#316 <= 1000
- 0 <= cpd00005_c0_potential#317 <= 1000
- 0 <= cpd00013_c0_potential#318 <= 1000
- 0 <= cpd00001_e0_potential#319 <= 1000
- 0 <= cpd00011_e0_potential#320 <= 1000
- 0 <= cpd00001_c0_potential#321 <= 1000
- 0 <= cpd00011_c0_potential#322 <= 1000
- 0 <= cpd00022_c0_potential#323 <= 1000
- 0 <= cpd00008_c0_potential#324 <= 1000
- 0 <= cpd00095_c0_potential#325 <= 1000
- 0 <= cpd00137_c0_potential#326 <= 1000
- 0 <= cpd00106_c0_potential#327 <= 1000
- 0 <= cpd00072_c0_potential#328 <= 1000
- 0 <= cpd00106_e0_potential#329 <= 1000
- 0 <= cpd00101_c0_potential#330 <= 1000
- 0 <= cpd00363_c0_potential#331 <= 1000
- 0 <= cpd00284_c0_potential#332 <= 1000
- 0 <= cpd00024_c0_potential#333 <= 1000
- 0 <= cpd00290_c0_potential#334 <= 1000
- 0 <= cpd00018_c0_potential#335 <= 1000
- 0 <= cpd00047_e0_potential#336 <= 1000
- 0 <= cpd00003_c0_potential#337 <= 1000
- 0 <= cpd00024_e0_potential#338 <= 1000
- 0 <= cpd00047_c0_potential#339 <= 1000
- 0 <= cpd00203_c0_potential#340 <= 1000
- 0 <= cpd00078_c0_potential#341 <= 1000
- 0 <= cpd00036_e0_potential#342 <= 1000
- 0 <= cpd00040_c0_potential#343 <= 1000
- 0 <= cpd00036_c0_potential#344 <= 1000
- 0 <= cpd00260_c0_potential#345 <= 1000
- 0 <= cpd00130_c0_potential#346 <= 1000
- 0 <= cpd00130_e0_potential#347 <= 1000
- 0 <= cpd15560_c0_potential#348 <= 1000
- 0 <= cpd00196_c0_potential#349 <= 1000
- 0 <= cpd00082_e0_potential#350 <= 1000
- 0 <= cpd00079_c0_potential#351 <= 1000
- 0 <= cpd00029_c0_potential#352 <= 1000
- 0 <= cpd00238_c0_potential#353 <= 1000
- 0 <= cpd00029_e0_potential#354 <= 1000
- 0 <= cpd00363_e0_potential#355 <= 1000
- 0 <= cpd00061_c0_potential#356 <= 1000
+-100000 <= cpd00020_e0_potential#285 <= 100000
+-100000 <= cpd00169_c0_potential#286 <= 100000
+-100000 <= cpd00020_c0_potential#287 <= 100000
+-100000 <= cpd15561_c0_potential#288 <= 100000
+-100000 <= cpd00009_e0_potential#289 <= 100000
+-100000 <= cpd00198_c0_potential#290 <= 100000
+-100000 <= cpd00482_c0_potential#291 <= 100000
+-100000 <= cpd00023_e0_potential#292 <= 100000
+-100000 <= cpd00027_e0_potential#293 <= 100000
+-100000 <= cpd00023_c0_potential#294 <= 100000
+-100000 <= cpd00102_c0_potential#295 <= 100000
+-100000 <= cpd00236_c0_potential#296 <= 100000
+-100000 <= cpd00009_c0_potential#297 <= 100000
+-100000 <= cpd00911_c0_potential#298 <= 100000
+-100000 <= cpd00221_e0_potential#299 <= 100000
+-100000 <= cpd00331_c0_potential#300 <= 100000
+-100000 <= cpd00221_c0_potential#301 <= 100000
+-100000 <= cpd00032_c0_potential#302 <= 100000
+-100000 <= cpd00010_c0_potential#303 <= 100000
+-100000 <= cpd00171_c0_potential#304 <= 100000
+-100000 <= cpd00002_c0_potential#305 <= 100000
+-100000 <= cpd00004_c0_potential#306 <= 100000
+-100000 <= cpd00007_e0_potential#307 <= 100000
+-100000 <= cpd00053_e0_potential#308 <= 100000
+-100000 <= cpd00007_c0_potential#309 <= 100000
+-100000 <= cpd00053_c0_potential#310 <= 100000
+-100000 <= cpd00006_c0_potential#311 <= 100000
+-100000 <= cpd00071_e0_potential#312 <= 100000
+-100000 <= cpd00067_c0_potential#313 <= 100000
+-100000 <= cpd00071_c0_potential#314 <= 100000
+-100000 <= cpd00013_e0_potential#315 <= 100000
+-100000 <= cpd00067_e0_potential#316 <= 100000
+-100000 <= cpd00005_c0_potential#317 <= 100000
+-100000 <= cpd00013_c0_potential#318 <= 100000
+-100000 <= cpd00001_e0_potential#319 <= 100000
+-100000 <= cpd00011_e0_potential#320 <= 100000
+-100000 <= cpd00001_c0_potential#321 <= 100000
+-100000 <= cpd00011_c0_potential#322 <= 100000
+-100000 <= cpd00022_c0_potential#323 <= 100000
+-100000 <= cpd00008_c0_potential#324 <= 100000
+-100000 <= cpd00095_c0_potential#325 <= 100000
+-100000 <= cpd00137_c0_potential#326 <= 100000
+-100000 <= cpd00106_c0_potential#327 <= 100000
+-100000 <= cpd00072_c0_potential#328 <= 100000
+-100000 <= cpd00106_e0_potential#329 <= 100000
+-100000 <= cpd00101_c0_potential#330 <= 100000
+-100000 <= cpd00363_c0_potential#331 <= 100000
+-100000 <= cpd00284_c0_potential#332 <= 100000
+-100000 <= cpd00024_c0_potential#333 <= 100000
+-100000 <= cpd00290_c0_potential#334 <= 100000
+-100000 <= cpd00018_c0_potential#335 <= 100000
+-100000 <= cpd00047_e0_potential#336 <= 100000
+-100000 <= cpd00003_c0_potential#337 <= 100000
+-100000 <= cpd00024_e0_potential#338 <= 100000
+-100000 <= cpd00047_c0_potential#339 <= 100000
+-100000 <= cpd00203_c0_potential#340 <= 100000
+-100000 <= cpd00078_c0_potential#341 <= 100000
+-100000 <= cpd00036_e0_potential#342 <= 100000
+-100000 <= cpd00040_c0_potential#343 <= 100000
+-100000 <= cpd00036_c0_potential#344 <= 100000
+-100000 <= cpd00260_c0_potential#345 <= 100000
+-100000 <= cpd00130_c0_potential#346 <= 100000
+-100000 <= cpd00130_e0_potential#347 <= 100000
+-100000 <= cpd15560_c0_potential#348 <= 100000
+-100000 <= cpd00196_c0_potential#349 <= 100000
+-100000 <= cpd00082_e0_potential#350 <= 100000
+-100000 <= cpd00079_c0_potential#351 <= 100000
+-100000 <= cpd00029_c0_potential#352 <= 100000
+-100000 <= cpd00238_c0_potential#353 <= 100000
+-100000 <= cpd00029_e0_potential#354 <= 100000
+-100000 <= cpd00363_e0_potential#355 <= 100000
+-100000 <= cpd00061_c0_potential#356 <= 100000
  0 <= rxn00549_c0_dgbinF#357 <= 1
  0 <= rxn00549_c0_dgbinR#358 <= 1
  0 <= rxn05312_c0_dgbinF#359 <= 1
@@ -1924,81 +2138,223 @@ Bounds
  0 <= rxn01116_c0_dgbinR#504 <= 1
  0 <= bio1_dgbinF#505 <= 1
  0 <= bio1_dgbinR#506 <= 1
- 0 <= Rgrxn00549_c0_thermo#262 <= 2000
- 0 <= Rgrxn05312_c0_thermo#263 <= 2000
- 0 <= Rgrxn00247_c0_thermo#264 <= 3000
- 0 <= Rgrxn00786_c0_thermo#265 <= 2000
- 0 <= Rgrxn08865_c0_thermo#266 <= 3000
- 0 <= Rgrxn01200_c0_thermo#267 <= 2000
- 0 <= Rgrxn08525_c0_thermo#268 <= 1000
- 0 <= RgFRD7_c0_thermo#269 <= 2000
- 0 <= Rgrxn00545_c0_thermo#270 <= 3000
- 0 <= Rgrxn09270_c0_thermo#271 <= 2000
- 0 <= Rgrxn00173_c0_thermo#272 <= 2000
- 0 <= Rgrxn08288_c0_thermo#273 <= 4000
- 0 <= Rgrxn00459_c0_thermo#274 <= 2000
- 0 <= Rgrxn00083_c0_thermo#275 <= 2000
- 0 <= Rgrxn00097_c0_thermo#276 <= 2000
- 0 <= Rgrxn32421_c0_thermo#277 <= 3000
- 0 <= Rgrxn00154_c0_thermo#278 <= 3000
- 0 <= Rgrxn19316_c0_thermo#279 <= 3000
- 0 <= Rgrxn00187_c0_thermo#280 <= 4000
- 0 <= Rgrxn00558_c0_thermo#281 <= 1000
- 0 <= Rgrxn05319_c0_thermo#282 <= 1000
- 0 <= Rgrxn00747_c0_thermo#283 <= 1000
- 0 <= Rgrxn05468_c0_thermo#284 <= 1000
- 0 <= Rgrxn35242_c0_thermo#285 <= 3000
- 0 <= Rgrxn08535_c0_thermo#286 <= 2000
- 0 <= Rgrxn01115_c0_thermo#287 <= 3000
- 0 <= Rgrxn00225_c0_thermo#288 <= 2000
- 0 <= Rgrxn00500_c0_thermo#289 <= 3000
- 0 <= Rgrxn08350_c0_thermo#290 <= 2000
- 0 <= Rgrxn20162_c0_thermo#291 <= 3000
- 0 <= Rgrxn01333_c0_thermo#292 <= 2000
- 0 <= Rgrxn30674_c0_thermo#293 <= 2000
- 0 <= Rgrxn01100_c0_thermo#294 <= 2000
- 0 <= Rgrxn39085_c0_thermo#295 <= 1000
- 0 <= Rgrxn08173_c0_thermo#296 <= 6000
- 0 <= Rgrxn00285_c0_thermo#297 <= 3000
- 0 <= Rgrxn00161_c0_thermo#298 <= 3000
- 0 <= Rgrxn00543_c0_thermo#299 <= 3000
- 0 <= Rgrxn05297_c0_thermo#300 <= 2000
- 0 <= Rgrxn05467_c0_thermo#301 <= 1000
- 0 <= Rgrxn05488_c0_thermo#302 <= 2000
- 0 <= Rgrxn00085_c0_thermo#303 <= 4000
- 0 <= Rgrxn00062_c0_thermo#304 <= 3000
- 0 <= Rgrxn34258_c0_thermo#305 <= 2000
- 0 <= Rgrxn00171_c0_thermo#306 <= 3000
- 0 <= Rgrxn05559_c0_thermo#307 <= 2000
- 0 <= Rgrxn09272_c0_thermo#308 <= 2000
- 0 <= Rgrxn00604_c0_thermo#309 <= 3000
- 0 <= Rgrxn00159_c0_thermo#310 <= 3000
- 0 <= Rgrxn08972_c0_thermo#311 <= 6000
- 0 <= Rgrxn08542_c0_thermo#312 <= 3000
- 0 <= Rgrxn01106_c0_thermo#313 <= 1000
- 0 <= Rgrxn00198_c0_thermo#314 <= 3000
- 0 <= Rgrxn01476_c0_thermo#315 <= 2000
- 0 <= Rgrxn00781_c0_thermo#316 <= 3000
- 0 <= Rgrxn09295_c0_thermo#317 <= 4000
- 0 <= Rgrxn00785_c0_thermo#318 <= 2000
- 0 <= Rgrxn08032_c0_thermo#319 <= 1000
- 0 <= Rgrxn00189_c0_thermo#320 <= 2000
- 0 <= Rgrxn00336_c0_thermo#321 <= 2000
- 0 <= Rgrxn00147_c0_thermo#322 <= 5000
- 0 <= Rgrxn09269_c0_thermo#323 <= 3000
- 0 <= Rgrxn00248_c0_thermo#324 <= 3000
- 0 <= Rgrxn00974_c0_thermo#325 <= 2000
- 0 <= Rgrxn05493_c0_thermo#326 <= 2000
- 0 <= Rgrxn00777_c0_thermo#327 <= 1000
- 0 <= Rgrxn08094_c0_thermo#328 <= 3000
- 0 <= Rgrxn05226_c0_thermo#329 <= 2000
- 0 <= Rgrxn05155_c0_thermo#330 <= 4000
- 0 <= Rgrxn08427_c0_thermo#331 <= 2000
- 0 <= Rgrxn00184_c0_thermo#332 <= 4000
- 0 <= Rgrxn05469_c0_thermo#333 <= 2000
- 0 <= Rgrxn32587_c0_thermo#334 <= 2000
- 0 <= Rgrxn01116_c0_thermo#335 <= 1000
- 0 <= Rgbio1_thermo#336 <= 203870.9
+-13.8155105579643 <= cpd00020_e0_logconc#507 <= -3.91202300542815
+-5 <= cpd00020_e0_dgerr#508 <= 5
+-13.8155105579643 <= cpd00169_c0_logconc#509 <= -3.91202300542815
+-5 <= cpd00169_c0_dgerr#510 <= 5
+-13.8155105579643 <= cpd00020_c0_logconc#511 <= -3.91202300542815
+-5 <= cpd00020_c0_dgerr#512 <= 5
+-13.8155105579643 <= cpd15561_c0_logconc#513 <= -3.91202300542815
+-5 <= cpd15561_c0_dgerr#514 <= 5
+      cpd00009_e0_logconc#515 = -2.88240358824699
+-5 <= cpd00009_e0_dgerr#516 <= 5
+-13.8155105579643 <= cpd00198_c0_logconc#517 <= -3.91202300542815
+-5 <= cpd00198_c0_dgerr#518 <= 5
+-13.8155105579643 <= cpd00482_c0_logconc#519 <= -3.91202300542815
+-5 <= cpd00482_c0_dgerr#520 <= 5
+-13.8155105579643 <= cpd00023_e0_logconc#521 <= -3.91202300542815
+-5 <= cpd00023_e0_dgerr#522 <= 5
+      cpd00027_e0_logconc#523 = -3.91202300542815
+-5 <= cpd00027_e0_dgerr#524 <= 5
+-13.8155105579643 <= cpd00023_c0_logconc#525 <= -3.91202300542815
+-5 <= cpd00023_c0_dgerr#526 <= 5
+-13.8155105579643 <= cpd00102_c0_logconc#527 <= -3.91202300542815
+-5 <= cpd00102_c0_dgerr#528 <= 5
+-13.8155105579643 <= cpd00236_c0_logconc#529 <= -3.91202300542815
+-5 <= cpd00236_c0_dgerr#530 <= 5
+-13.8155105579643 <= cpd00009_c0_logconc#531 <= -3.91202300542815
+-5 <= cpd00009_c0_dgerr#532 <= 5
+-13.8155105579643 <= cpd00911_c0_logconc#533 <= -3.91202300542815
+-5 <= cpd00911_c0_dgerr#534 <= 5
+-13.8155105579643 <= cpd00221_e0_logconc#535 <= -3.91202300542815
+-5 <= cpd00221_e0_dgerr#536 <= 5
+-13.8155105579643 <= cpd00331_c0_logconc#537 <= -3.91202300542815
+-5 <= cpd00331_c0_dgerr#538 <= 5
+-13.8155105579643 <= cpd00221_c0_logconc#539 <= -3.91202300542815
+-5 <= cpd00221_c0_dgerr#540 <= 5
+-13.8155105579643 <= cpd00032_c0_logconc#541 <= -3.91202300542815
+-5 <= cpd00032_c0_dgerr#542 <= 5
+-13.8155105579643 <= cpd00010_c0_logconc#543 <= -3.91202300542815
+-5 <= cpd00010_c0_dgerr#544 <= 5
+-13.8155105579643 <= cpd00171_c0_logconc#545 <= -3.91202300542815
+-5 <= cpd00171_c0_dgerr#546 <= 5
+-13.8155105579643 <= cpd00002_c0_logconc#547 <= -3.91202300542815
+-5 <= cpd00002_c0_dgerr#548 <= 5
+-13.8155105579643 <= cpd00004_c0_logconc#549 <= -3.91202300542815
+-5 <= cpd00004_c0_dgerr#550 <= 5
+      cpd00007_e0_logconc#551 = -11.7113764036941
+-5 <= cpd00007_e0_dgerr#552 <= 5
+-13.8155105579643 <= cpd00053_e0_logconc#553 <= -3.91202300542815
+-5 <= cpd00053_e0_dgerr#554 <= 5
+-16.1180956509583 <= cpd00007_c0_logconc#555 <= -11.7113764036941
+-5 <= cpd00007_c0_dgerr#556 <= 5
+-13.8155105579643 <= cpd00053_c0_logconc#557 <= -3.91202300542815
+-5 <= cpd00053_c0_dgerr#558 <= 5
+-13.8155105579643 <= cpd00006_c0_logconc#559 <= -3.91202300542815
+-5 <= cpd00006_c0_dgerr#560 <= 5
+-13.8155105579643 <= cpd00071_e0_logconc#561 <= -3.91202300542815
+-5 <= cpd00071_e0_dgerr#562 <= 5
+      cpd00067_c0_logconc#563 = -16.1180956509583
+-5 <= cpd00067_c0_dgerr#564 <= 5
+-13.8155105579643 <= cpd00071_c0_logconc#565 <= -3.91202300542815
+-5 <= cpd00071_c0_dgerr#566 <= 5
+      cpd00013_e0_logconc#567 = -3.9633162998157
+-5 <= cpd00013_e0_dgerr#568 <= 5
+      cpd00067_e0_logconc#569 = -14.9668023645418
+-5 <= cpd00067_e0_dgerr#570 <= 5
+-13.8155105579643 <= cpd00005_c0_logconc#571 <= -3.91202300542815
+-5 <= cpd00005_c0_dgerr#572 <= 5
+-13.8155105579643 <= cpd00013_c0_logconc#573 <= -3.91202300542815
+-5 <= cpd00013_c0_dgerr#574 <= 5
+-5 <= cpd00001_e0_dgerr#575 <= 5
+      cpd00011_e0_logconc#576 = -9.21034037197618
+-5 <= cpd00011_e0_dgerr#577 <= 5
+-5 <= cpd00001_c0_dgerr#578 <= 5
+-18.4206807439524 <= cpd00011_c0_logconc#579 <= -6.57128304236092
+-5 <= cpd00011_c0_dgerr#580 <= 5
+-13.8155105579643 <= cpd00022_c0_logconc#581 <= -3.91202300542815
+-5 <= cpd00022_c0_dgerr#582 <= 5
+-13.8155105579643 <= cpd00008_c0_logconc#583 <= -3.91202300542815
+-5 <= cpd00008_c0_dgerr#584 <= 5
+-13.8155105579643 <= cpd00095_c0_logconc#585 <= -3.91202300542815
+-5 <= cpd00095_c0_dgerr#586 <= 5
+-13.8155105579643 <= cpd00137_c0_logconc#587 <= -3.91202300542815
+-5 <= cpd00137_c0_dgerr#588 <= 5
+-13.8155105579643 <= cpd00106_c0_logconc#589 <= -3.91202300542815
+-5 <= cpd00106_c0_dgerr#590 <= 5
+-13.8155105579643 <= cpd00072_c0_logconc#591 <= -3.91202300542815
+-5 <= cpd00072_c0_dgerr#592 <= 5
+-13.8155105579643 <= cpd00106_e0_logconc#593 <= -3.91202300542815
+-5 <= cpd00106_e0_dgerr#594 <= 5
+-13.8155105579643 <= cpd00101_c0_logconc#595 <= -3.91202300542815
+-5 <= cpd00101_c0_dgerr#596 <= 5
+-13.8155105579643 <= cpd00363_c0_logconc#597 <= -3.91202300542815
+-5 <= cpd00363_c0_dgerr#598 <= 5
+-13.8155105579643 <= cpd00284_c0_logconc#599 <= -3.91202300542815
+-5 <= cpd00284_c0_dgerr#600 <= 5
+-13.8155105579643 <= cpd00024_c0_logconc#601 <= -3.91202300542815
+-5 <= cpd00024_c0_dgerr#602 <= 5
+-13.8155105579643 <= cpd00290_c0_logconc#603 <= -3.91202300542815
+-5 <= cpd00290_c0_dgerr#604 <= 5
+-13.8155105579643 <= cpd00018_c0_logconc#605 <= -3.91202300542815
+-5 <= cpd00018_c0_dgerr#606 <= 5
+-13.8155105579643 <= cpd00047_e0_logconc#607 <= -3.91202300542815
+-5 <= cpd00047_e0_dgerr#608 <= 5
+-13.8155105579643 <= cpd00003_c0_logconc#609 <= -3.91202300542815
+-5 <= cpd00003_c0_dgerr#610 <= 5
+-13.8155105579643 <= cpd00024_e0_logconc#611 <= -3.91202300542815
+-5 <= cpd00024_e0_dgerr#612 <= 5
+-13.8155105579643 <= cpd00047_c0_logconc#613 <= -3.91202300542815
+-5 <= cpd00047_c0_dgerr#614 <= 5
+-13.8155105579643 <= cpd00203_c0_logconc#615 <= -3.91202300542815
+-5 <= cpd00203_c0_dgerr#616 <= 5
+-13.8155105579643 <= cpd00078_c0_logconc#617 <= -3.91202300542815
+-5 <= cpd00078_c0_dgerr#618 <= 5
+-13.8155105579643 <= cpd00036_e0_logconc#619 <= -3.91202300542815
+-5 <= cpd00036_e0_dgerr#620 <= 5
+-13.8155105579643 <= cpd00040_c0_logconc#621 <= -3.91202300542815
+-5 <= cpd00040_c0_dgerr#622 <= 5
+-13.8155105579643 <= cpd00036_c0_logconc#623 <= -3.91202300542815
+-5 <= cpd00036_c0_dgerr#624 <= 5
+-13.8155105579643 <= cpd00260_c0_logconc#625 <= -3.91202300542815
+-5 <= cpd00260_c0_dgerr#626 <= 5
+-13.8155105579643 <= cpd00130_c0_logconc#627 <= -3.91202300542815
+-5 <= cpd00130_c0_dgerr#628 <= 5
+-13.8155105579643 <= cpd00130_e0_logconc#629 <= -3.91202300542815
+-5 <= cpd00130_e0_dgerr#630 <= 5
+-13.8155105579643 <= cpd15560_c0_logconc#631 <= -3.91202300542815
+-5 <= cpd15560_c0_dgerr#632 <= 5
+-13.8155105579643 <= cpd00196_c0_logconc#633 <= -3.91202300542815
+-5 <= cpd00196_c0_dgerr#634 <= 5
+-13.8155105579643 <= cpd00082_e0_logconc#635 <= -3.91202300542815
+-5 <= cpd00082_e0_dgerr#636 <= 5
+-13.8155105579643 <= cpd00079_c0_logconc#637 <= -3.91202300542815
+-5 <= cpd00079_c0_dgerr#638 <= 5
+-13.8155105579643 <= cpd00029_c0_logconc#639 <= -3.91202300542815
+-5 <= cpd00029_c0_dgerr#640 <= 5
+-13.8155105579643 <= cpd00238_c0_logconc#641 <= -3.91202300542815
+-5 <= cpd00238_c0_dgerr#642 <= 5
+-13.8155105579643 <= cpd00029_e0_logconc#643 <= -3.91202300542815
+-5 <= cpd00029_e0_dgerr#644 <= 5
+-13.8155105579643 <= cpd00363_e0_logconc#645 <= -3.91202300542815
+-5 <= cpd00363_e0_dgerr#646 <= 5
+-13.8155105579643 <= cpd00061_c0_logconc#647 <= -3.91202300542815
+-5 <= cpd00061_c0_dgerr#648 <= 5
+ 0 <= Rgrxn00549_c0_thermo#262 <= 400000
+ 0 <= Rgrxn05312_c0_thermo#263 <= 400000
+ 0 <= Rgrxn00247_c0_thermo#264 <= 500000
+ 0 <= Rgrxn00786_c0_thermo#265 <= 300000
+ 0 <= Rgrxn08865_c0_thermo#266 <= 600000
+ 0 <= Rgrxn01200_c0_thermo#267 <= 400000
+ 0 <= Rgrxn08525_c0_thermo#268 <= 200000
+ 0 <= RgFRD7_c0_thermo#269 <= 400000
+ 0 <= Rgrxn00545_c0_thermo#270 <= 500000
+ 0 <= Rgrxn09270_c0_thermo#271 <= 400000
+ 0 <= Rgrxn00173_c0_thermo#272 <= 400000
+ 0 <= Rgrxn08288_c0_thermo#273 <= 750000
+ 0 <= Rgrxn00459_c0_thermo#274 <= 300000
+ 0 <= Rgrxn00083_c0_thermo#275 <= 400000
+ 0 <= Rgrxn00097_c0_thermo#276 <= 400000
+ 0 <= Rgrxn32421_c0_thermo#277 <= 600000
+ 0 <= Rgrxn00154_c0_thermo#278 <= 600000
+ 0 <= Rgrxn19316_c0_thermo#279 <= 600000
+ 0 <= Rgrxn00187_c0_thermo#280 <= 700000
+ 0 <= Rgrxn00558_c0_thermo#281 <= 200000
+ 0 <= Rgrxn05319_c0_thermo#282 <= 200000
+ 0 <= Rgrxn00747_c0_thermo#283 <= 200000
+ 0 <= Rgrxn05468_c0_thermo#284 <= 200000
+ 0 <= Rgrxn35242_c0_thermo#285 <= 500000
+ 0 <= Rgrxn08535_c0_thermo#286 <= 400000
+ 0 <= Rgrxn01115_c0_thermo#287 <= 500000
+ 0 <= Rgrxn00225_c0_thermo#288 <= 400000
+ 0 <= Rgrxn00500_c0_thermo#289 <= 500000
+ 0 <= Rgrxn08350_c0_thermo#290 <= 400000
+ 0 <= Rgrxn20162_c0_thermo#291 <= 600000
+ 0 <= Rgrxn01333_c0_thermo#292 <= 400000
+ 0 <= Rgrxn30674_c0_thermo#293 <= 300000
+ 0 <= Rgrxn01100_c0_thermo#294 <= 400000
+ 0 <= Rgrxn39085_c0_thermo#295 <= 200000
+ 0 <= Rgrxn08173_c0_thermo#296 <= 1100000
+ 0 <= Rgrxn00285_c0_thermo#297 <= 600000
+ 0 <= Rgrxn00161_c0_thermo#298 <= 500000
+ 0 <= Rgrxn00543_c0_thermo#299 <= 500000
+ 0 <= Rgrxn05297_c0_thermo#300 <= 400000
+ 0 <= Rgrxn05467_c0_thermo#301 <= 200000
+ 0 <= Rgrxn05488_c0_thermo#302 <= 400000
+ 0 <= Rgrxn00085_c0_thermo#303 <= 700000
+ 0 <= Rgrxn00062_c0_thermo#304 <= 500000
+ 0 <= Rgrxn34258_c0_thermo#305 <= 400000
+ 0 <= Rgrxn00171_c0_thermo#306 <= 600000
+ 0 <= Rgrxn05559_c0_thermo#307 <= 400000
+ 0 <= Rgrxn09272_c0_thermo#308 <= 400000
+ 0 <= Rgrxn00604_c0_thermo#309 <= 500000
+ 0 <= Rgrxn00159_c0_thermo#310 <= 500000
+ 0 <= Rgrxn08972_c0_thermo#311 <= 1100000
+ 0 <= Rgrxn08542_c0_thermo#312 <= 600000
+ 0 <= Rgrxn01106_c0_thermo#313 <= 200000
+ 0 <= Rgrxn00198_c0_thermo#314 <= 500000
+ 0 <= Rgrxn01476_c0_thermo#315 <= 400000
+ 0 <= Rgrxn00781_c0_thermo#316 <= 600000
+ 0 <= Rgrxn09295_c0_thermo#317 <= 800000
+ 0 <= Rgrxn00785_c0_thermo#318 <= 400000
+ 0 <= Rgrxn08032_c0_thermo#319 <= 200000
+ 0 <= Rgrxn00189_c0_thermo#320 <= 400000
+ 0 <= Rgrxn00336_c0_thermo#321 <= 300000
+ 0 <= Rgrxn00147_c0_thermo#322 <= 800000
+ 0 <= Rgrxn09269_c0_thermo#323 <= 600000
+ 0 <= Rgrxn00248_c0_thermo#324 <= 500000
+ 0 <= Rgrxn00974_c0_thermo#325 <= 300000
+ 0 <= Rgrxn05493_c0_thermo#326 <= 400000
+ 0 <= Rgrxn00777_c0_thermo#327 <= 200000
+ 0 <= Rgrxn08094_c0_thermo#328 <= 600000
+ 0 <= Rgrxn05226_c0_thermo#329 <= 400000
+ 0 <= Rgrxn05155_c0_thermo#330 <= 700000
+ 0 <= Rgrxn08427_c0_thermo#331 <= 400000
+ 0 <= Rgrxn00184_c0_thermo#332 <= 700000
+ 0 <= Rgrxn05469_c0_thermo#333 <= 400000
+ 0 <= Rgrxn32587_c0_thermo#334 <= 300000
+ 0 <= Rgrxn01116_c0_thermo#335 <= 200000
+ 0 <= Rgbio1_thermo#336 <= 35730890
 Binaries
  rxn00549_c0_revbin#190  rxn05312_c0_revbin#191  rxn00247_c0_revbin#192 
  rxn00786_c0_revbin#193  rxn08865_c0_revbin#194  rxn01200_c0_revbin#195 
