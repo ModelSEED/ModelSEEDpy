@@ -5,7 +5,7 @@ import numpy
 from glob import glob
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
 import cobrakbase
-token = 'H6SZTTVQGYLKE55YLU5AOZ24OJWLKZNW'
+token = 'JOSNYJGASTV5BGELWQTUSATE4TNHZ66U'
 kbase = cobrakbase.KBaseAPI(token)
 import re
 
@@ -24,13 +24,12 @@ pkgmgr = MSPackageManager.get_pkg_mgr(model)
 
 def test_drain_functions():
     # define an arbitrary auto_sink
-    auto_sink_compound = 'cpd00032'
+    auto_sink_compound = 'cpd00169'
     met_id = auto_sink_compound + '_c0'
     cobra_id = model.metabolites.get_by_id(met_id)
     
-    drain_reaction = FBAHelper.add_autodrain_reactions_to_community_model(model, [auto_sink_compound])
-    print(drain_reaction)
-    model.add_reactions([drain_reaction])
+    drain_reactions = FBAHelper.add_autodrain_reactions_to_community_model(model, [auto_sink_compound])
+    model.add_reactions(drain_reactions)
     for reaction in model.reactions:
         if re.search('DM_', reaction.id):
             assert reaction.id == f'DM_{met_id}'
@@ -86,7 +85,7 @@ def test_set_objective_from_target_reaction():
     assert str(model.objective.expression) == '1.0*bio1 - 1.0*bio1_reverse_b18f7'
     assert model.objective.direction == 'max'
     
-    reaction = FBAHelper.set_objective_from_target_reaction(model, target_reaction, maximize = False)
+    reaction = FBAHelper.set_objective_from_target_reaction(model, target_reaction, minimize = True)
     assert model.objective.direction == 'min'
     
 def test_compute_flux_values_from_variables():
