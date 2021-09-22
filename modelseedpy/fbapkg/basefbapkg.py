@@ -90,6 +90,11 @@ class BaseFBAPkg:
             if len(coef) > 0:
                 self.constraints[type][name].set_linear_coefficients(coef)
             self.model.solver.update()
+        else:
+            self.model.constraints[f'{name}_{type}'].lb = lower_bound
+            self.model.constraints[f'{name}_{type}'].ub = upper_bound
+            self.model.solver.update()
+            self.constraints[type][name] = self.model.constraints[f'{name}_{type}']
         return self.constraints[type][name]
     
     def all_variables(self):
