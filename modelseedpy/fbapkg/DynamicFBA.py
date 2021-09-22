@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # import statements
-from modelseedpy import BaseFBAPkg
+# from modelseedpy import BaseFBAPkg
 from math import inf
 from numpy import nan   
 import pandas
@@ -16,9 +16,10 @@ def isnumber(string):
     string = str(string)
     try:
         string = string.strip()
-        if re.sub('([0-9]|\.)', '',string) == '':
+        if re.sub('([0-9\.\-])', '',string) == '':
             return True
     except:
+        print(string)
         return False
     
 def average(num_1, num_2 = None):
@@ -36,7 +37,7 @@ def average(num_1, num_2 = None):
         return None
             
 # define chemical concentrations
-class dynamicFBAPkg(BaseFBAPkg):
+class dynamicFBAPkg:
     def __init__(self, model, total_time, timestep, initial_concentrations, reaction_kinetics, logging = True, verbose = True):
         self.model = model
         self.verbose = verbose
@@ -112,6 +113,7 @@ class dynamicFBAPkg(BaseFBAPkg):
             solution = self.model.optimize()
             solutions.append(solution)
             print(f'\nobjective value for timestep {self.timestep}: ', solution.objective_value, '\n\n')
+#             print('flux', solution.fluxes[reaction.id])
             self.update_concentrations(solution)
         
         if visualize:
@@ -130,7 +132,7 @@ class dynamicFBAPkg(BaseFBAPkg):
             S = 0
             
             if source == 'custom':
-                remainder = re.sub('([0-9ABCS\-\/\(\)\+\.\*])', '', self.parameters['reaction_kinetics'][enzyme]["SubstitutedRateLaw"])
+                remainder = re.sub('([0-9ABCSE\-\/\(\)\+\.\*])', '', self.parameters['reaction_kinetics'][enzyme]["SubstitutedRateLaw"])
                 if remainder == '':
                     if "A" in self.parameters['reaction_kinetics'][enzyme]['parameters']:   
                         if self.parameters['reaction_kinetics'][enzyme]['parameters']["A"] in concentrations: 
@@ -166,13 +168,8 @@ class dynamicFBAPkg(BaseFBAPkg):
                     for entry_id in self.parameters['reaction_kinetics'][enzyme][reaction]:
                         if "SubstitutedRateLaw" in self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]:
                             if self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]['SubstitutedRateLaw'] not in empty:
-                                remainder = re.sub('([0-9ABCS\-\/\(\)\+\.\*])', '', self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["SubstitutedRateLaw"])
+                                remainder = re.sub('([0-9ABCSE\-\/\(\)\+\.\*])', '', self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["SubstitutedRateLaw"])
                                 if remainder == '':
-                                    A = 0
-                                    B = 0
-                                    C = 0
-
-
                                     if "A" in self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Parameters"]:   
                                         if self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Parameters"]["A"]["species"] in concentrations: 
                                             A = concentrations[self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Parameters"]["A"]["species"]]
@@ -189,52 +186,47 @@ class dynamicFBAPkg(BaseFBAPkg):
                                         if self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Parameters"]["S"]["species"] in concentrations:    
                                             S = concentrations[self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Parameters"]["S"]["species"]]
 
+                                    # define the closest match of the data to the parameterized conditions
+                                    if (temperature and self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Temperature"]) not in empty:
+                                        temperature_deviation = abs(temperature - float(self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Temperature"]))/temperature
+                                    else:
+                                        temperature_deviation = 0
+                                    if (p_h and self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["pH"]) not in empty:
+                                        ph_deviation = abs(p_h - float(self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["pH"]))/p_h
+                                    else:
+                                        ph_deviation = 0
+
+                                    old_minimum = minimum
+                                    deviation = average(temperature_deviation, ph_deviation)
+                                    minimum = min(deviation, minimum)
+                                            
                                     try:
                                         flux = eval(self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["SubstitutedRateLaw"])
-                                    except:
-                                        flux = None
-                                        pass
-
-                                    if flux:
-
-                                        # define the closest match of the data to the parameterized conditions
-                                        if (temperature and self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Temperature"]) not in empty:
-                                            temperature_deviation = abs(temperature - float(self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["Temperature"]))/temperature
-                                        else:
-                                            temperature_deviation = 0
-                                        if (p_h and self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["pH"]) not in empty:
-                                            ph_deviation = abs(p_h - float(self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["pH"]))/p_h
-                                        else:
-                                            ph_deviation = 0
-
-                                        old_minimum = minimum
-                                        deviation = average(temperature_deviation, ph_deviation)
-                                        minimum = min(deviation, minimum)
-            #                             print('minimum', minimum)
-            #                             print('deviation', deviation)
-
                                         if old_minimum == minimum:
                                             fluxes.append(flux)
                                         elif deviation == minimum:
                                             fluxes = [flux]
-
-                                        if self.verbose:
-                                            print('enzyme:', enzyme, '\trate:', self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["SubstitutedRateLaw"], '\tfluxes:', fluxes)
-                                        self.fluxes_df.at[enzyme, f'{self.timestep} (min)'] = average(fluxes)
+                                    except:
+                                        print('--> ERROR: The {} rate law is not solvable.'.format(self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["SubstitutedRateLaw"]))
+                                        pass
                                 else:
                                     if self.verbose:
                                         print('--> ERROR: The {} rate law has an unaccepted form.'.format(self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["SubstitutedRateLaw"]))
+                                        
+                    if self.verbose:
+                        print('enzyme:', enzyme, '\trate:', self.parameters['reaction_kinetics'][enzyme][reaction][entry_id]["SubstitutedRateLaw"], '\tfluxes:', fluxes)
+                    self.fluxes_df.at[enzyme, f'{self.timestep} (min)'] = average(fluxes)
+                    self.parameters['calculated_rate_laws'][enzyme.lower()] = average(fluxes)
                 
     def update_concentrations(self, solution):
         for reaction in self.model.reactions:
-            print('upper_bound', reaction.upper_bound)
-            print('lower_bound', reaction.lower_bound)
-            print('flux', solution.fluxes[reaction.id])
+#             print('upper_bound', reaction.upper_bound)
+#             print('lower_bound', reaction.lower_bound)
             #print(f'{reaction.id} \tflux: {solution.fluxes[reaction.id]}') # \tExpression: {reaction.reaction}
             for metabolite in reaction.metabolites:
                 delta_conc = reaction.metabolites[metabolite] * solution.fluxes[reaction.id]
 #                 print('stoich', reaction.metabolites[metabolite])
-                print('delta_conc', delta_conc)
+#                 print('delta_conc', delta_conc)
                 if self.timestep == 1:
                     initial_conc = 0
                     if metabolite.name in self.parameters['initial_concentrations']:
@@ -245,8 +237,8 @@ class dynamicFBAPkg(BaseFBAPkg):
                     self.variables['concentrations'][metabolite.name] += delta_conc
                     self.concentrations_df.at[f'{metabolite.name} ({metabolite.compartment})', f'{self.timestep} (min)'] = self.variables['concentrations'][metabolite.name]
                     after = self.variables['concentrations'][metabolite.name]
-                    print('before', before)
-                    print('after', after)
+#                     print('before', before)
+#                     print('after', after)
                     if self.verbose:
                         if before != after:
                             print(f'{metabolite.name} changed concentration, timestep {self.timestep}: {before}\t{after}')
