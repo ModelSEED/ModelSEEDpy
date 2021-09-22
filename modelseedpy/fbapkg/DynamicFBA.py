@@ -43,11 +43,7 @@ class dynamicFBAPkg:
         self.verbose = verbose
         self.parameters = {}
         self.variables = {}
-#         self.constraints = {}
-#         self.constraint_types = {}
-        
-#         self.constraints['kinetic'] = {}
-#         self.constraint_types['kinetic'] = {}
+
         self.parameters['timesteps'] = round(total_time/timestep)
         self.parameters['reaction_kinetics'] = reaction_kinetics
         self.parameters['initial_concentrations'] = initial_concentrations
@@ -97,9 +93,6 @@ class dynamicFBAPkg:
                 if not isnumber(kinetic_flux):
                     print(f'--> ERROR: The constant for {reaction.name} is erronenous.')
                     continue
-#                 else:
-#                     coef = {reaction.forward_variable:1, reaction.reverse_variable:1}
-#                     BaseFBAPkg.build_constraint(self, "kinetic",kinetic_flux,kinetic_flux,coef,reaction)
                 if kinetic_flux > reaction.lower_bound:
                     reaction.upper_bound = kinetic_flux
                     reaction.lower_bound = kinetic_flux
@@ -113,7 +106,6 @@ class dynamicFBAPkg:
             solution = self.model.optimize()
             solutions.append(solution)
             print(f'\nobjective value for timestep {self.timestep}: ', solution.objective_value, '\n\n')
-#             print('flux', solution.fluxes[reaction.id])
             self.update_concentrations(solution)
         
         if visualize:
@@ -220,13 +212,8 @@ class dynamicFBAPkg:
                 
     def update_concentrations(self, solution):
         for reaction in self.model.reactions:
-#             print('upper_bound', reaction.upper_bound)
-#             print('lower_bound', reaction.lower_bound)
-            #print(f'{reaction.id} \tflux: {solution.fluxes[reaction.id]}') # \tExpression: {reaction.reaction}
             for metabolite in reaction.metabolites:
                 delta_conc = reaction.metabolites[metabolite] * solution.fluxes[reaction.id]
-#                 print('stoich', reaction.metabolites[metabolite])
-#                 print('delta_conc', delta_conc)
                 if self.timestep == 1:
                     initial_conc = 0
                     if metabolite.name in self.parameters['initial_concentrations']:
@@ -237,8 +224,6 @@ class dynamicFBAPkg:
                     self.variables['concentrations'][metabolite.name] += delta_conc
                     self.concentrations_df.at[f'{metabolite.name} ({metabolite.compartment})', f'{self.timestep} (min)'] = self.variables['concentrations'][metabolite.name]
                     after = self.variables['concentrations'][metabolite.name]
-#                     print('before', before)
-#                     print('after', after)
                     if self.verbose:
                         if before != after:
                             print(f'{metabolite.name} changed concentration, timestep {self.timestep}: {before}\t{after}')
