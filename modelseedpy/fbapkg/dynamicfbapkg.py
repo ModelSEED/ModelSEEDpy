@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # import statements
-# from modelseedpy import BaseFBAPkg
 from math import inf
 from numpy import nan   
 import pandas
@@ -38,7 +37,7 @@ def average(num_1, num_2 = None):
             
 # define chemical concentrations
 class dynamicFBAPkg:
-    def __init__(self, model, total_time, timestep, initial_concentrations, reaction_kinetics, logging = True, verbose = True):
+    def __init__(self, model, total_time, timestep, initial_concentrations, reaction_kinetics, logging = True, verbose = False):
         self.model = model
         self.verbose = verbose
         self.parameters = {}
