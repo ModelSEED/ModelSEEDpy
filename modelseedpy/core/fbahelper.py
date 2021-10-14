@@ -5,6 +5,7 @@ from chemicals import periodic_table
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.biochem import from_local
+from scipy.odr.odrpack import Output
 #from Carbon.Aliases import false
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,6 @@ class FBAHelper:
                 'reverse': rxn.reverse_variable.primal,
                 'forward': rxn.forward_variable.primal
             }
-
         return flux_values
     
     @staticmethod
@@ -185,7 +185,100 @@ class FBAHelper:
                 for metabolite in reaction.metabolites:
                     (base,comp,index) = FBAHelper.parse_id(metabolite)
                     #exchange_hash[base][comp]
-                    
+
+    @staticmethod
+    def find_reaction(model,stoichiometry):
+        output = FBAHelper.stoichiometry_to_string(stoichiometry)
+        atpstring = output[0]
+        rxn_hash = FBAHelper.rxn_hash(model)
+        if atpstring in rxn_hash:
+            return rxn_hash[atpstring]
+        return None
+    
+    @staticmethod
+    def msid_hash(model): 
+        output = {}
+        for cpd in model.metabolites:
+            msid = FBAHelper.modelseed_id_from_cobra_metabolite(cpd)
+            if msid != None:
+                if msid not in output:
+                    output[msid] = []
+                output[msid].append(cpd)
+        return output
+    
+    @staticmethod
+    def rxn_hash(model): 
+        output = {}
+        for rxn in model.reactions:
+            strings = FBAHelper.stoichiometry_to_string(rxn.metabolites)
+            output[strings[0]] = [rxn,1]
+            output[strings[1]] = [rxn,-1]
+        return output
+    
+    @staticmethod
+    def rxn_compartment(reaction): 
+        compartments = list(reaction.compartments)
+        if len(compartments) == 1:
+            return compartments[0]
+        cytosol = None
+        othercomp = None
+        for comp in compartments:
+            if comp[0:1] != "e":
+                if comp[0:1] == "c":
+                    cytosol = comp
+                else:
+                    othercomp = comp
+        if othercomp != None:
+            return othercomp
+        return cytosol
+    
+    @staticmethod
+    def stoichiometry_to_string(stoichiometry):
+        reactants = []
+        products = []
+        for met in stoichiometry:
+            coef = stoichiometry[met]
+            if not isinstance(met, str):
+                if FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067":
+                    met = None
+                else:
+                    met = met.id
+            if met != None:
+                if coef < 0:
+                    reactants.append(met)
+                else:
+                    products.append(met)
+        reactants.sort()
+        products.sort()
+        return ["+".join(reactants)+"="+"+".join(products),"+".join(products)+"="+"+".join(reactants)]
+    
+    @staticmethod
+    def add_atp_hydrolysis(model,compartment):
+        #Searching for ATP hydrolysis compounds
+        coefs = {"cpd00002":[-1,compartment],"cpd00001":[-1,compartment],"cpd00008":[1,compartment],"cpd00009":[1,compartment],"cpd00067":[1,compartment]}
+        msids = ["cpd00002","cpd00001","cpd00008","cpd00009","cpd00067"]
+        stoichiometry = {}
+        id_hash = FBAHelper.msid_hash(model)
+        for msid in msids:
+            if msid not in id_hash:
+                logger.warning("Compound "+msid+" not found in model!")
+                return None
+            else:
+                for cpd in id_hash[msid]:
+                    if cpd.compartment == coefs[msid][1]:
+                        stoichiometry[cpd] = coefs[msid][0]
+        output = FBAHelper.find_reaction(model,stoichiometry)
+        if output != None and output[1] == ">":
+            return {"reaction":output[0],"direction":">","new":False}
+        cobra_reaction = Reaction("rxn00062_"+compartment, 
+                                  name="ATP hydrolysis", 
+                                  lower_bound=0, 
+                                  upper_bound=1000)
+        cobra_reaction.annotation["sbo"] = "SBO:0000176" #biochemical reaction
+        cobra_reaction.annotation["seed.reaction"] = "rxn00062"
+        cobra_reaction.add_metabolites(stoichiometry)
+        model.add_reactions([cobra_reaction])
+        return {"reaction":cobra_reaction,"direction":">","new":True}
         
     @staticmethod
     def parse_id(object):
@@ -193,3 +286,10 @@ class FBAHelper:
             m = re.search('(.+)_([a-z])(\d+)$', object.id)
             return (m[1],m[2],int(m[3]))
         return None
+    
+    @staticmethod
+    def medianame(media):
+        if media == None:
+            return "Complete"
+        return media.id
+        
