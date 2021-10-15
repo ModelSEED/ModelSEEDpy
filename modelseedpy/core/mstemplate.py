@@ -29,7 +29,7 @@ class TemplateReactionType(Enum):
     GAPFILLING = 'gapfilling'
 
 
-class NewModelTemplateCompound:
+class MSTemplateMetabolite:
 
     def __init__(self, cpd_id, formula=None, name='', default_charge=None,
                  mass=None, delta_g=None, delta_g_error=None, is_cofactor=False,
@@ -51,7 +51,7 @@ class NewModelTemplateCompound:
 
     @staticmethod
     def from_dict(d):
-        return NewModelTemplateCompound(
+        return MSTemplateMetabolite(
             d['id'], d['formula'], d['name'],
             d['defaultCharge'], d['mass'],
             d['deltaG'], d['deltaGErr'],
@@ -543,11 +543,11 @@ class MSTemplate:
 
     def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None, args=None):
         self.id = template_id
-        self.__VERSION__ = version
         self.name = name
         self.domain = domain
-        self.biochemistry_ref = ''
         self.template_type = template_type
+        self.__VERSION__ = version
+        self.biochemistry_ref = ''
         self.compartments = DictList()
         self.biomasses = DictList()
         self.reactions = DictList()
@@ -557,7 +557,6 @@ class MSTemplate:
         self.complexes = DictList()
         self.pathways = DictList()
         self.subsystems = DictList()
-        #self.info = info if info else KBaseObjectInfo(object_type='KBaseFBA.NewModelTemplate')
 
     def add_compartments(self, compartments: list):
         """
@@ -823,7 +822,7 @@ class MSTemplateBuilder:
         self.biochemistry_ref = None
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(d, info=None, args=None):
         """
 
         :param d:
@@ -910,10 +909,9 @@ class MSTemplateBuilder:
         return self
 
     def build(self):
-
         template = MSTemplate(self.id, self.name, self.domain, self.template_type, self.version)
         template.add_compartments(list(map(lambda x: MSTemplateCompartment.from_dict(x), self.compartments)))
-        template.add_compounds(list(map(lambda x: NewModelTemplateCompound.from_dict(x), self.compounds)))
+        template.add_compounds(list(map(lambda x: MSTemplateMetabolite.from_dict(x), self.compounds)))
         template.add_comp_compounds(
             list(map(lambda x: MSTemplateSpecies.from_dict(x), self.compartment_compounds)))
         template.add_roles(list(map(lambda x: NewModelTemplateRole.from_dict(x), self.roles)))
