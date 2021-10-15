@@ -490,14 +490,17 @@ class MSBuilder:
     def build(self, model_id, index='0', allow_all_non_grp_reactions=False, annotate_with_rast=True):
 
         if annotate_with_rast:
+            logger.info("[%s] annotate genome with rast", model_id)
             rast = RastClient()
             res = rast.annotate_genome(self.genome)
             self.search_name_to_genes, self.search_name_to_original = _aaaa(self.genome, 'RAST')
 
         # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
         if self.template is None:
+            logger.info("[%s] auto select template", model_id)
             self.auto_select_template()
 
+        logger.info("[%s] build genome scale model", model_id)
         cobra_model = Model(model_id)
         cobra_model.add_reactions(self.build_metabolic_reactions(index=index))
         cobra_model.add_reactions(self.build_non_metabolite_reactions(cobra_model, index, allow_all_non_grp_reactions))
@@ -570,6 +573,7 @@ class MSBuilder:
         model = builder.build(model_id, index, allow_all_non_grp_reactions, annotate_with_rast)
         # Gapfilling model
         if gapfill_model:
+            logger.info("[%s] gapfill model", model_id)
             model = MSBuilder.gapfill_model(model, 'bio1', builder.template, gapfill_media)
         return model
 
