@@ -7,6 +7,10 @@ import math
 from optlang.symbolics import Zero, add
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
+from modelseedpy.multiomics.msexpression import MSExpression, GENOME, MODEL, COLUMN_NORM
+
+#Options for default behavior
+LOWEST = 10
 
 #Base class for FBA packages
 class ProteomeFittingPkg(BaseFBAPkg):
@@ -15,7 +19,7 @@ class ProteomeFittingPkg(BaseFBAPkg):
         self.pkgmgr.addpkgs(["FluxFittingPkg"])
         
     def build_package(self,parameters):
-        self.validate_parameters(parameters,["rxn_proteome"],{
+        self.validate_parameters(parameters,["proteome","condition"],{
             "flux_values":{},
             "kcat_values":{},
             "prot_coef" : 0.1,
@@ -26,9 +30,18 @@ class ProteomeFittingPkg(BaseFBAPkg):
             "obj_vfit":1,
             "set_objective":1,
             "rescale_vfit_by_flux":True,
-            "default_rescaling":0.1
+            "default_rescaling":0.1,
+            "default_expression":LOWEST
         })
         objvars = []
+        #Converting genome proteome to reaction proteome if necessary
+        if self.parameters["proteome"].type == GENOME:
+            self.parameters["proteome"] = self.parameters["proteome"].build_reaction_expression(self.model,self.parameters["default_expression"])
+        #Checking for condition in proteome and converting condition string to object if necessary
+        if isinstance(self.parameters["condition"],str):
+            if self.parameters["condition"] not in self.parameters["proteome"].conditions:
+                logger.critical("Condition "+self.parameters["condition"]+" not found in proteome!")
+            self.parameters["condition"] = self.parameters["proteome"].conditions.get_by_id(self.parameters["condition"])
         #Adding flux fitting variables and constraints
         self.pkgmgr.getpkg("FluxFittingPkg").build_package({
             "target_flux":self.parameters["flux_values"],
@@ -42,16 +55,18 @@ class ProteomeFittingPkg(BaseFBAPkg):
             objvars.append(self.parameters["obj_vfit"] * self.pkgmgr.getpkg("FluxFittingPkg").variables["vfit"][rxnid] ** 2)
         #Adding proteome fitting variables and constraints
         for rxnobj in self.model.reactions:
-            if rxnobj.id not in self.parameters["rxn_proteome"]:
-                self.parameters["rxn_proteome"][rxnobj.id] = 0
-            self.build_variable(rxnobj,"kapp")
-            var = self.build_variable(rxnobj,"kvfit")
-            objvars.append(self.parameters["obj_kvfit"] * var ** 2)
-            const = self.build_constraint(rxnobj,"vkapp") 
+            #Only make constraints and variables if reaction is in the proteome
+            if rxnobj.id in self.parameters["proteome"].features:
+                self.build_variable(rxnobj,"kapp")
+                var = self.build_variable(rxnobj,"kvfit")
+                objvars.append(self.parameters["obj_kvfit"] * var ** 2)
+                const = self.build_constraint(rxnobj,"vkapp")            
         #Adding kcat fitting variables and constraints
         for rxnid in self.parameters["kcat_values"]:
             for rxnobj in self.model.reactions:
                 if rxnid == FBAHelper.modelseed_id_from_cobra_reaction(rxnobj):
+                    if rxnobj.id not in self.variables["kapp"]:
+                        self.build_variable(rxnobj,"kapp")
                     var = self.build_variable(rxnobj,"kfit")
                     const = self.build_constraint(rxnobj,"kfitc")
                     objvars.append(self.parameters["obj_kfit"] * var ** 2)
@@ -68,17 +83,23 @@ class ProteomeFittingPkg(BaseFBAPkg):
             return BaseFBAPkg.build_variable(self,type,-1000000,1000000,"continuous",object)
     
     def build_constraint(self,object,type):
-        if type == "vkapp" and object.id in self.parameters["rxn_proteome"]:
+        if type == "vkapp" and object.id in self.parameters["proteome"].features:
             #kvfit(i) = kapp(i)*ProtCoef*Prot(i) - v(i)
-            prot = self.parameters["rxn_proteome"][object.id]*self.parameters["prot_coef"]
-            if object.id in self.variables["kvfit"] and object.id in self.variables["kapp"]:
-                coef = {self.variables["kvfit"][object.id]:1,self.variables["kapp"][object.id]:-1*prot}
-                if self.parameters["totalflux"] == 1:
-                    coef[self.pkgmgr.getpkg("TotalFluxPkg").variables["tf"][object.id]] = 1
-                else:
-                    coef[object.forward_variable] = 1
-                    coef[object.reverse_variable] = 1
-                return BaseFBAPkg.build_constraint(self,type,0,0,coef,object)
+            #Pulling expression value for selected condition and reaction
+            expval = self.parameters["proteome"].get_value(object.id,self.parameters["condition"],COLUMN_NORM)
+            if expval is None and self.parameters["default_expression"] is not None:
+                if self.parameters["default_expression"] == LOWEST:
+                    expval = self.parameters["condition"].lowest/self.parameters["condition"].column_sum
+            if expval is not None:
+                prot = expval*self.parameters["prot_coef"]
+                if object.id in self.variables["kvfit"] and object.id in self.variables["kapp"]:
+                    coef = {self.variables["kvfit"][object.id]:1,self.variables["kapp"][object.id]:-1*prot}
+                    if self.parameters["totalflux"] == 1:
+                        coef[self.pkgmgr.getpkg("TotalFluxPkg").variables["tf"][object.id]] = 1
+                    else:
+                        coef[object.forward_variable] = 1
+                        coef[object.reverse_variable] = 1
+                    return BaseFBAPkg.build_constraint(self,type,0,0,coef,object)
         elif type == "kfitc":
             #kfit(i) = kapp(i) - kcoef*kcat(i)
             msid = FBAHelper.modelseed_id_from_cobra_reaction(object)
