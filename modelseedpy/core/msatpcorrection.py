@@ -1,6 +1,7 @@
 import logging
 import itertools
 import cobra
+from optlang.symbolics import Zero, add
 from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
@@ -49,21 +50,28 @@ class MSATPCorrection:
         self.original_bounds = {}
         self.noncore_reactions = []
         for reaction in self.model.reactions:
+            if reaction == self.atp_hydrolysis:
+                continue
             if FBAHelper.is_ex(reaction):
                 continue
             if FBAHelper.is_biomass(reaction):
                 continue
             msid = FBAHelper.modelseed_id_from_cobra_reaction(reaction)
-            msid += "_"+self.compartment[0:1]
+            if msid != None:
+                msid += "_"+self.compartment[0:1]
             if msid in self.coretemplate.reactions and FBAHelper.rxn_compartment(reaction) == self.compartment:
                 self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
+                #print(reaction.id+" core")
                 if reaction.lower_bound < 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).lower_bound >= 0:
+                    #print(reaction.id+" core but reversible")
                     self.noncore_reactions.append([reaction, "<"])
                     reaction.lower_bound = 0
                 if reaction.upper_bound > 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).upper_bound <= 0:
+                    #print(reaction.id+" core but reversible")
                     self.noncore_reactions.append([reaction, ">"])
                     reaction.upper_bound = 0
             else:
+                #print(reaction.id+" noncore")
                 self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
                 if reaction.lower_bound < 0:
                     self.noncore_reactions.append([reaction, "<"])
@@ -93,7 +101,7 @@ class MSATPCorrection:
                 logger.debug('evaluate media %s - %f (%s)', media, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
                 if solution.objective_value == 0 or solution.status != 'optimal':
-                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_objective)
+                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
 
     def determine_growth_media(self):
@@ -155,16 +163,18 @@ class MSATPCorrection:
         """
         self.gapfilling_tests = []
         self.filtered_noncore = []
-        self.model.objective = self.atp_objective
+        self.model.objective = self.atp_hydrolysis.id
         pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         for media in self.selected_media:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
             solution = self.model.optimize()
-            self.gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value,"objective":self.atp_objective})
+            print(media.name+" = "+str(solution.objective_value))
+            self.gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value,"objective":self.atp_hydrolysis.id})
         # Extending model with noncore reactions while retaining ATP accuracy
-        self.filtered_noncore = FBAHelper.reaction_expansion_test(self.model,self.noncore_reactions,self.gapfilling_tests)
+        self.filtered_noncore = FBAHelper.reaction_expansion_test(self.model,self.noncore_reactions,self.gapfilling_tests,pkgmgr)
         # Removing filtered reactions
         for item in self.filtered_noncore:
+            print("Removing "+item[0].id+" "+item[1])
             if item[1] == ">":
                 item[0].upper_bound = 0
             else:

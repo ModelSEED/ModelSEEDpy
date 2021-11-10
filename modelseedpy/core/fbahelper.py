@@ -20,7 +20,7 @@ class FBAHelper:
     @staticmethod
     def add_autodrain_reactions_to_community_model(model,auto_sink = ["cpd02701", "cpd11416", "cpd15302"]):
         #Adding missing drains in the base model
-        #drain_reactions = []
+        drain_reactions = []
         for metabolite in model.metabolites:
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
             if msid in auto_sink:
@@ -28,7 +28,10 @@ class FBAHelper:
                     met_id = metabolite.id
                     if all(rxn not in model.reactions for rxn in [f"EX_{met_id}", f"DM_{met_id}", f"SK_{met_id}"]):
                         drain_reaction = FBAHelper.add_drain_from_metabolite_id(model,metabolite.id,0,100,"DM_")
-                        return drain_reaction
+                        if drain_reaction != None:
+                            logger.info("Adding "+met_id+" DM")
+                            drain_reactions.append(drain_reaction)
+        model.add_reactions(drain_reactions)
         
     @staticmethod
     def add_drain_from_metabolite_id(model, cpd_id, uptake, excretion, prefix='EX_', prefix_name='Exchange for '):
@@ -82,6 +85,7 @@ class FBAHelper:
         count = 0
         filtered_list = []
         for item in reaction_list:
+            print("Testing "+item[0].id)
             if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
                 if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
