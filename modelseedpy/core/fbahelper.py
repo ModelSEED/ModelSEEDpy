@@ -4,6 +4,7 @@ import logging
 from chemicals import periodic_table
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction
+from cobra.util import solver as sutil
 from modelseedpy.biochem import from_local
 from scipy.odr.odrpack import Output
 #from Carbon.Aliases import false
@@ -61,11 +62,17 @@ class FBAHelper:
         for condition in condition_list:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]
-            sol = model.optimize()
-            if sol.objective_value >= condition["threshold"] and condition["is_max_threshold"]:
+            objective = model.slim_optimize()
+            if model.solver.status != 'optimal':
+                with open("debug.lp", 'w') as out:
+                    out.write(str(model.solver))
+                    out.close()
+                logger.critical("Infeasible problem - LP file printed to debug!")
+                return False
+            if objective >= condition["threshold"] and condition["is_max_threshold"]:
                 logger.info("FAILED")
                 return False
-            elif sol.objective_value <= condition["threshold"] and not condition["is_max_threshold"]:
+            elif objective <= condition["threshold"] and not condition["is_max_threshold"]:
                 logger.info("FAILED")
                 return False
         return True
@@ -79,13 +86,13 @@ class FBAHelper:
                 original_bound.append(item[0].upper_bound)
                 item[0].upper_bound = 0
             else:
-                original_bound.append(-1*item[0].lower_bound)
+                original_bound.append(item[0].lower_bound)
                 item[0].lower_bound = 0
         # Now restore reactions one at a time
         count = 0
         filtered_list = []
         for item in reaction_list:
-            print("Testing "+item[0].id)
+            logger.info("Testing "+item[0].id)
             if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
                 if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):

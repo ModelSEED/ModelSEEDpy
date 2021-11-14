@@ -67,6 +67,8 @@ class CommunityModelSpecies:
             logger.critical("No biomass found for species:"+self.id)
         self.community.model.objective = self.community.model.problem.Objective(Zero,direction="max")
         self.community.model.objective.set_linear_coefficients({self.biomasses[0].forward_variable:1})
+        if self.community.lp_filename != None:
+            self.community.print_lp(self.community.lp_filename+"_"+self.id+"_Biomass")
         return self.community.model.optimize()
     
     def compute_max_atp(self):
@@ -74,6 +76,8 @@ class CommunityModelSpecies:
             logger.critical("No ATP hydrolysis found for species:"+self.id)
         self.community.model.objective = self.community.model.problem.Objective(Zero,direction="max")
         self.community.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
+        if self.community.lp_filename != None:
+            self.community.print_lp(self.community.lp_filename+"_"+self.id+"_ATP")
         return self.community.model.optimize()
 
 class MSCommunity:
@@ -302,25 +306,6 @@ class MSCommunity:
             networkx.draw_networkx(graph,pos)
             labels = networkx.get_edge_attributes(graph,'flux')
             networkx.draw_networkx_edge_labels(graph,pos,edge_labels=labels)
-        
-        # view the cross feeding matrices
-        if table:
-            from pandas import DataFrame as df
-
-            species = [num+1 for num in range(len(self.production))]
-
-            print('\nProduction matrix:')
-            prod_df = df(self.production)
-            prod_df.index = prod_df.columns = species
-            prod_df.index.name = 'Donor'
-            print(prod_df)
-
-            print('\n\nConsumption matrix:')
-            cons_df = df(self.consumption)
-            cons_df.index = cons_df.columns = species
-            cons_df.index.name = 'Receiver'
-            print(cons_df)
-            print('\n')
     
     #Analysis functions
     def gapfill(self, media = None, target = None, minimize = False,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
