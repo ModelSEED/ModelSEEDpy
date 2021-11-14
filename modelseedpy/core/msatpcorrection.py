@@ -196,7 +196,7 @@ class MSATPCorrection:
         self.filtered_noncore = FBAHelper.reaction_expansion_test(self.model,self.noncore_reactions,self.gapfilling_tests,pkgmgr)
         # Removing filtered reactions
         for item in self.filtered_noncore:
-            logger.debug("Removing "+item[0].id+" "+item[1])
+            print("Removing "+item[0].id+" "+item[1])
             if item[1] == ">":
                 item[0].upper_bound = 0
             else:
