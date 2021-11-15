@@ -81,16 +81,15 @@ class BaseFBAPkg:
             name = object
         else:
             name = object.id
-        if name in self.constraints[type]:
-            self.model.remove_cons_vars(self.constraints[type][name])
-        self.constraints[type][name] = self.model.problem.Constraint(
-            Zero,lb=lower_bound,ub=upper_bound,name=name+"_"+type
-        )
-        self.model.add_cons_vars(self.constraints[type][name])
-        self.model.solver.update()
-        if len(coef) > 0:
-            self.constraints[type][name].set_linear_coefficients(coef)
-        self.model.solver.update()
+        if name not in self.constraints[type]:
+            self.constraints[type][name] = self.model.problem.Constraint(
+                Zero,lb=lower_bound,ub=upper_bound,name=name+"_"+type
+            )
+            self.model.add_cons_vars(self.constraints[type][name])
+            self.model.solver.update()
+            if len(coef) > 0:
+                self.constraints[type][name].set_linear_coefficients(coef)
+            self.model.solver.update()
         return self.constraints[type][name]
     
     def all_variables(self):
