@@ -36,8 +36,8 @@ class KBaseMediaPkg(BaseFBAPkg):
             self.parameters["default_uptake"] = 100
 
         exchange_reactions = {}
-        for reaction in self.model.reactions:  # FIXME: self.model.exchanges use cobrapy exchange method
-            if reaction.id[0:3].lower() == "ex_":  # FIXME: see above
+        for reaction in self.model.exchanges:
+            if reaction.id[:3] == 'EX_':
                 compound = reaction.id[3:]
                 exchange_reactions[compound] = reaction                
                 reaction.lower_bound = -1*self.parameters["default_uptake"]
@@ -50,9 +50,11 @@ class KBaseMediaPkg(BaseFBAPkg):
                 mdlcpds = self.find_model_compounds(compound.id)
                 for mdlcpd in mdlcpds:
                     if mdlcpd.id in exchange_reactions:
+                        #print('media compound: ', mdlcpd)
                         exchange_reactions[mdlcpd.id].lower_bound = -1 * compound.maxFlux
                         exchange_reactions[mdlcpd.id].upper_bound = -1 * compound.minFlux
                     if self.pkgmgr != None and "FullThermoPkg" in self.pkgmgr.packages:
+                        print('FullThermo constrained compound: ', mdlcpd)
                         if mdlcpd.id in self.variables["logconc"] and mdlcpd.compartment == "e0":
                             if compound.concentration != 0.001:
                                 self.variables["logconc"][msid_hash[compound.id].id].lb = compound.concentration
