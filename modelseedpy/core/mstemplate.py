@@ -64,14 +64,14 @@ class MSTemplateMetabolite:
         return {
             'id': self.id,
             'name': self.name,
-            'abbreviation': self.abbreviation,
+            'abbreviation': self.abbreviation if self.abbreviation else "",
             'aliases': [],
-            'defaultCharge': self.default_charge,
-            'deltaG': self.delta_g,
-            'deltaGErr': self.delta_g_error,
-            'formula': self.formula,
+            'defaultCharge': self.default_charge if self.default_charge else 0,
+            'deltaG': self.delta_g if self.delta_g else 10000000,
+            'deltaGErr': self.delta_g_error if self.delta_g_error else 10000000,
+            'formula': self.formula if self.formula else 'R',
             'isCofactor': 1 if self.is_cofactor else 0,
-            'mass': self.mass
+            'mass': self.mass if self.mass else 0
         }
 
     def __repr__(self):
@@ -106,7 +106,7 @@ class MSTemplateMetabolite:
 
 class MSTemplateSpecies(Metabolite):
 
-    def __init__(self, comp_cpd_id, charge, compartment, cpd_id, max_uptake=0, template=None):
+    def __init__(self, comp_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
         super().__init__(comp_cpd_id, '', '', charge, compartment)
         self._template = template
