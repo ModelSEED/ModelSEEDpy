@@ -38,12 +38,20 @@ core_biomass = {
     'cpd00079_c0': -0.205
 }
 
-core_atp = {
+core_atp2 = {
     'cpd00067_c0': 46.6265,
     'cpd00002_c0': -41.257,
     'cpd00008_c0': 41.257,
     'cpd00001_c0': -41.257,
     'cpd00009_c0': 41.257,
+}
+
+core_atp = {
+    'cpd00067_c0': 1,
+    'cpd00002_c0': -1,
+    'cpd00008_c0': 1,
+    'cpd00001_c0': -1,
+    'cpd00009_c0': 1,
 }
 
 gramneg = {
@@ -271,6 +279,20 @@ def aux_template(template):
                     # print(role_id, normalize_role(roles[role_id]['name']))
     return rxn_roles
 
+def build_gpr2(cpx_sets):
+    list_of_ors = []
+    for cpx in cpx_sets:
+        list_of_ands = []
+        for role_id in cpx_sets[cpx]:
+            gene_ors = cpx_sets[cpx][role_id]
+            if len(gene_ors) > 1:
+                list_of_ands.append('(' + ' or '.join(gene_ors) + ')')
+            else:
+                list_of_ands.append(list(gene_ors)[0])
+        list_of_ors.append('(' + ' and '.join(list_of_ands) + ')')
+    if len(list_of_ors) > 1:
+        return ' or '.join(list_of_ors)
+    return list_of_ors[0]
 
 def build_gpr(cpx_gene_role):
     """
@@ -325,6 +347,27 @@ class MSBuilder:
                     set() if sn not in self.search_name_to_genes else set(self.search_name_to_genes[sn])
                 ]
         return template_reaction_complexes
+    
+    @staticmethod
+    def _build_reaction_complex_gpr_sets2(match_complex, allow_incomplete_complexes=True):
+        complexes = {}
+        for cpx_id in match_complex:
+            complete = True
+            roles = set()
+            role_genes = {}
+            for role_id in match_complex[cpx_id]:
+                t = match_complex[cpx_id][role_id]
+                complete &= len(t[3]) > 0 or not t[1] or t[2]
+                if len(t[3]) > 0:
+                    roles.add(role_id)
+                    role_genes[role_id] = t[3]
+            #print(cpx_id, complete, roles)
+            if len(roles) > 0 and (allow_incomplete_complexes or complete):
+                complexes[cpx_id] = {}
+                for role_id in role_genes:
+                    complexes[cpx_id][role_id] = role_genes[role_id]
+                    #print(role_id, role_genes[role_id])
+        return complexes
 
     @staticmethod
     def _build_reaction_complex_gpr_sets(match_complex, allow_incomplete_complexes=True):
@@ -364,7 +407,7 @@ class MSBuilder:
 
         # self.map_gene(template_reaction_complexes)
         # print(template_reaction_complexes)
-        gpr_set = self._build_reaction_complex_gpr_sets(template_reaction_complexes, allow_incomplete_complexes)
+        gpr_set = self._build_reaction_complex_gpr_sets2(template_reaction_complexes, allow_incomplete_complexes)
         return gpr_set
 
     @staticmethod
@@ -387,7 +430,7 @@ class MSBuilder:
             template_reaction.lower_bound, template_reaction.upper_bound
         )
 
-        gpr_str = build_gpr(gpr_set) if gpr_set else ''
+        gpr_str = build_gpr2(gpr_set) if gpr_set else ''
         reaction.add_metabolites(metabolites)
         if gpr_str and len(gpr_str) > 0:
             reaction.gene_reaction_rule = gpr_str  # get_gpr_string(gpr_ll)
@@ -458,10 +501,10 @@ class MSBuilder:
 
         return genome_class
 
-    def build_metabolic_reactions(self, index='0'):
+    def build_metabolic_reactions(self, index='0', allow_incomplete_complexes=True):
         metabolic_reactions = {}
         for template_reaction in self.template.reactions:
-            gpr_set = self.get_gpr_from_template_reaction(template_reaction)
+            gpr_set = self.get_gpr_from_template_reaction(template_reaction, allow_incomplete_complexes)
             if gpr_set:
                 metabolic_reactions[template_reaction.id] = gpr_set
                 logger.debug("[%s] gpr set: %s", template_reaction.id, gpr_set)

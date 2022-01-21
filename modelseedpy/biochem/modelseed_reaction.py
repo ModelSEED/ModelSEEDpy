@@ -5,7 +5,7 @@ from cobra.core import Reaction
 
 def to_str2(rxn, cmp_replace=None, cpd_replace={}):
     direction = rxn.data['direction']
-    op =  '<?>'
+    op = '<?>'
     if direction == '=':
         op = '<=>'
     elif direction == '>':
@@ -13,7 +13,7 @@ def to_str2(rxn, cmp_replace=None, cpd_replace={}):
     elif direction == '<':
         op = '<--'
     else:
-        op =  '<?>'
+        op = '<?>'
     cstoichiometry = rxn.cstoichiometry
     l = []
     r = []
