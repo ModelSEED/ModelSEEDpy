@@ -8,6 +8,7 @@ from optlang.symbolics import Zero, add
 import json as _json
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.msmodelutl import MSModelUtil
 
 
 #Adding a few exception classes to handle different types of errors
@@ -22,6 +23,7 @@ class BaseFBAPkg:
     """
     def __init__(self, model, name, variable_types={}, constraint_types={},reaction_types = {}):
         self.model = model
+        self.modelutl = MSModelUtil(model)
         self.name = name
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         if self.pkgmgr is None:
