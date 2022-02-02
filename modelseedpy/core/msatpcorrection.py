@@ -37,7 +37,7 @@ class MSATPCorrection:
         self.max_gapfilling = max_gapfilling
         self.gapfilling_delta = gapfilling_delta
         self.coretemplate = core_template
-        self.msgapfill = MSGapfill(model,default_gapfill_templates=core_template)
+        self.msgapfill = MSGapfill(model, default_gapfill_templates=core_template)
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
@@ -126,7 +126,7 @@ class MSATPCorrection:
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
                 if solution.objective_value == 0 or solution.status != 'optimal':
-                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)  
+                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
                 elif solution.objective_value > 0 or solution.status == 'optimal':
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
