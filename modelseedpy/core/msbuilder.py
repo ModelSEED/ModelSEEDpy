@@ -451,10 +451,12 @@ class MSBuilder:
         reactions_exchanges = []
         for m in model.metabolites:
             if m.compartment == extra_cell:
-                rxn_exchange = Reaction('EX_' + m.id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
-                rxn_exchange.add_metabolites({m: -1})
-                rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
-                reactions_exchanges.append(rxn_exchange)
+                rxn_exchange_id = 'EX_' + m.id
+                if rxn_exchange_id not in model.reactions:
+                    rxn_exchange = Reaction(rxn_exchange_id, 'Exchange for ' + m.name, 'exchanges', -1000, 1000)
+                    rxn_exchange.add_metabolites({m: -1})
+                    rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
+                    reactions_exchanges.append(rxn_exchange)
         model.add_reactions(reactions_exchanges)
 
         return reactions_exchanges
@@ -544,7 +546,7 @@ class MSBuilder:
         cobra_model = Model(model_id)
         cobra_model.add_reactions(self.build_metabolic_reactions(index=index))
         cobra_model.add_reactions(self.build_non_metabolite_reactions(cobra_model, index, allow_all_non_grp_reactions))
-        cobra_model.add_reactions(self.build_exchanges(cobra_model))
+        self.build_exchanges(cobra_model)
 
         if self.template.name.startswith('CoreModel') or \
                 self.template.name.startswith('GramNeg') or self.template.name.startswith('GramPos'):
