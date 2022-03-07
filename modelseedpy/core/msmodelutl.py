@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 def search_name(name):
     name = name.lower()
-    name = re.sub(r'_[a-z]\d+$', '', name)
+    name = re.sub(r'_[a-z]\d*$', '', name)
     name = re.sub(r'\W+', '', name)
     return name
 
@@ -24,7 +24,11 @@ class MSModelUtil:
             self.add_name_to_metabolite_hash(met.id,met)
             self.add_name_to_metabolite_hash(met.name,met)
             for anno in met.annotation:
-                self.add_name_to_metabolite_hash(met.annotation[anno],met)
+                if isinstance(met.annotation[anno], list):
+                    for item in met.annotation[anno]:
+                        self.add_name_to_metabolite_hash(item,met)
+                else:
+                    self.add_name_to_metabolite_hash(met.annotation[anno],met)
     
     def add_name_to_metabolite_hash(self,name,met):
         if name not in self.metabolite_hash:
@@ -100,6 +104,7 @@ class MSModelUtil:
             drain_reaction.annotation["sbo"] = 'SBO:0000627'    
             drains.append(drain_reaction)
         self.model.add_reactions(drains)
+        return drains
         
     def reaction_scores(self):
         return {}

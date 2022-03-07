@@ -12,21 +12,21 @@ class BilevelPkg(BaseFBAPkg):
         BaseFBAPkg.__init__(self,model,"reaction use",{"dualconst":"string","dualub":"string","duallb":"string"},{"dualvar":"string","objective":"string"})
     
     def build_package(self,filter = None,binary_variable_count = 0):
-        self.validate_parameters(parameters, [], {
+        self.validate_parameters({}, [], {
             "binary_variable_count":binary_variable_count
         });
+        print("binary_variable_count:",binary_variable_count)
         coefficients = {}
         obj_coef = {}
         obj = self.model.solver.objective
-        #Using the JSON calls because get_linear_coefficients is REALLY slow
         #Creating new objective coefficient and bound variables
         bound_variables = {}
         reactions = self.model.reactions
-        if binary_variable_count > 0:
+        if self.parameters["binary_variable_count"] > 0:
             for reaction in self.model.reactions: 
-                var = self.build_variable("fluxcomp",reaction,None)
-                const = self.build_constraint("fluxcomp",reaction,None,None,None)
+                var = self.build_variable("flxcmp",reaction,None)
         #Retreiving model data with componenent flux variables
+        #Using the JSON calls because get_linear_coefficients is REALLY slow
         mdldata = self.model.solver.to_json()
         consthash = {}
         for const in mdldata["constraints"]:
@@ -35,10 +35,10 @@ class BilevelPkg(BaseFBAPkg):
         variables = list(self.model.solver.variables)
         objterms = obj.get_linear_coefficients(variables)
         #Adding binary variables and constraints which should not be included in dual formulation
-        if binary_variable_count > 0:
-            for variable in self.variables["fluxcomp"]: 
-                var = self.build_variable("bfluxcomp",variable,None)
-                const = self.build_constraint("bfluxcomp",variable,None,None,None)                
+        if self.parameters["binary_variable_count"] > 0:
+            for reaction in self.model.reactions: 
+                var = self.build_variable("bflxcmp",reaction,None)
+                const = self.build_constraint("bflxcmp",reaction,None,None,None)                
         #Now implementing dual variables and constraints
         varhash = {}
         for var in variables:
@@ -65,7 +65,6 @@ class BilevelPkg(BaseFBAPkg):
                     coefficients[var][dvar] = 1
                 self.build_constraint("dualvar",var,obj,objterms,coefficients)
         self.build_constraint("objective",None,obj,objterms,obj_coef)
-        #Add binary variables and constaints which should not be part of the formulation
     
     def build_variable(self,type,object,obj_coef):
         if type == "dualconst":
@@ -95,30 +94,38 @@ class BilevelPkg(BaseFBAPkg):
             for i in range(0,self.parameters["binary_variable_count"]):
                 value = 2**i
                 if object.lower_bound < 0:
-                    var = BaseFBAPkg.build_variable(self,"rflxcmp"+str(i),0,-1*value*object.lower_bound/denominator,"continuous",object.id)
+                    self.add_variable_type("rflxcmp"+str(i),"reaction")
+                    var = BaseFBAPkg.build_variable(self,"rflxcmp"+str(i),0,-1*value*object.lower_bound/denominator,"continuous",object)
                     coefs[0][var] = -1
                 if object.upper_bound > 0:
-                    var = BaseFBAPkg.build_variable(self,"fflxcmp"+str(i),0,value*object.upper_bound/denominator,"continuous",object.id)
+                    self.add_variable_type("fflxcmp"+str(i),"reaction")
+                    var = BaseFBAPkg.build_variable(self,"fflxcmp"+str(i),0,value*object.upper_bound/denominator,"continuous",object)
                     coefs[1][var] = -1
             if object.lower_bound < 0:
                 #flux - flux_comp_0 - flux_comp_n = 0 - restriction of reverse fluxes by component fluxes
+                self.add_constraint_type("rflxcmpc","reaction")
                 coefs[0][object.reverse_variable] = 1
-                BaseFBAPkg.build_constraint(self,"rflxcmpc",0,0,coefs[0],object.id)
+                BaseFBAPkg.build_constraint(self,"rflxcmpc",0,0,coefs[0],object)
             if object.upper_bound > 0:
                 #flux - flux_comp_0 - flux_comp_n = 0 - restriction of forward fluxes by component fluxes
+                self.add_constraint_type("fflxcmpc","reaction")
                 coefs[1][object.forward_variable] = 1
-                BaseFBAPkg.build_constraint(self,"fflxcmpc",0,0,coefs[1],object.id)
+                BaseFBAPkg.build_constraint(self,"fflxcmpc",0,0,coefs[1],object)
             return None
         if type == "bflxcmp" and self.parameters["binary_variable_count"] > 0:
             for i in range(0,self.parameters["binary_variable_count"]):
                 if object.lower_bound < 0:
-                    var = BaseFBAPkg.build_variable(self,"brflxcmp"+str(i),0,1,"binary",object.id)
+                    self.add_variable_type("brflxcmp"+str(i),"reaction")
+                    var = BaseFBAPkg.build_variable(self,"brflxcmp"+str(i),0,1,"binary",object)
                     othervar = self.variables["rflxcmp"+str(i)][object.id]
-                    BaseFBAPkg.build_constraint(self,"brflxcmpc"+str(i),None,0,{othervar:1,var:-1000},object.id)
+                    self.add_constraint_type("brflxcmpc"+str(i),"reaction")
+                    BaseFBAPkg.build_constraint(self,"brflxcmpc"+str(i),None,0,{othervar:1,var:-1000},object)
                 if object.upper_bound > 0:
-                    var = BaseFBAPkg.build_variable(self,"bfflxcmp"+str(i),0,1,"binary",object.id)
+                    self.add_variable_type("bfflxcmp"+str(i),"reaction")
+                    var = BaseFBAPkg.build_variable(self,"bfflxcmp"+str(i),0,1,"binary",object)
                     othervar = self.variables["fflxcmp"+str(i)][object.id]
-                    BaseFBAPkg.build_constraint(self,"bfflxcmpc"+str(i),None,0,{othervar:1,var:-1000},object.id)
+                    self.add_constraint_type("bfflxcmpc"+str(i),"reaction")
+                    BaseFBAPkg.build_constraint(self,"bfflxcmpc"+str(i),None,0,{othervar:1,var:-1000},object)
             return None
                     
     def build_constraint(self,type,object,objective,objterms,coefficients):

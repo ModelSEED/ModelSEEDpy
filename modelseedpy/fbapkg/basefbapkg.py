@@ -100,3 +100,15 @@ class BaseFBAPkg:
     
     def all_constraints(self):
         return self.pkgmgr.all_constraints()
+    
+    def add_variable_type(self,name,type):
+        if name not in self.variables:
+            self.variables[name] = dict()
+        if name not in self.variable_types:
+            self.variable_types[name] = type
+            
+    def add_constraint_type(self,name,type):
+        if name not in self.constraints:
+            self.constraints[name] = dict()
+        if name not in self.constraint_types:
+            self.constraint_types[name] = type

@@ -1,5 +1,6 @@
 import pandas as pd
 import logging
+import cobra
 from cobra.core.dictlist import DictList
 from modelseedpy.core.msmedia import MSMedia
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
@@ -33,7 +34,9 @@ class MSGrowthPhenotype:
             full_media.merge(parent.base_media,overwrite_overlap = False)
         return full_media
     
-    def simulate(self,modelutl,growth_threshold=0.001,add_missing_exchanges=False,save_fluxes=False):        
+    def simulate(self,modelutl,growth_threshold=0.001,add_missing_exchanges=False,save_fluxes=False,pfba=False):        
+        if not isinstance(modelutl,MSModelUtil):
+            modelutl = MSModelUtil(modelutl)
         media = self.build_media()
         output = {"growth":None,"class":None,"missing_transports":[]}
         if add_missing_exchanges:
@@ -44,11 +47,13 @@ class MSGrowthPhenotype:
             if gene in modelutl.model.genes:
                 geneobj = modelutl.model.genes.get_by_id(gene)
                 geneobj.knock_out()
-        solution = modelutl.model.optimize()        
+        solution = modelutl.model.optimize()
+        output["growth"] = solution.objective_value
+        if solution.objective_value > 0 and pfba:
+            solution = cobra.flux_analysis.pfba(modelutl.model)
         if save_fluxes:
             output["fluxes"] = solution.fluxes
-        output["growth"] = solution.objective_value
-        if solution.objective_value >= growth_threshold:
+        if output["growth"] >= growth_threshold:
             if self.growth > 0:
                 output["class"] = "CP"
             else:
@@ -61,6 +66,8 @@ class MSGrowthPhenotype:
         return output        
     
     def gapfill_model_for_phenotype(self,modelutl,default_gapfill_templates,test_conditions,default_gapfill_models=[],blacklist=[],growth_threshold=0.001,add_missing_exchanges=False):
+        if not isinstance(modelutl,MSModelUtil):
+            modelutl = MSModelUtil(modelutl)
         self.gapfilling = MSGapfill(modelutl.model, default_gapfill_templates, default_gapfill_models, test_conditions, modelutl.reaction_scores(), blacklist) 
         media = self.build_media()
         if add_missing_exchanges:
@@ -173,9 +180,7 @@ class MSGrowthPhenotypes:
         model.objective = biomass
         modelutl = MSModelUtil(model)
         summary = {"Label":["Accuracy","CP","CN","FP","FN"],"Count":[0,0,0,0,0]}
-        data = {"Phenotype":[],"Observed growth":[],"Simulated growth":[],"Class":[],"Transports missing":[]}
-        if correct_false_negatives:
-            data["Gapfilled reactions"] = []
+        data = {"Phenotype":[],"Observed growth":[],"Simulated growth":[],"Class":[],"Transports missing":[],"Gapfilled reactions":[]}
         for pheno in self.phenotypes:
             with model:
                 result = pheno.simulate(modelutl,growth_threshold,add_missing_exchanges,save_fluxes)#Result should have "growth" and "class"

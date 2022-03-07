@@ -48,7 +48,7 @@ from modelseedpy.core import (
 from modelseedpy.fbapkg import (
     BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,ElementUptakePkg,BilevelPkg,
     CommKineticPkg,KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg,FlexibleBiomassPkg,
-    ProblemReplicationPkg,FullThermoPkg,MSPackageManager,ObjConstPkg
+    ProblemReplicationPkg,FullThermoPkg,MSPackageManager,ObjConstPkg,ChangeOptPkg
 )
 
 from modelseedpy.multiomics import (

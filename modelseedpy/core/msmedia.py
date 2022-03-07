@@ -32,7 +32,7 @@ class MSMedia:
     def from_dict(d):
         """
         Either dict with exchange bounds (example: {'cpd00027': (-10, 1000)}) or
-        just absolute value of update (example: {''cpd00027': 10})
+        just absolute value of uptake (example: {''cpd00027': 10})
         :param d:
         :return:
         """
