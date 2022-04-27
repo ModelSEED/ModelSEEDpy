@@ -194,7 +194,7 @@ def load_reactions_from_df(df: pd.DataFrame, database_metabolites: dict, names: 
             reactions.append(rxn)
         except Exception as e:
             logger.error('failed to read reaction at Index: %s. %s', t[0], e)
-    return reactions
+    return reactions, list(metabolites_indexed.values())
 
 
 class ModelSEEDDatabase:
@@ -202,11 +202,13 @@ class ModelSEEDDatabase:
     ModelSEED database instance.
     """
 
-    def __init__(self, compounds, reactions):
+    def __init__(self, compounds, reactions, compound_tokens):
         self.compounds = DictList()
+        self.compound_tokens = DictList()
         self.reactions = DictList()
         self.compounds += compounds
         self.reactions += reactions
+        self.reactions += compound_tokens
         self.inchi_key_lookup = {}
         self.metabolite_reactions = {}
 
@@ -403,8 +405,9 @@ def load_database(compounds_url, reactions_url,
     reaction_ecs = get_aliases_from_df(pd.read_csv(reactions_ec_url, sep='\t'))
 
     df_reactions = pd.read_csv(reactions_url, sep='\t', low_memory=False)
-    reactions = load_reactions_from_df(df_reactions, dict(map(lambda x: (x.id, x), compounds)), reaction_names,
-                                       reaction_aliases, reaction_ecs)
+    reactions, metabolites_indexed = load_reactions_from_df(
+        df_reactions, dict(map(lambda x: (x.id, x), compounds)), reaction_names,
+        reaction_aliases, reaction_ecs)
 
     database = ModelSEEDDatabase(compounds, reactions)
     return database

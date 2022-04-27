@@ -4,7 +4,9 @@ import logging
 from chemicals import periodic_table
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction
+from cobra.util import solver as sutil
 from modelseedpy.biochem import from_local
+from scipy.odr.odrpack import Output
 #from Carbon.Aliases import false
 
 logger = logging.getLogger(__name__)
@@ -27,8 +29,10 @@ class FBAHelper:
                     met_id = metabolite.id
                     if all(rxn not in model.reactions for rxn in [f"EX_{met_id}", f"DM_{met_id}", f"SK_{met_id}"]):
                         drain_reaction = FBAHelper.add_drain_from_metabolite_id(model,metabolite.id,0,100,"DM_")
-                        drain_reactions.append(drain_reaction)
-        return drain_reactions
+                        if drain_reaction != None:
+                            logger.info("Adding "+met_id+" DM")
+                            drain_reactions.append(drain_reaction)
+        model.add_reactions(drain_reactions)
         
     @staticmethod
     def add_drain_from_metabolite_id(model, cpd_id, uptake, excretion, prefix='EX_', prefix_name='Exchange for '):
@@ -58,11 +62,17 @@ class FBAHelper:
         for condition in condition_list:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]
-            sol = model.optimize()
-            if sol.objective_value >= condition["threshold"] and condition["is_max_threshold"]:
+            objective = model.slim_optimize()
+            if model.solver.status != 'optimal':
+                with open("debug.lp", 'w') as out:
+                    out.write(str(model.solver))
+                    out.close()
+                logger.critical("Infeasible problem - LP file printed to debug!")
+                return False
+            if objective >= condition["threshold"] and condition["is_max_threshold"]:
                 logger.info("FAILED")
                 return False
-            elif sol.objective_value <= condition["threshold"] and not condition["is_max_threshold"]:
+            elif objective <= condition["threshold"] and not condition["is_max_threshold"]:
                 logger.info("FAILED")
                 return False
         return True
@@ -76,12 +86,13 @@ class FBAHelper:
                 original_bound.append(item[0].upper_bound)
                 item[0].upper_bound = 0
             else:
-                original_bound.append(-1*item[0].lower_bound)
+                original_bound.append(item[0].lower_bound)
                 item[0].lower_bound = 0
         # Now restore reactions one at a time
         count = 0
         filtered_list = []
         for item in reaction_list:
+            logger.info("Testing "+item[0].id)
             if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
                 if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
@@ -126,7 +137,6 @@ class FBAHelper:
                 'reverse': rxn.reverse_variable.primal,
                 'forward': rxn.forward_variable.primal
             }
-
         return flux_values
     
     @staticmethod
@@ -177,3 +187,120 @@ class FBAHelper:
     def is_biomass(reaction):
         # TODO: check for SBO
         return reaction.id[0:3] == "bio"
+    
+    @staticmethod
+    def exchange_hash(model):
+        exchange_hash = {}
+        for reaction in model.reactions:
+            if len(reaction.metabolites) == 1:
+                for metabolite in reaction.metabolites:
+                    (base,comp,index) = FBAHelper.parse_id(metabolite)
+                    #exchange_hash[base][comp]
+
+    @staticmethod
+    def find_reaction(model,stoichiometry):
+        output = FBAHelper.stoichiometry_to_string(stoichiometry)
+        atpstring = output[0]
+        rxn_hash = FBAHelper.rxn_hash(model)
+        if atpstring in rxn_hash:
+            return rxn_hash[atpstring]
+        return None
+    
+    @staticmethod
+    def msid_hash(model): 
+        output = {}
+        for cpd in model.metabolites:
+            msid = FBAHelper.modelseed_id_from_cobra_metabolite(cpd)
+            if msid != None:
+                if msid not in output:
+                    output[msid] = []
+                output[msid].append(cpd)
+        return output
+    
+    @staticmethod
+    def rxn_hash(model): 
+        output = {}
+        for rxn in model.reactions:
+            strings = FBAHelper.stoichiometry_to_string(rxn.metabolites)
+            output[strings[0]] = [rxn,1]
+            output[strings[1]] = [rxn,-1]
+        return output
+    
+    @staticmethod
+    def rxn_compartment(reaction): 
+        compartments = list(reaction.compartments)
+        if len(compartments) == 1:
+            return compartments[0]
+        cytosol = None
+        othercomp = None
+        for comp in compartments:
+            if comp[0:1] != "e":
+                if comp[0:1] == "c":
+                    cytosol = comp
+                else:
+                    othercomp = comp
+        if othercomp is not None:
+            return othercomp
+        return cytosol
+    
+    @staticmethod
+    def stoichiometry_to_string(stoichiometry):
+        reactants = []
+        products = []
+        for met in stoichiometry:
+            coef = stoichiometry[met]
+            if not isinstance(met, str):
+                if FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067":
+                    met = None
+                else:
+                    met = met.id
+            if met != None:
+                if coef < 0:
+                    reactants.append(met)
+                else:
+                    products.append(met)
+        reactants.sort()
+        products.sort()
+        return ["+".join(reactants)+"="+"+".join(products),"+".join(products)+"="+"+".join(reactants)]
+    
+    @staticmethod
+    def add_atp_hydrolysis(model,compartment):
+        #Searching for ATP hydrolysis compounds
+        coefs = {"cpd00002":[-1,compartment],"cpd00001":[-1,compartment],"cpd00008":[1,compartment],"cpd00009":[1,compartment],"cpd00067":[1,compartment]}
+        msids = ["cpd00002","cpd00001","cpd00008","cpd00009","cpd00067"]
+        stoichiometry = {}
+        id_hash = FBAHelper.msid_hash(model)
+        for msid in msids:
+            if msid not in id_hash:
+                logger.warning("Compound "+msid+" not found in model!")
+                return None
+            else:
+                for cpd in id_hash[msid]:
+                    if cpd.compartment == coefs[msid][1]:
+                        stoichiometry[cpd] = coefs[msid][0]
+        output = FBAHelper.find_reaction(model,stoichiometry)
+        if output != None and output[1] == ">":
+            return {"reaction":output[0],"direction":">","new":False}
+        cobra_reaction = Reaction("rxn00062_"+compartment, 
+                                  name="ATP hydrolysis", 
+                                  lower_bound=0, 
+                                  upper_bound=1000)
+        cobra_reaction.annotation["sbo"] = "SBO:0000176" #biochemical reaction
+        cobra_reaction.annotation["seed.reaction"] = "rxn00062"
+        cobra_reaction.add_metabolites(stoichiometry)
+        model.add_reactions([cobra_reaction])
+        return {"reaction":cobra_reaction,"direction":">","new":True}
+        
+    @staticmethod
+    def parse_id(object):
+        if re.search('(.+)_([a-z])(\d+)$', object.id) != None:
+            m = re.search('(.+)_([a-z])(\d+)$', object.id)
+            return (m[1],m[2],int(m[3]))
+        return None
+    
+    @staticmethod
+    def medianame(media):
+        if media == None:
+            return "Complete"
+        return media.id
+        

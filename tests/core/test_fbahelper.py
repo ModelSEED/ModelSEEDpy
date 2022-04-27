@@ -2,10 +2,12 @@
 import os
 import cobra
 import numpy
+# FIXME: COMMENTING ALL OF THIS will provide a model later
+"""
 from glob import glob
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
 import cobrakbase
-token = 'JOSNYJGASTV5BGELWQTUSATE4TNHZ66U'
+token = 'xx'
 kbase = cobrakbase.KBaseAPI(token)
 import re
 
@@ -152,3 +154,4 @@ def test_is_biomass():
             assert result is True
         else:
             assert result is False
+"""

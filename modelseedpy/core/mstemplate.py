@@ -29,7 +29,7 @@ class TemplateReactionType(Enum):
     GAPFILLING = 'gapfilling'
 
 
-class NewModelTemplateCompound:
+class MSTemplateMetabolite:
 
     def __init__(self, cpd_id, formula=None, name='', default_charge=None,
                  mass=None, delta_g=None, delta_g_error=None, is_cofactor=False,
@@ -51,7 +51,7 @@ class NewModelTemplateCompound:
 
     @staticmethod
     def from_dict(d):
-        return NewModelTemplateCompound(
+        return MSTemplateMetabolite(
             d['id'], d['formula'], d['name'],
             d['defaultCharge'], d['mass'],
             d['deltaG'], d['deltaGErr'],
@@ -64,14 +64,14 @@ class NewModelTemplateCompound:
         return {
             'id': self.id,
             'name': self.name,
-            'abbreviation': self.abbreviation,
+            'abbreviation': self.abbreviation if self.abbreviation else "",
             'aliases': [],
-            'defaultCharge': self.default_charge,
-            'deltaG': self.delta_g,
-            'deltaGErr': self.delta_g_error,
-            'formula': self.formula,
+            'defaultCharge': self.default_charge if self.default_charge else 0,
+            'deltaG': self.delta_g if self.delta_g else 10000000,
+            'deltaGErr': self.delta_g_error if self.delta_g_error else 10000000,
+            'formula': self.formula if self.formula else 'R',
             'isCofactor': 1 if self.is_cofactor else 0,
-            'mass': self.mass
+            'mass': self.mass if self.mass else 0
         }
 
     def __repr__(self):
@@ -106,7 +106,7 @@ class NewModelTemplateCompound:
 
 class MSTemplateSpecies(Metabolite):
 
-    def __init__(self, comp_cpd_id, charge, compartment, cpd_id, max_uptake=0, template=None):
+    def __init__(self, comp_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
         super().__init__(comp_cpd_id, '', '', charge, compartment)
         self._template = template
@@ -184,7 +184,7 @@ class MSTemplateReaction(Reaction):
     def __init__(self, rxn_id: str, reference_id: str, name='', subsystem='', lower_bound=0.0, upper_bound=None,
                  reaction_type=TemplateReactionType.CONDITIONAL, gapfill_direction='=',
                  base_cost=1000, reverse_penalty=1000, forward_penalty=1000,
-                 status='OK', delta_g=0.0, delta_g_err=0.0, reference_reaction_id=None):
+                 status='OK', reference_reaction_id=None):
         """
 
         :param rxn_id:
@@ -199,8 +199,6 @@ class MSTemplateReaction(Reaction):
         :param reverse_penalty:
         :param forward_penalty:
         :param status:
-        :param delta_g:
-        :param delta_g_err:
         :param reference_reaction_id: DO NOT USE THIS duplicate of reference_id
         :param template:
         """
@@ -212,9 +210,7 @@ class MSTemplateReaction(Reaction):
         self.forward_penalty = forward_penalty
         self.status = status
         self.type = reaction_type.value if type(reaction_type) == TemplateReactionType else reaction_type
-        self.deltaG = delta_g
-        self.deltaGErr = delta_g_err
-        self.reference_reaction_id = reference_reaction_id  #TODO: to be removed
+        self.reference_reaction_id = reference_reaction_id  # TODO: to be removed
         self.complexes = DictList()
         self.templateReactionReagents = {}
         self._template = None
@@ -273,8 +269,6 @@ class MSTemplateReaction(Reaction):
             d['type'], d['GapfillDirection'],
             d['base_cost'], d['reverse_penalty'], d['forward_penalty'],
             d['status'] if 'status' in d else None,
-            d['deltaG'] if 'deltaG' in d else None,
-            d['deltaGErr'] if 'deltaGErr' in d else None,
             d['reaction_ref'].split('/')[-1]
         )
         reaction.add_metabolites(metabolites)
@@ -336,8 +330,6 @@ class MSTemplateReaction(Reaction):
             'base_cost': self.base_cost,
             'reverse_penalty': self.reverse_penalty,
             'forward_penalty': self.forward_penalty,
-            'deltaG': self.deltaG,
-            'deltaGErr': self.deltaGErr,
             'upper_bound': self.upper_bound,
             'lower_bound': self.lower_bound,
             'direction': get_direction_from_constraints(self.lower_bound, self.upper_bound),
@@ -347,7 +339,7 @@ class MSTemplateReaction(Reaction):
             'templateReactionReagents': template_reaction_reagents,
             'templatecompartment_ref': '~/compartments/id/' + self.compartment,
             'templatecomplex_refs': list(map(lambda x: '~/complexes/id/' + x.id, self.complexes)),
-            'status': self.status,
+            # 'status': self.status,
             'type': self.type
         }
 
@@ -523,16 +515,40 @@ class NewModelTemplateComplex:
                                          self.roles.items()), 200))
 
 
+class MSTemplateCompartment:
+
+    def __init__(self, compartment_id: str, name: str, ph: float, hierarchy=0, aliases=None):
+        self.id = compartment_id
+        self.name = name
+        self.ph = ph
+        self.hierarchy = hierarchy
+        self.aliases = [] if aliases is None else list(aliases)
+        self._template = None
+
+    @staticmethod
+    def from_dict(d):
+        return MSTemplateCompartment(d['id'], d['name'], d['pH'], d['hierarchy'], d['aliases'])
+
+    def get_data(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'pH': self.ph,
+            'aliases': self.aliases,
+            'hierarchy': self.hierarchy
+        }
+
+
 class MSTemplate:
 
     def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None, args=None):
         self.id = template_id
-        self.__VERSION__ = version
         self.name = name
         self.domain = domain
-        self.biochemistry_ref = ''
         self.template_type = template_type
-        self.compartments = {}
+        self.__VERSION__ = version
+        self.biochemistry_ref = ''
+        self.compartments = DictList()
         self.biomasses = DictList()
         self.reactions = DictList()
         self.compounds = DictList()
@@ -541,7 +557,21 @@ class MSTemplate:
         self.complexes = DictList()
         self.pathways = DictList()
         self.subsystems = DictList()
-        #self.info = info if info else KBaseObjectInfo(object_type='KBaseFBA.NewModelTemplate')
+
+    def add_compartments(self, compartments: list):
+        """
+
+        :param compartments:
+        :return:
+        """
+        duplicates = list(filter(lambda x: x.id in self.compartments, compartments))
+        if len(duplicates) > 0:
+            logger.error("unable to add compartments [%s] already present in the template", duplicates)
+            return None
+
+        for x in compartments:
+            x._template = self
+        self.compartments += compartments
 
     def add_roles(self, roles: list):
         """
@@ -693,7 +723,24 @@ class MSTemplate:
     #    return super()._to_object(key, data)
 
     def get_data(self):
-        compartments = []
+        """
+        typedef structure {
+            modeltemplate_id id;
+            string name;
+            string type;
+            string domain;
+            Biochemistry_ref biochemistry_ref;
+            list < TemplateRole > roles;
+            list < TemplateComplex > complexes;
+            list < TemplateCompound > compounds;
+            list < TemplateCompCompound > compcompounds;
+            list < TemplateCompartment > compartments;
+            list < NewTemplateReaction > reactions;
+            list < NewTemplateBiomass > biomasses;
+            list < TemplatePathway > pathways;
+        } NewModelTemplate;
+        """
+
         return {
             '__VERSION__': self.__VERSION__,
             'id': self.id,
@@ -701,24 +748,13 @@ class MSTemplate:
             'domain': self.domain,
             'biochemistry_ref': self.biochemistry_ref,
             'type': 'Test',
-            'biomasses': [],
-            'compartments': [{'aliases': [],
-                              'hierarchy': 3,
-                              'id': 'c',
-                              'index': '0',
-                              'name': 'Cytosol',
-                              'pH': 7},
-                             {'aliases': [],
-                              'hierarchy': 0,
-                              'id': 'e',
-                              'index': '1',
-                              'name': 'Extracellular',
-                              'pH': 7}],
+            'compartments': list(map(lambda x: x.get_data(), self.compartments)),
             'compcompounds': list(map(lambda x: x.get_data(), self.compcompounds)),
             'compounds': list(map(lambda x: x.get_data(), self.compounds)),
             'roles': list(map(lambda x: x.get_data(), self.roles)),
             'complexes': list(map(lambda x: x.get_data(), self.complexes)),
             'reactions': list(map(lambda x: x.get_data(), self.reactions)),
+            'biomasses': list(self.biomasses),
             'pathways': [],
             'subsystems': [],
         }
@@ -786,7 +822,7 @@ class MSTemplateBuilder:
         self.biochemistry_ref = None
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(d, info=None, args=None):
         """
 
         :param d:
@@ -873,26 +909,9 @@ class MSTemplateBuilder:
         return self
 
     def build(self):
-        base = {
-            '__VERSION__': '',
-            'biochemistry_ref': '',
-            'biomasses': [],
-            'compartments': self.compartments,
-            'compcompounds': [],
-            'complexes': [],
-            'compounds': [],
-            'domain': '',
-            'id': '',
-            'name': '',
-            'pathways': [],
-            'reactions': [],
-            'roles': [],
-            'subsystems': [],
-            'type': ''
-        }
-
         template = MSTemplate(self.id, self.name, self.domain, self.template_type, self.version)
-        template.add_compounds(list(map(lambda x: NewModelTemplateCompound.from_dict(x), self.compounds)))
+        template.add_compartments(list(map(lambda x: MSTemplateCompartment.from_dict(x), self.compartments)))
+        template.add_compounds(list(map(lambda x: MSTemplateMetabolite.from_dict(x), self.compounds)))
         template.add_comp_compounds(
             list(map(lambda x: MSTemplateSpecies.from_dict(x), self.compartment_compounds)))
         template.add_roles(list(map(lambda x: NewModelTemplateRole.from_dict(x), self.roles)))
