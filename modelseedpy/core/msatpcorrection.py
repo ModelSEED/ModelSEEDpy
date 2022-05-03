@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 class MSATPCorrection:
 
-    def __init__(self, model, core_template, atp_medias,compartment="c0", max_gapfilling=None, gapfilling_delta=0):
+    def __init__(self, model, core_template, atp_medias,compartment="c0",
+                 max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None):
         """
 
         :param model:
@@ -23,16 +24,20 @@ class MSATPCorrection:
         :param atp_objective:
         :param max_gapfilling:
         :param gapfilling_delta:
+        :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
         self.model = model
         self.compartment = compartment
-        output = FBAHelper.add_atp_hydrolysis(self.model,compartment)
-        self.atp_hydrolysis = output["reaction"]
+        if atp_hydrolysis_id and atp_hydrolysis_id in self.model.reactions:
+            self.atp_hydrolysis = self.model.reactions.get_by_id(atp_hydrolysis_id)
+        else:
+            output = FBAHelper.add_atp_hydrolysis(self.model, compartment)
+            self.atp_hydrolysis = output["reaction"]
         self.atp_medias = atp_medias
         self.max_gapfilling = max_gapfilling
         self.gapfilling_delta = gapfilling_delta
         self.coretemplate = core_template
-        self.msgapfill = MSGapfill(model,default_gapfill_templates=core_template)
+        self.msgapfill = MSGapfill(model, default_gapfill_templates=core_template)
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
@@ -122,10 +127,12 @@ class MSATPCorrection:
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
                 if solution.objective_value == 0 or solution.status != 'optimal':
-                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)  
+                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
+                elif solution.objective_value > 0 or solution.status == 'optimal':
+                    self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
         return output
-        
+
     def determine_growth_media(self):
         """
         Decides which of the test media to use as growth conditions for this model

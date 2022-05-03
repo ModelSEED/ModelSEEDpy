@@ -2,10 +2,12 @@
 import os
 import cobra
 import numpy
+# FIXME: COMMENTING ALL OF THIS will provide a model later
+"""
 from glob import glob
 os.environ["HOME"] = 'C:\\Users\\Andrew Freiburger\\Dropbox\\My PC (DESKTOP-M302P50)\\Documents\\UVic Civil Engineering\\Internships\\Agronne\\cobrakbase'
 import cobrakbase
-token = 'TKWQA762H2SMAYRES3BFUP37LKGNGQSM'
+token = 'xx'
 kbase = cobrakbase.KBaseAPI(token)
 import re
 
@@ -50,3 +52,4 @@ def test_run_gapfilling_and_integrate_gapfill_solution():
 
 def test_gapfill():
     pass   
+"""

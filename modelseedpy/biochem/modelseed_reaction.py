@@ -5,7 +5,7 @@ from cobra.core import Reaction
 
 def to_str2(rxn, cmp_replace=None, cpd_replace={}):
     direction = rxn.data['direction']
-    op =  '<?>'
+    op = '<?>'
     if direction == '=':
         op = '<=>'
     elif direction == '>':
@@ -13,7 +13,7 @@ def to_str2(rxn, cmp_replace=None, cpd_replace={}):
     elif direction == '<':
         op = '<--'
     else:
-        op =  '<?>'
+        op = '<?>'
     cstoichiometry = rxn.cstoichiometry
     l = []
     r = []
@@ -158,9 +158,7 @@ class ModelSEEDReaction2(Reaction):
                 raise ValueError(f'invalid compartment setup missing key [{m.compartment}] in {compartment_setup}')
             cpd = m.to_template_compartment_compound(compartment_setup[m.compartment])
             metabolites[cpd] = v
-            print(m.id, m.compartment, cpd)
-
-            print(v)
+            # print(m.id, m.compartment, cpd, v)
 
         # if len(str(index)) > 0:
         #    name = f'{self.name} [{compartment}]'

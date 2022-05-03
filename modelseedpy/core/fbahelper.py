@@ -243,7 +243,7 @@ class FBAHelper:
                     cytosol = comp
                 else:
                     othercomp = comp
-        if othercomp != None:
+        if othercomp is not None:
             return othercomp
         return cytosol
     

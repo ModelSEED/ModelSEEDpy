@@ -3,3 +3,4 @@ cobra
 pandas
 networkx
 numpy
+chemicals

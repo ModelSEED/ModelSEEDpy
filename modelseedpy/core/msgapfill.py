@@ -59,7 +59,7 @@ class MSGapfill:
             "gapfill_all_indecies_with_default_models": self.gapfill_all_indecies_with_default_models,
             "default_excretion":100,
             "default_uptake":100,
-            "minimum_obj":minimum_obj,
+            "minimum_obj": minimum_obj,
             "blacklist": self.blacklist,
             "reaction_scores": self.reaction_scores,
             "set_objective": 1
