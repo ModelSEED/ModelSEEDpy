@@ -1,11 +1,8 @@
 import logging
-import itertools
+#import itertools
 import cobra
-import re
-import os
-from numpy import zeros
 from itertools import combinations
-from optlang.symbolics import Zero, add
+from optlang.symbolics import Zero
 import networkx
 import sigfig
 import pandas as pd
@@ -14,20 +11,18 @@ from cobra.core import Reaction
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
+#from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 from matplotlib import pyplot
 
 logger = logging.getLogger(__name__)
 
 class CommunityModelSpecies:
     def __init__(self,community,biocpd,names=[]):
-        self.community = community
-        self.biomass_cpd = biocpd
+        self.community, self.biomass_cpd = community, biocpd
         self.index = int(self.biomass_cpd.compartment[1:])
         self.abundance = 0
-        if biocpd in community.primary_biomass.metabolites:
-            self.abundance = abs(community.primary_biomass.metabolites[biocpd])
-        self.biomass_drain = None
+        if self.biomass_cpd in self.community.primary_biomass.metabolites:
+            self.abundance = abs(self.community.primary_biomass.metabolites[self.biomass_cpd])
         if self.index <= len(names) and names[self.index-1] != None:
             self.id = names[self.index-1]
         else:
@@ -36,33 +31,33 @@ class CommunityModelSpecies:
             else:
                 self.id = "Species"+str(self.index)
         logger.info("Making atp hydrolysis reaction for species: "+self.id)
-        output = FBAHelper.add_atp_hydrolysis(community.model,"c"+str(self.index))
-        FBAHelper.add_autodrain_reactions_to_community_model(community.model)
+        output = FBAHelper.add_atp_hydrolysis(self.community.model,"c"+str(self.index))
+        FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)
         self.atp_hydrolysis = output["reaction"]
+        self.biomass_drain = None
         self.biomasses = []
         for reaction in self.community.model.reactions:
-            if biocpd in reaction.metabolites:
-                if reaction.metabolites[biocpd] == 1 and len(reaction.metabolites) > 1:
+            if self.biomass_cpd in reaction.metabolites:
+                if reaction.metabolites[self.biomass_cpd] == 1 and len(reaction.metabolites) > 1:
                     self.biomasses.append(reaction)
-                elif len(reaction.metabolites) == 1 and reaction.metabolites[biocpd] < 0:
+                elif len(reaction.metabolites) == 1 and reaction.metabolites[self.biomass_cpd] < 0:
                     self.biomass_drain = reaction
         if len(self.biomasses) == 0:
             logger.critical("No biomass reaction found for species "+self.id)
         if self.biomass_drain == None:
             logger.info("Making biomass drain reaction for species: "+self.id)
-            self.biomass_drain = Reaction(id="DM_"+biocpd.id,
-                                      name="DM_" + biocpd.name,
+            self.biomass_drain = Reaction(id="DM_"+self.biomass_cpd.id,
+                                      name="DM_" + self.biomass_cpd.name,
                                       lower_bound=0, 
                                       upper_bound=100)
-            community.model.add_reactions([self.biomass_drain])
-            self.biomass_drain.add_metabolites({biocpd : -1})
+            self.community.model.add_reactions([self.biomass_drain])
+            self.biomass_drain.add_metabolites({self.biomass_cpd : -1})
             self.biomass_drain.annotation["sbo"] = 'SBO:0000627'
     
     def disable_species(self):
         for reaction in self.community.model.reactions:
             if int(FBAHelper.rxn_compartment(reaction)[1:]) == self.index:
-                reaction.upper_bound = 0
-                reaction.lower_bound = 0
+                reaction.upper_bound, reaction.lower_bound = 0, 0
     
     def compute_max_biomass(self):
         if len(self.biomasses) == 0:
@@ -84,24 +79,18 @@ class CommunityModelSpecies:
 
 class MSCommunity:
 
-    def __init__(self,model,names=[],abundances=None,pfba = True,lp_filename = None):
+    def __init__(self,
+                 model,
+                 names=[],
+                 abundances=None,
+                 pfba = True, #Set this to false to turn off pfba
+                 lp_filename = None #Set this attribute to a filename to cause lp files to be created
+                 ):
         #Setting model and package manager
-        self.model = model
+        self.model, self.lp_filename, self.pfba = model, lp_filename, pfba
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
-        #Set this attribute to a filename to cause lp files to be created
-        self.lp_filename = lp_filename
-        #Set this to false to turn off pfba
-        self.pfba = pfba
-        #Solution from the last run FBA analysis is always stashed here
-        self.solution = None
-        #Data attributes
-        self.biomass_cpd = None
-        self.primary_biomass = None
-        self.biomass_drain = None
-        self.msgapfill  = None
-        self.element_uptake_limit = None
-        self.kinetic_coeff = None
-        self.msdb_path_for_fullthermo = None
+        #Define Data attributes as None
+        self.solution, self.biomass_cpd, self.primary_biomass, self.biomass_drain, self.msgapfill, self.element_uptake_limit, self.kinetic_coeff, self.msdb_path_for_fullthermo = None, None, None, None, None, None, None, None
         self.species = DictList()
         #Computing data from model
         id_hash = FBAHelper.msid_hash(model)
@@ -128,12 +117,10 @@ class MSCommunity:
     #Manipulation functions
     def set_abundance(self,abundances):
         #First ensure normalization
-        totalabundance = 0
-        for species in abundances:
-            totalabundance += abundances[species]
+        total_abundance = sum([abundances[species] for species in abundances])
         #Next map abundances to all species
         for species in abundances:
-            abundances[species] = abundances[species]/totalabundance
+            abundances[species] = abundances[species]/total_abundance
             if species in self.species:
                 self.species.get_by_id(species).abundance = abundances[species]
         #Finally, remake the primary biomass reaction based on abundances
@@ -168,35 +155,30 @@ class MSCommunity:
         # applying FullThermo constraints
         self.msdb_path_for_fullthermo = msdb_path_for_fullthermo
         if msdb_path_for_fullthermo is not None:
-            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_path':msdb_path_for_fullthermo}, verbose)
+            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_path':msdb_path_for_fullthermo})
     
     #Utility functions
     def print_lp(self,filename = None):
         if filename == None:
             filename = self.lp_filename
-        if filename != None:
-            with open(filename+".lp", 'w') as out:
-                out.write(str(self.model.solver))
-                out.close()
+        with open(filename+".lp", 'w') as out:
+            out.write(str(self.model.solver))
+            out.close()
     
     def compute_interactions(self,solution = None,threshold=1):
-        #Checking for existance of solution
-        if solution == None:
-            solution = self.solution
-        if solution == None:
+        #Check for existance of solution
+        if solution == None and self.solution == None:
             logger.warning("No feasible solution!")
             return None
-        #Initializing datafram
-        metabolite_data = {}
-        species_data = {"Environment":{}}
-        species_list = {"Environment":{}}
-        species_array = [None for i in range(1000)]
-        met_array = []
-        data = {"IDs":[],"Metabolites/Species":[]}
-        #Cycling through metabolites and flagging external metabolites
+        #Initialize data 
+        metabolite_data, species_data, species_collection = {}, {"Environment":{}}, {"Environment":{}}
+        data = {"IDs":[],"Metabolites/Species":[], "Environment":[]}
+        met_list, species_list = [], [None for i in range(1000)]
+
+        #Cycle through metabolites and flag external metabolites
         for met in self.model.metabolites:
             if met.compartment == "e0":
-                met_array.append(met)
+                met_list.append(met)
                 data["IDs"].append(met.id)
                 data["Metabolites/Species"].append(met.name)
                 metabolite_data[met] = {} 
@@ -204,27 +186,21 @@ class MSCommunity:
                     metabolite_data[met][individual.id] = 0
                 metabolite_data[met]["Environment"] = 0
         for individual in self.species:
-            species_data[individual.id] = {}
-            species_list[individual.id] = {}
+            species_data[individual.id], species_collection[individual.id] = {}, {}
             data[individual.id] = []
             data["IDs"].append(individual.index)
             data["Metabolites/Species"].append(individual.id)
             for other in self.species:
                 species_data[individual.id][other.id] = 0
-                species_list[individual.id][other.id] = []
-            species_data["Environment"][individual.id] = 0
-            species_list["Environment"][individual.id] = []
-            species_data[individual.id]["Environment"] = 0
-            species_list[individual.id]["Environment"] = []
-            species_array[individual.index] = individual
+                species_collection[individual.id][other.id] = []
+            species_data["Environment"][individual.id], species_data[individual.id]["Environment"] = 0, 0
+            species_collection["Environment"][individual.id], species_collection[individual.id]["Environment"] = [], []
+            species_list[individual.index] = individual
         data["IDs"].append("Environment")
         data["Metabolites/Species"].append("Environment")
         for individual in self.species:
             data["IDs"].append(individual.index)
             data["Metabolites/Species"].append(individual.id+" list")
-        data["IDs"].append("Environment")
-        data["Metabolites/Species"].append("Environment")
-        data["Environment"] = []
         #Cycling through reactions and computing metabolite input and output
         for rxn in self.model.reactions:
             if rxn.id[0:3] == "EX_" and abs(solution.fluxes[rxn.id]) > Zero:
@@ -236,36 +212,38 @@ class MSCommunity:
                 comp_index = int(cmp[1:])
                 for metabolite in rxn.metabolites:
                     if metabolite in metabolite_data:
-                        if species_array[comp_index] != None:
-                            metabolite_data[metabolite][species_array[comp_index].id] += solution.fluxes[rxn.id]*rxn.metabolites[metabolite]
-        #Now translating metbaolite input and output into species interaction flux
+                        if species_list[comp_index] != None:
+                            metabolite_data[metabolite][species_list[comp_index].id] += solution.fluxes[rxn.id]*rxn.metabolites[metabolite]
+                            
+        #Translate metbaolite input and output into species interaction flux
         for met in metabolite_data:
             #Iterating through the producers of the metabolite:
-            total = 0
-            for individual in self.species:
-                if metabolite_data[met][individual.id] > Zero:
-                    total += metabolite_data[met][individual.id]
+            total = sum([metabolite_data[met][individual.id] for individual in self.species if metabolite_data[met][individual.id] > Zero])
             if metabolite_data[met]["Environment"] > Zero:
                 total += metabolite_data[met]["Environment"]
             for individual in self.species:
                 if metabolite_data[met][individual.id] > Zero:
                     for other in self.species:
                         if metabolite_data[met][other.id] < Zero:
-                            species_data[individual.id][other.id] += -1*metabolite_data[met][individual.id]*metabolite_data[met][other.id]/total
-                            if -1*metabolite_data[met][individual.id]*metabolite_data[met][other.id]/total > threshold:
-                                species_list[individual.id][other.id].append(met.name)
+                            normalized_flux = -1*metabolite_data[met][individual.id]*metabolite_data[met][other.id]/total
+                            species_data[individual.id][other.id] += normalized_flux
+                            if normalized_flux > threshold:
+                                species_collection[individual.id][other.id].append(met.name)
                     if metabolite_data[met]["Environment"] < Zero:
-                        species_data[individual.id]["Environment"] += -1*metabolite_data[met][individual.id]*metabolite_data[met]["Environment"]/total
-                        if -1*metabolite_data[met][individual.id]*metabolite_data[met]["Environment"]/total > threshold:
-                            species_list[individual.id]["Environment"].append(met.name)
+                        normalized_flux = -1*metabolite_data[met][individual.id]*metabolite_data[met]["Environment"]/total
+                        species_data[individual.id]["Environment"] += normalized_flux
+                        if normalized_flux > threshold:
+                            species_collection[individual.id]["Environment"].append(met.name)
             if metabolite_data[met]["Environment"] > Zero:
                 for other in self.species:
                     if metabolite_data[met][other.id] < Zero:
-                        species_data["Environment"][other.id] += -1*metabolite_data[met]["Environment"]*metabolite_data[met][other.id]/total
-                        if -1*metabolite_data[met]["Environment"]*metabolite_data[met][other.id]/total > threshold:
-                            species_list["Environment"][other.id].append(met.name)
-        #Now reformating all data into a dataframe
-        for met in met_array:
+                        normalized_flux = -1*metabolite_data[met]["Environment"]*metabolite_data[met][other.id]/total
+                        species_data["Environment"][other.id] += normalized_flux
+                        if normalized_flux > threshold:
+                            species_collection["Environment"][other.id].append(met.name)
+                            
+        #Reformat data into a dataframe
+        for met in met_list:
             for individual in self.species:
                 data[individual.id].append(metabolite_data[met][individual.id])
             data["Environment"].append(metabolite_data[met]["Environment"])
@@ -278,36 +256,35 @@ class MSCommunity:
         data["Environment"].append(0)
         for individual in self.species:    
             for other in self.species:
-                data[individual.id].append("; ".join(species_list[individual.id][other.id]))
-            data[individual.id].append("; ".join(species_list[individual.id]["Environment"]))
+                data[individual.id].append("; ".join(species_collection[individual.id][other.id]))
+            data[individual.id].append("; ".join(species_collection[individual.id]["Environment"]))
         for individual in self.species:
-            data["Environment"].append("; ".join(species_list["Environment"][individual.id]))
+            data["Environment"].append("; ".join(species_collection["Environment"][individual.id]))
         data["Environment"].append("")
         df = pd.DataFrame(data)
         logger.info(df)
         return df
         
     def visualize(self, graph = True, table = True): 
-        # view the cross feeding matrices
+        # Define the cross feeding matrices
         if table:
             from pandas import DataFrame as df
-
             species = [num+1 for num in range(len(self.production))]
 
             print('\nProduction matrix:')
-            prod_df = df(self.production)
-            prod_df.index = prod_df.columns = species
-            prod_df.index.name = 'Donor'
-            print(prod_df)
+            self.prod_df = df(self.production)
+            self.prod_df.index = self.prod_df.columns = species
+            self.prod_df.index.name = 'Donor'
+            print(self.prod_df)
 
             print('\n\nConsumption matrix:')
-            cons_df = df(self.consumption)
-            cons_df.index = cons_df.columns = species
-            cons_df.index.name = 'Receiver'
-            print(cons_df)
+            self.cons_df = df(self.consumption)
+            self.cons_df.index = self.cons_df.columns = species
+            self.cons_df.index.name = 'Receiver'
+            print(self.cons_df)
             print('\n')
             
-        # graph the community network
+        # Graph the community network
         if graph:
             graph = networkx.Graph()
             for num in self.compartments:
@@ -365,15 +342,13 @@ class MSCommunity:
         logger.info(df)
         return df
     
-    def atp_correction(self,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0):
-        atpcorrect = MSATPCorrection(self.model,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0)      
+    def atp_correction(self,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0): #!!! What is the point of this function?
+        self.atpcorrect = MSATPCorrection(self.model,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0)      
     
     def predict_abundances(self,media=None,pfba=True,kinetic_coeff = None):
         with self.model:
             #Kinetic coefficients must be used for this formulation to work
-            if kinetic_coeff == None:
-                kinetic_coeff = self.kinetic_coeff
-            if kinetic_coeff == None:
+            if kinetic_coeff == None and self.kinetic_coeff == None:
                 kinetic_coeff = 2000
             self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff,self)
             objcoef = {}
@@ -389,11 +364,7 @@ class MSCommunity:
     def run(self,media,pfba = None):
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         self.print_lp()
-        if pfba == None:
-            pfba = self.pfba
-        if pfba == None:
-            pfba = True
-        if pfba:
+        if pfba == None and self.pfba == None:
             self._set_solution(cobra.flux_analysis.pfba(self.model))
         else:
             self._set_solution(self.model.optimize())
@@ -405,15 +376,11 @@ class MSCommunity:
 
     #Internal functions
     def _compute_relative_abundance_from_solution(self,solution = None):
-        if solution == None:
-            solution = self.solution
-        if sollution == None:
+        if solution == None and self.solution == None:
             logger.warning("No feasible solution!")
             return None
         data = {"Species":[],"Abundance":[]}
-        totalgrowth = 0
-        for species in self.species:
-            totalgrowth += self.solution.fluxes[species.biomasses[0].id]
+        totalgrowth = sum([self.solution.fluxes[species.biomasses[0].id] for species in self.species])
         if totalgrowth == 0:
             logger.warning("Community model did not grow!")
             return None
