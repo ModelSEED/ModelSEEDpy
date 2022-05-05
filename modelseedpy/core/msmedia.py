@@ -1,5 +1,7 @@
+import logging
 from cobra.core.dictlist import DictList
 
+logger = logging.getLogger(__name__)
 
 class MediaCompound:
 
@@ -30,7 +32,7 @@ class MSMedia:
     def from_dict(d):
         """
         Either dict with exchange bounds (example: {'cpd00027': (-10, 1000)}) or
-        just absolute value of update (example: {''cpd00027': 10})
+        just absolute value of uptake (example: {''cpd00027': 10})
         :param d:
         :return:
         """
@@ -61,3 +63,15 @@ class MSMedia:
             media[met_id] = (compound.lower_bound, compound.upper_bound)
 
         return media
+    
+    def merge(self,media,overwrite_overlap=False):
+        new_cpds = []
+        for cpd in media.mediacompounds:
+            newcpd = MediaCompound(cpd.id,-1*cpd.maxFlux,-1*cpd.minFlux,cpd.concentration)
+            if newcpd.id in self.mediacompounds:
+                if overwrite_overlap:
+                    self.mediacompounds[newcpd.id] = newcpd
+            else:
+                new_cpds.append(newcpd)
+        self.mediacompounds += new_cpds
+    
