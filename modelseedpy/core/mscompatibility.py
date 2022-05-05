@@ -59,26 +59,61 @@ class MSCompatibility():
             reaction_dict[met[1]] = stoich
             
         return reaction_dict
+
+    def _correct_met(self, met, metabolites_set, met_name):
+        try:
+            original_id = met.id
+            original_name = met.name
+            met.id = self.compound_names[met_name]
+            if original_id != met.id and self.printing:
+                print('\noriginal ID\t', original_id, '\t', original_name)
+                print('new ID\t\t', met.id, '\t', met.name)
+        except: # the met.id already exists in the model
+            for rxn in met.reactions:
+                original_reaction = rxn.reaction
+                rxn_mets = [rxn_met.id for rxn_met in rxn.metabolites]
+                if metabolites_set[met_name] not in rxn_mets:
+                    rxn.add_metabolites({
+                                met: 0, metabolites_set[met_name]: rxn.metabolites[met]
+                            }, combine = False)
+                else:
+                    warn(f'The {met.id} metabolite in the {rxn.id} reaction could not be corrected.')
+                if original_reaction!= rxn.reaction and self.printing:
+                    print('\noriginal met_rxn\t', original_reaction)
+                    print('new met_rxn\t\t', rxn.reaction)
+                    
+        return met
         
     def standardize_MSD(self,model):
         for met in model.metabolites:
-            # standardize the metabolite names
-            met.name = self.compound_ids[met.id]
+            if met.id in self.compound_ids:
+                # standardize the metabolite names
+                met.name = self.compound_ids[met.id]
+            else:
+                warn(f'The {met.id} metabolite is not captured by the ModelSEED Database')
 
         for rxn in model.reactions:
-            # standardize the reaction names
-            rxn.name = self.reactions_ids[rxn.id]
-            
-            # standardize the reactions to the ModelSEED Database
-            for index, rxn_id in enumerate(self.reaction_ids):
-                if rxn_id == rxn.id:
-                    reaction_string = self.reaction[index]['equation']
-                    reaction_dict = self._parse_rxn_string(reaction_string)
-                    break
-            
-            for met in rxn.metabolites:
-                rxn.add_metabolites({met:0}, combine = False)
-            rxn.add_metabolites(reaction_dict, combine = False)
+            if rxn.id in self.reaction_ids:
+                # standardize the reaction names
+                rxn.name = self.reaction_ids[rxn.id]
+                
+                # standardize the reactions to the ModelSEED Database
+                for index, rxn_id in enumerate(self.reaction_ids):
+                    if rxn_id == rxn.id:
+                        reaction_string = self.reaction[index]['equation']
+                        reaction_dict = self._parse_rxn_string(reaction_string)
+                        break
+                
+                for met in rxn.metabolites:
+                    rxn.add_metabolites({met:0}, combine = False)
+                rxn.add_metabolites(reaction_dict, combine = False)
+            else:
+                warn(f'The {rxn.id} reaction is not captured by the ModelSEED Database')
+                for met in rxn.metabolites:
+                    for name in self.compound_names:
+                        if met.name == name:
+                            met = self._correct_met(met, self.compound_names, name)
+                            break
         
         return model
     
@@ -88,38 +123,37 @@ class MSCompatibility():
                        ): 
         misaligned = []
         if metabolites: # contrast metabolites 
+            model2_ids = OrderedDict({met.id:re.sub('(_\w\d)', '', met.name) for met in model_2.metabolites})
             compared_met_counter = 0
             for met in model_1.metabolites:  #!!! develop dictionaries of ids and names to facilitate the comparison
-                met_id = re.sub('(_\w\d)', '', met.id)
-                if met_id in model_2.metabolites: 
-                    index = model_2.metabolites.index(met_id)
-                    met2_id = re.sub('(_\w\d)', '', model_2.metabolites[index].name)
-                    if met.name != met2_id:
-                        print(f'\nmisaligned met {met_id} names\n', f'model1: {met.name}', f'model2: {met2_id}')
+                if met.id in model2_ids: 
+                    met_name = re.sub('(_\w\d)', '', met.name)
+                    if met_name != model2_ids[met.id]:
+                        print(f'\nmisaligned {met.id} names\n', f'model1: {met_name}', f'model2: {model2_ids[met.id]}')
                         misaligned.append({
-                                    'model_1': met.name,
-                                    'model_2': met2_id,
+                                    'model_1': met_name,
+                                    'model_2': model2_ids[met.id],
                                 })
                         if self.printing:
-                            print(met.name, met2_id)
+                            print(met.name, model2_ids[met.id])
                         
                     compared_met_counter += 1
                 
             if self.printing:
-                print(f'''\n\n{compared_met_counter} of the {len(model_1.metabolites)} model_1 metabolites and {len(model_2.metabolites)} model_2 metabolites are shared and were compared.''')        
+                print(f'\n\n{compared_met_counter} of the {len(model_1.metabolites)} model_1 metabolites and {len(model_2.metabolites)} model_2 metabolites are shared and were compared.')        
         else: # contrast reactions 
             model2_rxns = {rxn.id:rxn for rxn in model_2.reactions}
             compared_rxn_counter = 0
             for rxn in model_1.reactions:
-                if rxn['id'] in model2_rxns:
-                    if rxn.name != model2_rxns[rxn.id].name:
-                        print(f'\nmisaligned reaction {rxn.id} names\n', ' model1  ',rxn.name, ' model2  ',model2_rxns[rxn.id].name)
+                if rxn.id in model2_rxns:
+                    if re.sub('(_\w\d)', '', rxn.name)!= re.sub('(_\w\d)', '', model2_rxns[rxn.id].name):
+                        print(f'\nmisaligned {rxn.id} names\n', ' model1  ',rxn.name, ' model2  ',model2_rxns[rxn.id].name)
                         misaligned.append({
                                     'model_1': rxn.name,
                                     'model_2': model2_rxns[rxn.id].name,
                                 })                            
                     elif rxn.reaction != model2_rxns[rxn.id].reaction:                            
-                        print(f'\nmisaligned reaction {rxn.id} reagents\n', 'model1: ',rxn.reaction, 'model2: ',model2_rxns[rxn.id].reaction)
+                        print(f'\nmisaligned {rxn.id} reagents\n', 'model1: ',rxn.reaction, 'model2: ',model2_rxns[rxn.id].reaction)
                         misaligned.append({
                                     'model_1': rxn.reaction,
                                     'model_2': model2_rxns[rxn.id].reaction,
@@ -128,7 +162,7 @@ class MSCompatibility():
                     compared_rxn_counter += 1
                     
             if self.printing:
-                print(f'''\n\n{compared_rxn_counter}/{len(model_1.reactions)} model_1 reactions are shared with model_2 and were compared.''')
+                print(f'''\n\n{compared_rxn_counter} of the {len(model_1.reactions)} model_1 reactions and {len(model_2.reactions)} model_2 reactions are shared and were compared.''')
                 
         if standardize:
             model_1 = self.standardize_MSD(model_1)
@@ -138,30 +172,7 @@ class MSCompatibility():
         
     def exchanges(self,
                   model # cobrakbase model
-                  ):
-        def correct_met(met, metabolites_set, met_name):
-            try:
-                original_id = met.id
-                original_name = met.name
-                met.id = self.compound_names[name]
-                if self.printing:
-                    print('\noriginal ID\t', original_id, '\t', original_name)
-                    print('new ID\t\t', met.id, '\t', met.name)
-            except: # the met.id already exists in the model
-                for rxn in met.reactions:
-                    original_reaction = rxn.reaction
-                    rxn_mets = [rxn_met.id for rxn_met in rxn.metabolites]
-                    if metabolites_set[met_name] not in rxn_mets:
-                        rxn.add_metabolites({
-                                    met: 0, metabolites_set[met_name]: rxn.metabolites[met]
-                                }, 
-                                combine = False)
-                    else:
-                        warn(f'The {met.id} metabolite in the {rxn.id} reaction could not be corrected.')
-                    if self.printing:
-                        print('\noriginal met_rxn\t', original_reaction)
-                        print('new met_rxn\t\t', rxn.reaction)
-                        
+                  ):                        
         # homogenize isomeric metabolites in exchange reactions
         unique_base_met_id = OrderedDict()
         unique_base_met_name = []
@@ -177,8 +188,8 @@ class MSCompatibility():
                             # replace isomers of different IDs with a standard isomer
                             base_name_index = unique_base_met_name.index(base_name)
                             base_name_id = list(unique_base_met_id.keys())[base_name_index]
-                            if met.id != base_name_id:
-                                correct_met(met, unique_base_met_id, base_name_id)
+                            if re.sub('(_\w\d)', '', met.id) != base_name_id:
+                                met = self._correct_met(met, unique_base_met_id, base_name_id)
                     
         # standardize model metabolite IDs with the ModelSEED Database
         unknown_met_ids = []
@@ -188,7 +199,7 @@ class MSCompatibility():
                 unknown_met_ids.append(met.id)
                 for name in self.compound_names:
                     if met.name == name:
-                        correct_met(met, self.compound_names, name)
+                        met = self._correct_met(met, self.compound_names, name)
                         break
 #                    warn(f'The metabolite {met.id} is not recognized by the ModelSEED Database')
         
