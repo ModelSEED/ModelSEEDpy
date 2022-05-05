@@ -6,6 +6,7 @@ import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
+logger = logging.getLogger(__name__)
 
 class KBaseMediaPkg(BaseFBAPkg):
     """
@@ -32,35 +33,31 @@ class KBaseMediaPkg(BaseFBAPkg):
                 self.parameters["default_uptake"] = 0
             if self.parameters["default_excretion"] is None:
                 self.parameters["default_excretion"] = 100    
-        if self.parameters["media"] is None:
+        if self.parameters["media"] is None and self.parameters["default_uptake"] == 0:
             self.parameters["default_uptake"] = 100
-
-        exchange_reactions = {}
-        for reaction in self.model.exchanges:
-            if reaction.id[:3] == 'EX_':
-                compound = reaction.id[3:]
-                exchange_reactions[compound] = reaction                
-                reaction.lower_bound = -1*self.parameters["default_uptake"]
-                reaction.upper_bound = self.parameters["default_excretion"]
-                reaction.update_variable_bounds()  # FIXME: this seems unnecessary
-
+        
+        #First initializing all exchanges to default uptake and excretion
+        exchange_list = self.modelutl.exchange_list()
+        for reaction in exchange_list:
+            reaction.lower_bound = -1*self.parameters["default_uptake"]
+            reaction.upper_bound = self.parameters["default_excretion"]
+        
+        #Now constraining exchanges for specific compounds specified in the media
         if self.parameters["media"]:
-            # Searching for media compounds in model
-            for compound in self.parameters["media"].mediacompounds:
-                mdlcpds = self.find_model_compounds(compound.id)
-                for mdlcpd in mdlcpds:
-                    if mdlcpd.id in exchange_reactions:
-                        #print('media compound: ', mdlcpd)
-                        exchange_reactions[mdlcpd.id].lower_bound = -1 * compound.maxFlux
-                        exchange_reactions[mdlcpd.id].upper_bound = -1 * compound.minFlux
-                    if self.pkgmgr != None and "FullThermoPkg" in self.pkgmgr.packages:
-                        print('FullThermo constrained compound: ', mdlcpd)
-                        if mdlcpd.id in self.variables["logconc"] and mdlcpd.compartment == "e0":
-                            if compound.concentration != 0.001:
-                                self.variables["logconc"][msid_hash[compound.id].id].lb = compound.concentration
-                                self.variables["logconc"][msid_hash[compound.id].id].ub = compound.concentration
-    
-    def find_model_compounds(self, cpd_id):
-        if cpd_id in self.model.metabolites:
-            return [self.model.metabolites.get_by_id(cpd_id)]
-        return [m for m in self.model.metabolites if FBAHelper.modelseed_id_from_cobra_metabolite(m) == cpd_id]
+            exchange_hash = self.modelutl.exchange_hash()
+            self.modelutl.build_metabolite_hash()
+            for mediacpd in self.parameters["media"].mediacompounds:
+                mets = self.modelutl.find_met(mediacpd.id)
+                if len(mets) > 0:
+                    for met in mets:
+                        if met in exchange_hash:
+                            exchange_hash[met].lower_bound = -1 * mediacpd.maxFlux
+                            exchange_hash[met].upper_bound = -1 * mediacpd.minFlux
+                            if self.pkgmgr != None and "FullThermoPkg" in self.pkgmgr.packages:
+                                logger.info('FullThermo constrained compound: ', met.id)
+                                if met.id in self.variables["logconc"] and met.compartment[0:1] == "e":
+                                    if mediacpd.concentration != 0.001:
+                                        self.variables["logconc"][met.id].lb = ln(mediacpd.concentration)
+                                        self.variables["logconc"][met.id].ub = ln(mediacpd.concentration)
+                else:
+                    logger.warn('Media compound: ', mediacpd.id,' not found in model.')

@@ -38,7 +38,7 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                desc = header_data[1]
+                #desc = header_data[1]
 
             seq = MSFeature(seq_id, "", desc)
         else:

@@ -11,3 +11,5 @@ from modelseedpy.core.mseditorapi import MSEditorAPI,MSEquation
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.msatpcorrection import MSATPCorrection
 from modelseedpy.core.mscommunity import MSCommunity
+from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes
+from modelseedpy.core.msmodelutl import MSModelUtil
