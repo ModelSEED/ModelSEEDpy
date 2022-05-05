@@ -30,8 +30,8 @@ class MSCompatibility():
             
     def _correct_met(self, met, metabolites_set, met_name):
         try:
+            original_id = met.id
             if re.sub('(_\w\d)', '', original_id) != self.compound_names[met_name]:
-                original_id = met.id
                 original_name = met.name
                 met.id = self.compound_names[met_name]
                 if self.printing:
