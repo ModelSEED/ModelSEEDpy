@@ -16,7 +16,7 @@ def get_mapping(df, valid_databases, pd):
                     mapping[id][db] = value
     return mapping
 
-def atom_count(formula):  #!!! 
+def atom_count(formula):
     chem_mw = ChemMW()
     try:
         chem_mw.mass(formula)

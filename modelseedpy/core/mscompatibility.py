@@ -17,91 +17,62 @@ class MSCompatibility():
             self.reaction_ids = OrderedDict()
             for rxn in self.reactions:
                 self.reaction_ids[rxn['id']] = rxn['name']
+                
         with open(os.path.join(modelseed_db_path, 'Biochemistry', 'compounds.json'), 'r') as rxns:
             self.compounds = json.load(rxns)
-            self.compound_names = self.compound_ids = OrderedDict()
+            self.compounds_id_indexed = self.compound_names = OrderedDict()
             for cpd in self.compounds:
-                self.compound_ids[cpd['id']] = cpd['name']
+                self.compounds_id_indexed[cpd['id']] = cpd
                 if 'aliases' in cpd and cpd['aliases'] is not None:
                     names = [name.strip() for name in cpd['aliases'][0].split(';')]
                     for name in names:
                         self.compound_names[name] = cpd['id']
             
-    def _parse_rxn_string(self,reaction_string):
-        # parse the reaction string
-        if '<=>' in reaction_string:
-            compounds = reaction_string.split('<=>')
-        elif '-->' in reaction_string:
-            compounds = reaction_string.split('-->')
-        elif '=>' in reaction_string:
-            compounds = reaction_string.split('=>')
-        elif '<=' in reaction_string:
-            compounds = reaction_string.split('<=')
-        else:
-            warn(f'The reaction string {reaction_string} has an unexpected reagent delimiter.')
-        reactant, product = compounds[0], compounds[1]
-        reactants = [x.strip() for x in reactant.split('+')]
-        products = [x.strip() for x in product.split('+')]
-        reactant_met = [x.split(' ') for x in reactants]
-        product_met = [x.split(' ') for x in products]
-        
-        # assemble a reaction dictionary that is amenable with the add_metabolites function of COBRA models
-        reaction_dict = {}
-        for met in reactant_met:
-            if len(met) == 1:
-                met.insert(0, '1') 
-            stoich = float(re.search('(\d+)', met[0]).group())
-            reaction_dict[met[1]] = negative(stoich)
-        for met in product_met:
-            if len(met) == 1:
-                met.insert(0, '1') 
-            stoich = float(re.search('(\d+)', met[0]).group())
-            reaction_dict[met[1]] = stoich
-            
-        return reaction_dict
-
     def _correct_met(self, met, metabolites_set, met_name):
         try:
-            original_id = met.id
-            original_name = met.name
-            met.id = self.compound_names[met_name]
-            if original_id != met.id and self.printing:
-                print('\noriginal ID\t', original_id, '\t', original_name)
-                print('new ID\t\t', met.id, '\t', met.name)
+            if re.sub('(_\w\d)', '', original_id) != self.compound_names[met_name]:
+                original_id = met.id
+                original_name = met.name
+                met.id = self.compound_names[met_name]
+                if self.printing:
+                    print('\noriginal ID\t', original_id, '\t', original_name)
+                    print('new ID\t\t', met.id, '\t', met.name)
         except: # the met.id already exists in the model
             for rxn in met.reactions:
                 original_reaction = rxn.reaction
-                rxn_mets = [rxn_met.id for rxn_met in rxn.metabolites]
-                if metabolites_set[met_name] not in rxn_mets:
-                    rxn.add_metabolites({
-                                met: 0, metabolites_set[met_name]: rxn.metabolites[met]
-                            }, combine = False)
-                else:
-                    warn(f'The {met.id} metabolite in the {rxn.id} reaction could not be corrected.')
-                if original_reaction!= rxn.reaction and self.printing:
-                    print('\noriginal met_rxn\t', original_reaction)
-                    print('new met_rxn\t\t', rxn.reaction)
+                if re.sub('(_\w\d)', '', original_reaction) != re.sub('(_\w\d)', '', rxn.reaction):
+                    rxn_mets = [rxn_met.id for rxn_met in rxn.metabolites]
+                    if metabolites_set[met_name] not in rxn_mets:
+                        rxn.add_metabolites({
+                                    met: 0, metabolites_set[met_name]: rxn.metabolites[met]
+                                }, combine = False)
+                    else:
+                        warn(f'The {met.id} metabolite in the {rxn.id} reaction could not be corrected.')
+                    if self.printing:
+                        print('\noriginal met_rxn\t', original_reaction)
+                        print('new met_rxn\t\t', rxn.reaction)
                     
         return met
         
     def standardize_MSD(self,model):
         for met in model.metabolites:
-            if met.id in self.compound_ids:
+            if re.sub('(_\w\d)', '', met.id) in self.compounds_id_indexed:
                 # standardize the metabolite names
-                met.name = self.compound_ids[met.id]
+                met.name = self.compounds_id_indexed[re.sub('(_\w\d)', '', met.id)]['name']
             else:
                 warn(f'The {met.id} metabolite is not captured by the ModelSEED Database')
 
         for rxn in model.reactions:
-            if rxn.id in self.reaction_ids:
+            if re.sub('(_\w\d)', '', rxn.id) in self.reaction_ids:
                 # standardize the reaction names
-                rxn.name = self.reaction_ids[rxn.id]
+                rxn.name = self.reaction_ids[re.sub('(_\w\d)', '', rxn.id)]
                 
                 # standardize the reactions to the ModelSEED Database
-                for index, rxn_id in enumerate(self.reaction_ids):
-                    if rxn_id == rxn.id:
-                        reaction_string = self.reaction[index]['equation']
-                        reaction_dict = self._parse_rxn_string(reaction_string)
+                for index, rxn_id in enumerate(list(self.reaction_ids.keys())):
+                    if rxn_id == re.sub('(_\w\d)', '', rxn.id):
+                        reaction_dict = {}
+                        for met in rxn.metabolites:
+                            reaction_dict[met] = float(rxn.metabolites[met])
                         break
                 
                 for met in rxn.metabolites:
