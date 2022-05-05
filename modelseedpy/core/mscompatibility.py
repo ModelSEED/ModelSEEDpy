@@ -1,26 +1,38 @@
+from collections import OrderedDict
 from numpy import negative
 from warnings import warn
 from pprint import pprint
-import pandas
 import json, re, os
 
-# define the environment path 
-local_cobrakbase_path = os.path.join('C:', 'Users', 'Andrew Freiburger','Documents','Argonne','cobrakbase')
-os.environ["HOME"] = local_cobrakbase_path
-
-class align_models:
+class MSCompatibility():
     def __init__(self,
                  modelseed_db_path: str, # the local path to the ModelSEEDDatabase repository
                  printing = True         # specifies whether results are printed
                  ):       
         self.printing = printing
-        with open(os.path.join(modelseed_db_path, 'Biochemistry', 'reactions.json')) as rxns:
+        
+        # import and parse ModelSEED Database reactions and compounds
+        with open(os.path.join(modelseed_db_path, 'Biochemistry', 'reactions.json'), 'r') as rxns:
             self.reactions = json.load(rxns)
+            self.reaction_ids = OrderedDict()
+            for rxn in self.reactions:
+                self.reaction_ids[rxn['id']] = rxn['name']
+        with open(os.path.join(modelseed_db_path, 'Biochemistry', 'compounds.json'), 'r') as rxns:
+            self.compounds = json.load(rxns)
+            self.compound_names = self.compound_ids = OrderedDict()
+            for cpd in self.compounds:
+                self.compound_ids[cpd['id']] = cpd['name']
+                if 'aliases' in cpd and cpd['aliases'] is not None:
+                    names = [name.strip() for name in cpd['aliases'][0].split(';')]
+                    for name in names:
+                        self.compound_names[name] = cpd['id']
             
-    def _parse_ms_rxn_string(self,reaction_string):
+    def _parse_rxn_string(self,reaction_string):
         # parse the reaction string
         if '<=>' in reaction_string:
             compounds = reaction_string.split('<=>')
+        elif '-->' in reaction_string:
+            compounds = reaction_string.split('-->')
         elif '=>' in reaction_string:
             compounds = reaction_string.split('=>')
         elif '<=' in reaction_string:
@@ -33,198 +45,151 @@ class align_models:
         reactant_met = [x.split(' ') for x in reactants]
         product_met = [x.split(' ') for x in products]
         
-        # assemble a dictionary for the reaction
+        # assemble a reaction dictionary that is amenable with the add_metabolites function of COBRA models
         reaction_dict = {}
         for met in reactant_met:
+            if len(met) == 1:
+                met.insert(0, '1') 
             stoich = float(re.search('(\d+)', met[0]).group())
-            met[1] = met[1].replace('[0]', '_c0')
-            met[1] = met[1].replace('[1]', '_c0')
             reaction_dict[met[1]] = negative(stoich)
         for met in product_met:
+            if len(met) == 1:
+                met.insert(0, '1') 
             stoich = float(re.search('(\d+)', met[0]).group())
-            met[1] = met[1].replace('[0]', '_c0')
-            met[1] = met[1].replace('[1]', '_c0')
             reaction_dict[met[1]] = stoich
             
         return reaction_dict
-    
-    def _parse_modelReactionReagents(self,modelReactionReagents):
-        # parse the reaction dictionary
-        rxn_dict = {}
-        for cpd in modelReactionReagents:
-            cpd_id = re.search('(cpd\d{5})', cpd['modelcompound_ref']).group()
-            stoich = float(cpd['coefficient'])
-            rxn_dict[cpd_id] = stoich
-            
-        return rxn_dict
         
-    def _parse_models(self,
-                     model_1, # an arbitrary cobrakbase model
-                     model_2, # an arbitrary cobrakbase model
-                     metabolites = True, # contrast the metabolic termology between the models
-                     ):
-        if metabolites:
-            misaligned_metabolites = []
+    def standardize_MSD(self,model):
+        for met in model.metabolites:
+            # standardize the metabolite names
+            met.name = self.compound_ids[met.id]
+
+        for rxn in model.reactions:
+            # standardize the reaction names
+            rxn.name = self.reactions_ids[rxn.id]
+            
+            # standardize the reactions to the ModelSEED Database
+            for index, rxn_id in enumerate(self.reaction_ids):
+                if rxn_id == rxn.id:
+                    reaction_string = self.reaction[index]['equation']
+                    reaction_dict = self._parse_rxn_string(reaction_string)
+                    break
+            
+            for met in rxn.metabolites:
+                rxn.add_metabolites({met:0}, combine = False)
+            rxn.add_metabolites(reaction_dict, combine = False)
+        
+        return model
+    
+    def compare_models(self, model_1, model_2,       # arbitrary cobrakbase models
+                       metabolites: bool = True,     # contrast metabolites (True) or reactions (False) between the models
+                       standardize: bool = False     # standardize the model names and reactions to the ModelSEED Database
+                       ): 
+        misaligned = []
+        if metabolites: # contrast metabolites 
             compared_met_counter = 0
-            for met_id in model_1.metabolites:
-                if met_id in model_2.metabolites:
-                    # define model1 specifications
-                    model1_met_index = model_1.metabolites.index(met_id)
-                    model1_met_dict = model_1.modelcompounds[model1_met_index]
-                    model1_met_name = re.sub('(_\w\d)$', '', model1_met_dict['name'])
-                    
-                    # define model2 specifications
-                    model2_met_index = model_2.metabolites.index(str(met_id))
-                    model2_met_dict = model_2.modelcompounds[model2_met_index]
-                    model2_met_name = re.sub('(_\w\d)$', '', model2_met_dict['name'])    
-                    
-                    if model1_met_name != model2_met_name:
-                        print('\nmisaligned met names', 'model1:',model1_rxn_index, 'model2:',model2_rxn_index)
-                        misaligned_metabolites.append({
-                                    'model_1': model1_met_name,
-                                    'model_2': model2_met_name,
+            for met in model_1.metabolites:  #!!! develop dictionaries of ids and names to facilitate the comparison
+                met_id = re.sub('(_\w\d)', '', met.id)
+                if met_id in model_2.metabolites: 
+                    index = model_2.metabolites.index(met_id)
+                    met2_id = re.sub('(_\w\d)', '', model_2.metabolites[index].name)
+                    if met.name != met2_id:
+                        print(f'\nmisaligned met {met_id} names\n', f'model1: {met.name}', f'model2: {met2_id}')
+                        misaligned.append({
+                                    'model_1': met.name,
+                                    'model_2': met2_id,
                                 })
                         if self.printing:
-                            print(model1_met_name, model2_met_name)
+                            print(met.name, met2_id)
                         
                     compared_met_counter += 1
-                    
-            if self.printing:
-                print(f'''\n\n{compared_met_counter}/{len(model_1.metabolites)} model_1 metabolites are shared with model_2 and were compared.''')
-            
-            return misaligned_metabolites, model_1, model_2
-
-        else:
-#            pprint(dir(self.model1))
-#            with open('model_reactions.json', 'w') as reactions:
-#                json.dump(self.model1.modelreactions, reactions, indent = 3)
-#            with open('reactions.json', 'w') as rxns:
-#                rxns.write('\n'.join([str(x) for x in self.model1.reactions]))
-            model1_rxns = [rxn['id'] for rxn in model_1.modelreactions]
-            model2_rxns = misaligned_reactions = model1_exchanges = []
-            model2_ex_mets = set()
-            model2_ex = {}
-            for rxn in model_2.modelreactions:
-                 model2_rxns.append(rxn['id'])
-                 if re.search('(R-|EX_)', rxn['id']):
-                     reaction_dict = self._parse_ms_rxn_string(rxn['equation'])
-                     model2_ex_mets.add()
-                     for met in model2_ex_metabolites:
-                         model2_ex[rxn['id']] = {
-                                     met['id']: met['name']
-                                 }
-            compared_reaction_counter = 0
-            for rxn in model_1.modelreactions:
-                if re.search('(R-|EX_)', rxn['id']): # exchange reactions
-                    model1_exchanges.append(rxn)   # parse the reaction via a function to acquire the set of metabolites
-                if rxn['id'] in model2_rxns: # identical cytoplasmic reactions
-                    # define model1 specifications
-                    model1_rxn_index = model1_rxns.index(rxn['id'])
-                    model1_rxn_dict = model_1.modelreactions[rxn]
-                    model1_rxn_id = re.sub('(_\w\d)$', '', model1_rxn_dict['id'])
-                    model1_rxn_name = re.sub('(_\w\d)$', '', model1_rxn_dict['name'])
-                    model1_rxn_reagents = model1_rxn_dict['modelReactionReagents']
-                    
-                    # define model2 specifications
-                    model2_rxn_index = model2_rxns.index(rxn['id'])
-                    model2_rxn_dict = model_2.modelreactions[model2_rxn_index]
-                    model2_rxn_id = re.sub('(_\w\d)$', '', model2_rxn_dict['id'])  
-                    model2_rxn_name = re.sub('(_\w\d)$', '', model2_rxn_dict['name'])
-                    model2_rxn_reagents = model2_rxn_dict['modelReactionReagents']
-                    
-                    # assess the alignment between the reaction descriptions
-                    if model1_rxn_name != model2_rxn_name:
-                        print(f'\nmisaligned names {model2_rxn_id}', ' model1  ',model1_rxn_name, ' model2  ',model2_rxn_name)
-                        misaligned_reactions.append({
-                                    'model_1': model1_rxn_name,
-                                    'model_2': model2_rxn_name,
-                                })
-                        # determine the correct reaction name according to the ModelSEEDDatabase
-                        for rxn in self.reactions:
-                            if model2_rxn_id == rxn['id']:
-                                reaction_name = rxn['name']
-                                break
-                            
-                        # correct the erroneous model
-                        if model1_rxn_name != reaction_name:
-                            model_1.modelreactions[model1_rxn_index]['name'] = reaction_name
-                        elif model2_rxn_name != reaction_name:
-                            model_2.modelreactions[model2_rxn_index]['name'] = reaction_name
-                    elif model1_rxn_reagents != model2_rxn_reagents:                            
-                        # determine the correct reaction according to the ModelSEEDDatabase
-                        for rxn in self.reactions:
-                            if model2_rxn_id == rxn['id']:
-                                reaction_dict = self._parse_ms_rxn_string(rxn['equation'])
-                                break
-                            elif model1_rxn_id == rxn['id']:
-                                reaction_dict = self._parse_ms_rxn_string(rxn['equation'])
-                                break
-                        
-                        # standardize the reaction dictionaries of the questioned reactions
-                        model1_rxn_dict = self._parse_modelReactionReagents(model1_rxn_reagents)
-                        model2_rxn_dict = self._parse_modelReactionReagents(model1_rxn_reagents)
-                        if model1_rxn_dict != model2_rxn_dict:
-                            print('\nmisaligned reagents', 'model1:',model1_rxn_id, 'model2:',model2_rxn_id)
-                            misaligned_reactions.append({
-                                        'model_1': model1_rxn_dict,
-                                        'model_2': model2_rxn_dict,
-                                    })
-                            if self.printing:
-                                print('\nmodel1:')
-                                pprint(model1_rxn_dict)
-                                print('\nmodel2:')
-                                pprint(model2_rxn_dict)
-                            
-                            # correct the erroneous model 
-                            modelReactionReagents_dict = {}
-                            if model2_rxn_dict == reaction_dict:
-                                for cpd, stoich in reaction_dict.items():
-                                    modelReactionReagents_dict['modelcompound_ref'] = cpd
-                                    modelReactionReagents_dict['coefficient'] = stoich
-                                model_1.modelreactions[model1_rxn_index] = modelReactionReagents_dict
-                            elif model1_rxn_dict == reaction_dict:
-                                for cpd, stoich in reaction_dict.items():
-                                    modelReactionReagents_dict['modelcompound_ref'] = cpd
-                                    modelReactionReagents_dict['coefficient'] = stoich
-                                model_2.modelreactions[model1_rxn_index] = modelReactionReagents_dict
-                            else:
-                                warn(f'The {rxn_id} reactions of model_1 {model1_rxn_dict} and model_2 {model2_rxn_dict} nether align with the ModelSEED Database reaction {reaction_dict} nor align with themselves.')
-                        
-                    compared_reaction_counter += 1
-                    
-            if self.printing:
-                print(f'''\n\n{compared_reaction_counter}/{len(model_1.reactions)} model_1 reactions are shared with model_2 and were compared.''')
                 
-            # contrast
+            if self.printing:
+                print(f'''\n\n{compared_met_counter} of the {len(model_1.metabolites)} model_1 metabolites and {len(model_2.metabolites)} model_2 metabolites are shared and were compared.''')        
+        else: # contrast reactions 
+            model2_rxns = {rxn.id:rxn for rxn in model_2.reactions}
+            compared_rxn_counter = 0
+            for rxn in model_1.reactions:
+                if rxn['id'] in model2_rxns:
+                    if rxn.name != model2_rxns[rxn.id].name:
+                        print(f'\nmisaligned reaction {rxn.id} names\n', ' model1  ',rxn.name, ' model2  ',model2_rxns[rxn.id].name)
+                        misaligned.append({
+                                    'model_1': rxn.name,
+                                    'model_2': model2_rxns[rxn.id].name,
+                                })                            
+                    elif rxn.reaction != model2_rxns[rxn.id].reaction:                            
+                        print(f'\nmisaligned reaction {rxn.id} reagents\n', 'model1: ',rxn.reaction, 'model2: ',model2_rxns[rxn.id].reaction)
+                        misaligned.append({
+                                    'model_1': rxn.reaction,
+                                    'model_2': model2_rxns[rxn.id].reaction,
+                                })
+
+                    compared_rxn_counter += 1
+                    
+            if self.printing:
+                print(f'''\n\n{compared_rxn_counter}/{len(model_1.reactions)} model_1 reactions are shared with model_2 and were compared.''')
+                
+        if standardize:
+            model_1 = self.standardize_MSD(model_1)
+            model_2 = self.standardize_MSD(model_2)
             
-            return misaligned_reactions, model_1, model_2
-
+        return misaligned, model_1, model_2
         
-    def align(self,model1, model2):
-        self.model1, self.model2 = model1, model2
+    def exchanges(self,
+                  model # cobrakbase model
+                  ):
+        def correct_met(met, metabolites_set, met_name):
+            try:
+                original_id = met.id
+                original_name = met.name
+                met.id = self.compound_names[name]
+                if self.printing:
+                    print('\noriginal ID\t', original_id, '\t', original_name)
+                    print('new ID\t\t', met.id, '\t', met.name)
+            except: # the met.id already exists in the model
+                for rxn in met.reactions:
+                    original_reaction = rxn.reaction
+                    rxn_mets = [rxn_met.id for rxn_met in rxn.metabolites]
+                    if metabolites_set[met_name] not in rxn_mets:
+                        rxn.add_metabolites({
+                                    met: 0, metabolites_set[met_name]: rxn.metabolites[met]
+                                }, 
+                                combine = False)
+                    else:
+                        warn(f'The {met.id} metabolite in the {rxn.id} reaction could not be corrected.')
+                    if self.printing:
+                        print('\noriginal met_rxn\t', original_reaction)
+                        print('new met_rxn\t\t', rxn.reaction)
+                        
+        # homogenize isomeric metabolites in exchange reactions
+        unique_base_met_id = OrderedDict()
+        unique_base_met_name = []
+        for rxn in model.reactions:
+            if 'EX_' in rxn.id:
+                for met in rxn.metabolites:
+                    if '-' in met.name:
+                        base_name = ''.join(met.name.split('-')[1:])
+                        if base_name not in unique_base_met_name:
+                            unique_base_met_name.append(base_name)
+                            unique_base_met_id[met.id] = met
+                        else:
+                            # replace isomers of different IDs with a standard isomer
+                            base_name_index = unique_base_met_name.index(base_name)
+                            base_name_id = list(unique_base_met_id.keys())[base_name_index]
+                            if met.id != base_name_id:
+                                correct_met(met, unique_base_met_id, base_name_id)
+                    
+        # standardize model metabolite IDs with the ModelSEED Database
+        unknown_met_ids = []
+        for met in model.metabolites:
+            # correct non-standard IDs
+            if 'cpd' not in met.id and len(met.reactions) >= 1:
+                unknown_met_ids.append(met.id)
+                for name in self.compound_names:
+                    if met.name == name:
+                        correct_met(met, self.compound_names, name)
+                        break
+#                    warn(f'The metabolite {met.id} is not recognized by the ModelSEED Database')
         
-        # compare metabolites between the models
-        misaligned_met_model1_in_model2, self.model1, self.model2 = self._parse_models(model1, model2)
-        print(f'Misaligned metabolites: {len(misaligned_met_model1_in_model2)}\n', misaligned_met_model1_in_model2)
-        
-        # compare reactions between the models
-        misaligned_rxn_model1_in_model2, self.model1, self.model2 = self._parse_models(model1, model2, metabolites = False)
-        print(f'Misaligned reactions: {len(misaligned_rxn_model1_in_model2)}\n', misaligned_rxn_model1_in_model2)
-               
-
-# import the models
-import cobrakbase
-token = 'WE6CHYRDTJSGOHFIDGPE7WYFT6PRPXJL'
-kbase_api = cobrakbase.KBaseAPI(token)
-model1 = kbase_api.get_from_ws("iML1515",76994)
-model2 = kbase_api.get_from_ws("iSB1139.kb.gf",30650)
-#print(model1.modelreactions[8])
-#print(model2.modelreactions[591])
-
-#from collections import Counter
-#counts = dict(Counter(list(model2.metabolites)))
-#duplicates = {key:value for key, value in counts.items() if value > 1}
-#print(duplicates)
-
-alignment = align_models(modelseed_db_path = os.path.join('..', 'ModelSEEDDatabase'))
-alignment.align(model1, model2)
+        return model, unknown_met_ids
