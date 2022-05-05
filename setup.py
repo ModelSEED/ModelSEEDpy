@@ -26,6 +26,7 @@ setup(
         "cobra >= 0.17.1",
         "scikit-learn == 0.23.2",  # too support KBase pickle models
         "scipy >= 1.5.4",
-        "chemicals >= 1.0.13"
+        "chemicals >= 1.0.13",
+        "chemw >= 0.3.2"
     ]
 )

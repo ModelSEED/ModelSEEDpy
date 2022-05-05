@@ -79,10 +79,7 @@ class CommunityModelSpecies:
 
 class MSCommunity:
 
-    def __init__(self,
-                 model,
-                 names=[],
-                 abundances=None,
+    def __init__(self, model, names=[], abundances=None,
                  pfba = True, #Set this to false to turn off pfba
                  lp_filename = None #Set this attribute to a filename to cause lp files to be created
                  ):
@@ -90,7 +87,7 @@ class MSCommunity:
         self.model, self.lp_filename, self.pfba = model, lp_filename, pfba
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         #Define Data attributes as None
-        self.solution, self.biomass_cpd, self.primary_biomass, self.biomass_drain, self.msgapfill, self.element_uptake_limit, self.kinetic_coeff, self.msdb_path_for_fullthermo = None, None, None, None, None, None, None, None
+        self.solution = self.biomass_cpd = self.primary_biomass = self.biomass_drain = self.msgapfill = self.element_uptake_limit = self.kinetic_coeff = self.msdb_path_for_fullthermo = None
         self.species = DictList()
         #Computing data from model
         id_hash = FBAHelper.msid_hash(model)
