@@ -1,13 +1,30 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar  5 12:03:59 2022
 
-@author: Andrew Freiburger
-"""
 import matplotlib, pandas
 import shutil
-import dfbapy
+from modelseedpy.fbapkg import dfbapkg
+
+# define the environment path 
 import os
+local_cobrakbase_path = os.path.join('C:', 'Users', 'Andrew Freiburger','Documents','Argonne','cobrakbase')
+os.environ["HOME"] = local_cobrakbase_path
+
+# import the models
+import cobrakbase
+token = 'WE6CHYRDTJSGOHFIDGPE7WYFT6PRPXJL'
+kbase_api = cobrakbase.KBaseAPI(token)
+model1 = kbase_api.get_from_ws("iML1515",76994)
+# model2 = kbase_api.get_from_ws("iSB1139.kb.gf",30650)
+
+# define in the initial conditions
+modelseed_db_path = os.path.join('..', '..', '..', 'ModelSEEDDatabase')
+initial_concentrations = {"ATP_c0":200, "ADP_c0":100}
+total_time = 5
+timestep = 1
+
+# execute the package
+dfba = dfbapkg.dFBA(model1, modelseed_db_path, warnings = False, verbose = False)
+conc, fluxes = dfba.simulate('model_kinetics.json', initial_concentrations, total_time, timestep, labeled_plots = False, export_name = 'test_dfba')
 
 def isnumber(string):
     try:
@@ -20,35 +37,22 @@ def isnumber(string):
         except:
             return False
 
-model_path = os.path.join(os.path.dirname(__file__),'iSB619.xml')
-kinetics_path = os.path.join(os.path.dirname(__file__),'model_kinetics.json')
-
 def test_init():
-    dfba = dfbapy.dFBA(bigg_model_path, 'glpk')
-    
     # assert qualities of the content
     for dic in [
-            dfba.bigg_metabolites_ids,
-            dfba.bigg_metabolites_names,
+            dfba.compound_names,
             dfba.parameters,
             dfba.variables,
             dfba.variables['concentrations'],
             dfba.variables['time_series'],
             ]:
         assert type(dic) is dict
-    for lis in [dfba.model_ids,dfba.model_names]:
+    for lis in [dfba.met_ids,dfba.met_names]:
         assert type(lis) is list
-    for string in [dfba.parameters['bigg_model_name']]:
-        assert type(string) is str
     for bol in [dfba.verbose,dfba.printing]:
         assert type(bol) is bool
         
 def test_simulate():
-    # load the model
-    dfba = dfbapy.dFBA(bigg_model_path, 'glpk')
-    dfba.simulate(kinetics_path, export_name = 'test_dfba')
-    
-    # assert qualities of the simulation
     for dic in [dfba.kinetics_data,dfba.defined_reactions]:
         assert type(dic) is dict
     for lis in [dfba.constrained,dfba.solutions]:
