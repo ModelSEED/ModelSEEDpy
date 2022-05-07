@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from scipy.constants import milli, hour, minute, day, femto
+from collections import OrderedDict
 from warnings import warn
 from matplotlib import pyplot
 from pprint import pprint
@@ -14,7 +15,7 @@ import json, re, os
 def isnumber(string):
     try:
         float(string)
-        remainder = re.sub('([0-9.-eE])', '', str(string))
+        remainder = re.sub('([0-9.\-eE])', '', str(string))
         if remainder == '':
             return True
     except:
@@ -54,16 +55,13 @@ class dFBA():
                  warnings: bool = True, verbose: bool = False, printing: bool = False, jupyter: bool = False
                  ):
         # define the parameter and variable dictionaries
-        self.parameters, self.variables, self.variables['concentrations'], self.variables['time_series'], self.compound_names = {}, {}, {}, {}, {}
+        self.parameters, self.variables, self.compound_id = {}, {}, {}
 
         # load ModelSEED DB compound content
         with open(os.path.join(modelseed_db_path, 'Biochemistry', 'compounds.json'), 'r') as rxns:
             compounds = json.load(rxns)
             for cpd in compounds:
-                if 'aliases' in cpd and cpd['aliases'] is not None:
-                    names = [name.strip() for name in cpd['aliases'][0].split(';')]
-                    for name in names:
-                        self.compound_names[name] = cpd['id']
+                self.compound_id[cpd['id']] = cpd['name']
             
         # define simulation conditions
         self.warnings, self.verbose, self.printing, self.jupyter = warnings, verbose, printing, jupyter 
@@ -74,8 +72,7 @@ class dFBA():
         self.met_ids, self.met_names = [], []
         for met in self.model.metabolites:
             self.met_ids.append(met.id)
-            self.met_names.append(met.name)
-            self.variables['time_series'][met.name] = []
+            self.met_names.append(self.compound_id[met.id])
             
     def __find_data_match(self,
                           reaction_name: str, # specifies the name of the given reaction
@@ -103,23 +100,13 @@ class dFBA():
                           ):           
         rxn = self.defined_reactions[reaction_name]
         rxn_name = re.sub(' ', '_', rxn.name) 
-        if rxn_name not in self.constrained:
-            self.constrained.append(rxn_name)
-            
-            constraint = self.model.problem.Constraint(rxn.flux_expression, lb=flux, ub=flux, name=f'{rxn_name}_kinetics')
-            self.model.solver.update()
-            self.model.add_cons_vars(constraint)
-        else:
-            # designed sequence of parameterization to prevent an error that the upper bound is lower than the lower bound, or visa versa
-            if flux > self.model.constraints[f'{rxn_name}_kinetics'].ub:
-                self.model.constraints[f'{rxn_name}_kinetics'].ub = flux
-                self.model.constraints[f'{rxn_name}_kinetics'].lb = flux
-            else:                
-                self.model.constraints[f'{rxn_name}_kinetics'].lb = flux
-                self.model.constraints[f'{rxn_name}_kinetics'].ub = flux
-                
+        if rxn_name in self.constrained:
+            self.model.remove_cons_vars(self.constrained[rxn_name])
         self.model.solver.update()
-        if self.printing:
+        self.constrained[rxn_name] = self.model.problem.Constraint(rxn.flux_expression, lb=flux, ub=flux, name=f'{rxn_name}_kinetics')
+        self.model.add_cons_vars(self.constrained[rxn_name])
+        self.model.solver.update()
+        if self.verbose:
             print(self.model.constraints[f'{rxn_name}_kinetics'])
             
         
@@ -168,29 +155,30 @@ class dFBA():
             self.concentrations.at[str(met), self.col] = float(0)
         for reaction_name in self.kinetics_data:
             for condition in self.kinetics_data[reaction_name]:
-                for var in self.kinetics_data[reaction_name][condition]['initial_concentrations_M']:
-                    name = self.kinetics_data[reaction_name][condition]['variables_name'][var]
-                    if name in self.compound_names:
-                        if self.compound_names[name] in self.met_ids:                                    
-                            self.concentrations.at[
-                                    name, self.col
-                                    ] += self.kinetics_data[reaction_name][condition]['initial_concentrations_M'][var]/milli
+                datum = self.kinetics_data[reaction_name][condition]
+                for var in datum['initial_concentrations_M']:
+                    met_id = datum['met_id'][var]
+                    if met_id in self.compound_id:
+                        name = self.compound_id[met_id]
+                        if name in self.met_names:                                    
+                            self.concentrations.at[name, self.col] += datum['initial_concentrations_M'][var]/milli
                         else:
                             if self.warnings:
-                                warn(f"KineticsError: The {name} reagent in the {self.kinetics_data[reaction_name][condition]['substituted_rate_law']} rate law is not defined by the model.")
+                                warn(f"KineticsError: The {name} reagent ({var}) in the {datum['substituted_rate_law']} rate law is not defined by the model.")
                     else:
                         if self.warnings:
-                            warn(f"KineticsError: The {name} reagent in the {self.kinetics_data[reaction_name][condition]['substituted_rate_law']} rate law is not recognized by the ModelSEED Database.")
+                            warn(f"KineticsError: The {name} reagent ({var}) in the {datum['substituted_rate_law']} rate law is not recognized by the ModelSEED Database.")
                         
         # incorporate custom initial concentrations
-        for met_name in initial_concentrations:
-            if met_name not in self.concentrations.index:
-                if self.warnings:
-                    warn(f'InitialConcError: The {met_name} metabolite is not defined by the model.')
-            else:
-                self.concentrations.at[met_name, self.col] = initial_concentrations[met_name]
-            
-                
+        if type(initial_concentrations) is dict and initial_concentrations != {}:
+            for met_name in initial_concentrations:
+                if met_name not in self.concentrations.index:
+                    if self.warnings:
+                        warn(f'InitialConcError: The {met_name} metabolite is not defined by the model.')
+                else:
+                    self.concentrations.at[met_name, self.col] = initial_concentrations[met_name]
+                    
+
     def _define_timestep(self,):
         self.col = f'{self.timestep*self.timestep_value} min'
         self.previous_col = f'{(self.timestep-1)*self.timestep_value} min'
@@ -206,28 +194,22 @@ class dFBA():
             fluxes = []
             for source in self.kinetics_data[reaction_name]: 
                 incalculable = False
-                source_instance = self.kinetics_data[reaction_name][source]
-                if "substituted_rate_law" in source_instance:     #!!! Statistics of aggregating each condition should be provided for provenance.
-                    remainder = re.sub('([0-9A-Za-z/()e\-\+\.\*])', '', source_instance["substituted_rate_law"])
+                datum = self.kinetics_data[reaction_name][source]
+                if "substituted_rate_law" in datum:     #!!! Statistics of aggregating each condition should be provided for provenance.
+                    remainder = re.sub('([0-9A-Za-z/()e\-\+\.\*])', '', datum["substituted_rate_law"])
                     if remainder == '':
                         # define each variable concentration
                         conc_dict = {}
-                        for var in self.kinetics_data[reaction_name][source]['variables_name']:
-                            var_name = source_instance['variables_name'][var]
+                        for var in datum['met_id']:
+                            met_id = datum['met_id'][var]
                             if len(var) == 1:
-                                if not var_name in self.met_names:
-                                    incalculable = True
-                                    break
-                                conc_dict[var] = self.concentrations.at[var_name, self.previous_col]*milli
-                                
-                        if incalculable:  # exit this source entry entirely
-                            if self.warnings:
-                                warn(f'MetaboliteError: The {var_name} chemical is not recognized by the ModelSEED Database.')
-                            break
+                                met_name = self.met_names[self.met_ids.index(met_id)]
+                                conc_dict[var] = self.concentrations.at[met_name, self.previous_col]*milli    # the concentrations dictionary is defined in mM
+                                # warn(f'MetaboliteError: The {met_name} chemical is not recognized by the ModelSEED Database.')
 
                         if conc_dict != {}:
                             locals().update(conc_dict)
-                            flux = eval(source_instance["substituted_rate_law"])
+                            flux = eval(datum["substituted_rate_law"])
                             
                             # average or overwrite flux calculations based upon the alignment of the data conditions with the simulation conditions
                             add_or_write = 'a'
@@ -242,10 +224,10 @@ class dFBA():
                                 warn(f'MetaboliteError: The {reaction_name} reaction possesses unpredictable chemicals.')
                     else:
                          if self.warnings:
-                             warn('RateLawError: The rate law {source_instance["substituted_rate_law"]} contains unknown characters: {remainder}')
+                             warn('RateLawError: The {datum["substituted_rate_law"]} rate law contains unknown characters: {remainder}')
                 else:    
                     if self.warnings:
-                        warn(f'RateLawError: The {source_instance} does not possess a rate law')
+                        warn(f'RateLawError: The {datum} datum lacks a rate law.')
                         
             flux = average(fluxes)
             if isnumber(flux):
@@ -259,7 +241,7 @@ class dFBA():
                         warn(f'ReactionError: The {reaction_name} reaction, with a flux of {flux}, is not described by the model.')
             else:
                  if self.warnings:
-                     warn(f'FluxError: The {reaction_name} reaction flux {source_instance["substituted_rate_law"]} value {flux} is not numberic.')
+                     warn(f'FluxError: The {reaction_name} reaction flux {datum["substituted_rate_law"]} value {flux} is not numberic.')
                 
     def _execute_cobra(self):
         # execute the COBRA model 
@@ -274,12 +256,12 @@ class dFBA():
                                cell_dry_fg, cell_fL # The dry mass and volume of the simulated cell, in units of fg and fL, respectively.
                                ):
         for met in self.model.metabolites:      
-            self.concentrations.at[str(met.name), self.col] = 0
+            self.concentrations.at[self.compound_id[met.id], self.col] = 0
             for rxn in met.reactions: # flux units: mmol/(g_(dry weight)*hour)
                 stoich = rxn.metabolites[met]
                 flux = self.fluxes.at[rxn.name, self.col] 
                 delta_conc = stoich * (flux * self.timestep_value*(minute/hour) * cell_dry_fg/cell_fL) 
-                self.concentrations.at[met.name, self.col] += delta_conc
+                self.concentrations.at[self.compound_id[met.id], self.col] += delta_conc
                     
                     
     def _visualize(self,
@@ -304,7 +286,7 @@ class dFBA():
         if included_metabolites == []:
             bbox = (1.7,1)
             for chem in self.changed:
-                if max(self.concentrations.loc[[chem]].values[0].tolist()) > 1e-2:  # an arbitrary concentration threshold for plotting on the figure
+                if max(self.concentrations.loc[[chem]].values[0].tolist()) > 1e-2:   # an arbitrary concentration threshold for plotting on the figure
                     included_metabolites.append(chem)
         
         log_axis = False
@@ -422,7 +404,8 @@ class dFBA():
         # define the dataframe for the time series content
         self.parameters['timesteps'] = int(total_time/timestep)    
         self.timestep_value, self.total_time = timestep, total_time
-        self.constrained = self.solutions = []
+        self.constrained = OrderedDict()
+        self.solutions = []
         self.minimum = inf
         
         # define experimental conditions
@@ -469,7 +452,7 @@ class dFBA():
         # view calculations and results
         if self.verbose:
             print('\n\n', 'Changed metabolite  concentrations\n', '='*2*len('changed metabolites'), '\n', self.changed)
-            print('\nConstrained reactions:', self.constrained)     
+            print('\nConstrained reactions:', self.constrained.keys())     
         elif self.printing:
             if self.jupyter:
                 pandas.set_option('max_rows', None)
