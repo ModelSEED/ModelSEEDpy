@@ -171,12 +171,13 @@ class dFBA():
                         
         # incorporate custom initial concentrations
         if type(initial_concentrations) is dict and initial_concentrations != {}:
-            for met_name in initial_concentrations:
+            for met_id in initial_concentrations:
+                met_name = self.compound_id[met_id]
                 if met_name not in self.concentrations.index:
                     if self.warnings:
-                        warn(f'InitialConcError: The {met_name} metabolite is not defined by the model.')
+                        warn(f'InitialConcError: The {met_id} ({met_name}) metabolite is not defined by the model.')
                 else:
-                    self.concentrations.at[met_name, self.col] = initial_concentrations[met_name]
+                    self.concentrations.at[met_name, self.col] = initial_concentrations[met_id]
                     
 
     def _define_timestep(self,):
