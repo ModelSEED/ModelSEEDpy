@@ -194,7 +194,7 @@ class FBAHelper:
     
     @staticmethod
     def exchange_hash(model):
-        exchange_hash = {}
+        # exchange_hash = {}
         for reaction in model.reactions:
             if len(reaction.metabolites) == 1:
                 for metabolite in reaction.metabolites:
@@ -203,8 +203,8 @@ class FBAHelper:
 
     @staticmethod
     def find_reaction(model,stoichiometry):
-        output = FBAHelper.stoichiometry_to_string(stoichiometry)
-        atpstring = output[0]
+        reaction_strings = FBAHelper.stoichiometry_to_string(stoichiometry)
+        atpstring = reaction_strings[0]
         rxn_hash = FBAHelper.rxn_hash(model)
         if atpstring in rxn_hash:
             return rxn_hash[atpstring]
@@ -225,9 +225,9 @@ class FBAHelper:
     def rxn_hash(model): 
         output = {}
         for rxn in model.reactions:
-            strings = FBAHelper.stoichiometry_to_string(rxn.metabolites)
-            output[strings[0]] = [rxn,1]
-            output[strings[1]] = [rxn,-1]
+            reaction_strings = FBAHelper.stoichiometry_to_string(rxn.metabolites)
+            output[reaction_strings[0]] = [rxn,1]
+            output[reaction_strings[1]] = [rxn,-1]
         return output
     
     @staticmethod
@@ -270,11 +270,16 @@ class FBAHelper:
     @staticmethod
     def add_atp_hydrolysis(model,compartment):
         #Searching for ATP hydrolysis compounds
-        coefs = {"cpd00002":[-1,compartment],"cpd00001":[-1,compartment],"cpd00008":[1,compartment],"cpd00009":[1,compartment],"cpd00067":[1,compartment]}
-        msids = ["cpd00002","cpd00001","cpd00008","cpd00009","cpd00067"]
+        coefs = {
+            "cpd00002":[-1,compartment],
+            "cpd00001":[-1,compartment],
+            "cpd00008":[1,compartment],
+            "cpd00009":[1,compartment],
+            "cpd00067":[1,compartment]
+            }
         stoichiometry = {}
         id_hash = FBAHelper.msid_hash(model)
-        for msid in msids:
+        for msid in coefs:
             if msid not in id_hash:
                 logger.warning("Compound "+msid+" not found in model!")
                 return None
@@ -283,7 +288,7 @@ class FBAHelper:
                     if cpd.compartment == coefs[msid][1]:
                         stoichiometry[cpd] = coefs[msid][0]
         output = FBAHelper.find_reaction(model,stoichiometry)
-        if output != None and output[1] == ">":
+        if output != None and output[1] > 1:  #!!! The output is a list, where the second entry is +/- 1     
             return {"reaction":output[0],"direction":">","new":False}
         cobra_reaction = Reaction("rxn00062_"+compartment, 
                                   name="ATP hydrolysis", 

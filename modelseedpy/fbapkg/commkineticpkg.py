@@ -3,8 +3,6 @@
 from __future__ import absolute_import
 
 import logging
-import re
-from optlang.symbolics import Zero, add
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.mscommunity import MSCommunity, FBAHelper
 

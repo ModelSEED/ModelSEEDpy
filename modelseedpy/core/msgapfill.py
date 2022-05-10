@@ -29,10 +29,7 @@ class MSGapfill:
         self.gapfill_models_by_index = {}
         self.gapfill_all_indecies_with_default_templates = True
         self.gapfill_all_indecies_with_default_models = True
-        self.blacklist = default_blacklist
-        for rxnid in blacklist:
-            if rxnid not in self.blacklist:
-                self.blacklist.append(rxnid)
+        self.blacklist = list(set(default_blacklist)|set(blacklist))
         self.lp_filename = None
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
@@ -77,7 +74,7 @@ class MSGapfill:
 
         self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         if self.test_conditions:
-            self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions,self.last_solution,self.test_condition_iteration_limit)
+            self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions, self.last_solution, self.test_condition_iteration_limit)
             if self.last_solution is None:
                 logger.warning("no solution could be found that satisfied all specified test conditions in specified iterations!")
                 return None

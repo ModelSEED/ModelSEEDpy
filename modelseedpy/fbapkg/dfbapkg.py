@@ -128,7 +128,7 @@ class dFBA():
     def _initial_concentrations(self,
                                 kinetics_path: str = None,  # the absolute path to a JSON file of kinetics data 
                                 kinetics_data: dict = {},   # a dictionary of kinetics data, which supplants imported data from the kinetics_path
-                                initial_concentrations: dict = {} # a dictionary of the initial metabolic concentrations , which supplants concentrations from the defined kinetics data
+                                initial_concentrations_M: dict = {} # a dictionary of the initial metabolic concentrations , which supplants concentrations from the defined kinetics data
                                 ):
         # define kinetics of the system
         self.kinetics_data = {}
@@ -170,14 +170,14 @@ class dFBA():
                             warn(f"KineticsError: The {name} reagent ({var}) in the {datum['substituted_rate_law']} rate law is not recognized by the ModelSEED Database.")
                         
         # incorporate custom initial concentrations
-        if type(initial_concentrations) is dict and initial_concentrations != {}:
+        if type(initial_concentrations_M) is dict and initial_concentrations_M != {}:
             for met_id in initial_concentrations:
                 met_name = self.compound_id[met_id]
                 if met_name not in self.concentrations.index:
                     if self.warnings:
                         warn(f'InitialConcError: The {met_id} ({met_name}) metabolite is not defined by the model.')
                 else:
-                    self.concentrations.at[met_name, self.col] = initial_concentrations[met_id]
+                    self.concentrations.at[met_name, self.col] = initial_concentrations_M[met_id]*milli
                     
 
     def _define_timestep(self,):
@@ -389,7 +389,7 @@ class dFBA():
                             
     def simulate(self, 
                  kinetics_path: str = None,                             # the path of the kinetics data JSON file
-                 initial_concentrations: dict = {},                     # an option of a specific dictionary for the initial concentrations
+                 initial_concentrations_M: dict = {},                     # an option of a specific dictionary for the initial concentrations
                  total_time: float = 200,                               # total simulation time in mintues
                  timestep: float = 20,                                  # simulation timestep in minutes
                  export_name: str = None, export_directory: str = None, # the location to which simulation content will be exported
@@ -414,7 +414,7 @@ class dFBA():
         self.variables['elapsed_time'] = 0
         
         # define initial concentrations
-        self._initial_concentrations(kinetics_path,kinetics_data,initial_concentrations)
+        self._initial_concentrations(kinetics_path,kinetics_data,initial_concentrations_M)
         
         # determine the reactions for which kinetics are predefined
         self.defined_reactions = {}

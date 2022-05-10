@@ -9,13 +9,13 @@ The simulation environment is defined:
 
 .. code-block:: python
 
- from modelseedpy import dfbapkg
+ from modelseedpy.fbapkg import dfbapkg
  dfba = dfbapkg.dFBA(model, modelseed_db_path, solver = 'glpk', warnings = True, verbose = False, printing = False, jupyter = False)
 
 - *model* ``cobra.core.model.Model``: the CobraKBase model that will be simulated. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
 - *modelseed_db_path* ``str``: specifies the path to a local version of the ModelSEED Database.
 - *solver* ``str``: specifies which linear programmating algorithm will be used to simulate the FBA model. The `glpk` solver is selected by default since it is free and universally accessible.
-- *warnings*, *verbose*, & *printing* ``bool``: specifies whether simulation warnings, details and calculated, or results will be printed, respectively. These options are valuable for trobuleshooting.
+- *warnings*, *verbose*, & *printing* ``bool``: specifies whether simulation warnings, details and calculations, or results will be printed, respectively. These options are valuable for troubleshooting.
 - *jupyter* ``bool``: specifies whether simulation is being conducted in a Jupyter notebook, in which case the printed DataFrames will be expressed with the ``display()`` function. 
 
            
@@ -27,7 +27,7 @@ A cobrakbase model is simulated with the parameterized kinetics data over the de
 
 .. code-block:: python
 
- dfba.simulate(self, kinetics_path = None, initial_concentrations_M: dict = {}, total_time = 200, timestep = 20, export_name = None, 
+ dfba.simulate(kinetics_path = None, initial_concentrations_M: dict = {}, total_time = 200, timestep = 20, export_name = None, 
                export_directory = None, kinetics_data = {}, temperature = 25, p_h = 7, cellular_dry_mass_fg = 222, cellular_fL = 1, 
                figure_title = 'Metabolic perturbation', included_metabolites = [], labeled_plots = True, visualize = True, export = True)
 

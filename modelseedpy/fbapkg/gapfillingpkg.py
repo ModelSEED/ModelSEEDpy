@@ -471,7 +471,7 @@ class GapfillingPkg(BaseFBAPkg):
                     rxnobj.upper_bound = 0
                 rxnobj.update_variable_bounds()
         
-    def run_test_conditions(self,condition_list,solution = None,max_iterations = 10):
+    def run_test_conditions(self, condition_list, solution = None, max_iterations = 10):
         if solution == None:
             solution = self.compute_gapfilled_solution()
         reaction_list = []

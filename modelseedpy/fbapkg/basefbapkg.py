@@ -3,10 +3,7 @@
 from __future__ import absolute_import
 
 import logging
-import re
-from optlang.symbolics import Zero, add
-import json as _json
-from cobra.core import Gene, Metabolite, Model, Reaction
+from optlang.symbolics import Zero
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
 
@@ -25,17 +22,19 @@ class BaseFBAPkg:
         self.model = model
         self.modelutl = MSModelUtil(model)
         self.name = name
+        
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         if self.pkgmgr is None:
             self.pkgmgr = MSPackageManager.get_pkg_mgr(model,1)
         self.pkgmgr.addpkgobj(self)
-        self.constraints = dict()
+        
+        self.constraints = dict()      #!!! FIXME where is this ever used?
         self.variables = dict()
         self.parameters = dict()
-        self.new_reactions = dict()
+        self.new_reactions = dict()    #!!! FIXME where is this ever used?
+        
         self.variable_types = variable_types
         self.constraint_types = constraint_types
-        
         for type in variable_types:
             self.variables[type] = dict()
         for type in constraint_types:
@@ -45,8 +44,8 @@ class BaseFBAPkg:
         for item in required:
             if item not in params:
                 raise ValueError(f'Required argument {item} is missing!')
-        self.parameters.update(defaults)  # we assign all defaults
-        self.parameters.update(params)  # replace defaults with params
+        self.parameters.update(defaults)  
+        self.parameters.update(params)    # defaults are assigned and then replaced manual params
     
     def clear(self):
         objects = []

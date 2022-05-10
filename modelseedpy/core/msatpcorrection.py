@@ -21,7 +21,7 @@ class MSATPCorrection:
         :param model:
         :param core_template:
         :param atp_medias:
-        :param atp_objective:
+        :param compartment:
         :param max_gapfilling:
         :param gapfilling_delta:
         :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
@@ -244,7 +244,7 @@ class MSATPCorrection:
         self.expand_model_to_genome_scale()
 
     @staticmethod
-    def atp_correction(model,coretemplate,atp_medias = None,atp_objective = "bio2",max_gapfilling = None,gapfilling_delta = 0):
-        msatpobj = MSATPCorrection(model,coretemplate,atp_medias,atp_objective,max_gapfilling,gapfilling_delta)
+    def atp_correction(model,coretemplate,atp_medias = None,max_gapfilling = None,gapfilling_delta = 0):
+        msatpobj = MSATPCorrection(model,coretemplate,atp_medias,max_gapfilling,gapfilling_delta)
         msatpobj.run_atp_correction()
         return msatpobj
