@@ -3,8 +3,8 @@ ________________________________________________________________________
 
 |docs|
 
-.. |docs| image:: https://readthedocs.org/projects/rosspy/badge/?version=latest
-   :target: https://rosspy.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/modelseedpy/badge/?version=latest
+   :target: https://modelseedpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
