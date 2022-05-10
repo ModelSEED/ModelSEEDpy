@@ -1,11 +1,7 @@
 Core: editing models and assembling communities
 ________________________________________________________________________
 
-|docs|
-
-.. |docs| image:: https://readthedocs.org/projects/modelseedpy/badge/?version=latest
-   :target: https://modelseedpy.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+|License|
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
    :target: https://pypi.org/project/modelseedpy/
@@ -41,4 +37,5 @@ The core set of ModelSEEDpy packages consist of the following:
 
 .. toctree::
 
-   mscommunity_api
+    mscommunity_api
+    mscompatibility_api

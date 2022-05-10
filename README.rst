@@ -1,7 +1,7 @@
 Metabolic modeling with the ModelSEED Database in Python
 ________________________________________________________________________
 
-|docs|
+|docs| |License|
 
 .. |docs| image:: https://readthedocs.org/projects/modelseedpy/badge/?version=latest
    :target: https://modelseedpy.readthedocs.io/en/latest/?badge=latest

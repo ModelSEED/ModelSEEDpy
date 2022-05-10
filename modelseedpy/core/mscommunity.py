@@ -29,16 +29,16 @@ class CommunityModelSpecies:
         if self.biomass_cpd in self.community.primary_biomass.metabolites:
             self.abundance = abs(self.community.primary_biomass.metabolites[self.biomass_cpd])
         if self.species_num <= len(names) and names[self.species_num-1] != None:
-            self.species_id = names[self.species_num-1]
+            self.id = names[self.species_num-1]
         else:
             if "species_name" in self.biomass_cpd.annotation:
-                self.species_id = self.biomass_cpd.annotation["species_name"]
+                self.id = self.biomass_cpd.annotation["species_name"]
             else:
-                self.species_id = "Species"+str(self.species_num)
+                self.id = "Species"+str(self.species_num)
                 
-        logger.info("Making atp hydrolysis reaction for species: "+self.species_id)
+        logger.info("Making atp hydrolysis reaction for species: "+self.id)
         atp_rxn = FBAHelper.add_atp_hydrolysis(self.community.model,"c"+str(self.species_num))
-        FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)
+        # FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)  #!!! FIXME This FBAHelper function is not defined.
         self.atp_hydrolysis = atp_rxn["reaction"]
         self.biomass_drain = None
         self.biomasses = []
@@ -50,11 +50,11 @@ class CommunityModelSpecies:
                     self.biomass_drain = reaction
                     
         if len(self.biomasses) == 0:
-            logger.critical("No biomass reaction found for species "+self.species_id)
+            logger.critical("No biomass reaction found for species "+self.id)
         if self.atp_hydrolysis == None:
-            logger.critical("No ATP hydrolysis found for species:"+self.species_id)
+            logger.critical("No ATP hydrolysis found for species:"+self.id)
         if self.biomass_drain == None:
-            logger.info("Making biomass drain reaction for species: "+self.species_id)
+            logger.info("Making biomass drain reaction for species: "+self.id)
             self.biomass_drain = Reaction(id="DM_"+self.biomass_cpd.id,
                                       name="DM_" + self.biomass_cpd.name,
                                       lower_bound=0, 
@@ -72,14 +72,14 @@ class CommunityModelSpecies:
         self.community.model.objective = self.community.model.problem.Objective(Zero,direction="max")
         self.community.model.objective.set_linear_coefficients({self.biomasses[0].forward_variable:1})
         if self.community.lp_filename != None:
-            self.community.print_lp(self.community.lp_filename+"_"+self.species_id+"_Biomass")
+            self.community.print_lp(self.community.lp_filename+"_"+self.id+"_Biomass")
         return self.community.model.optimize()
     
     def compute_max_atp(self):
         self.community.model.objective = self.community.model.problem.Objective(Zero,direction="max")
         self.community.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
         if self.community.lp_filename != None:
-            self.community.print_lp(self.community.lp_filename+"_"+self.species_id+"_ATP")
+            self.community.print_lp(self.community.lp_filename+"_"+self.id+"_ATP")
         return self.community.model.optimize()
 
 class MSCommunity:
@@ -92,6 +92,7 @@ class MSCommunity:
         #Setting model and package manager
         self.model, self.lp_filename, self.pfba = model, lp_filename, pfba
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        self.gapfillings = {}
         #Define Data attributes as None
         self.solution = self.biomass_cpd = self.primary_biomass = self.biomass_drain = self.msgapfill = self.element_uptake_limit = self.kinetic_coeff = self.modelseed_db_path = None
         self.species = DictList()
@@ -107,7 +108,7 @@ class MSCommunity:
                     if self.biomass_cpd in reaction.metabolites:
                         if reaction.metabolites[self.biomass_cpd] == 1 and len(reaction.metabolites) > 1:
                             self.primary_biomass = reaction
-                        elif len(reaction.metabolites) == 1 and reaction.metabolites[self.biomass_cpd] < 0:
+                        elif reaction.metabolites[self.biomass_cpd] < 0 and len(reaction.metabolites) == 1:
                             self.biomass_drain = reaction
             else:
                 other_biomass_cpds.append(biomass_cpd)
@@ -162,11 +163,12 @@ class MSCommunity:
     
     #Utility functions
     def print_lp(self,filename = None):
-        if filename == None:
+        if filename is None:
             filename = self.lp_filename
-        with open(filename+".lp", 'w') as out:
-            out.write(str(self.model.solver))
-            out.close()
+        if filename is not None:
+            with open(filename+".lp", 'w') as out:
+                out.write(str(self.model.solver))
+                out.close()
     
     def compute_interactions(self,solution = None,threshold=1):
         #Check for existance of solution
@@ -193,18 +195,18 @@ class MSCommunity:
         for individual in self.species:
             species_data[individual.id], species_collection[individual.id] = {}, {}
             data[individual.id] = []
-            data["IDs"].append(individual.index)
+            data["IDs"].append(individual.species_num)
             data["Metabolites/Species"].append(individual.id)
             for other in self.species:
                 species_data[individual.id][other.id] = 0
                 species_collection[individual.id][other.id] = []
             species_data["Environment"][individual.id], species_data[individual.id]["Environment"] = 0, 0
             species_collection["Environment"][individual.id], species_collection[individual.id]["Environment"] = [], []
-            species_list[individual.index] = individual
+            species_list[individual.species_num] = individual
         data["IDs"].append("Environment")
         data["Metabolites/Species"].append("Environment")
         for individual in self.species:
-            data["IDs"].append(individual.index)
+            data["IDs"].append(individual.species_num)
             data["Metabolites/Species"].append(individual.id+" list")
         #Cycling through reactions and computing metabolite input and output
         for rxn in self.model.reactions:
@@ -265,61 +267,67 @@ class MSCommunity:
             data[individual.id].append("; ".join(species_collection[individual.id]["Environment"]))
         for individual in self.species:
             data["Environment"].append("; ".join(species_collection["Environment"][individual.id]))
+        # equate the quantity of rows amongst all of the DATA entries
         data["Environment"].append("")
-        df = pd.DataFrame(data)
-        logger.info(df)
-        return df
+        data["IDs"].append("")
+        data["Metabolites/Species"].append("")
+        self.cross_feeding_df = pd.DataFrame(data)
+        logger.info(self.cross_feeding_df)
+        return self.cross_feeding_df
         
-    def visualize(self, graph = True, table = True): 
-        # Define the cross feeding matrices
-        if table:
-            from pandas import DataFrame as df
-            species = [num+1 for num in range(len(self.production))]
+    # def visualize(self, graph = True, table = True):    #!!! This is no longer aligned with the parsing and calculations of COMPUTE_INTERACTIONS
+    #     # Define the cross feeding matrices
+    #     if table:
+    #         from pandas import DataFrame as df
+    #         display(self.cross_feeding_df)
+    #         species = [num+1 for num in range(len(self.cross_feeding_df))]
 
-            print('\nProduction matrix:')
-            self.prod_df = df(self.production)
-            self.prod_df.index = self.prod_df.columns = species
-            self.prod_df.index.name = 'Donor'
-            print(self.prod_df)
+    #         print('\nProduction matrix:')
+    #         self.prod_df = df(self.production)
+    #         self.prod_df.index = self.prod_df.columns = species
+    #         self.prod_df.index.name = 'Donor'
+    #         print(self.prod_df)
 
-            print('\n\nConsumption matrix:')
-            self.cons_df = df(self.consumption)
-            self.cons_df.index = self.cons_df.columns = species
-            self.cons_df.index.name = 'Receiver'
-            print(self.cons_df)
-            print('\n')
+    #         print('\n\nConsumption matrix:')
+    #         self.cons_df = df(self.consumption)
+    #         self.cons_df.index = self.cons_df.columns = species
+    #         self.cons_df.index.name = 'Receiver'
+    #         print(self.cons_df)
+    #         print('\n')
             
-        # Graph the community network
-        if graph:
-            graph = networkx.Graph()
-            for num in self.compartments:
-                graph.add_node(num)
-            for com in combinations(self.compartments, 2):
-                species_1 = int(com[0])-1
-                species_2 = int(com[1])-1
+    #     # Graph the community network
+    #     if graph:
+    #         graph = networkx.Graph()
+    #         for num in self.compartments:
+    #             graph.add_node(num)
+    #         for com in combinations(self.compartments, 2):
+    #             species_1 = int(com[0])-1
+    #             species_2 = int(com[1])-1
 
-                interaction_net_flux = sigfig.round((self.production[species_1][species_2] - self.consumption[species_1][species_2]), 3)
-                if species_1 < species_2:
-                    graph.add_edge(com[0],com[1],flux = interaction_net_flux)
-                elif species_1 > species_2:
-                    graph.add_edge(com[0],com[1],flux = -interaction_net_flux)
+    #             interaction_net_flux = sigfig.round((self.production[species_1][species_2] - self.consumption[species_1][species_2]), 3)
+    #             if species_1 < species_2:
+    #                 graph.add_edge(com[0],com[1],flux = interaction_net_flux)
+    #             elif species_1 > species_2:
+    #                 graph.add_edge(com[0],com[1],flux = -interaction_net_flux)
 
-            pos = networkx.circular_layout(graph)
-            networkx.draw_networkx(graph,pos)
-            labels = networkx.get_edge_attributes(graph,'flux')
-            networkx.draw_networkx_edge_labels(graph,pos,edge_labels=labels)
-            pyplot.show()
-            return graph, pos, labels
+    #         pos = networkx.circular_layout(graph)
+    #         networkx.draw_networkx(graph,pos)
+    #         labels = networkx.get_edge_attributes(graph,'flux')
+    #         networkx.draw_networkx_edge_labels(graph,pos,edge_labels=labels)
+    #         pyplot.show()
+    #         return graph, pos, labels
 
     
     #Analysis functions
-    def gapfill(self, media = None, target = None, minimize = False,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = []):
+    def gapfill(self, media = None, target = None, minimize = False,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = [], suffix = None, solver = 'glpk'):
         if target == None:
             target = self.primary_biomass.id
         self.set_objective(target,minimize)
-        gfname = FBAHelper.medianame(media)+"-"+target+"-"+self.suffix
+        gfname = FBAHelper.medianame(media)+"-"+target
+        if suffix is not None:
+            gfname += f"-{suffix}"
         self.gapfillings[gfname] = MSGapfill(self.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist) 
-        gfresults = self.gapfillings[gfname].run_gapfilling(media,target)
+        gfresults = self.gapfillings[gfname].run_gapfilling(media,target, solver = solver)
         if gfresults is None:
             logger.critical("Gapfilling failed with the specified model, media, and target reaction.")
         return self.gapfillings[gfname].integrate_gapfill_solution(gfresults)

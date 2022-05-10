@@ -5,7 +5,7 @@ TFA API
 FullThermoPkg()
 +++++++++++++++++++++
 
-The simulation environment is defined:
+This class applies and simulates rigorous thermodynamic constraints upon COBRA models:
 
 .. code-block:: python
 

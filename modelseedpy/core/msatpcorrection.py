@@ -6,7 +6,8 @@ from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
 from cobra.core import Gene, Metabolite, Model, Reaction
-from modelseedpy.core import FBAHelper, MSGapfill
+from modelseedpy.core.msgapfill import MSGapfill
+from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 logger = logging.getLogger(__name__)

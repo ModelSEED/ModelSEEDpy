@@ -40,13 +40,13 @@ class MSCompatibility():
         except: # the met.id already exists in the model
             for rxn in met.reactions:
                 original_reaction = rxn.reaction
-                if re.sub('(_\w\d)', '', original_reaction) != re.sub('(_\w\d)', '', rxn.reaction):
+                if re.sub('(_\w\d)', '', original_reaction) != re.sub('(_\w\d)', '', rxn.reaction): #!!! What is the intention of this line?
                     rxn_mets = [rxn_met.id for rxn_met in rxn.metabolites]
                     if metabolites_set[met_name] not in rxn_mets:
                         rxn.add_metabolites({
                                     met: 0, metabolites_set[met_name]: rxn.metabolites[met]
                                 }, combine = False)
-                    else:
+                    else:   #!!! The designation of metabolites that are never corrected must be made, perhaps by returning None
                         warn(f'The {met.id} metabolite in the {rxn.id} reaction could not be corrected.')
                     if self.printing:
                         print('\noriginal met_rxn\t', original_reaction)
@@ -167,11 +167,13 @@ class MSCompatibility():
         for met in model.metabolites:
             # correct non-standard IDs
             if 'cpd' not in met.id and len(met.reactions) >= 1:
-                unknown_met_ids.append(met.id)
                 for name in self.compound_names:
                     if met.name == name:
                         met = self._correct_met(met, self.compound_names, name)
                         break
-#                    warn(f'The metabolite {met.id} is not recognized by the ModelSEED Database')
+           
+            if 'cpd' not in met.id and len(met.reactions) >= 1: 
+                unknown_met_ids.append(met.id)
+                warn(f'The metabolite {met.id} | {met.name} cannot not recognized by the ModelSEED Database')
         
         return model, unknown_met_ids

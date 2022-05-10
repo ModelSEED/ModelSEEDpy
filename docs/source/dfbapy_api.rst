@@ -5,7 +5,7 @@ dFBApy API
 dFBA()
 +++++++
 
-The simulation environment is defined:
+This class defines and executes dynamic FBA simulations of COBRA models:
 
 .. code-block:: python
 

@@ -36,14 +36,14 @@ class MSGapfill:
         self.reaction_scores = reaction_scores
         self.last_solution = None
         
-    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False):
+    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, solver = 'optland-cplex'):
         if target != None:
             self.model.objective = self.model.problem.Objective(
                 self.model.reactions.get_by_id(target).flux_expression, 
                 direction='max'
             )
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
-        self.gfmodel.solver = 'optlang-cplex'
+        self.gfmodel.solver = solver
         pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
         pkgmgr.getpkg("GapfillingPkg").build_package({
             "auto_sink": self.auto_sink,

@@ -5,7 +5,7 @@ MScommunity API
 CommunityModel()
 +++++++++++++++++++++
 
-The species in a community model are parsed based upon the composition of the model biomass reaction:
+This class parses species in a community model based upon the composition of the model biomass reaction:
 
 .. code-block:: python
 
@@ -64,7 +64,7 @@ Several objects within the ``FullThermo`` class may be useful for subsequent pos
 
 - *model* ``cobra.core.model.Model``: the cobrakbase model, with the corresponding constraints, that is simulated.
 - *species_num* ``int``: the number that is assigned to the species under consideration in the community model.
-- *species_id*  ``str``: the identification of the species under consideration in the community model.
+- *id*  ``str``: the identification of the species under consideration in the community model.
 - *abundance* ``int``: the abundance of the species under consideration in the community model.
 - *biomasses* ``list``: the collection of community reactions, excluding transport reactions, that produce the investigated metabolite.
 - *biomass_drain* ``cobra.core.model.Reaction``: the transport reaction that drains the investigated metabolite into the extracellular environment.
@@ -73,7 +73,7 @@ Several objects within the ``FullThermo`` class may be useful for subsequent pos
 MSCommunity()
 +++++++++++++++++++++
 
-The simulation environment is defined:
+This class manipulates and simulates community models:
 
 .. code-block:: python
 
@@ -149,6 +149,8 @@ The cross-feeding interactions amongst all of the members of the community model
 
 - *solution* ``cobra.core.solution.Solution``: the simulation solution that will be parsed to calculate the cross-feeding interactions. The solution from the last simulation, which is stored within the class, is used when the argument is ``None``.
 - *threshold* ``int``: the normalized flux threshold, above which the cross-feeding interactions will be considered.
+
+**returns** ``pandas.core.frame.DataFrame`` A `Pandas DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`_ that provides the metabolite-level resolution of cross-feeding for each species in the community.
 
 ----------------------
 visualize()
@@ -245,4 +247,22 @@ The community model is simulated, with the :
 - *pfba* ``bool``: signifies whether parsimonious FBA will be simulated.
 
 **return** ``cobra.core.solution.Solution`` The solution from simulation of the community model. 
+
+
+----------------------
+Accessible content
+----------------------
+
+Several objects within the ``FullThermo`` class may be useful for subsequent post-processing or troubleshooting of the simulation results:
+
+- *model* ``cobra.core.model.Model``: the cobrakbase model, with the corresponding constraints, that is simulated.
+- *cross_feeding_df* ``pandas.core.frame.DataFrame``: the output DataFrame from the ``compute_interactions`` function that organizes metabolite-resolution of cross-feeding for each species in the community.
+- *lp_filename* ``str``: the filename to which the Linear Programming problem is exported. This can alternatively be defined in the ``print_lp()`` function as an argument. The absence of a defined ``lp_filename`` prevents the LP problem from being exported.
+- *gapfillings*  ``dict``: the collection of ``MSGapfil`` objects (``values``) for each combination of media and target objective that is parameterized in the function (``key``).
+- *pkgmgr* ``modelseedpy.fbapkg.mspackagemanager.MSPackageManager``: The collection of associated classes that are used in the FullThermo package.
+- *solution* ``int``: the FBA solution from the most recent simulation of the model.
+- *primary_biomass* & *biomass_drain* ``cobra.core.model.Reaction``: the COBRA model reactions that produce or excrete the biomass compound, respectively.
+- *kinetic_coeff* ``float``: the kinetic coefficient that constrained cross-feeding amongst members of the simulated community. 
+- *element_uptake_limit* ``dict``: the upper limits of consumption (``values``) for each element in the simulated system (``keys``).
+- *modelseed_db_path* ``str``: the path to the ModelSEED Database, if the FullThermo constraints were applied. 
 
