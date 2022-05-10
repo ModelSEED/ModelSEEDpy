@@ -43,26 +43,6 @@ The ModelSEEDpy repository consists of a few directories, which are individually
 
 .. toctree::
 
-   core
-   fbapkg
-   
-   
-
-
-
-----------------------
-Installation
-----------------------
-
-ModelSEEDpy is installed via ``pip``::
-
- pip install modelseedpy
-   
-   
-Contents
---------
-
-.. toctree::
-
-   modelseedpy_api
+   core_index
+   fbapkg_index
    
