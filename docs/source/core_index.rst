@@ -1,10 +1,10 @@
-Packages for editing and assembling individual and community models
+Core: editing models and assembling communities
 ________________________________________________________________________
 
 |docs|
 
-.. |docs| image:: https://readthedocs.org/projects/rosspy/badge/?version=latest
-   :target: https://rosspy.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/modelseedpy/badge/?version=latest
+   :target: https://modelseedpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
@@ -23,7 +23,7 @@ ________________________________________________________________________
    :target: https://pepy.tech/project/modelseedpy
    :alt: Downloads
 
-The collection of packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. 
+The ModelSEEDpy packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. 
 
 ----------------------
 Import
@@ -33,8 +33,9 @@ The core packages of ModelSEEDpy are locally imported::
 
  from modelseedpy.core import *   
    
+----------------------
 Contents
---------
+----------------------
 
 The core set of ModelSEEDpy packages consist of the following:
 

@@ -1,10 +1,10 @@
-FBA packages for constraining and investigating metabolic models 
+fbapkg: constraining and investigating FBA simulations
 ________________________________________________________________________
 
 |docs|
 
-.. |docs| image:: https://readthedocs.org/projects/rosspy/badge/?version=latest
-   :target: https://rosspy.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/modelseedpy/badge/?version=latest
+   :target: https://modelseedpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
@@ -34,8 +34,10 @@ The core packages of ModelSEEDpy are locally imported::
 
  from modelseedpy.fbapkg import *   
    
+   
+----------------------
 Contents
---------
+----------------------
 
 The core set of ModelSEEDpy packages consist of the following:
 
