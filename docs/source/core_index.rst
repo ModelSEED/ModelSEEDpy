@@ -1,7 +1,7 @@
 Packages for editing and assembling individual and community models
 ________________________________________________________________________
 
-|Documentation Status|
+|docs|
 
 .. |docs| image:: https://readthedocs.org/projects/rosspy/badge/?version=latest
    :target: https://rosspy.readthedocs.io/en/latest/?badge=latest
