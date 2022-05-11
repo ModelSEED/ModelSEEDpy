@@ -170,7 +170,7 @@ class MSCommunity:
                 out.write(str(self.model.solver))
                 out.close()
     
-    def compute_interactions(self,solution = None,threshold=1):
+    def compute_interactions(self,solution = None,threshold=1, visualize = False):
         #Check for existance of solution
         if solution == None:
             solution = self.solution 
@@ -182,36 +182,42 @@ class MSCommunity:
         data = {"IDs":[],"Metabolites/Species":[], "Environment":[]}
         met_list, species_list = [], [None for i in range(1000)]
 
-        #Cycle through metabolites and flag external metabolites
+        #track only extracellular metabolites 
         for met in self.model.metabolites:
             if met.compartment == "e0":
                 met_list.append(met)
                 data["IDs"].append(met.id)
                 data["Metabolites/Species"].append(met.name)
+                
                 metabolite_data[met] = {} 
+                metabolite_data[met]["Environment"] = 0
                 for individual in self.species:
                     metabolite_data[met][individual.id] = 0
-                metabolite_data[met]["Environment"] = 0
+                    
+        # establish the infrastructure for 
         for individual in self.species:
             species_data[individual.id], species_collection[individual.id] = {}, {}
+            species_list[individual.species_num] = individual
             data[individual.id] = []
             data["IDs"].append(individual.species_num)
             data["Metabolites/Species"].append(individual.id)
             for other in self.species:
                 species_data[individual.id][other.id] = 0
                 species_collection[individual.id][other.id] = []
-            species_data["Environment"][individual.id], species_data[individual.id]["Environment"] = 0, 0
+                
+            species_data["Environment"][individual.id] = species_data[individual.id]["Environment"] = 0
             species_collection["Environment"][individual.id], species_collection[individual.id]["Environment"] = [], []
-            species_list[individual.species_num] = individual
+            
         data["IDs"].append("Environment")
         data["Metabolites/Species"].append("Environment")
         for individual in self.species:
             data["IDs"].append(individual.species_num)
             data["Metabolites/Species"].append(individual.id+" list")
-        #Cycling through reactions and computing metabolite input and output
+            
+        # computing net metabolite flux from each reaction
         for rxn in self.model.reactions:
             if rxn.id[0:3] == "EX_" and abs(solution.fluxes[rxn.id]) > Zero:
-                cpd = list(rxn.metabolites.keys())[0]
+                cpd = list(rxn.metabolites.keys())[0]   
                 if cpd in metabolite_data:
                     metabolite_data[cpd]["Environment"] += -1*solution.fluxes[rxn.id]
             if len(rxn.id.split("_")) > 1:
@@ -222,9 +228,9 @@ class MSCommunity:
                         if species_list[comp_index] != None:
                             metabolite_data[metabolite][species_list[comp_index].id] += solution.fluxes[rxn.id]*rxn.metabolites[metabolite]
                             
-        #Translate metbaolite input and output into species interaction flux
+        # translating net metbaolite flux into species interaction flux
         for met in metabolite_data:
-            #Iterating through the producers of the metabolite:
+            #Iterating through the metabolite producers
             total = sum([metabolite_data[met][individual.id] for individual in self.species if metabolite_data[met][individual.id] > Zero])
             if metabolite_data[met]["Environment"] > Zero:
                 total += metabolite_data[met]["Environment"]
@@ -242,12 +248,12 @@ class MSCommunity:
                         if normalized_flux > threshold:
                             species_collection[individual.id]["Environment"].append(met.name)
             if metabolite_data[met]["Environment"] > Zero:
-                for other in self.species:
-                    if metabolite_data[met][other.id] < Zero:
-                        normalized_flux = -1*metabolite_data[met]["Environment"]*metabolite_data[met][other.id]/total
-                        species_data["Environment"][other.id] += normalized_flux
+                for individual in self.species:
+                    if metabolite_data[met][individual.id] < Zero:
+                        normalized_flux = -1*metabolite_data[met]["Environment"]*metabolite_data[met][individual.id]/total
+                        species_data["Environment"][individual.id] += normalized_flux
                         if normalized_flux > threshold:
-                            species_collection["Environment"][other.id].append(met.name)
+                            species_collection["Environment"][individual.id].append(met.name)
                             
         #Reformat data into a dataframe
         for met in met_list:
@@ -263,60 +269,37 @@ class MSCommunity:
         data["Environment"].append(0)
         for individual in self.species:    
             for other in self.species:
-                data[individual.id].append("; ".join(species_collection[individual.id][other.id]))
+                if other != individual:
+                    data[individual.id].append("; ".join(species_collection[individual.id][other.id]))
             data[individual.id].append("; ".join(species_collection[individual.id]["Environment"]))
         for individual in self.species:
             data["Environment"].append("; ".join(species_collection["Environment"][individual.id]))
-        # equate the quantity of rows amongst all of the DATA entries
-        data["Environment"].append("")
-        data["IDs"].append("")
-        data["Metabolites/Species"].append("")
         self.cross_feeding_df = pd.DataFrame(data)
         logger.info(self.cross_feeding_df)
-        return self.cross_feeding_df
         
-    # def visualize(self, graph = True, table = True):    #!!! This is no longer aligned with the parsing and calculations of COMPUTE_INTERACTIONS
-    #     # Define the cross feeding matrices
-    #     if table:
-    #         from pandas import DataFrame as df
-    #         display(self.cross_feeding_df)
-    #         species = [num+1 for num in range(len(self.cross_feeding_df))]
+        # graph the network diagram
+        if visualize:
+            self.graph = networkx.Graph()
+            for species in self.species:
+                self.graph.add_node(species.num_species)
+            for com in combinations(self.compartments, 2): #!!! FIXME the total fluxes between each species must be amalgamated from the metabolite-resoluton fluxes
+                species_1 = int(com[0])-1
+                species_2 = int(com[1])-1
 
-    #         print('\nProduction matrix:')
-    #         self.prod_df = df(self.production)
-    #         self.prod_df.index = self.prod_df.columns = species
-    #         self.prod_df.index.name = 'Donor'
-    #         print(self.prod_df)
+                interaction_net_flux = sigfig.round((self.production[species_1][species_2] - self.consumption[species_1][species_2]), 3)
+                if species_1 < species_2:
+                    self.graph.add_edge(com[0],com[1],flux = interaction_net_flux)
+                elif species_1 > species_2:
+                    self.graph.add_edge(com[0],com[1],flux = -interaction_net_flux)
 
-    #         print('\n\nConsumption matrix:')
-    #         self.cons_df = df(self.consumption)
-    #         self.cons_df.index = self.cons_df.columns = species
-    #         self.cons_df.index.name = 'Receiver'
-    #         print(self.cons_df)
-    #         print('\n')
-            
-    #     # Graph the community network
-    #     if graph:
-    #         graph = networkx.Graph()
-    #         for num in self.compartments:
-    #             graph.add_node(num)
-    #         for com in combinations(self.compartments, 2):
-    #             species_1 = int(com[0])-1
-    #             species_2 = int(com[1])-1
-
-    #             interaction_net_flux = sigfig.round((self.production[species_1][species_2] - self.consumption[species_1][species_2]), 3)
-    #             if species_1 < species_2:
-    #                 graph.add_edge(com[0],com[1],flux = interaction_net_flux)
-    #             elif species_1 > species_2:
-    #                 graph.add_edge(com[0],com[1],flux = -interaction_net_flux)
-
-    #         pos = networkx.circular_layout(graph)
-    #         networkx.draw_networkx(graph,pos)
-    #         labels = networkx.get_edge_attributes(graph,'flux')
-    #         networkx.draw_networkx_edge_labels(graph,pos,edge_labels=labels)
-    #         pyplot.show()
-    #         return graph, pos, labels
-
+            self.pos = networkx.circular_layout(self.graph)
+            networkx.draw_networkx(self.graph,self.pos)
+            self.labels = networkx.get_edge_attributes(self.graph,'flux')
+            networkx.draw_networkx_edge_labels(self.graph,self.pos,edge_labels=self.labels)
+            pyplot.show()
+        
+        return self.cross_feeding_df
+                   
     
     #Analysis functions
     def gapfill(self, media = None, target = None, minimize = False,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = [], suffix = None, solver = 'glpk'):

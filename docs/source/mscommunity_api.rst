@@ -149,21 +149,10 @@ The cross-feeding interactions amongst all of the members of the community model
 
 - *solution* ``cobra.core.solution.Solution``: the simulation solution that will be parsed to calculate the cross-feeding interactions. The solution from the last simulation, which is stored within the class, is used when the argument is ``None``.
 - *threshold* ``int``: the normalized flux threshold, above which the cross-feeding interactions will be considered.
+- *visualize* ``bool``: The calculated cross-feeding from the simulation results is expressed as a network diagram.
 
 **returns** ``pandas.core.frame.DataFrame`` A `Pandas DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`_ that provides the metabolite-level resolution of cross-feeding for each species in the community.
 
-----------------------
-visualize()
-----------------------
-
-The calculated cross-feeding from the simulation results is expressed as a network diagram and as a data table:
-
-.. code-block:: python
-
- mscom.visualize(graph = True, table = True)
-
-- *graph* ``bool``: the network diagram of cross-feeding in the simulated system will be constructed, printed to the console, and returned for post-processing. 
-- *table* ``bool``: the total net cross-feeding fluxes will be constructed in matrix tables. The production and consumption matrix tables are transposes of each other.
 
 ----------------------
 gapfill()
