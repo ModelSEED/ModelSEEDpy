@@ -502,6 +502,29 @@ class GapfillingPkg(BaseFBAPkg):
             return None
         return solution
     
+    def filter_database_based_on_tests(self,test_conditions):
+        filetered_list = []
+        with self.model:
+            rxnlist = []
+            for reaction in self.model.reactions:
+                if reaction.id in self.gapfilling_penalties:
+                    if "reverse" in self.gapfilling_penalties[reaction.id]:
+                        reaction.lower_bound = 0
+                        rxnlist.append([reaction,"<"])
+                    if "forward" in self.gapfilling_penalties[reaction.id]:
+                        reaction.upper_bound = 0
+                        rxnlist.append([reaction,">"])
+                    reaction.update_variable_bounds()
+            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+            filtered_list = FBAHelper.reaction_expansion_test(self.model,rxnlist,test_conditions,self.pkgmgr)
+        #Now constraining filtered reactions to zero
+        for item in filtered_list:
+            print("Filtering:",item[0].id,item[1])
+            if item[1] == ">":
+                self.model.reactions.get_by_id(item[0].id).upper_bound = 0
+            else:
+                self.model.reactions.get_by_id(item[0].id).lower_bound = 0
+    
     def compute_gapfilled_solution(self, flux_values=None):
         if flux_values is None:
             flux_values = FBAHelper.compute_flux_values_from_variables(self.model)

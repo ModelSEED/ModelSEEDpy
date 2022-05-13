@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import re
 from optlang.symbolics import Zero, add
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
@@ -9,7 +10,7 @@ from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 #Base class for FBA packages
 class BilevelPkg(BaseFBAPkg):
     def __init__(self,model):
-        BaseFBAPkg.__init__(self,model,"reaction use",{"dualconst":"string","dualub":"string","duallb":"string"},{"dualvar":"string","objective":"string"})
+        BaseFBAPkg.__init__(self,model,"reaction use",{"dualconst":"string","dualub":"string","duallb":"string"},{"dualvar":"string","objective":"string","dualbin":"string"})
     
     def build_package(self,filter = None,binary_variable_count = 0):
         self.validate_parameters({}, [], {
@@ -38,7 +39,7 @@ class BilevelPkg(BaseFBAPkg):
         if self.parameters["binary_variable_count"] > 0:
             for reaction in self.model.reactions: 
                 var = self.build_variable("bflxcmp",reaction,None)
-                const = self.build_constraint("bflxcmp",reaction,None,None,None)                
+                const = self.build_constraint("bflxcmp",reaction,None,None,None)      
         #Now implementing dual variables and constraints
         varhash = {}
         for var in variables:
@@ -80,12 +81,20 @@ class BilevelPkg(BaseFBAPkg):
             var = BaseFBAPkg.build_variable(self,type,lb,ub,"continuous",object.name)
             obj_coef[var] = coef
             return var
-        if type == "dualub":
+        if type == "dualub":#Add a constraint that makes this variable zero when binary variable is zero
             var = BaseFBAPkg.build_variable(self,type,0,1000000,"continuous",object.name)
+            if re.search('(.+)_(fflxcmp\d+)$', object.name) is not None:
+                m = re.search('(.+)_(fflxcmp\d+)$', object.name)
+                bvar = self.variables[m[2]][m[1]]
+                BaseFBAPkg.build_constraint(self,"dualbin",None,0,{var:1,bvar:-1000000},object.name)
             obj_coef[var] = object.ub
             return var
         if type == "duallb":
             var = BaseFBAPkg.build_variable(self,type,-1000000,0,"continuous",object.name)
+            #if re.search('(.+)_(fflxcmp\d+)$', object.name) is not None:
+                #m = re.search('(.+)_(fflxcmp\d+)$', metabolite.id)
+                #bvar = self.variables[m[2]][m[1]]
+                #BaseFBAPkg.build_constraint(self,object.name+"_lbdualbin",None,0,{var:-1,bvar:-1000000},object)
             obj_coef[var] = object.lb
             return var
         if type == "flxcmp" and self.parameters["binary_variable_count"] > 0:
