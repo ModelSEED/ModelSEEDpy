@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from cobra.core.metabolite import Metabolite
-from cobra.core.reaction import  Reaction
-# from numpy import negative
+from numpy import negative
 from warnings import warn
 from pprint import pprint
 import json, re, os
@@ -191,8 +190,7 @@ class MSCompatibility():
             if self.compound_names[met_name] in met.model.metabolites:
                 for rxn in met.reactions:
                     original_reaction = rxn.reaction
-                    reaction_dict = {}
-                    for rxn_met in rxn.metabolites:
+                    for rxn_met in rxn.reactants+rxn.products:
                         stoich = float(rxn.metabolites[rxn_met])
                         new_met = rxn_met
                         if rxn_met.id == met.id:
@@ -203,26 +201,17 @@ class MSCompatibility():
                                 charge = met.charge,
                                 compartment = met.compartment
                                 )
-                        reaction_dict[new_met] = stoich
-
-                    new_rxn = Reaction(
-                        id = rxn.id,
-                        name = rxn.name,
-                        subsystem = rxn.subsystem,
-                        lower_bound = rxn.lower_bound,
-                        upper_bound = rxn.upper_bound
-                        )
-                    rxn.delete()
-                    new_rxn.add_metabolites(reaction_dict)
-                    # rxn.add_metabolites({new_met:stoich}, combine = False)
+                        
+                        rxn.add_metabolites({rxn_met:0}, combine = False)
+                        rxn.add_metabolites({new_met:stoich}, combine = False)  
                     change = {
                             'original': {
                                     'reaction': original_reaction
                                 },
                             'new': {
-                                    'reaction': new_rxn.reaction
+                                    'reaction': rxn.reaction
                                 },
-                            'justification': f'The non-ModelSEED ID {met.id} in this reaction ({new_rxn.id}) must be replaced.'
+                            'justification': f'The non-ModelSEED ID {met.id} in this reaction ({rxn.id}) must be replaced.'
                         }
                     self.changed_reactions.append(change)
                     if self.printing:
@@ -250,4 +239,4 @@ class MSCompatibility():
                     print('\n')
                     pprint(change, sort_dicts=False)
 
-        return met
+                return met
