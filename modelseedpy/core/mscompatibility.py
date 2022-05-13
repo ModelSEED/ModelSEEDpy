@@ -1,5 +1,7 @@
 from collections import OrderedDict
-from numpy import negative
+from cobra.core.metabolite import Metabolite
+from cobra.core.reaction import  Reaction
+# from numpy import negative
 from warnings import warn
 from pprint import pprint
 import json, re, os
@@ -27,174 +29,225 @@ class MSCompatibility():
                     names = [name.strip() for name in cpd['aliases'][0].split(';')]
                     names.append(cpd['name'])
                     for name in names:
-                        self.compound_names[name] = cpd['id']
+                        if name not in self.compound_names:
+                            self.compound_names[name] = cpd['id']
         
-    def standardize_MSD(self,model):
-        for met in model.metabolites:
-            if re.sub('(_\w\d)', '', met.id) in self.compounds_id_indexed:
-                # standardize the metabolite names
-                met.name = self.compounds_id_indexed[re.sub('(_\w\d)', '', met.id)]['name']
-            else:
-                warn(f'The {met.id} metabolite is not captured by the ModelSEED Database')
-
-        for rxn in model.reactions:
-            if re.sub('(_\w\d)', '', rxn.id) in self.reaction_ids:
-                # standardize the reaction names
-                rxn.name = self.reaction_ids[re.sub('(_\w\d)', '', rxn.id)]
-                
-                # standardize the reactions to the ModelSEED Database
-                for index, rxn_id in enumerate(list(self.reaction_ids.keys())):
-                    if rxn_id == re.sub('(_\w\d)', '', rxn.id):
-                        reaction_dict = {}
-                        for met in rxn.metabolites:
-                            reaction_dict[met] = float(rxn.metabolites[met])
-                        break
-                
-                for met in rxn.metabolites:
-                    rxn.add_metabolites({met:0}, combine = False)
-                rxn.add_metabolites(reaction_dict, combine = False)
-            else:
-                warn(f'The {rxn.id} reaction is not captured by the ModelSEED Database')
-                for met in rxn.metabolites:
-                    for name in self.compound_names:
-                        if met.name == name:
-                            met = self._correct_met(met, self.compound_names, name)
-                            break
-        
-        return model
-    
-    def compare_models(self, model_1, model_2,       # arbitrary cobrakbase models
-                       metabolites: bool = True,     # contrast metabolites (True) or reactions (False) between the models
-                       standardize: bool = False     # standardize the model names and reactions to the ModelSEED Database
-                       ): 
-        misaligned = []
-        if metabolites: # contrast metabolites 
-            model2_ids = OrderedDict({met.id:re.sub('(_\w\d)', '', met.name) for met in model_2.metabolites})
-            compared_met_counter = 0
-            for met in model_1.metabolites:  #!!! develop dictionaries of ids and names to facilitate the comparison
-                if met.id in model2_ids: 
-                    met_name = re.sub('(_\w\d)', '', met.name)
-                    if met_name != model2_ids[met.id]:
-                        print(f'\nmisaligned {met.id} names\n', f'model1: {met_name}', f'model2: {model2_ids[met.id]}')
-                        misaligned.append({
-                                    'model_1': met_name,
-                                    'model_2': model2_ids[met.id],
-                                })
-                        if self.printing:
-                            print(met.name, model2_ids[met.id])
-                        
-                    compared_met_counter += 1
-                
-            if self.printing:
-                print(f'\n\n{compared_met_counter} of the {len(model_1.metabolites)} model_1 metabolites and {len(model_2.metabolites)} model_2 metabolites are shared and were compared.')        
-        else: # contrast reactions 
-            model2_rxns = {rxn.id:rxn for rxn in model_2.reactions}
-            compared_rxn_counter = 0
-            for rxn in model_1.reactions:
-                if rxn.id in model2_rxns:
-                    if re.sub('(_\w\d)', '', rxn.name)!= re.sub('(_\w\d)', '', model2_rxns[rxn.id].name):
-                        print(f'\nmisaligned {rxn.id} names\n', ' model1  ',rxn.name, ' model2  ',model2_rxns[rxn.id].name)
-                        misaligned.append({
-                                    'model_1': rxn.name,
-                                    'model_2': model2_rxns[rxn.id].name,
-                                })                            
-                    elif rxn.reaction != model2_rxns[rxn.id].reaction:                            
-                        print(f'\nmisaligned {rxn.id} reagents\n', 'model1: ',rxn.reaction, 'model2: ',model2_rxns[rxn.id].reaction)
-                        misaligned.append({
-                                    'model_1': rxn.reaction,
-                                    'model_2': model2_rxns[rxn.id].reaction,
-                                })
-
-                    compared_rxn_counter += 1
-                    
-            if self.printing:
-                print(f'''\n\n{compared_rxn_counter} of the {len(model_1.reactions)} model_1 reactions and {len(model_2.reactions)} model_2 reactions are shared and were compared.''')
-                
-        if standardize:
-            model_1 = self.standardize_MSD(model_1)
-            model_2 = self.standardize_MSD(model_2)
+    def standardize_MSD(self, models, output_path = None):
+        self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
+        self.unknown_met_ids, self.changed_metabolites, self.changed_reactions= [], [], []
+        for model in models:
+            model_index = models.index(model)
             
-        return misaligned, model_1, model_2
-        
-    def exchanges(self,
-                  model # cobrakbase model
-                  ):                        
-        # homogenize isomeric metabolites in exchange reactions
-        self.unique_base_met_name = OrderedDict()
-        for rxn in model.reactions:
-            if 'EX_' in rxn.id:
-                for met in rxn.metabolites:
-                    if '-' in met.name:
-                        base_name = ''.join(met.name.split('-')[1:]).capitalize()
-                        if base_name not in self.unique_base_met_name:
-                            self.unique_base_met_name[base_name] = met
-                        else:
-                            # replace isomers of different IDs with a standard isomer
-                            base_name_id = self.unique_base_met_name[base_name].id
-                            if re.sub('(_\w\d)', '', met.id) != base_name_id:
-                                met = self._correct_met(met, base_name)
-                    elif met.name not in self.unique_base_met_name:
-                        self.unique_base_met_name[met.name] = met
-                    
-        # standardize model metabolite IDs with the ModelSEED Database
-        unknown_met_ids = []
-        for met in model.metabolites:
-            name_prefix = met.name.split('-')[0]
-            base_name = ''.join(met.name.split('-')[1:]).capitalize()
-            # correct non-standard IDs
-            if 'cpd' not in met.id and len(met.reactions) >= 1:
-                for name in self.compound_names:
-                    if '-' in met.name:
-                        if '-'.join([name_prefix,base_name]) == name:
-                            met = self._correct_met(met, name)
-                            break
-                    elif met.name == name:
-                        met = self._correct_met(met, name)
-                        break
-           
-            # if 'cpd' not in met.id and len(met.reactions) >= 1: 
-            #     warn(f'CodeError: The metabolite {met.id} | {met.name} was not replaced.')
-        
-        return model, unknown_met_ids
-        
-    def _correct_met(self, met, met_name):
-        # correct the met
-        original_id = met.id
-        general_met_name = re.sub('_\w\d', '', met_name)
-        if general_met_name not in self.compound_names:
-            general_met_name = re.sub('_\w\d', '', met.name)
-        if general_met_name not in self.compound_names:
-            warn(f'ModelSEEDError: The metabolite {met.id} | {general_met_name} is not recognized by the ModelSEED Database')
-        elif re.sub('(_\w\d)', '', original_id) != self.compound_names[general_met_name]:
-            # replace the undesirable isomer
-            if self.compound_names[general_met_name] in met.model.metabolites:
-                if met_name in self.unique_base_met_name:
-                    for rxn in met.reactions:
-                        rxn.add_metabolites({
-                                    met: 0, self.unique_base_met_name[met_name]: rxn.metabolites[met]
-                                }, combine = False)
+            # standardize metabolites
+            for met in model.metabolites:
+                base_name = ''.join(met.name.split('-')[1:]).capitalize()
+                met_name = re.sub('_\w\d', '', met.name)
+                if met.name in self.compound_names:
+                    met = self._correct_met(met, met.name)
+                elif met_name in self.compound_names:
+                    met = self._correct_met(met, met_name)
+                elif base_name in self.compound_names:
+                    met = self._correct_met(met, base_name)
                 else:
-                    warn(f'CodeError1: The {self.compound_names[general_met_name]} for the {met.id} | {met.name} | {met_name} metabolite is not captured.')
-                    return met
+                    self.unknown_met_ids.append(met.id)
+                    warn(f'ModelSEEDError: The metabolite {met.id} | {met.name} is not recognized by the ModelSEED Database')
+                        
+                # ensure that the metabolite ID is conventional in the ModelSEED Database
+                if 'cpd' not in met.id: 
+                    self.unknown_met_ids.append(met.id)
+                    warn(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
+                        
+            # standardize reactions
+            missed_reactions = 0
+            for rxn in model.reactions:
+                if re.sub('(_\w\d)', '', rxn.id) in self.reaction_ids:
+                    rxn.name = self.reaction_ids[re.sub('(_\w\d)', '', rxn.id)]
+                    reaction_dict = {}
+                    for met in rxn.metabolites:
+                        new_met = self._correct_met(met, re.sub('(_\w\d)', '', met.name))
+                        reaction_dict[new_met] = float(rxn.metabolites[met])
+                    for met in rxn.metabolites:
+                        rxn.add_metabolites({met:0}, combine = False)
+                    rxn.add_metabolites(reaction_dict, combine = False)
+                else:
+                    missed_reactions += 1
+                    # warn(f'ModelSEEDError: The {rxn.id} | {rxn.name} reaction is not recognized by the ModelSEED Database')
+                    
+            print(model_index, missed_reactions)
+            models[model_index] = model
+            
+        if output_path is not None:
+            with open(output_path, 'w') as out:
+                json.dump(self.changed_metabolites, out, indent = 3)
+                
+        return models
+    
+    def correct_exchanges(self, models,                      # the collection of cobrakbase models that will be compared
+                          conflicts_path_file: str = None,   # the metabolite conflicts are stored and organized
+                          standardize: bool = False,         # standardize the model names and reactions to the ModelSEED Database
+                          ): 
+        def fix_met(met):
+            # correct the conflict
+            base_name = ''.join(met.name.split('-')[1:]).capitalize()
+            if met.name in self.compound_names:
+                met = self._correct_met(met, met.name)
+            elif base_name in self.compound_names:
+                met = self._correct_met(met, base_name)
             else:
-                met.id = self.compound_names[general_met_name]
-                if self.printing:
-                    print('\noriginal ID\t', original_id, '\t', met.name)
-                    print('new ID\t\t', met.id, '\t', general_met_name)
-                
-                # for rxn in met.reactions:
-                #     original_reaction = rxn.reaction
-                #     if met_name in self.unique_base_met_name:
-                #         rxn.add_metabolites({
-                #                     met: 0, self.unique_base_met_name[met_name]: rxn.metabolites[met]
-                #                 }, combine = False)
-                #     else:
-                #         warn(f'CodeError2: The {self.compound_names[general_met_name]} for the {met.id} | {met.name} | {met_name} metabolite is not captured.')
-                #         return met
-                #     if self.printing:
-                #         print('\noriginal met_rxn\t', original_reaction)
-                #         print('new met_rxn\t\t', rxn.reaction)
-                
+                self.unknown_met_ids.append(met.id)
+                warn(f'ModelSEEDError: The metabolite {met.id} | {met.name} | {base_name} is not recognized by the ModelSEED Database')    
+            return met
+        
+        if standardize:
+            models = self.standardize_MSD(models)
+            
+        unique_names, established_mets, self.unknown_met_ids, self.changed_metabolites, self.changed_reactions = [], [], [], [], []
+        self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
+        for model in models:
+            model_index = models.index(model)
+            for ex_rxn in model.exchanges:
+                for met in ex_rxn.metabolites:
+                    met_name = re.sub('_\w\d', '', met.name)
+                    if met.id not in self.unique_mets and met.id not in established_mets:
+                        if met_name not in unique_names:
+                            self.unique_mets[met.id] = {
+                                f'model{model_index}_id': met.id,
+                                f'model{model_index}_met': met
+                                }
+                            unique_names.append(met_name)
+                        else:
+                            former_id = list(self.unique_mets.keys())[unique_names.index(met_name)]
+                            former_model_index = list(self.unique_mets[former_id].keys())[0].split('_')[0].removeprefix('model')
+                            if met.name not in self.met_conflicts:
+                                self.met_conflicts[met_name] = {
+                                        f'model{former_model_index}_id': former_id,
+                                        f'model{former_model_index}_met': self.unique_mets[former_id][f'model{former_model_index}_met'],
+                                        f'model{model_index}_id': met.id,
+                                        f'model{model_index}_met': met
+                                    }
+                            else:
+                                self.met_conflicts[met_name].update({
+                                        f'model{model_index}_id': met.id,
+                                        f'model{model_index}_met': met
+                                    })
+                            # correct the conflict
+                            met = fix_met(met)
+    
+                    else:
+                        former_name = unique_names[list(self.unique_mets.keys()).index(met.id)]
+                        former_model_index = list(self.unique_mets[met.id].keys())[0].split('_')[0].removeprefix('model')
+                        if met_name == former_name:
+                            # remove the metabolite that is no longer unique
+                            del unique_names[list(self.unique_mets.keys()).index(met.id)]
+                            self.unique_mets.pop(met.id)    
+                            established_mets.append(met.id)
+                        else:
+                            if met.id not in self.met_conflicts:
+                                self.met_conflicts[met.id] = {
+                                        f'model{former_model_index}_name': former_name,
+                                        f'model{former_model_index}_met': self.unique_mets[former_id][f'model{former_model_index}_met'],
+                                        f'model{model_index}_name': met.name,
+                                        f'model{model_index}_met': met
+                                    }
+                            else:
+                                if f'model{model_index}_name' not in self.met_conflicts[met.id]:
+                                    self.met_conflicts[met.id].update({
+                                            f'model{model_index}_name': met.name,
+                                            f'model{model_index}_met': met
+                                        })
+                                else:
+                                    iteration = 0
+                                    while f'model{model_index}_{iteration}_name' in self.met_conflicts[met.id]:
+                                        iteration += 1
+                                        
+                                    self.met_conflicts[met.id].update({
+                                            f'model{model_index}_{iteration}_name': met.name,
+                                            f'model{model_index}_{iteration}_met': met
+                                        })
+                            # correct the conflict
+                            met = fix_met(met)
+             
+                    models[model_index] = model
+                            
+        if conflicts_path_file is not None:
+            export_met_conflicts = {}
+            for met_id, content in self.met_conflicts.items():
+                print(content)
+                export_met_conflicts[met_id] = {}
+                for key, val in content.items():
+                    if '_met' not in key:
+                        export_met_conflicts[met_id][key] = val
+                    else:
+                        export_met_conflicts[met_id][key.replace('_met', '_met_formula')] = val.formula
+            with open(conflicts_path_file, 'w') as out:
+                json.dump(export_met_conflicts, out, indent = 3)
 
-                
+        return models
+        
+    def _correct_met(self, met, met_name, standardize = False):
+        original_id = re.sub('(_\w\d)', '', met.id)
+        if original_id != self.compound_names[met_name]:  # If the ID associated with the name deviates from that in the ModelSEED Database
+            # replace the undesirable isomer
+            if self.compound_names[met_name] in met.model.metabolites:
+                for rxn in met.reactions:
+                    original_reaction = rxn.reaction
+                    reaction_dict = {}
+                    for rxn_met in rxn.metabolites:
+                        stoich = float(rxn.metabolites[rxn_met])
+                        new_met = rxn_met
+                        if rxn_met.id == met.id:
+                            new_met = Metabolite(
+                                id = self.compound_names[met_name], 
+                                name = met_name,
+                                formula = met.formula,
+                                charge = met.charge,
+                                compartment = met.compartment
+                                )
+                        reaction_dict[new_met] = stoich
+
+                    new_rxn = Reaction(
+                        id = rxn.id,
+                        name = rxn.name,
+                        subsystem = rxn.subsystem,
+                        lower_bound = rxn.lower_bound,
+                        upper_bound = rxn.upper_bound
+                        )
+                    rxn.delete()
+                    new_rxn.add_metabolites(reaction_dict)
+                    # rxn.add_metabolites({new_met:stoich}, combine = False)
+                    change = {
+                            'original': {
+                                    'reaction': original_reaction
+                                },
+                            'new': {
+                                    'reaction': new_rxn.reaction
+                                },
+                            'justification': f'The non-ModelSEED ID {met.id} in this reaction ({new_rxn.id}) must be replaced.'
+                        }
+                    self.changed_reactions.append(change)
+                    if self.printing:
+                        print('\n')
+                        pprint(change, sort_dicts=False)
+            else:
+                met.id = self.compound_names[met_name]
+                change = {
+                        'original': {
+                                'id': original_id,
+                                'name': met.name
+                            },
+                        'new': {
+                                'id': met.id,
+                                'name': met_name
+                            },
+                        'justification': f'The {original_id} and {met.id} distinction is incompatible.'
+                    }
+                if 'cpd' not in original_id:
+                    change['justification'] = 'The {original_id} ID is not a ModelSEED Database ID.'
+                if standardize:
+                    change['justification'] = 'The {original_id} and {met.id} metabolites were matched via their name.'
+                self.changed_metabolites.append(change)
+                if self.printing:
+                    print('\n')
+                    pprint(change, sort_dicts=False)
+
         return met

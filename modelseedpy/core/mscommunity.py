@@ -359,7 +359,7 @@ class MSCommunity:
     def run(self,media,pfba = None):
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         self.print_lp()
-        if pfba == None and self.pfba == None:
+        if (pfba == None and self.pfba == None) or pfba == True or self.pfba == True:
             self._set_solution(cobra.flux_analysis.pfba(self.model))
         else:
             self._set_solution(self.model.optimize())
