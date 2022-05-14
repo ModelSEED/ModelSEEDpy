@@ -130,7 +130,10 @@ class MSATPCorrection:
                 if solution.objective_value == 0 or solution.status != 'optimal':
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
+                elif solution.objective_value > 0 or solution.status == 'optimal':
+                    self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
         return output
+
     def determine_growth_media(self):
         """
         Decides which of the test media to use as growth conditions for this model
