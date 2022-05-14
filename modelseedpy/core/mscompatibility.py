@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from cobra.core.metabolite import Metabolite
+from cobra.io.json import save_json_model
 from numpy import negative
 from warnings import warn
 from pprint import pprint
@@ -56,17 +57,25 @@ class MSCompatibility():
 
     #     return rxn_dict
         
-    def standardize_MSD(self, models, output_directory = None, metabolites = True, exchanges = True):
+    def standardize_MSD(self, models,                      # the collection of cobrakbase models that will be compared
+                        metabolites: bool = True,          # specifies whether metabolites or reactions (FALSE) will be standardized
+                        exchanges: bool = True,            # specifies whether the exchange reactions will be standardized
+                        conflicts_file_name: str = None,   # the metabolite conflicts are stored and organized, where None does not export
+                        model_names: list = None,          # specifies the export names of the models
+                        model_format: str = 'json',        # specifies to which format the model will be exported 
+                        export_directory: str = None       # specifies the directory to which all of the content will be exported 
+                        ):
+        self.models = models
         self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
         self.unknown_met_ids, self.changed_metabolites, self.changed_reactions= [], [], []
         self.changed_ids_count = self.changed_rxn_count = 0
         if exchanges:
             output = None
-            if output_directory is not None:
-                os.path.join(output_directory, 'exchanges_conflicts.txt')
-            self.correct_exchanges(models, output)
-        for model in models:
-            model_index = models.index(model)
+            if export_directory is not None:
+                os.path.join(export_directory, 'exchanges_conflicts.txt')
+            self.correct_exchanges(self.models, output)
+        for model in self.models:
+            model_index = self.models.index(model)
             
             # standardize metabolites
             if metabolites:
@@ -76,14 +85,13 @@ class MSCompatibility():
                         self.unknown_met_ids.append(met.id)
                         warn(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
             
-                if output_directory is not None:
-                    with open(os.path.join(output_directory, 'standardized_metabolites.txt'), 'w') as out:
-                        json.dump(self.changed_metabolites+self.changed_reactions, out, indent = 3)
+                if conflicts_file_name is not None:
+                    self._export(self.changed_metabolites+self.changed_reactions, conflicts_file_name, model_names, model_format, export_directory)
                         
             # standardize reactions
             # else:  #!!! The modelreactions appear to be incorrect
             #     modelreactions_ids = {re.sub('(_\w\d$)', '', rxn['id']).removeprefix('R-'):rxn for rxn in model.modelreactions}
-            #     with open(os.path.join(output_directory, 'modelreactions.json'), 'w') as out:
+            #     with open(os.path.join(export_directory, 'modelreactions.json'), 'w') as out:
             #         json.dump(modelreactions_ids, out, indent = 3)
             #     model_metabolites = {met.id:met for met in model.metabolites}
             #     missed_reactions = 0
@@ -133,8 +141,8 @@ class MSCompatibility():
             #                 }
             #             self.changed_reactions.append(change)
                     
-            #     if output_directory is not None:
-            #         with open(os.path.join(output_directory, 'standardized_reactions.txt'), 'w') as out:
+            #     if export_directory is not None:
+            #         with open(os.path.join(export_directory, 'standardized_reactions.txt'), 'w') as out:
             #             json.dump(self.changed_reactions, out, indent = 3)
                         
             #     total_reactions = 0
@@ -143,22 +151,26 @@ class MSCompatibility():
                     
             #     warn(f'\nModelSEEDError: {missed_reactions}/{total_reactions} reactions were not captured by the ModelSEED modelreaction IDs.')
         
-        models[model_index] = model
+        self.models[model_index] = model
         print(f'\n\n{self.changed_rxn_count} reactions were substituted and {self.changed_ids_count} metabolite IDs were redefined.')
-        return models
+        return self.models
     
     def correct_exchanges(self, models,                      # the collection of cobrakbase models that will be compared
-                          conflicts_path_file: str = None,   # the metabolite conflicts are stored and organized
                           standardize: bool = False,         # standardize the model names and reactions to the ModelSEED Database
+                          conflicts_file_name: str = None,   # the metabolite conflicts are stored and organized, where None does not the conflicts
+                          model_names: list = None,          # specifies the name of the exported model, where None does not export the models
+                          model_format: str = 'json',        # specifies to which format the model will be exported 
+                          export_directory: str = None       # specifies the directory to which all of the content will be exported 
                           ): 
+        self.models = models
         self.changed_ids_count = self.changed_rxn_count = 0
         if standardize:
-            models = self.standardize_MSD(models)
+            self.standardize_MSD(self.models)
             
         unique_names, established_mets, self.unknown_met_ids, self.changed_metabolites, self.changed_reactions = [], [], [], [], []
         self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
-        for model in models:
-            model_index = models.index(model)
+        for model in self.models:
+            model_index = self.models.index(model)
             model_metabolites = {met.id:met for met in model.metabolites}
             for ex_rxn in model.exchanges:
                 for met in ex_rxn.metabolites:
@@ -222,15 +234,15 @@ class MSCompatibility():
                                         })
                             met = self._fix_met(met)
              
-                    models[model_index] = model
+                    self.models[model_index] = model
                     
                 # correct the reaction ID
                 if re.sub('(_\w\d$)', '', ex_rxn.id).removeprefix('EX_') in model_metabolites:
                     suffix = re.search('(_\w\d$)', ex_rxn.id).group()
                     rxn_met = self._fix_met(re.sub('(_\w\d$)', '', ex_rxn.id).removeprefix('EX_'))
                     ex_rxn.id = 'EX_'+rxn_met.id+suffix
-                            
-        if conflicts_path_file is not None:
+
+        if conflicts_file_name is not None:
             export_met_conflicts = {}
             for met_id, content in self.met_conflicts.items():
                 export_met_conflicts[met_id] = {}
@@ -239,11 +251,11 @@ class MSCompatibility():
                         export_met_conflicts[met_id][key] = val
                     else:
                         export_met_conflicts[met_id][key.replace('_met','_formula')] = val.formula
-            with open(conflicts_path_file, 'w') as out:
-                json.dump(export_met_conflicts, out, indent = 3)
+                        
+            self._export(export_met_conflicts, conflicts_file_name, model_names, model_format, export_directory)
 
         print(f'\n\n{self.changed_rxn_count} exchange reactions were substituted and {self.changed_ids_count} exchange metabolite IDs were redefined.')
-        return models
+        return self.models
     
     def _fix_met(self,met):
         # correct the conflict
@@ -259,6 +271,22 @@ class MSCompatibility():
             self.unknown_met_ids.append(met.id)
             warn(f'ModelSEEDError: The metabolite {met.id} | {met.name} | {base_name} | {met_name} is not recognized by the ModelSEED Database')    
         return met
+    
+    def _export(self, conflicts,             # the conflicts dictionary that will be exported
+                conflicts_file_name,         # the metabolite conflicts are stored and organized, where None does not the conflicts
+                model_names,                 # specifies the name of the exported model, where None does not export the models
+                model_format,                # specifies to which format the model will be exported 
+                export_directory             # specifies the directory to which all of the content will be exported 
+                ):
+        if export_directory is None:
+            export_directory = os.getcwd()
+                    
+        if conflicts_file_name is not None:
+            with open(os.path.join(export_directory,conflicts_file_name), 'w') as out:
+                json.dump(conflicts, out, indent = 3)
+        if model_names is not None:
+            for index, model in enumerate(self.models):
+                save_json_model(model, os.path.join(export_directory,f'{model_names[index]}.{model_format}'))
         
     def __correct_met(self, met, met_name, standardize = False):
         def check_cross_references(met, general_met):

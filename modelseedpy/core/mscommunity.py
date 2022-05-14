@@ -120,14 +120,14 @@ class MSCommunity:
     
     #Manipulation functions
     def set_abundance(self,abundances):
-        #First ensure normalization
+        #ensure normalization
         total_abundance = sum([abundances[species] for species in abundances])
-        #Next map abundances to all species
+        #map abundances to all species
         for species in abundances:
             abundances[species] = abundances[species]/total_abundance
             if species in self.species:
                 self.species.get_by_id(species).abundance = abundances[species]
-        #Finally, remake the primary biomass reaction based on abundances
+        #remake the primary biomass reaction based on abundances
         if self.primary_biomass == None:
             logger.critical("Primary biomass reaction not found in community model")
         all_metabolites = {self.biomass_cpd:1}
@@ -136,7 +136,6 @@ class MSCommunity:
         self.primary_biomass.add_metabolites(all_metabolites,combine=False)
         
     def set_objective(self,target = None,minimize = False):
-        #Setting objective function
         if target == None:
             target = self.primary_biomass.id
         sense = "max"
@@ -182,7 +181,7 @@ class MSCommunity:
         data = {"IDs":[],"Metabolites/Species":[], "Environment":[]}
         met_list, species_list = [], [None for i in range(1000)]
 
-        #track only extracellular metabolites 
+        #establish spreadsheet infrastructure for only extracellular metabolites 
         for met in self.model.metabolites:
             if met.compartment == "e0":
                 met_list.append(met)
@@ -194,7 +193,6 @@ class MSCommunity:
                 for individual in self.species:
                     metabolite_data[met][individual.id] = 0
                     
-        # establish the infrastructure for 
         for individual in self.species:
             species_data[individual.id], species_collection[individual.id] = {}, {}
             species_list[individual.species_num] = individual
@@ -222,6 +220,7 @@ class MSCommunity:
                     metabolite_data[cpd]["Environment"] += -1*solution.fluxes[rxn.id]
             if len(rxn.id.split("_")) > 1:
                 cmp = rxn.id.split("_").pop()
+                print(cmp)
                 comp_index = int(cmp[1:])
                 for metabolite in rxn.metabolites:
                     if metabolite in metabolite_data:
