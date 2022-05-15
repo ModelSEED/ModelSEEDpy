@@ -322,6 +322,9 @@ class MSCompatibility():
                                 if not match:
                                     warn(f'ModelSEEDError: The old metabolite {met.id} cross-references ({self.compounds_cross_references[general_met]}) do not overlap with those ({self.compounds_cross_references[self.compound_names[met_name]]}) of the new metabolite {new_met_id}.')
                                     
+                                    #!!! The metabolite object may be acquired from the ID string via self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_db_path"])
+                                    # and then this call mscpd = self.parameters["modelseed_api"].get_seed_compound(msid)
+                                    
                             # define the metabolite with the new name
                             new_met = Metabolite(
                                 id = new_met_id, 

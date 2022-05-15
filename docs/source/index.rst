@@ -1,7 +1,11 @@
 Metabolic modeling with the ModelSEED Database in Python
 ________________________________________________________________________
 
+|Supported Python Versions| 
 
+.. |Supported Python Versions| image:: https://img.shields.io/pypi/pyversions/modelseedpy)
+   :target: https://pypi.org/project/modelseedpy/
+   :alt: Python versions
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
    :target: https://pypi.org/project/modelseedpy/

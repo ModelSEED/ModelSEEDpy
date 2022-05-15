@@ -18,7 +18,7 @@ class BaseFBAPkg:
     """
     Base class for FBA packages
     """
-    def __init__(self, model, name, variable_types={}, constraint_types={},reaction_types = {}):
+    def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
         self.model = model
         self.modelutl = MSModelUtil(model)
         self.name = name
@@ -28,17 +28,18 @@ class BaseFBAPkg:
             self.pkgmgr = MSPackageManager.get_pkg_mgr(model,1)
         self.pkgmgr.addpkgobj(self)
         
-        self.constraints = dict()      #!!! FIXME where is this ever used?
+        self.constraints = dict()   
         self.variables = dict()
         self.parameters = dict()
-        self.new_reactions = dict()    #!!! FIXME where is this ever used?
         
         self.variable_types = variable_types
         self.constraint_types = constraint_types
-        for type in variable_types:
+        for type in self.variable_types:
             self.variables[type] = dict()
-        for type in constraint_types:
+        for type in self.constraint_types:
             self.constraints[type] = dict()
+            
+        print(self.variables, self.variable_types)
     
     def validate_parameters(self, params, required, defaults):
         for item in required:
@@ -68,6 +69,7 @@ class BaseFBAPkg:
             name = object
         else:
             name = object.id
+        print(name, self.variables)
         if name not in self.variables[type]:
             self.variables[type][name] = self.model.problem.Variable(name+"_"+type, lb=lower_bound,ub=upper_bound,type=vartype)
             self.model.add_cons_vars(self.variables[type][name])
@@ -93,6 +95,15 @@ class BaseFBAPkg:
             self.constraints[type][name].set_linear_coefficients(coef)
         self.model.solver.update()
         return self.constraints[type][name]
+    
+    #Utility functions
+    def print_lp(self,filename = None):
+        if filename is None:
+            filename = self.lp_filename
+        if filename is not None:
+            with open(filename+".lp", 'w') as out:
+                out.write(str(self.model.solver))
+                out.close()
     
     def all_variables(self):
         return self.pkgmgr.all_variables()

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from scipy.constants import milli, hour, minute, day, femto
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.core.fbahelper import FBAHelper
 from collections import OrderedDict
+from optlang.symbolics import Zero
 from warnings import warn
 from matplotlib import pyplot
 from pprint import pprint
@@ -34,7 +37,7 @@ def average(num_1, num_2 = None):
             return sum(numbers) / len(numbers)
         else:
             return num_1
-    elif type(num_1) is list:
+    elif isinstance(num_1, list):
         summation = total = 0
         for num in num_1:
             if num is not None:
@@ -47,7 +50,7 @@ def average(num_1, num_2 = None):
         return None
     
 
-class dFBA():
+class dFBA(BaseFBAPkg):
     def __init__(self, 
                  model,                   # Cobrakbase model
                  modelseed_db_path: str,  # local path to the ModelSEED Database
@@ -55,9 +58,11 @@ class dFBA():
                  warnings: bool = True, verbose: bool = False, printing: bool = False, jupyter: bool = False
                  ):
         # define the parameter and variable dictionaries
-        self.parameters, self.variables, self.compound_id = {}, {}, {}
+        BaseFBAPkg.__init__(self,model,"BasedFBA", {"met":"metabolite"}, {"conc": 'metabolite'})
+        self.compound_id = {}
 
         # load ModelSEED DB compound content
+        # self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_db_path"])
         with open(os.path.join(modelseed_db_path, 'Biochemistry', 'compounds.json'), 'r') as rxns:
             compounds = json.load(rxns)
             for cpd in compounds:
@@ -170,8 +175,8 @@ class dFBA():
                             warn(f"KineticsError: The {name} reagent ({var}) in the {datum['substituted_rate_law']} rate law is not recognized by the ModelSEED Database.")
                         
         # incorporate custom initial concentrations
-        if type(initial_concentrations_M) is dict and initial_concentrations_M != {}:
-            for met_id in initial_concentrations:
+        if isinstance(initial_concentrations_M, dict) and initial_concentrations_M != {}:
+            for met_id in initial_concentrations_M:
                 met_name = self.compound_id[met_id]
                 if met_name not in self.concentrations.index:
                     if self.warnings:
@@ -304,14 +309,10 @@ class dFBA():
                 minimum = min(minimum, min_conc)
                 
                 # plot chemicals with perturbed concentrations
-                relative = False
-                if concentrations[0] < 1e-9:
-                    relative = True
-                        
                 ax.plot(times, concentrations)
                 if len(chem) > 25:
                     chem = self.met_ids[self.met_names.index(chem)]
-                if not relative:
+                if not concentrations[0] < 1e-9:
                     legend_list.append(chem)
                 else:
                     legend_list.append(f'(rel) {chem}')
@@ -344,11 +345,11 @@ class dFBA():
                 export_directory: str  # the directory within which the simulation folder will be created
                 ):
         # define a unique simulation name 
-        if export_name is None:
-            export_name = '-'.join([re.sub(' ', '_', str(x)) for x in [date.today(), 'dFBA', self.model.name, f'{self.total_time} min']])
         directory = os.getcwd()
         if export_directory is not None:
             directory = os.path.dirname(export_directory)
+        if export_name is None:
+            export_name = '-'.join([re.sub(' ', '_', str(x)) for x in [date.today(), 'dFBA', self.model.name, f'{self.total_time} min']])
             
         simulation_number = -1
         while os.path.exists(os.path.join(directory, export_name)):
@@ -385,7 +386,34 @@ class dFBA():
         if self.verbose:
             if not self.jupyter:
                 self.figure.show()    
-                
+                                
+    def _build_constraints(self):
+        # create a metabolite variable that prevents negative concentrations
+        for met in self.model.metabolites: 
+            # met.constraint.ub = None
+            # print(met.constraint.lb, met.constraint.ub, met.constraint.expression)
+            # pprint(dir(met.constraint))
+            # break
+            
+            # build the metabolite variable
+            self.variables["met"][met.id] = self.model.problem.Variable(met.id,lb=0,ub=None,type="continuous")
+            self.model.add_cons_vars(self.variables["met"][met.id])
+            
+            # build the metabolite constraint
+            if met.id in self.constraints["conc"]:
+                self.model.remove_cons_vars(self.constraints["conc"][met.id])
+            self.constraints["conc"][met.id] = self.model.problem.Constraint(Zero, lb=0, ub=None, name=f'{met.id}_conc')
+            self.model.add_cons_vars(self.constraints["conc"][met.id])
+            self.model.solver.update()
+            self.constraints["conc"][met.id].set_linear_coefficients({self.variables["met"][met.id]: 1})
+            self.model.solver.update()
+            
+            # var = BaseFBAPkg.build_variable(self,"met",0,None,"continuous",met)  
+            # BaseFBAPkg.build_constraint(self,"conc",0,None,{met:1},met)
+            
+    #Utility functions
+    def print_lp(self,filename = None):
+        BaseFBAPkg.print_lp(self, filename.removesuffix('.lp'))
                             
     def simulate(self, 
                  kinetics_path: str = None,                             # the path of the kinetics data JSON file
@@ -400,7 +428,7 @@ class dFBA():
                  figure_title: str = 'Metabolic perturbation',          # title of the concentrations figure
                  included_metabolites: list = [],                       # A list of the metabolites that will be graphically displayed
                  labeled_plots: bool = True,                            # specifies whether plots will be individually labeled 
-                 visualize: bool = True, export: bool = True    # specifies whether simulation content will be visualized or exported, respectively
+                 visualize: bool = True, export: bool = True            # specifies whether simulation content will be visualized or exported, respectively
                  ):
         # define the dataframe for the time series content
         self.parameters['timesteps'] = int(total_time/timestep)    
@@ -423,6 +451,7 @@ class dFBA():
                 self.defined_reactions[rxn.name] = rxn
             
         # execute FBA for each timestep
+        self._build_constraints()
         for self.timestep in range(1,self.parameters['timesteps']+1):
             # calculate custom fluxes, constrain the model, and update concentrations
             self._define_timestep()
