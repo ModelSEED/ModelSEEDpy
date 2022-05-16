@@ -102,8 +102,14 @@ class BaseFBAPkg:
             filename = self.lp_filename
         if filename is not None:
             with open(filename+".lp", 'w') as out:
-                out.write(str(self.model.solver))
-                out.close()
+                complete_line = ''
+                for line in str(self.model.solver).splitlines():
+                    if ':' in line:
+                        if complete_line != '':
+                            out.write(complete_line)
+                        complete_line = ''
+                    else:
+                        complete_line += line
     
     def all_variables(self):
         return self.pkgmgr.all_variables()
