@@ -126,7 +126,6 @@ class dFBA(BaseFBAPkg):
     def _initial_concentrations(self,
                                 kinetics_path: str = None,  # the absolute path to a JSON file of kinetics data 
                                 kinetics_data: dict = {},   # a dictionary of kinetics data, which supplants imported data from the kinetics_path
-                                initial_concentrations_M: dict = {} # a dictionary of the initial metabolic concentrations , which supplants concentrations from the defined kinetics data
                                 ):
         # define kinetics of the system
         self.kinetics_data = {}
@@ -149,6 +148,7 @@ class dFBA(BaseFBAPkg):
         self.fluxes.index.name = 'reactions (mmol/g_(dw)/hr)'
         
         # parse the kinetics data 
+        initial_concentrations = {}
         for met in self.met_names:
             self.concentrations.at[str(met), self.col] = float(0)
         for reaction_name in self.kinetics_data:
@@ -160,6 +160,7 @@ class dFBA(BaseFBAPkg):
                         name = self.met_ids[met_id]
                         if name in self.met_names:                                    
                             self.concentrations.at[name, self.col] += datum['initial_concentrations_M'][var]/milli
+                            initial_concentrations[met_id] = self.concentrations.at[name, self.col]
                         else:
                             if self.warnings:
                                 warn(f"KineticsError: The {name} reagent ({var}) in the {datum['substituted_rate_law']} rate law is not defined by the model.")
@@ -168,14 +169,16 @@ class dFBA(BaseFBAPkg):
                             warn(f"KineticsError: The {name} reagent ({var}) in the {datum['substituted_rate_law']} rate law is not recognized by the ModelSEED Database.")
                         
         # incorporate custom initial concentrations
-        if isinstance(initial_concentrations_M, dict) and initial_concentrations_M != {}:
-            for met_id in initial_concentrations_M:
+        if isinstance(self.initial_concentrations_M, dict) and self.initial_concentrations_M != {}:
+            for met_id in self.initial_concentrations_M:
                 met_name = self.met_ids[met_id]
                 if met_name not in self.concentrations.index:
                     if self.warnings:
                         warn(f'InitialConcError: The {met_id} ({met_name}) metabolite is not defined by the model.')
                 else:
-                    self.concentrations.at[met_name, self.col] = initial_concentrations_M[met_id]*milli
+                    self.concentrations.at[met_name, self.col] = self.initial_concentrations_M[met_id]*milli
+                    
+        self.initial_concentrations_M = initial_concentrations
                     
 
     def _define_timestep(self,):
@@ -380,41 +383,43 @@ class dFBA(BaseFBAPkg):
         # create a metabolite variable that prevents negative concentrations
         timestep_hr = self.timestep_value * (minute/hour)
         for met in self.model.metabolites: 
-            # met.constraint.ub = None
-            # print(met.constraint.lb, met.constraint.ub, met.constraint.expression)
-            # pprint(dir(met))
-            # break
-            coef = {}
-            for rxn in met.reactions:
-                stoich = timestep_hr*rxn.metabolites[met]  # The product of the reaction stoichiometry and the timestep, for the integration of the steady-state
-                coef[rxn.forward_variable] = stoich
-                coef[rxn.reverse_variable] = -stoich
-                if stoich < 0:
-                    coef[rxn.forward_variable] = -stoich
-                    coef[rxn.reverse_variable] = stoich
+            if met.id in self.initial_concentrations_M:
+                # met.constraint.ub = None
+                # print(met.constraint.lb, met.constraint.ub, met.constraint.expression)
+                # pprint(dir(met))
+                # break
                 
-            # build the metabolite constraint
-            if met.id in self.constraints["conc"]:
-                self.model.remove_cons_vars(self.constraints["conc"][met.id])
-            self.constraints["conc"][met.id] = self.model.problem.Constraint(
-                Zero, lb=-self.concentrations.at[met.name, self.previous_col], ub=None, name=f'{met.id}_conc'
-                )
-            self.model.add_cons_vars(self.constraints["conc"][met.id])
-            self.model.solver.update()
-            
-            self.constraints["conc"][met.id].set_linear_coefficients(coef)
-            self.model.solver.update()
-            
-            # var = BaseFBAPkg.build_variable(self,"met",0,None,"continuous",met)  
-            # BaseFBAPkg.build_constraint(self,"conc",0,None,{met:1},met)
-            
+                coef = {}
+                for rxn in met.reactions:
+                    stoich = timestep_hr*rxn.metabolites[met]  # The product of the reaction stoichiometry and the timestep, for the integration of the steady-state
+                    coef[rxn.forward_variable] = stoich
+                    coef[rxn.reverse_variable] = -stoich
+                    if stoich < 0:
+                        coef[rxn.forward_variable] = -stoich
+                        coef[rxn.reverse_variable] = stoich
+                    
+                # build the metabolite constraint
+                if met.id in self.constraints["conc"]:
+                    self.model.remove_cons_vars(self.constraints["conc"][met.id])
+                self.constraints["conc"][met.id] = self.model.problem.Constraint(
+                    Zero, lb=-self.concentrations.at[met.name, self.previous_col], ub=None, name=f'{met.id}_conc'
+                    )
+                self.model.add_cons_vars(self.constraints["conc"][met.id])
+                self.model.solver.update()
+                
+                self.constraints["conc"][met.id].set_linear_coefficients(coef)
+                self.model.solver.update()
+                
+                # var = BaseFBAPkg.build_variable(self,"met",0,None,"continuous",met)  
+                # BaseFBAPkg.build_constraint(self,"conc",0,None,{met:1},met)
+                
     #Utility functions
     def print_lp(self,filename = None):
         BaseFBAPkg.print_lp(self, filename.removesuffix('.lp'))
                             
     def simulate(self, 
                  kinetics_path: str = None,                             # the path of the kinetics data JSON file
-                 initial_concentrations_M: dict = {},                   # an option of a specific dictionary for the initial concentrations
+                 initial_concentrations_M: dict = {},                   # a dictionary of the initial metabolic concentrations , which supplants concentrations from the defined kinetics data
                  total_time: float = 200, timestep: float = 20,         # total simulation time and the simulation timestep in minutes
                  export_name: str = None, export_directory: str = None, # the location to which simulation content will be exported
                  kinetics_data: dict = {},                              # A dictionary of custom kinetics data
@@ -438,7 +443,8 @@ class dFBA(BaseFBAPkg):
         self.variables['elapsed_time'] = 0
         
         # define initial concentrations
-        self._initial_concentrations(kinetics_path,kinetics_data,initial_concentrations_M)
+        self.initial_concentrations_M = initial_concentrations_M
+        self._initial_concentrations(kinetics_path,kinetics_data)
         
         # determine the reactions for which kinetics are predefined
         self.defined_reactions = {}
