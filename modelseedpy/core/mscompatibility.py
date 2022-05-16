@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from cobra.core.metabolite import Metabolite
 from cobra.io.json import save_json_model
-from numpy import negative
+from zipfile import ZipFile
 from warnings import warn
 from pprint import pprint
 import json, re, os
@@ -296,12 +296,21 @@ class MSCompatibility():
         if export_directory is None:
             export_directory = os.getcwd()
                     
+        file_paths = []
         if conflicts_file_name is not None:
-            with open(os.path.join(export_directory,conflicts_file_name), 'w') as out:
+            path = os.path.join(export_directory,conflicts_file_name)
+            file_paths.append(os.path.relpath(path, export_directory))
+            with open(path, 'w') as out:
                 json.dump(conflicts, out, indent = 3)
         if model_names is not None:
             for index, model in enumerate(self.models):
-                save_json_model(model, os.path.join(export_directory,f'{model_names[index]}.{model_format}'))
+                path = os.path.join(export_directory,f'{model_names[index]}.{model_format}')
+                file_paths.append(os.path.relpath(path, export_directory))
+                save_json_model(model, path)
+        with ZipFile('_'.join(model_names[:4])+'.zip', 'w') as zip:
+            for file in file_paths:
+                zip.write(file)
+                os.remove(file)
         
     def __correct_met(self, met, met_name, standardize = False):
         def check_cross_references(met, general_met):
