@@ -38,8 +38,6 @@ class BaseFBAPkg:
             self.variables[type] = dict()
         for type in self.constraint_types:
             self.constraints[type] = dict()
-            
-        print(self.variables, self.variable_types)
     
     def validate_parameters(self, params, required, defaults):
         for item in required:
@@ -69,7 +67,6 @@ class BaseFBAPkg:
             name = object
         else:
             name = object.id
-        print(name, self.variables)
         if name not in self.variables[type]:
             self.variables[type][name] = self.model.problem.Variable(name+"_"+type, lb=lower_bound,ub=upper_bound,type=vartype)
             self.model.add_cons_vars(self.variables[type][name])

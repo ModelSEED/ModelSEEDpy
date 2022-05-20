@@ -28,6 +28,10 @@ setup(
         "scipy >= 1.5.4",
         "chemicals >= 1.0.13",
         "chemw >= 0.3.2",
-        " matplotlib >= 3.0.0"
-    ]
+        "matplotlib >= 3.0.0"
+    ],
+    project_urls={
+        'Documentation': 'https://modelseedpy.readthedocs.io/en/stable/',
+        'Issues': 'https://github.com/ModelSEED/ModelSEEDpy/issues',
+    }
 )

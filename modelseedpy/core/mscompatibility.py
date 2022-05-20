@@ -1,10 +1,10 @@
 from collections import OrderedDict
 from cobra.core.metabolite import Metabolite
 from cobra.io.json import save_json_model
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_LZMA
 from warnings import warn
 from pprint import pprint
-import json, re, os
+import json, lzma, re, os
 
 class MSCompatibility():
     def __init__(self,
@@ -70,7 +70,7 @@ class MSCompatibility():
         self.unknown_met_ids, self.changed_metabolites, self.changed_reactions= [], [], []
         self.changed_ids_count = self.changed_rxn_count = 0
         for self.model in self.models:
-            model_index = self.models.index(self.model)
+            self.model_index = self.models.index(self.model)
             
             # standardize metabolites
             if metabolites:
@@ -94,7 +94,9 @@ class MSCompatibility():
                             warn(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
                 
                 if conflicts_file_name is not None:
-                    self._export(self.changed_metabolites+self.changed_reactions, conflicts_file_name, model_names, model_format, export_directory)
+                    self._export({'metabolite_changes':self.changed_metabolites, 'reaction_changes':self.changed_reactions}, 
+                        conflicts_file_name, model_names, model_format, export_directory
+                        )
                         
             # standardize reactions
             # else:  #!!! The modelreactions appear to be incorrect
@@ -159,7 +161,7 @@ class MSCompatibility():
                     
             #     warn(f'\nModelSEEDError: {missed_reactions}/{total_reactions} reactions were not captured by the ModelSEED modelreaction IDs.')
         
-        self.models[model_index] = self.model
+        self.models[self.model_index] = self.model
         print(f'\n\n{self.changed_rxn_count} reactions were substituted and {self.changed_ids_count} metabolite IDs were redefined.')
         return self.models
        
@@ -178,7 +180,7 @@ class MSCompatibility():
         unique_names, established_mets, self.unknown_met_ids, self.changed_metabolites, self.changed_reactions = [], [], [], [], []
         self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
         for self.model in self.models:
-            model_index = self.models.index(self.model)
+            self.model_index = self.models.index(self.model)
             model_metabolites = {met.id:met for met in self.model.metabolites}
             for ex_rxn in self.model.exchanges:
                 for met in ex_rxn.metabolites:
@@ -187,8 +189,8 @@ class MSCompatibility():
                         if met_name not in unique_names:
                             # identify the unique metabolite
                             self.unique_mets[met.id] = {
-                                f'model{model_index}_id': met.id,
-                                f'model{model_index}_met': met
+                                f'model{self.model_index}_id': met.id,
+                                f'model{self.model_index}_met': met
                                 }
                             unique_names.append(met_name)
                         else:
@@ -199,13 +201,13 @@ class MSCompatibility():
                                 self.met_conflicts[met_name] = {
                                         f'model{former_model_index}_id': former_id,
                                         f'model{former_model_index}_met': self.unique_mets[former_id][f'model{former_model_index}_met'],
-                                        f'model{model_index}_id': met.id,
-                                        f'model{model_index}_met': met
+                                        f'model{self.model_index}_id': met.id,
+                                        f'model{self.model_index}_met': met
                                     }
                             else:
                                 self.met_conflicts[met_name].update({
-                                        f'model{model_index}_id': met.id,
-                                        f'model{model_index}_met': met
+                                        f'model{self.model_index}_id': met.id,
+                                        f'model{self.model_index}_met': met
                                     })
                             met, new_met_id, success = self._fix_met(met)
                     else:
@@ -222,27 +224,27 @@ class MSCompatibility():
                                 self.met_conflicts[met.id] = {
                                         f'model{former_model_index}_name': former_name,
                                         f'model{former_model_index}_met': self.unique_mets[former_id][f'model{former_model_index}_met'],
-                                        f'model{model_index}_name': met.name,
-                                        f'model{model_index}_met': met
+                                        f'model{self.model_index}_name': met.name,
+                                        f'model{self.model_index}_met': met
                                     }
                             else:
-                                if f'model{model_index}_name' not in self.met_conflicts[met.id]:
+                                if f'model{self.model_index}_name' not in self.met_conflicts[met.id]:
                                     self.met_conflicts[met.id].update({
-                                            f'model{model_index}_name': met.name,
-                                            f'model{model_index}_met': met
+                                            f'model{self.model_index}_name': met.name,
+                                            f'model{self.model_index}_met': met
                                         })
                                 else:
                                     iteration = 0
-                                    while f'model{model_index}_{iteration}_name' in self.met_conflicts[met.id]:
+                                    while f'model{self.model_index}_{iteration}_name' in self.met_conflicts[met.id]:
                                         iteration += 1
                                         
                                     self.met_conflicts[met.id].update({
-                                            f'model{model_index}_{iteration}_name': met.name,
-                                            f'model{model_index}_{iteration}_met': met
+                                            f'model{self.model_index}_{iteration}_name': met.name,
+                                            f'model{self.model_index}_{iteration}_met': met
                                         })
                             met, new_met_id, success = self._fix_met(met)
              
-                    self.models[model_index] = self.model
+                    self.models[self.model_index] = self.model
                     
                 # correct the reaction ID
                 if re.sub('(_\w\d$)', '', ex_rxn.id).removeprefix('EX_') in model_metabolites:
@@ -307,7 +309,7 @@ class MSCompatibility():
                 path = os.path.join(export_directory,f'{model_names[index]}.{model_format}')
                 file_paths.append(os.path.relpath(path, export_directory))
                 save_json_model(model, path)
-        with ZipFile('_'.join(model_names[:4])+'.zip', 'w') as zip:
+        with ZipFile('_'.join(model_names[:4])+'.zip', 'w', compression = ZIP_LZMA) as zip:
             for file in file_paths:
                 zip.write(file)
                 os.remove(file)
@@ -360,7 +362,7 @@ class MSCompatibility():
                                         'new': {
                                                 'reaction': None
                                             },
-                                        'justification': f'A {new_met_id} exchange reaction already exists, thus this duplicative exchange reaction ({rxn.id}) is deleted.'
+                                        'justification': f'A {new_met_id} exchange reaction already exists in model {self.model_index}, thus this duplicative exchange reaction ({rxn.id}) is deleted.'
                                     }
                                 if match:
                                     change['justification'] += f' The ID match was verified with {db} cross-references.'
@@ -403,7 +405,7 @@ class MSCompatibility():
                                 'new': {
                                         'reaction': rxn.reaction
                                     },
-                                'justification': f'The {new_met_id} replacement for {met.id} already exists in the model, so each reaction (here {rxn.id}) must be updated.'
+                                'justification': f'The {new_met_id} replacement for {met.id} already exists in model {self.model_index}, so each reaction (here {rxn.id}) must be updated.'
                             }
                         if match:
                             change['justification'] += f' The ID match was verified with {db} cross-references.'
@@ -435,7 +437,7 @@ class MSCompatibility():
                                 'id': met.id,
                                 'name': met_name+compartment
                             },
-                        'justification': f'The {original_id} and {met.id} distinction is incompatible.'
+                        'justification': f'The {original_id} and {met.id} distinction in {self.model_index} is incompatible.'
                     }
                 if 'cpd' not in original_id:
                     change['justification'] = f'The {original_id} ID is not a ModelSEED Database ID.'
