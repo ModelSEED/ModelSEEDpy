@@ -2,7 +2,7 @@
 
 from scipy.constants import milli, hour, minute, day, femto
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.fbahelper import FBAHelper
+# from modelseedpy.core.fbahelper import FBAHelper
 from collections import OrderedDict
 from optlang.symbolics import Zero
 from warnings import warn
