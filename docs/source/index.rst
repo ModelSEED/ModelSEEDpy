@@ -36,3 +36,10 @@ ModelSEEDpy can be installed via ``pip`` through the ``PyPI`` channel and via ``
  conda install modelseedpy
    
    
+.. toctree::
+    :hidden:
+
+   core_index
+   fbapkg_index
+   contents
+   
