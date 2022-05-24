@@ -15,7 +15,7 @@ setup(
     long_description=readme,
     author='Christopher Henry',
     author_email='chenry@anl.gov',
-    url='https://github.com/ModelSEED/ModelSEEDpy',
+    url='https://github.com/freiburgermsu/ModelSEEDpy',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     package_data={

@@ -45,3 +45,8 @@ The core set of ModelSEEDpy packages consist of the following:
 
    dfbapy_api
    tfa_api
+   bilevel_api
+   changeoptpkg_api
+   flexiblebiomass_api
+   fluxfitting_api
+   

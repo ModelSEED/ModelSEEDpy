@@ -19,7 +19,7 @@ ________________________________________________________________________
    :target: https://pepy.tech/project/modelseedpy
    :alt: Downloads
 
-The ModelSEEDpy packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. 
+The ModelSEEDpy packages that compatibilize the transport reactions of individual models and simulate cross-feeding amongst community members are organized in the ``community`` directory of the ModelSEEDpy library. 
 
 ----------------------
 Import
@@ -37,4 +37,7 @@ The core set of ModelSEEDpy packages consist of the following:
 
 .. toctree::
 
-    
+    mscommunity_api
+    mscompatibility_api
+    commkineticpkg_api
+    elementuptakepkg_api

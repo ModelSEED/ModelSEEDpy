@@ -11,15 +11,15 @@ class ElementUptakePkg(BaseFBAPkg):
         BaseFBAPkg.__init__(self,model,"element uptake",{"elements":"string"},{"elements":"string"})
         
     def build_package(self,element_limits):
-        for element in element_limits:
+        for element, limit in element_limits.items():
             if element not in self.variables["elements"]:
-                self.build_variable(element,element_limits[element])
-                self.build_constraint(element)
+                self._build_variable(element, limit)
+                self._build_constraint(element)
                    
-    def build_variable(self,element,limit):
+    def _build_variable(self,element,limit):
         return BaseFBAPkg.build_variable(self,"elements",0,limit,"continuous",element)
     
-    def build_constraint(self,element):
+    def _build_constraint(self,element):
         coef = {self.variables["elements"][element] : -1}
         for reaction in self.model.reactions:
             if reaction.id[0:3] == "EX_":

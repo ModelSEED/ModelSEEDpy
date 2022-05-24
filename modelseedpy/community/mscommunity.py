@@ -1,8 +1,6 @@
-from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.fbapkg import MSPackageManager
 #from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
-from modelseedpy.core.msatpcorrection import MSATPCorrection
-from modelseedpy.core.msgapfill import MSGapfill
-from modelseedpy.core.fbahelper import FBAHelper
+from modelseedpy.core import MSATPCorrection, MSGapfill, FBAHelper
 from cobra.core.dictlist import DictList
 from itertools import combinations
 from optlang.symbolics import Zero

@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.mscommunity import MSCommunity, FBAHelper
+from modelseedpy.community.mscommunity import MSCommunity
+from modelseedpy.core.fbahelper import FBAHelper
 
 #Base class for FBA packages
 class CommKineticPkg(BaseFBAPkg):
@@ -19,9 +20,9 @@ class CommKineticPkg(BaseFBAPkg):
         if self.parameters["community"] == None:
             self.parameters["community"] = MSCommunity(self.model)
         for species in self.parameters["community"].species:
-            self.build_constraint(species)
+            self._build_constraint(species)
 
-    def build_constraint(self,species):
+    def _build_constraint(self,species):
         coef = {species.biomasses[0].forward_variable:-1*self.parameters["kinetic_coef"]}
         for reaction in self.model.reactions:
             if int(FBAHelper.rxn_compartment(reaction)[1:]) == species.index and reaction != species.biomasses[0]:

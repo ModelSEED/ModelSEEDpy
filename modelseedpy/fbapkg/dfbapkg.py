@@ -5,11 +5,11 @@ from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 # from modelseedpy.core.fbahelper import FBAHelper
 from collections import OrderedDict
 from optlang.symbolics import Zero
+from numpy import log10, nan, mean
 from warnings import warn
 from matplotlib import pyplot
 from pprint import pprint
 from datetime import date
-from numpy import log10, nan
 from math import inf 
 import pandas
 import json, re, os
@@ -27,26 +27,6 @@ def isnumber(string):
             return False
     if remainder == '':
         return True
-    
-def average(num_1, num_2 = None):
-    if isnumber(num_1): 
-        if isnumber(num_2):
-            numbers = [num_1, num_2]
-            return sum(numbers) / len(numbers)
-        else:
-            return num_1
-    elif isinstance(num_1, list):
-        summation = total = 0
-        for num in num_1:
-            if num is not None:
-                summation += num
-                total += 1
-        if total > 0:
-            return summation/total
-        return None
-    else:
-        return None
-    
 
 class dFBAPkg(BaseFBAPkg):
     def __init__(self, 
@@ -276,7 +256,7 @@ class dFBAPkg(BaseFBAPkg):
                     if self.warnings:
                         warn(f'RateLawError: The {datum} datum lacks a rate law.')
                         
-            flux = average(fluxes)
+            flux = mean(fluxes)
             if isnumber(flux):
                 if reaction_name in self.defined_reactions:
                     self.__set_constraints(reaction_name, flux)
@@ -485,7 +465,7 @@ class dFBAPkg(BaseFBAPkg):
 
         # equally weight between temperature and pH deviation from the simulation conditions
         old_minimum = self.minimum
-        deviation = average(temperature_deviation, ph_deviation)
+        deviation = mean(temperature_deviation, ph_deviation)
         self.minimum = min(deviation, self.minimum)
 
         if old_minimum == self.minimum:

@@ -9,7 +9,7 @@ This class applies and simulates rigorous thermodynamic constraints upon COBRA m
 
 .. code-block:: python
 
- from modelseedpy.fbapkg.fullthermopkg import FullThermoPkg
+ from modelseedpy.fbapkg import FullThermoPkg
  tfa = FullThermoPkg(model)
 
 - *model* ``cobra.core.model.Model``: the CobraKBase model that will be simulated. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 

@@ -2,17 +2,13 @@
 
 from __future__ import absolute_import
 
+from modelseedpy.fbapkg import BaseFBAPkg
+from numpy import ln
 import logging
-from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
 
 class KBaseMediaPkg(BaseFBAPkg):
-    """
-    Base class for FBA packages
-    """
-
     def __init__(self, model):
         BaseFBAPkg.__init__(self, model, "kbase media", {}, {})
 
@@ -37,9 +33,8 @@ class KBaseMediaPkg(BaseFBAPkg):
             self.parameters["default_uptake"] = 100
         
         #First initializing all exchanges to default uptake and excretion
-        exchange_list = self.modelutl.exchange_list()
-        for reaction in exchange_list:
-            reaction.lower_bound = -1*self.parameters["default_uptake"]
+        for reaction in self.modelutl.exchange_list():
+            reaction.lower_bound = -self.parameters["default_uptake"]
             reaction.upper_bound = self.parameters["default_excretion"]
         
         #Now constraining exchanges for specific compounds specified in the media
@@ -51,8 +46,8 @@ class KBaseMediaPkg(BaseFBAPkg):
                 if len(mets) > 0:
                     for met in mets:
                         if met in exchange_hash:
-                            exchange_hash[met].lower_bound = -1 * mediacpd.maxFlux
-                            exchange_hash[met].upper_bound = -1 * mediacpd.minFlux
+                            exchange_hash[met].lower_bound = -mediacpd.maxFlux
+                            exchange_hash[met].upper_bound = -mediacpd.minFlux
                             if self.pkgmgr != None and "FullThermoPkg" in self.pkgmgr.packages:
                                 logger.info('FullThermo constrained compound: ', met.id)
                                 if met.id in self.variables["logconc"] and met.compartment[0:1] == "e":

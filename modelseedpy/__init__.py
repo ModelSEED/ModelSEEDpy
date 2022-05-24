@@ -42,12 +42,14 @@ if sys.version_info[0] == 2:
 import modelseedpy
 from modelseedpy.core import (
     RastClient, MSGenome, MSBuilder, MSMedia, MSGrowthPhenotypes,MSModelUtil,
-    FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation,MSCommunity
+    FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation
 )
 
+from modelseedpy.community import (MSCommunity, MSCompatibility, ElementUptakePkg, CommKineticPkg)
+
 from modelseedpy.fbapkg import (
-    BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,ElementUptakePkg,BilevelPkg,
-    CommKineticPkg,KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg,FlexibleBiomassPkg,
+    BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,BilevelPkg,
+    KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg,FlexibleBiomassPkg,
     ProblemReplicationPkg,FullThermoPkg,MSPackageManager,ObjConstPkg,ChangeOptPkg
 )
 

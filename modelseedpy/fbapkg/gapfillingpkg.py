@@ -4,11 +4,10 @@ from __future__ import absolute_import
 
 import logging
 import re
-import json
-from optlang.symbolics import Zero, add
-from cobra import Model, Reaction, Metabolite
-from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.fbahelper import FBAHelper
+from optlang.symbolics import Zero
+from cobra import Reaction, Metabolite
+from modelseedpy.fbapkg import BaseFBAPkg
+from modelseedpy.core import FBAHelper
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +63,6 @@ default_blacklist = ["rxn12985", "rxn00238", "rxn07058", "rxn05305", "rxn00154",
 
 
 class GapfillingPkg(BaseFBAPkg):
-    """
-
-    """
-
     def __init__(self, model):
         BaseFBAPkg.__init__(self, model, "gapfilling", {}, {})
         self.gapfilling_penalties = None
@@ -80,24 +75,6 @@ class GapfillingPkg(BaseFBAPkg):
             "set_objective": 1
         }
         self.build_package(parameters)
-
-    def get_model_index_hash(self):
-        """
-        Determine all indices that should be gap filled
-        :return:
-        """
-        index_hash = {"none": 0}
-        for metabolite in self.model.metabolites:
-            if re.search('_[a-z]\d+$', metabolite.id) is not None:
-                m = re.search('_([a-z])(\d+)$', metabolite.id)
-                if m[1] != "e":
-                    if m[2] not in index_hash:
-                        index_hash[m[2]] = 0
-                    index_hash[m[2]] += 1
-            else:
-                index_hash["none":0]
-                # Iterating over all indecies with more than 10 intracellular compounds:
-        return index_hash
 
     def build_package(self, parameters):
         self.validate_parameters(parameters, [], {
@@ -125,8 +102,8 @@ class GapfillingPkg(BaseFBAPkg):
 
         # Iterating over all indecies with more than 10 intracellular compounds:
         self.gapfilling_penalties = dict()
-        for index in indexhash:
-            if indexhash[index] > 10:
+        for index, val in indexhash.items():
+            if val > 10:
                 if index == "none":
                     for template in self.parameters["default_gapfill_templates"]:
                         new_penalties = self.extend_model_with_template_for_gapfilling(template, index)
@@ -186,6 +163,24 @@ class GapfillingPkg(BaseFBAPkg):
                     obj_coef[reaction.reverse_variable] = 0
             self.model.objective = reaction_objective
             reaction_objective.set_linear_coefficients(obj_coef)
+
+    def get_model_index_hash(self):
+        """
+        Determine all indices that should be gap filled
+        :return:
+        """
+        index_hash = {"none": 0}
+        for metabolite in self.model.metabolites:
+            if re.search('_[a-z]\d+$', metabolite.id) is not None:
+                m = re.search('_([a-z])(\d+)$', metabolite.id)
+                if m[1] != "e":
+                    if m[2] not in index_hash:
+                        index_hash[m[2]] = 0
+                    index_hash[m[2]] += 1
+            else:
+                index_hash["none":0]
+                # Iterating over all indecies with more than 10 intracellular compounds:
+        return index_hash
 
     def extend_model_with_model_for_gapfilling(self, source_model, index):
         new_metabolites = {}

@@ -1,7 +1,7 @@
 Metabolic modeling with the ModelSEED Database in Python
 ________________________________________________________________________
 
-|docs| |License|
+|PyPI version| |docs| |Downloads| |License|
 
 .. |docs| image:: https://readthedocs.org/projects/modelseedpy/badge/?version=latest
    :target: https://modelseedpy.readthedocs.io/en/latest/?badge=latest
@@ -30,8 +30,7 @@ Metabolic modeling is an pivotal method for computational research in synthetic 
 Installation
 ----------------------
 
-ModelSEEDpy can be installed via ``pip`` through the ``PyPI`` channel and via ``conda`` through the ``conda-forge`` channel::
+ModelSEEDpy can be installed via ``pip`` through the ``PyPI`` channel::
 
  pip install modelseedpy
- conda install modelseedpy
    

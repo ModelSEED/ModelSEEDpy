@@ -3,10 +3,8 @@ from __future__ import absolute_import
 import logging
 from chemicals import periodic_table
 import re
-from cobra.core import Gene, Metabolite, Model, Reaction
-from cobra.util import solver as sutil
+from cobra.core import Reaction
 from modelseedpy.biochem import from_local
-from scipy.odr.odrpack import Output
 #from Carbon.Aliases import false
 
 logger = logging.getLogger(__name__)
@@ -164,12 +162,11 @@ class FBAHelper:
     @staticmethod
     def metabolite_mw(metabolite):
         mw = 0
-        elements = metabolite.elements
-        for element in elements:
+        for element in metabolite.elements:
             if element not in elementmass:
                 print("Missing mass for element "+element+" in compound "+metabolite.id+". Element will be ignored when computing MW")
             else:
-                mw += elements[element]*elementmass[element]
+                mw += metabolite.elements[element]*elementmass[element]
         return mw
     
     @staticmethod    

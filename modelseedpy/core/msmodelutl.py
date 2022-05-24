@@ -1,9 +1,9 @@
 import logging
-import re
-from cobra import Model, Reaction, Metabolite
-from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-
 logger = logging.getLogger(__name__)
+
+from modelseedpy.fbapkg import MSPackageManager
+from cobra import Reaction
+import re
 
 def search_name(name):
     name = name.lower()
@@ -16,8 +16,7 @@ class MSModelUtil:
     def __init__(self,model):
         self.model = model
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
-        self.metabolite_hash = None
-        self.search_metabolite_hash = None
+        self.metabolite_hash = self.search_metabolite_hash = None
     
     def build_metabolite_hash(self):
         self.metabolite_hash = {}

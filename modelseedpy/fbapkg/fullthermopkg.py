@@ -5,8 +5,8 @@ from __future__ import absolute_import
 import logging
 from scipy.constants import physical_constants, calorie, kilo, R
 from numpy import log as ln
-from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.fbahelper import FBAHelper
+from modelseedpy.fbapkg import BaseFBAPkg
+from modelseedpy.core import FBAHelper
 
 #Base class for FBA packages
 class FullThermoPkg(BaseFBAPkg):    
