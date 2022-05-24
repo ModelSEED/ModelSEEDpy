@@ -1,4 +1,4 @@
-fbapkg: constraining and investigating FBA simulations
+fbapkg
 ________________________________________________________________________
 
 |docs|
@@ -24,21 +24,11 @@ ________________________________________________________________________
    :alt: Downloads
 
 
-The collection of packages that constrain and investigate, e.g. dFBA, metabolic models are assembled into the ``fbapkg`` directory of ModelSEEDpy. 
-
-----------------------
-Import
-----------------------
-
-The core packages of ModelSEEDpy are locally imported::
+The collection of packages that constrain and investigate, e.g. dFBA, metabolic models are assembled into the ``fbapkg`` directory of ModelSEEDpy. These packages are imported::
 
  from modelseedpy.fbapkg import *   
    
    
-----------------------
-Contents
-----------------------
-
 The core set of ModelSEEDpy packages consist of the following:
 
 .. toctree::

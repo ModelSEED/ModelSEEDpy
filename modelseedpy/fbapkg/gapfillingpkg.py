@@ -98,7 +98,7 @@ class GapfillingPkg(BaseFBAPkg):
         self.pkgmgr.getpkg("ObjConstPkg").build_package(self.parameters["minimum_obj"],None)
                 
         # Determine all indecies that should be gapfilled
-        indexhash = self.get_model_index_hash()
+        indexhash = self._get_model_index_hash()
 
         # Iterating over all indecies with more than 10 intracellular compounds:
         self.gapfilling_penalties = dict()
@@ -106,27 +106,21 @@ class GapfillingPkg(BaseFBAPkg):
             if val > 10:
                 if index == "none":
                     for template in self.parameters["default_gapfill_templates"]:
-                        new_penalties = self.extend_model_with_template_for_gapfilling(template, index)
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.gapfilling_penalties.update(self.extend_model_with_template_for_gapfilling(template, index))
                     for gfmdl in self.parameters["default_gapfill_models"]:
-                        new_penalties = self.extend_model_with_model_for_gapfilling(gfmdl, index)
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.gapfilling_penalties.update(self.extend_model_with_model_for_gapfilling(gfmdl, index))
                 if index in self.parameters["gapfill_templates_by_index"]:
                     for template in self.parameters["gapfill_templates_by_index"][index]:
-                        new_penalties = self.extend_model_with_template_for_gapfilling(template, index)
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.gapfilling_penalties.update(self.extend_model_with_template_for_gapfilling(template, index))
                 if index in self.parameters["gapfill_models_by_index"]:
                     for gfmdl in self.parameters["gapfill_models_by_index"]:
-                        new_penalties = self.extend_model_with_model_for_gapfilling(gfmdl, index)
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.gapfilling_penalties.update(self.extend_model_with_model_for_gapfilling(gfmdl, index))
                 if self.parameters["gapfill_all_indecies_with_default_templates"]:
                     for template in self.parameters["default_gapfill_templates"]:
-                        new_penalties = self.extend_model_with_template_for_gapfilling(template, index)
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.gapfilling_penalties.update(self.extend_model_with_template_for_gapfilling(template, index))
                 if self.parameters["gapfill_all_indecies_with_default_models"]:
                     for gfmdl in self.parameters["default_gapfill_models"]:
-                        new_penalties = self.extend_model_with_model_for_gapfilling(gfmdl, index)
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.gapfilling_penalties.update(self.extend_model_with_model_for_gapfilling(gfmdl, index))
         # Rescaling penalties by reaction scores and saving genes
         for reaction in self.gapfilling_penalties:
             rxnid = reaction.split("_")[0]
@@ -143,9 +137,7 @@ class GapfillingPkg(BaseFBAPkg):
 
         self.model.solver.update()
         if self.parameters["set_objective"] == 1:
-            reaction_objective = self.model.problem.Objective(
-                Zero,
-                direction="min")
+            reaction_objective = self.model.problem.Objective(Zero, direction="min")
             obj_coef = dict()
             for reaction in self.model.reactions:
                 if reaction.id in self.gapfilling_penalties:
@@ -159,12 +151,11 @@ class GapfillingPkg(BaseFBAPkg):
                     # elif default_penalty != 0:
                     #    obj_coef[reaction.forward_variable] = 0
                 else:
-                    obj_coef[reaction.forward_variable] = 0
-                    obj_coef[reaction.reverse_variable] = 0
+                    obj_coef[reaction.forward_variable] = obj_coef[reaction.reverse_variable] = 0
             self.model.objective = reaction_objective
             reaction_objective.set_linear_coefficients(obj_coef)
 
-    def get_model_index_hash(self):
+    def _get_model_index_hash(self):
         """
         Determine all indices that should be gap filled
         :return:
