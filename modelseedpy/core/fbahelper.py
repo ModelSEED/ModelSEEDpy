@@ -91,21 +91,19 @@ class FBAHelper:
                 original_bound.append(item[0].lower_bound)
                 item[0].lower_bound = 0
         # Now restore reactions one at a time
-        count = 0
         filtered_list = []
-        for item in reaction_list:
+        for index, item in enumerate(reaction_list):
             logger.info("Testing "+item[0].id)
             if item[1] == ">":
-                item[0].upper_bound = original_bound[count]
+                item[0].upper_bound = original_bound[index]
                 if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
                     item[0].upper_bound = 0
                     filtered_list.append(item)
             else:
-                item[0].lower_bound = original_bound[count]
+                item[0].lower_bound = original_bound[index]
                 if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
                     item[0].lower_bound = 0
                     filtered_list.append(item)
-            count += 1
         return filtered_list
 
     @staticmethod

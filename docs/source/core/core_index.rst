@@ -1,7 +1,7 @@
 core
 ________________________________________________________________________
 
-|License|
+|PyPI version| |License| |Downloads|
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
    :target: https://pypi.org/project/modelseedpy/
@@ -19,10 +19,11 @@ ________________________________________________________________________
    :target: https://pepy.tech/project/modelseedpy
    :alt: Downloads
 
-The ModelSEEDpy packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. These packages are imported::
+The ModelSEEDpy packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. These packages are imported via::
 
  from modelseedpy.community import *   
    
+and include the following
 
 .. toctree::
 

@@ -1,7 +1,7 @@
 community
 ________________________________________________________________________
 
-|License|
+|PyPI version| |License| |Downloads|
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
    :target: https://pypi.org/project/modelseedpy/
@@ -19,21 +19,11 @@ ________________________________________________________________________
    :target: https://pepy.tech/project/modelseedpy
    :alt: Downloads
 
-The ModelSEEDpy packages that compatibilize the transport reactions of individual models and simulate cross-feeding amongst community members are organized in the ``community`` directory of the ModelSEEDpy library. 
-
-----------------------
-Import
-----------------------
-
-The core packages of ModelSEEDpy are locally imported::
+The ModelSEEDpy packages that compatibilize the transport reactions of individual models and simulate cross-feeding amongst community members are organized in the ``community`` directory of the ModelSEEDpy library. These packages are imported via::
 
  from modelseedpy.community import *   
-   
-----------------------
-Contents
-----------------------
 
-The core set of ModelSEEDpy packages consist of the following:
+and include the following:
 
 .. toctree::
 

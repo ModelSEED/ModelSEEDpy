@@ -1,11 +1,7 @@
 fbapkg
 ________________________________________________________________________
 
-|docs|
-
-.. |docs| image:: https://readthedocs.org/projects/modelseedpy/badge/?version=latest
-   :target: https://modelseedpy.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+|PyPI version| |License| |Downloads|
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/modelseedpy.svg?logo=PyPI&logoColor=brightgreen
    :target: https://pypi.org/project/modelseedpy/

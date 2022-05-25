@@ -3,6 +3,8 @@
 from __future__ import absolute_import
 
 import logging
+logger = logging.getLogger(__name__)
+
 from optlang.symbolics import add
 from modelseedpy.fbapkg import BaseFBAPkg
 from modelseedpy.core import FBAHelper
@@ -56,24 +58,24 @@ class ProteomeFittingPkg(BaseFBAPkg):
         for rxnobj in self.model.reactions:
             #Only make constraints and variables if reaction is in the proteome
             if rxnobj.id in self.parameters["proteome"].features:
-                self.build_variable(rxnobj,"kapp")
-                var = self.build_variable(rxnobj,"kvfit")
+                self._build_variable(rxnobj,"kapp")
+                var = self._build_variable(rxnobj,"kvfit")
                 objvars.append(self.parameters["obj_kvfit"] * var ** 2)
-                const = self.build_constraint(rxnobj,"vkapp")            
+                self._build_constraint(rxnobj,"vkapp")            
         #Adding kcat fitting variables and constraints
-        for rxnid in self.parameters["kcat_values"]:
+        for rxnid in self.parameters["kcat_values"]:  #!!! what does this loop contribute?
             for rxnobj in self.model.reactions:
                 if rxnid == FBAHelper.modelseed_id_from_cobra_reaction(rxnobj):
                     if rxnobj.id not in self.variables["kapp"]:
-                        self.build_variable(rxnobj,"kapp")
-                    var = self.build_variable(rxnobj,"kfit")
-                    const = self.build_constraint(rxnobj,"kfitc")
+                        self._build_variable(rxnobj,"kapp")
+                    var = self._build_variable(rxnobj,"kfit")
+                    self._build_constraint(rxnobj,"kfitc")
                     objvars.append(self.parameters["obj_kfit"] * var ** 2)
         #Creating objective function
         if self.parameters["set_objective"] == 1:
             self.model.objective = self.model.problem.Objective(add(objvars), direction="min", sloppy=True)
                  
-    def build_variable(self,object,type):
+    def _build_variable(self,object,type):
         if type == "kapp":
             return BaseFBAPkg.build_variable(self,type,-1000000,1000000,"continuous",object)
         if type == "kvfit":
@@ -81,7 +83,7 @@ class ProteomeFittingPkg(BaseFBAPkg):
         elif type == "kfit":
             return BaseFBAPkg.build_variable(self,type,-1000000,1000000,"continuous",object)
     
-    def build_constraint(self,object,type):
+    def _build_constraint(self,object,type):
         if type == "vkapp" and object.id in self.parameters["proteome"].features:
             #kvfit(i) = kapp(i)*ProtCoef*Prot(i) - v(i)
             #Pulling expression value for selected condition and reaction

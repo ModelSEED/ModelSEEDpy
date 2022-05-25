@@ -1,4 +1,4 @@
-Metabolic modeling with the ModelSEED Database in Python
+Metabolic modeling with the ModelSEED Database
 ________________________________________________________________________
 
 |PyPI version| |Downloads| |License|
