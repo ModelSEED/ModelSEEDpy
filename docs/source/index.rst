@@ -38,6 +38,11 @@ ModelSEEDpy can be installed via ``pip`` through the ``PyPI`` channel::
 
  pip install modelseedpy
    
+The associated ModelSEED Database, which is required for a few packages, is simply downloaded by cloning the GitHub repository::
+
+ git clone https://github.com/ModelSEED/ModelSEEDDatabase.git
+   
+and the path to this repository is passed as an argument to the corresponding packages.
    
 .. toctree::
    :hidden:

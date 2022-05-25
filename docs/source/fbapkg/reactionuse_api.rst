@@ -1,4 +1,4 @@
-Reaction Use Package API
+Reaction Use Package
 --------------------------------------
 
 +++++++++++++++++++++

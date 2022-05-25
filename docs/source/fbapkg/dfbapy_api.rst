@@ -1,9 +1,9 @@
-dFBApy API
+dFBA Package
 --------------
 
-+++++++
-dFBA()
-+++++++
+++++++++++
+dFBAPkg()
+++++++++++
 
 This class defines and executes dynamic FBA simulations of COBRA models:
 

@@ -1,4 +1,4 @@
-CommKinetic API
+CommKinetic 
 -------------------
 
 +++++++++++++++++++++
