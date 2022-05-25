@@ -27,7 +27,7 @@ and include the following:
 
 .. toctree::
 
-    mscommunity_api
-    mscompatibility_api
     commkineticpkg_api
     elementuptakepkg_api
+    mscommunity_api
+    mscompatibility_api

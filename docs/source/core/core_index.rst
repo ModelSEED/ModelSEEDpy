@@ -21,7 +21,7 @@ ________________________________________________________________________
 
 The ModelSEEDpy packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. These packages are imported via::
 
- from modelseedpy.community import *   
+ from modelseedpy.core import *   
    
 and include the following
 

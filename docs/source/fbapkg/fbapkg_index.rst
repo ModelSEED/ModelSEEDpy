@@ -25,14 +25,21 @@ The collection of packages that constrain and investigate, e.g. dFBA, metabolic 
  from modelseedpy.fbapkg import *   
    
    
-The core set of ModelSEEDpy packages consist of the following:
+and include the following:
 
 .. toctree::
 
-   dfbapy_api
-   tfa_api
    bilevel_api
    changeoptpkg_api
+   dfbapy_api
+   drainfluxes_api
    flexiblebiomass_api
    fluxfitting_api
+   gapfillingpkg_api
+   kbasemedia_api
+   metabofba_api
+   msmodelutils_api
+   proteomefitting_api
+   reactionuse_api
+   tfa_api
    
