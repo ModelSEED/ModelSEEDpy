@@ -9,7 +9,8 @@ from optlang.symbolics import Zero, add
 import networkx
 import pandas as pd
 from cobra.core.dictlist import DictList
-from cobra.core import Reaction
+from cobra import Model, Reaction, Metabolite
+from modelseedpy.core.msmodelutl import metabolite_msid, MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
@@ -82,6 +83,112 @@ class CommunityModelSpecies:
 
 class MSCommunity:
 
+    @staticmethod
+    def build_from_species_models(models,mdlid=None,name=None,names=[],abundances=None):
+        """Merges the input list of single species metabolic models into a community metabolic model
+        
+        Parameters
+        ----------
+        models : list<Cobra.Model>
+            List of models to be merged into a community model
+        mdlid : string
+            String specifying community model ID
+        name : string
+            String specifying community model name
+        names : list<string>
+            List of human readable names for models being merged
+        abundances : dict<string,float>
+            Hash of relative abundances for input models in community model
+        
+        Returns
+        -------
+        Cobra.Model
+            Community model object
+            
+        Raises
+        ------
+        """
+        newmodel = Model(mdlid,name)
+        newutl = MSModelUtil(newmodel)
+        biomass_compounds = []
+        index = 1
+        biomass_index = 2
+        for model in models:        
+            new_metabolites = []
+            new_reactions = []
+            #Rename metabolites
+            for met in model.metabolites:
+                #Renaming compartments
+                if re.search('[a-z+](\d*)$', met.compartment) is not None:
+                    m = re.search('([a-z]+)(\d*)$', met.compartment)
+                    if len(m[2]) == 0:
+                        if m[1] == "e":
+                            met.compartment += "0"
+                        else:
+                            met.compartment += str(index)
+                    elif m[1] == "e":
+                        met.compartment = m[1]+"0"
+                    else:
+                        met.compartment = m[1]+str(index)
+                #Processing metabolite ID
+                output = MSModelUtil.parse_id(met)
+                if output == None:
+                    if met.compartment[0] != "e":
+                        met.id += str(index)
+                elif output[1] != "e":
+                    if len(output[2]) == 0:
+                        met.id = met.id+str(index)
+                    else:
+                        met.id = output[0]+"_"+output[1]+str(index)
+                if met.id not in newmodel.metabolites:
+                    new_metabolites.append(met)
+                    if metabolite_msid(met) == "cpd11416":
+                        biomass_compounds.append(met)
+            #Rename reactions
+            for rxn in model.reactions:
+                if rxn.id[0:3] != "EX_":
+                    if re.search('^(bio)(\d+)$', rxn.id) != None:
+                        rxn.id = "bio"+str(biomass_index)
+                        biomass_index += 1
+                    else:
+                        output = MSModelUtil.parse_id(rxn)
+                        if output == None:
+                            if rxn.compartment.id[0] != "e":
+                                rxn.id += str(index)
+                        elif output[1] != "e":
+                            if len(output[2]) == 0:
+                                rxn.id = rxn.id+str(index)
+                            else:
+                                rxn.id = output[0]+"_"+output[1]+str(index)
+                if rxn.id not in newmodel.reactions:
+                    new_reactions.append(rxn)
+            #Adding new reactions and compounds to base model
+            newmodel.add_reactions(new_reactions)
+            newmodel.add_metabolites(new_metabolites)
+            index += 1
+        #Create community biomass
+        comm_biomass = Metabolite(
+                            "cpd11416_c0",
+                            None,
+                            "Community biomass",
+                            0,
+                            "c0"
+                        )
+        metabolites = {comm_biomass : 1}
+        comm_biorxn = Reaction(
+                            id="bio1",
+                            name= "bio1",
+                            lower_bound=0, 
+                            upper_bound=100,
+                        )
+        count = len(biomass_compounds)
+        for cpd in biomass_compounds:
+            metabolites[cpd] = -1/count
+        comm_biorxn.add_metabolites(metabolites)
+        newmodel.add_reactions([comm_biorxn])
+        newutl.add_exchanges_for_metabolites([comm_biomass],0,100,'SK_')
+        return MSCommunity(newmodel,names,abundances)
+
     def __init__(self,model,names=[],abundances=None,pfba = True,lp_filename = None):
         #Setting model and package manager
         self.model = model
@@ -122,6 +229,7 @@ class MSCommunity:
             self.species.append(species_obj)
         if abundances != None:
             self.set_abundance(abundances)
+        self.set_objective()
     
     #Manipulation functions
     def set_abundance(self,abundances):
