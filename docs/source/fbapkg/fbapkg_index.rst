@@ -31,7 +31,6 @@ and include the following:
 
    bilevel_api
    changeoptpkg_api
-   dfbapy_api
    drainfluxes_api
    flexiblebiomass_api
    fluxfitting_api

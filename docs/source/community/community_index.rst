@@ -28,6 +28,7 @@ and include the following:
 .. toctree::
 
     commkineticpkg_api
+    dfbapkg_api
     elementuptakepkg_api
     mscommunity_api
     mscompatibility_api
