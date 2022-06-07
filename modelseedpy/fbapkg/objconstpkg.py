@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import logging
-from modelseedpy.fbapkg import BaseFBAPkg
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
 #Base class for FBA packages
 class ObjConstPkg(BaseFBAPkg):

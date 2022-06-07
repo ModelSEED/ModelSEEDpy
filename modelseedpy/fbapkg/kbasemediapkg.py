@@ -2,8 +2,8 @@
 
 from __future__ import absolute_import
 
-from modelseedpy.fbapkg import BaseFBAPkg
-from numpy import ln
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from numpy import log as ln
 import logging
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class KBaseMediaPkg(BaseFBAPkg):
         #Now constraining exchanges for specific compounds specified in the media
         if self.parameters["media"]:
             exchange_hash = self.modelutl.exchange_hash()
-            self.modelutl.build_metabolite_hash()
+            # self.modelutl.build_metabolite_hash()
             for mediacpd in self.parameters["media"].mediacompounds:
                 mets = self.modelutl.find_met(mediacpd.id)
                 if len(mets) > 0:

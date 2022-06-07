@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import logging
-from modelseedpy.fbapkg import BaseFBAPkg
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
 #Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):

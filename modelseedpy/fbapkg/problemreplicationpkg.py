@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 
-from modelseedpy.fbapkg import BaseFBAPkg
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from optlang import Variable
 import logging
 

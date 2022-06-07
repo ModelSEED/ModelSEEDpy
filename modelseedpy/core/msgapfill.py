@@ -2,7 +2,7 @@ import logging
 import itertools
 import cobra
 import re
-from modelseedpy.core import FBAHelper
+from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 
@@ -72,7 +72,7 @@ class MSGapfill:
             logger.warning("No solution found for %s", media)
             return None
 
-        self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
+        # self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() #!!! Does not exist
         if self.test_conditions:
             self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions, self.last_solution, self.test_condition_iteration_limit)
             if self.last_solution is None:

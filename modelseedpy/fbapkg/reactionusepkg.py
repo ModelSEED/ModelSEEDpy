@@ -3,8 +3,8 @@
 from __future__ import absolute_import
 import logging
 
-from modelseedpy.fbapkg import BaseFBAPkg
-from modelseedpy.core import FBAHelper
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.core.fbahelper import FBAHelper
 from optlang.symbolics import Zero
 
 #Base class for FBA packages

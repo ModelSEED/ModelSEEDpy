@@ -1,6 +1,7 @@
 import logging
 
-from modelseedpy.fbapkg import GapfillingPkg, KBaseMediaPkg
+from modelseedpy.fbapkg.gapfillingpkg import GapfillingPkg
+from modelseedpy.fbapkg.kbasemediapkg import KBaseMediaPkg
 from cobra.core import Gene, Metabolite, Model, Reaction
 from optlang.symbolics import Zero, add
 from modelseedpy.core import FBAHelper

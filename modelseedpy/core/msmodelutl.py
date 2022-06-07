@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from modelseedpy.fbapkg import MSPackageManager
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from cobra import Reaction
 import re
 

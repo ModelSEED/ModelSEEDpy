@@ -345,6 +345,7 @@ class MSCommunity:
         gfresults = self.gapfillings[gfname].run_gapfilling(media,target, solver = solver)
         if not gfresults:
             logger.critical("Gapfilling failed with the specified model, media, and target reaction.")
+            return None
         return self.gapfillings[gfname].integrate_gapfill_solution(gfresults)
     
     def test_individual_species(self,media = None,allow_cross_feeding=True,run_atp=True,run_biomass=True):

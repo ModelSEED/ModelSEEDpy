@@ -5,7 +5,7 @@ from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
 from cobra.core import Gene, Metabolite, Model, Reaction
-from modelseedpy.core import FBAHelper
+from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 SBO_ANNOTATION = "sbo"

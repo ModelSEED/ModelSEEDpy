@@ -225,16 +225,16 @@ class FBAHelper:
     @staticmethod
     def _stoichiometry_to_string(stoichiometry):
         reactants, products = [], []
-        for met, stoich in stoichiometry:
+        for met, stoich in stoichiometry.items():
+            met_id = None
             if not isinstance(met, str):
-                met = None
                 if not FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067":
-                    met = met.id
-            if met != None:
+                    met_id = met.id
+            if met_id:
                 if stoich < 0:
-                    reactants.append(met)
+                    reactants.append(met_id)
                 else:
-                    products.append(met)
+                    products.append(met_id)
         return ["+".join(sorted(reactants))+"="+"+".join(sorted(products)),"+".join(sorted(products))+"="+"+".join(sorted(reactants))]
     
     @staticmethod

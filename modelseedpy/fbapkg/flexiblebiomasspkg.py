@@ -4,8 +4,8 @@ from __future__ import absolute_import
 
 import logging
 from cobra import Reaction
-from modelseedpy.fbapkg import BaseFBAPkg
-from modelseedpy.core import FBAHelper
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.core.fbahelper import FBAHelper
 
 classes = {
     "rna":{"cpd00052":-1,"cpd00038":-1,"cpd00002":-1,"cpd00062":-1},

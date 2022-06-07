@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import logging
 from optlang.symbolics import Zero
-from modelseedpy.core import MSModelUtil, MSPackageManager
+from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 #Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):
