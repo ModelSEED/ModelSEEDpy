@@ -69,9 +69,7 @@ class MSCompatibility():
         self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
         self.unknown_met_ids, self.changed_metabolites, self.changed_reactions= [], [], []
         self.changed_ids_count = self.changed_rxn_count = 0
-        for self.model in self.models:
-            self.model_index = self.models.index(self.model)
-            
+        for self.model_index, self.model in enumerate(self.models):
             # standardize metabolites
             if metabolites:
                 if exchanges:
@@ -161,7 +159,7 @@ class MSCompatibility():
                     
             #     warn(f'\nModelSEEDError: {missed_reactions}/{total_reactions} reactions were not captured by the ModelSEED modelreaction IDs.')
         
-        self.models[self.model_index] = self.model
+            self.models[self.model_index] = self.model
         print(f'\n\n{self.changed_rxn_count} reactions were substituted and {self.changed_ids_count} metabolite IDs were redefined.')
         return self.models
        
@@ -179,8 +177,7 @@ class MSCompatibility():
             
         unique_names, established_mets, self.unknown_met_ids, self.changed_metabolites, self.changed_reactions = [], [], [], [], []
         self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
-        for self.model in self.models:
-            self.model_index = self.models.index(self.model)
+        for self.model_index, self.model in enumerate(self.models):
             model_metabolites = {met.id:met for met in self.model.metabolites}
             for ex_rxn in self.model.exchanges:
                 for met in ex_rxn.metabolites:
@@ -252,7 +249,7 @@ class MSCompatibility():
                     rxn_met, new_met_id, success = self._fix_met(re.sub('(_\w\d$)', '', ex_rxn.id).removeprefix('EX_'))
                     ex_rxn.id = 'EX_'+new_met_id+suffix
 
-        if conflicts_file_name is not None:
+        if conflicts_file_name:
             export_met_conflicts = {}
             for met_id, content in self.met_conflicts.items():
                 export_met_conflicts[met_id] = {}

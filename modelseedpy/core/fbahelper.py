@@ -6,14 +6,10 @@ import re
 from cobra.core import Reaction
 from modelseedpy.biochem import from_local
 from chemw import ChemMW
+from warnings import warn
 #from Carbon.Aliases import false
 
 logger = logging.getLogger(__name__)
-
-elementmass = {}
-for element in periodic_table:
-    elementmass[element.symbol] = element.MW
-
 
 class FBAHelper:
 
@@ -148,22 +144,16 @@ class FBAHelper:
     
     @staticmethod
     def metabolite_mw(metabolite):
-        mw = 0
         try:
-            for element in metabolite.elements:
-                if element not in elementmass:
-                    print("Missing mass for element "+element+" in compound "+metabolite.id+". Element will be ignored when computing MW")
-                else:
-                    mw += metabolite.elements[element]*elementmass[element]
-            return mw
-        except:
             chem_mw = ChemMW()
             chem_mw.mass(metabolite.formula)
             return chem_mw.raw_mw
+        except:
+            warn("The compound "+metabolite.id+" possesses an unconventional formula {metabolite.formula}; hence, the MW cannot be computed.")
     
     @staticmethod    
     def elemental_mass():
-        return elementmass
+        return {element.symbol:element.MW for element in periodic_table}
     
     @staticmethod
     def get_modelseed_db_api(modelseed_path):

@@ -157,7 +157,7 @@ class dFBAPkg(BaseFBAPkg):
                                 ):
         # define kinetics of the system
         self.kinetics_data = {}
-        if kinetics_path is not None:
+        if kinetics_path:
             if not os.path.exists(kinetics_path):
                 raise ValueError('The path {kinetics_data} is not a valid path')
             with open(kinetics_path) as data:
@@ -166,13 +166,14 @@ class dFBAPkg(BaseFBAPkg):
             for reaction in kinetics_data:
                 self.kinetics_data[reaction] = kinetics_data[reaction]
         if self.kinetics_data == {}:
-            raise NameError('Kinetics data must be defined.')
+            raise ValueError('Kinetics data must be defined.')
                 
         # define the DataFrames
         self.col = '0 min'     
         self.concentrations = pandas.DataFrame(index = set(self.met_names), columns = [self.col])
         self.chemical_moles = pandas.DataFrame(index = set(self.met_names), columns = [self.col])
         self.concentrations.index.name = self.chemical_moles.index.name = 'metabolite (\u0394mM)'
+        
         self.fluxes = pandas.DataFrame(index = set(rxn.name for rxn in self.model.reactions), columns = [self.col])
         self.fluxes.index.name = 'reactions (mmol/g_(dw)/hr)'
         
@@ -181,8 +182,7 @@ class dFBAPkg(BaseFBAPkg):
         for met in self.met_names:
             self.concentrations.at[str(met), self.col] = float(0)
         for reaction_name in self.kinetics_data:
-            for condition in self.kinetics_data[reaction_name]:
-                datum = self.kinetics_data[reaction_name][condition]
+            for condition, datum in self.kinetics_data[reaction_name].items():
                 for var in datum['initial_concentrations_M']:
                     met_id = datum['met_id'][var]
                     if met_id in self.met_ids:
@@ -206,7 +206,7 @@ class dFBAPkg(BaseFBAPkg):
                         warn(f'InitialConcError: The {met_id} ({met_name}) metabolite is not defined by the model.')
                 else:
                     self.concentrations.at[met_name, self.col] = self.initial_concentrations_M[met_id]*milli
-                    
+                    initial_concentrations[met_id] = self.concentrations.at[name, self.col]
         self.initial_concentrations_M = initial_concentrations
                     
 

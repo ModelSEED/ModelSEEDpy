@@ -2,6 +2,7 @@ from modelseedpy.fbapkg import MSPackageManager
 #from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 from modelseedpy.core import MSATPCorrection, MSGapfill, FBAHelper
 from cobra.core.dictlist import DictList
+from cobra.io import save_matlab_model
 from itertools import combinations
 from optlang.symbolics import Zero
 from cobra.core import Reaction
@@ -27,7 +28,7 @@ class CommunityModelSpecies:
         self.abundance = 0
         if self.biomass_cpd in self.community.primary_biomass.metabolites:
             self.abundance = abs(self.community.primary_biomass.metabolites[self.biomass_cpd])
-        if self.species_num <= len(names) and names[self.species_num-1] != None:
+        if self.species_num <= len(names) and names[self.species_num-1]:
             self.id = names[self.species_num-1]
         else:
             if "species_name" in self.biomass_cpd.annotation:
@@ -50,14 +51,13 @@ class CommunityModelSpecies:
                     
         if len(self.biomasses) == 0:
             logger.critical("No biomass reaction found for species "+self.id)
-        if self.atp_hydrolysis == None:
+        if not self.atp_hydrolysis:
             logger.critical("No ATP hydrolysis found for species:"+self.id)
-        if self.biomass_drain == None:
+        if not self.biomass_drain:
             logger.info("Making biomass drain reaction for species: "+self.id)
             self.biomass_drain = Reaction(id="DM_"+self.biomass_cpd.id,
                                       name="DM_" + self.biomass_cpd.name,
-                                      lower_bound=0, 
-                                      upper_bound=100)
+                                      lower_bound=0, upper_bound=100)
             self.community.model.add_reactions([self.biomass_drain])
             self.biomass_drain.add_metabolites({self.biomass_cpd : -1})
             self.biomass_drain.annotation["sbo"] = 'SBO:0000627'
@@ -114,7 +114,7 @@ class MSCommunity:
         for biomass_cpd in other_biomass_cpds:        
             species_obj = CommunityModelSpecies(self,biomass_cpd,names)
             self.species.append(species_obj)
-        if abundances != None:
+        if abundances:
             self.set_abundance(abundances)
     
     #Manipulation functions
@@ -134,7 +134,7 @@ class MSCommunity:
             all_metabolites[species.biomass_cpd] = -1*abundances[species.id]
         self.primary_biomass.add_metabolites(all_metabolites,combine=False)
         
-    def set_objective(self,target = None,minimize = False):
+    def set_objective(self,target = None,minimize = False): #!!! Mustn't a multilevel objective be set for community models?
         if target == None:
             target = self.primary_biomass.id
         sense = "max"
@@ -148,22 +148,22 @@ class MSCommunity:
     def constrain(self,element_uptake_limit = None, kinetic_coeff = None,modelseed_db_path = None):
         # applying uptake constraints
         self.element_uptake_limit = element_uptake_limit
-        if element_uptake_limit is not None:
+        if element_uptake_limit:
             self.pkgmgr.getpkg("ElementUptakePkg").build_package(element_uptake_limit)
         # applying kinetic constraints
         self.kinetic_coeff = kinetic_coeff
-        if kinetic_coeff is not None:
+        if kinetic_coeff:
             self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff,self)
         # applying FullThermo constraints
         self.modelseed_db_path = modelseed_db_path
-        if modelseed_db_path is not None:
+        if modelseed_db_path:
             self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_db_path':modelseed_db_path})
     
     #Utility functions
     def print_lp(self,filename = None):
-        if filename is None:
+        if not filename:
             filename = self.lp_filename
-        if filename is not None:
+        if filename:
             with open(filename+".lp", 'w') as out:
                 out.write(str(self.model.solver))
                 out.close()
@@ -177,9 +177,9 @@ class MSCommunity:
                              show_figure: bool = True             # specifies whether the figure will be printed to the console
                              ):
         #Check for solution
-        if solution == None:
+        if not solution:
             solution = self.solution 
-        if solution == None:
+        if not solution:
             logger.warning("No feasible solution!")
             return None
         
@@ -326,7 +326,7 @@ class MSCommunity:
         self.labels = networkx.get_edge_attributes(self.graph,'flux')
         networkx.draw_networkx_edge_labels(self.graph,self.pos,edge_labels=self.labels)
         
-        if export_directory is not None:
+        if export_directory:
             pyplot.savefig(os.path.join(export_directory, 'cross_feeding_diagram.svg'))
             self.cross_feeding_df.to_csv(os.path.join(export_directory, 'cross_feeding.csv'))
             
@@ -335,15 +335,15 @@ class MSCommunity:
     
     #Analysis functions
     def gapfill(self, media = None, target = None, minimize = False,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = [], suffix = None, solver = 'glpk'):
-        if target == None:
+        if not target:
             target = self.primary_biomass.id
         self.set_objective(target,minimize)
         gfname = FBAHelper.medianame(media)+"-"+target
-        if suffix is not None:
+        if suffix:
             gfname += f"-{suffix}"
         self.gapfillings[gfname] = MSGapfill(self.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist) 
         gfresults = self.gapfillings[gfname].run_gapfilling(media,target, solver = solver)
-        if gfresults is None:
+        if not gfresults:
             logger.critical("Gapfilling failed with the specified model, media, and target reaction.")
         return self.gapfillings[gfname].integrate_gapfill_solution(gfresults)
     
@@ -372,9 +372,9 @@ class MSCommunity:
     
     def predict_abundances(self,media=None,pfba=True,kinetic_coeff = None):
         with self.model:   # WITH, here, discards changes after each simulation
-            if kinetic_coeff == None:
+            if not kinetic_coeff:
                 kinetic_coeff = self.kinetic_coeff
-            if kinetic_coeff == None: #Kinetic coefficients must be used for this formulation to work
+            if not kinetic_coeff: #Kinetic coefficients must be used for this formulation to work
                 kinetic_coeff = 2000 
             self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff,self)
             
@@ -391,11 +391,12 @@ class MSCommunity:
     def run(self,media,pfba = None):
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         self.print_lp()
-        if (pfba == None and self.pfba == None) or pfba == True or self.pfba == True:
+        save_matlab_model(self.model, self.model.name+".mat")        
+        if pfba or self.pfba:
             self._set_solution(cobra.flux_analysis.pfba(self.model))
         else:
             self._set_solution(self.model.optimize())
-        if self.solution == None:
+        if not self.solution:
             return None
         logger.info(self.model.summary())
         return self.solution
@@ -403,7 +404,7 @@ class MSCommunity:
 
     #Internal functions
     def _compute_relative_abundance_from_solution(self,solution = None):
-        if solution == None and self.solution == None:
+        if not solution and not self.solution:
             logger.warning("No feasible solution!")
             return None
         data = {"Species":[],"Abundance":[]}

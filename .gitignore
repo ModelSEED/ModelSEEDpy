@@ -131,5 +131,8 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# Julia dev models
+*.mat
+
 # Pyre type checker
 .pyre/

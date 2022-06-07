@@ -47,10 +47,14 @@ def test_init():
             dfba.variables['time_series'],
             ]:
         assert type(dic) is dict
-    for lis in [dfba.met_ids,dfba.met_names]:
-        assert type(lis) is list
-    for bol in [dfba.verbose,dfba.printing]:
+    assert type(dfba.met_names) is list
+    for bol in [dfba.verbose,dfba.printing, dfba.warnings, dfba.jupyter]:
         assert type(bol) is bool
+        
+def test_lp():
+    dfba.lp('test')
+    assert os.path.exists('test.lp')
+    shutil.rmtree('test.lp')
         
 def test_simulate():
     for dic in [dfba.kinetics_data,dfba.defined_reactions]:
@@ -68,7 +72,9 @@ def test_simulate():
             dfba.total_time,
             dfba.variables['elapsed_time'],
             dfba.parameters['pH'],
-            dfba.parameters['temperature']
+            dfba.parameters['temperature'],
+            dfba.cellular_dry_mass_fg,
+            dfba.cellular_fL
             ]:
         assert isnumber(quant)
     for fig in [dfba.figure]:
