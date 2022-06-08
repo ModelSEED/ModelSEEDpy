@@ -37,7 +37,6 @@ and include the following:
    gapfillingpkg_api
    kbasemedia_api
    metabofba_api
-   msmodelutils_api
    proteomefitting_api
    reactionuse_api
    tfa_api
