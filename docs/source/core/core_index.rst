@@ -27,5 +27,14 @@ and include the following
 
 .. toctree::
 
+   biology_api
+   fbahelper_api
+   msgenomeclassifier_api
+   msmedia_api
+   msmodel_api
+   msmodelutils_api
+   predict_phenotypes_api
+   rpcclient_api
+   template_api
     
     
