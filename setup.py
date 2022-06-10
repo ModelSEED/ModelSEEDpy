@@ -17,9 +17,9 @@ setup(
     author_email='chenry@anl.gov',
     url='https://github.com/freiburgermsu/ModelSEEDpy',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs')),
+    packages=find_packages(exclude=('docs')),
     package_data={
-        'modelseedpy': ['config.cfg']
+        'modelseedpy': ['config.cfg', 'test_data/*'],
     },
     install_requires=[
         "networkx >= 2.4",

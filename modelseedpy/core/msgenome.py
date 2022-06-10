@@ -1,7 +1,6 @@
 import logging
 
 import re
-import copy
 from cobra.core.dictlist import DictList
 
 logger = logging.getLogger(__name__)
@@ -31,14 +30,15 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
         if line.startswith('>'):
             if seq:
                 features.append(seq)
-            seq_id = line[1:]
             desc = None
+            if not split:
+                seq_id = line[1:]
             if h_func:
-                seq_id, desc = h_func(seq_id)
+                seq_id, desc = h_func(line[1:])
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                #desc = header_data[1]
+                desc = header_data[1]
 
             seq = MSFeature(seq_id, "", desc)
         else:
@@ -82,9 +82,6 @@ class MSGenome:
 
     @staticmethod
     def from_protein_sequences_hash(sequences):
-        """
-
-        """
         features = []
         for seq_id in sequences:
             features.append(MSFeature(seq_id, sequences[seq_id]))

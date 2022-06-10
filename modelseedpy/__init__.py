@@ -45,16 +45,14 @@ from modelseedpy.core import (
     FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation
 )
 
-from modelseedpy.community import (MSCommunity, MSCompatibility, ElementUptakePkg, CommKineticPkg)
+from modelseedpy.community import (MSCommunity, MSCompatibility, CommKineticPkg)
 
 from modelseedpy.fbapkg import (
-    BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,BilevelPkg,
-    KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg,FlexibleBiomassPkg,
-    ProblemReplicationPkg,FullThermoPkg,MSPackageManager,ObjConstPkg,ChangeOptPkg
+    BaseFBAPkg, RevBinPkg, ReactionUsePkg, SimpleThermoPkg, TotalFluxPkg, BilevelPkg,
+    KBaseMediaPkg, FluxFittingPkg, ProteomeFittingPkg, GapfillingPkg, MetaboFBAPkg, FlexibleBiomassPkg,
+    ProblemReplicationPkg, FullThermoPkg, MSPackageManager, ObjConstPkg, ChangeOptPkg, ElementUptakePkg
 )
 
-from modelseedpy.multiomics import (
-    MSExpression
-)
+from modelseedpy.multiomics import MSExpression
 
 __version__ = "0.2.2"

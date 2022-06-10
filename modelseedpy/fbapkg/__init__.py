@@ -17,3 +17,4 @@ from modelseedpy.fbapkg.problemreplicationpkg import ProblemReplicationPkg
 from modelseedpy.fbapkg.fullthermopkg import FullThermoPkg
 from modelseedpy.fbapkg.objconstpkg import ObjConstPkg
 from modelseedpy.fbapkg.changeoptpkg import ChangeOptPkg
+from modelseedpy.fbapkg.elementuptakepkg import ElementUptakePkg

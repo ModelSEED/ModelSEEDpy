@@ -1,24 +1,9 @@
 import logging
-
-from modelseedpy.fbapkg.gapfillingpkg import GapfillingPkg
-from modelseedpy.fbapkg.kbasemediapkg import KBaseMediaPkg
-from cobra.core import Gene, Metabolite, Model, Reaction
-from optlang.symbolics import Zero, add
-from modelseedpy.core import FBAHelper
-import cobra
-import copy
-import re
-
-
-#from modelseedpy.core.msgenome import MSGenome
-# FIXME: fix unused imports
-import re
-import copy
-import cobra
-from cobra.core import Gene, Metabolite, Model, Reaction
-
 logger = logging.getLogger(__name__)
-
+from cobra.core import Reaction
+import cobra
+import re
+#from modelseedpy.core.msgenome import MSGenome
 
 class MSEditorAPI:
 
@@ -26,7 +11,11 @@ class MSEditorAPI:
     def remove_reactions(model, rxn_id_list = []):
         for rxn_id in rxn_id_list:
             if not model.reactions.has_id(rxn_id):
-                raise Exception('Reaction', rxn_id, 'is not in the model.')
+                compartment = re.search(f'(?<={rxn_id})(\_\w\d)', ' '.join([rxn.id for rxn in model.reactions]))
+                if not compartment:
+                    raise Exception('Reaction', rxn_id, 'is not in the model.')
+                else:
+                    rxn_id += compartment.group()
             model.remove_reactions([rxn_id])
 
     # edit reaction progam
@@ -87,7 +76,6 @@ class MSEditorAPI:
         return model.metabolites.get_by_id(metabolite_id).formula_weight
 
     @staticmethod
-
     def add_custom_reaction(model,rxn_id,MSEquation,gpr = None,genome = None):
         new_rxn = Reaction(id=rxn_id)
         # going on the assumption that all metabolites are present in the model
@@ -181,8 +169,6 @@ class MSEquation:
         def clean_ends(lst):
             """
             FIXME: use .strip
-            :param lst:
-            :return:
             """
             for i in range(len(lst)):
                 # remove whitespace from the front
