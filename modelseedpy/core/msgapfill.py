@@ -29,7 +29,7 @@ class MSGapfill:
         self.gapfill_models_by_index = {}
         self.gapfill_all_indecies_with_default_templates = True
         self.gapfill_all_indecies_with_default_models = True
-        self.blacklist = list(set(default_blacklist)|set(blacklist))
+        self.blacklist = list(set(default_blacklist+blacklist))
         self.lp_filename = None
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
@@ -72,7 +72,7 @@ class MSGapfill:
             logger.warning("No solution found for %s", media)
             return None
 
-        # self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() #!!! Does not exist
+        # self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() #!!! this function does not exist
         if self.test_conditions:
             self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions, self.last_solution, self.test_condition_iteration_limit)
             if self.last_solution is None:

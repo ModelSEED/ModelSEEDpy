@@ -77,7 +77,7 @@ This class manipulates and simulates community models:
 
 .. code-block:: python
 
- from modelseedpy.core.mscommunity import MSCommunity 
+ from modelseedpy.community import MSCommunity 
  mscom = MSCommunity(model, names=[], abundances=None, pfba = True, lp_filename = None)
 
 - *model* ``cobra.core.model.Model``: the CobraKBase model that will be simulated. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
@@ -145,13 +145,12 @@ The cross-feeding interactions amongst all of the members of the community model
 
 .. code-block:: python
 
- mscom.compute_interactions(solution = None, threshold=1)
+ cross_feeding = mscom.compute_interactions(solution = None, threshold=1)
 
 - *solution* ``cobra.core.solution.Solution``: the simulation solution that will be parsed to calculate the cross-feeding interactions. The solution from the last simulation, which is stored within the class, is used when the argument is ``None``.
 - *threshold* ``int``: the normalized flux threshold, above which the cross-feeding interactions will be considered.
-- *visualize* ``bool``: The calculated cross-feeding from the simulation results is expressed as a network diagram.
 
-**returns** ``pandas.core.frame.DataFrame`` A `Pandas DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`_ that provides the metabolite-level resolution of cross-feeding for each species in the community.
+**returns** *cross_feeding* ``pandas.core.frame.DataFrame`` A `Pandas DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`_ that provides the metabolite-level resolution of cross-feeding for each species in the community.
 
 
 ----------------------
@@ -230,12 +229,12 @@ The community model is simulated, with the :
 
 .. code-block:: python
 
- mscom.atp_correction(media = None, pfba = True)
+ solution = mscom.run(media = None, pfba = True)
 
 - *media* ``str``: the media of the model that will be used for gap-filling, where ``None`` defaults to a complete media. 
 - *pfba* ``bool``: signifies whether parsimonious FBA will be simulated.
 
-**return** ``cobra.core.solution.Solution`` The solution from simulation of the community model. 
+**return** *solution* ``cobra.core.solution.Solution`` The solution from simulation of the community model. 
 
 
 ----------------------

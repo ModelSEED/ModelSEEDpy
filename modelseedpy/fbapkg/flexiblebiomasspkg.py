@@ -65,14 +65,14 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 else:
                     object_stoichiometry[content[msid]] = self.parameters["bio_rxn"].metabolites[content[msid]]
                 total_coef += abs(object_stoichiometry[content[msid]])
-            if any([met_class == "rna", met_class == "dna"]) and refcpd["cpd00012"] != None and refcpd["cpd00001"] != None:
+            if any([met_class == "rna", met_class == "dna"]) and refcpd["cpd00012"] and refcpd["cpd00001"]:
                 add = True
                 object_stoichiometry[refcpd["cpd00012"]] = total_coef
                 object_stoichiometry[refcpd["cpd00001"]] = total_coef
-            if met_class == "protein" and refcpd["cpd00001"] != None:
+            if met_class == "protein" and refcpd["cpd00001"]:
                 add = True
                 object_stoichiometry[refcpd["cpd00001"]] = total_coef
-            if met_class == "energy" and all([x is not None for x in [refcpd["cpd00001"], refcpd["cpd00002"], refcpd["cpd00067"], refcpd["cpd00009"]]]):
+            if met_class == "energy" and all([refcpd["cpd00001"], refcpd["cpd00002"], refcpd["cpd00067"], refcpd["cpd00009"]]):
                 add = True
                 object_stoichiometry[refcpd["cpd00001"]] = -1*total_coef
                 object_stoichiometry[refcpd["cpd00002"]] = -1*total_coef

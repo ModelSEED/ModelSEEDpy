@@ -11,7 +11,6 @@ class MSGenomeClassifier:
         """
         :param genome: ModelSEED Genome to classify
         :param ontology_term: Ontology Term to classify (Example: RAST)
-        :return:
         """
         features = set()
         for feat in genome.features:
@@ -29,9 +28,6 @@ class MSGenomeClassifier:
 def load_classifier_from_folder(directory, filename):
     """
     TEMPORARY SOLUTION TO LOAD AN EXISTING CLASSIFIER
-    :param directory:
-    :param filename:
-    :return:
     """
     import pickle
     import json

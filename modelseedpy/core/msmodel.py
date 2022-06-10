@@ -1,7 +1,7 @@
 import logging
 import re
 from cobra.core import Model
-from pyeda.inter import expr
+from pyeda.inter import expr  # wheels must be specially downloaded and installed for Windows https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyeda
 
 logger = logging.getLogger(__name__)
 
@@ -65,11 +65,6 @@ def split_compartment_from_index(cmp_str: str):
 
 
 def get_cmp_token(compartments):
-    """
-
-    :param compartments:
-    :return:
-    """
     if len(compartments) == 0:
         logger.warning('The compartments parameter is empty. The "c" parameter is assumed.')
         return 'c'

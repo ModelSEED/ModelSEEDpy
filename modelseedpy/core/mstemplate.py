@@ -5,9 +5,7 @@ from enum import Enum
 from cobra.core import Metabolite, Reaction
 from cobra.core.dictlist import DictList
 from cobra.util import format_long_string
-from modelseedpy.core.msmodel import get_direction_from_constraints, \
-    get_reaction_constraints_from_direction, get_cmp_token
-from cobra.core.dictlist import DictList
+from modelseedpy.core.msmodel import get_direction_from_constraints, get_reaction_constraints_from_direction, get_cmp_token
 #from cobrakbase.kbase_object_info import KBaseObjectInfo
 
 logger = logging.getLogger(__name__)
@@ -52,12 +50,8 @@ class MSTemplateMetabolite:
     @staticmethod
     def from_dict(d):
         return MSTemplateMetabolite(
-            d['id'], d['formula'], d['name'],
-            d['defaultCharge'], d['mass'],
-            d['deltaG'], d['deltaGErr'],
-            d['isCofactor'] == 1,
-            d['abbreviation'],
-            d['aliases']
+            d['id'], d['formula'], d['name'], d['defaultCharge'], d['mass'],
+            d['deltaG'], d['deltaGErr'], d['isCofactor'] == 1, d['abbreviation'],d['aliases']
         )
 
     def get_data(self):
@@ -84,31 +78,26 @@ class MSTemplateMetabolite:
         return """
         <table>
             <tr>
-                <td><strong>Compound identifier</strong></td><td>{id}</td>
+                <td><strong>Compound identifier</strong></td><td>{self.id}</td>
             </tr><tr>
-                <td><strong>Name</strong></td><td>{name}</td>
+                <td><strong>Name</strong></td><td>{format_long_string(self.name)}</td>
             </tr><tr>
                 <td><strong>Memory address</strong></td>
-                <td>{address}</td>
+                <td>{'0x0%x' % id(self)}</td>
             </tr><tr>
-                <td><strong>Formula</strong></td><td>{formula}</td>
+                <td><strong>Formula</strong></td><td>{self.formula}</td>
             </tr><tr>
-                <td><strong>In {n_species} species</strong></td><td>
-                    {species}</td>
+                <td><strong>In {len(self.species)} species</strong></td><td>
+                    {format_long_string(', '.join(r.id for r in self.species), 200)}</td>
             </tr>
-        </table>""".format(id=self.id, name=format_long_string(self.name),
-                           formula=self.formula,
-                           address='0x0%x' % id(self),
-                           n_species=len(self.species),
-                           species=format_long_string(
-                               ', '.join(r.id for r in self.species), 200))
+        </table>"""
 
 
 class MSTemplateSpecies(Metabolite):
 
-    def __init__(self, comp_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
+    def __init__(self, cobra_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
-        super().__init__(comp_cpd_id, '', '', charge, compartment)
+        super().__init__(cobra_cpd_id, '', '', charge, compartment)
         self._template = template
         self.cpd_id = cpd_id
         self.max_uptake = max_uptake
@@ -122,7 +111,7 @@ class MSTemplateSpecies(Metabolite):
         :param index: compartment index
         :return: cobra.core.Metabolite
         """
-        if index is None:
+        if not index:
             index = ''
         cpd_id = f'{self.id}{index}'
         compartment = f'{self.compartment}{index}'
@@ -143,9 +132,9 @@ class MSTemplateSpecies(Metabolite):
         return ''
 
     @name.setter
-    def name(self, value):
+    def name(self, name):
         if self._template_compound:
-            self._template_compound.name = value
+            self._template_compound.name = name
 
     @property
     def formula(self):
@@ -154,9 +143,9 @@ class MSTemplateSpecies(Metabolite):
         return ''
 
     @formula.setter
-    def formula(self, value):
+    def formula(self, formula):
         if self._template_compound:
-            self._template_compound.formula = value
+            self._template_compound.formula = formula
 
     @staticmethod
     def from_dict(d, template=None):
@@ -183,25 +172,7 @@ class MSTemplateReaction(Reaction):
 
     def __init__(self, rxn_id: str, reference_id: str, name='', subsystem='', lower_bound=0.0, upper_bound=None,
                  reaction_type=TemplateReactionType.CONDITIONAL, gapfill_direction='=',
-                 base_cost=1000, reverse_penalty=1000, forward_penalty=1000,
-                 status='OK', reference_reaction_id=None):
-        """
-
-        :param rxn_id:
-        :param reference_id:
-        :param name:
-        :param subsystem:
-        :param lower_bound:
-        :param upper_bound:
-        :param reaction_type:
-        :param gapfill_direction:
-        :param base_cost:
-        :param reverse_penalty:
-        :param forward_penalty:
-        :param status:
-        :param reference_reaction_id: DO NOT USE THIS duplicate of reference_id
-        :param template:
-        """
+                 base_cost=1000, reverse_penalty=1000, forward_penalty=1000, status='OK'):
         super().__init__(rxn_id, name, subsystem, lower_bound, upper_bound)
         self.reference_id = reference_id
         self.GapfillDirection = gapfill_direction
@@ -209,8 +180,7 @@ class MSTemplateReaction(Reaction):
         self.reverse_penalty = reverse_penalty
         self.forward_penalty = forward_penalty
         self.status = status
-        self.type = reaction_type.value if type(reaction_type) == TemplateReactionType else reaction_type
-        self.reference_reaction_id = reference_reaction_id  # TODO: to be removed
+        self.type = reaction_type.value if isinstance(reaction_type, TemplateReactionType) else reaction_type
         self.complexes = DictList()
         self.templateReactionReagents = {}
         self._template = None
@@ -219,16 +189,12 @@ class MSTemplateReaction(Reaction):
     def gene_reaction_rule(self):
         return ' or '.join(map(lambda x: x.id, self.complexes))
 
-    @gene_reaction_rule.setter
-    def gene_reaction_rule(self, gpr):
-        pass
+    # @gene_reaction_rule.setter
+    # def gene_reaction_rule(self, gpr):
+    #     pass
 
     @property
     def compartment(self):
-        """
-
-        :return:
-        """
         return get_cmp_token(self.compartments)
 
     def to_reaction(self, model=None, index='0'):
@@ -265,9 +231,9 @@ class MSTemplateReaction(Reaction):
             lower_bound = d['lower_bound']
             upper_bound = d['upper_bound']
         reaction = MSTemplateReaction(
-            d['id'], d['reaction_ref'].split('/')[-1], d['name'], '', lower_bound, upper_bound,
-            d['type'], d['GapfillDirection'],
-            d['base_cost'], d['reverse_penalty'], d['forward_penalty'],
+            d['id'], d['reaction_ref'].split('/')[-1], d['name'], 
+            '', lower_bound, upper_bound,
+            d['type'], d['GapfillDirection'], d['base_cost'], d['reverse_penalty'], d['forward_penalty'],
             d['status'] if 'status' in d else None,
             d['reaction_ref'].split('/')[-1]
         )
@@ -280,49 +246,42 @@ class MSTemplateReaction(Reaction):
 
     @property
     def cstoichiometry(self):
-        return dict(((met.id, met.compartment), coefficient) for (met, coefficient) in self.metabolites.items())
+        return {(met.id, met.compartment): coefficient for (met, coefficient) in self.metabolites.items()}
 
-    def remove_role(self, role_id):
-        pass
+    # def remove_role(self, role_id):
+    #     pass
 
-    def remove_complex(self, complex_id):
-        pass
+    # def remove_complex(self, complex_id):
+    #     pass
 
     def get_roles(self):
-        """
-
-        :return:
-        """
         roles = set()
         for cpx in self.complexes:
-            for role in cpx.roles:
-                roles.add(role)
+            roles.update(cpx.roles)
         return roles
 
     def get_complexes(self):
         return self.complexes
 
     def get_complex_roles(self):
-        res = {}
+        roles = {}
         for complexes in self.data['templatecomplex_refs']:
             complex_id = complexes.split('/')[-1]
-            res[complex_id] = set()
+            roles[complex_id] = set()
             if self._template:
                 cpx = self._template.get_complex(complex_id)
-
                 if cpx:
                     for complex_role in cpx['complexroles']:
                         role_id = complex_role['templaterole_ref'].split('/')[-1]
-                        res[complex_id].add(role_id)
+                        roles[complex_id].add(role_id)
                 else:
-                    print('!!')
-        return res
+                    print(f'The complex for ID {complex_id} does not exist.')
+        return roles
 
     def get_data(self):
-        template_reaction_reagents = list(map(lambda x: {
-            'coefficient': x[1],
-            'templatecompcompound_ref': '~/compcompounds/id/' + x[0].id
-        }, self.metabolites.items()))
+        template_reaction_reagents = [
+            {'coefficient': coef, 'templatecompcompound_ref': '~/compcompounds/id/'+met.id} 
+            for met, coef in self.metabolites.items()]
         return {
             'id': self.id,
             'name': self.name,
@@ -365,21 +324,9 @@ class MSTemplateReaction(Reaction):
 
 class NewModelTemplateRole:
 
-    def __init__(self, role_id, name,
-                 features=None, source='', aliases=None):
-        """
-
-        :param role_id:
-        :param name:
-        :param features:
-        :param source:
-        :param aliases:
-        """
-        self.id = role_id
-        self.name = name
-        self.source = source
-        self.features = [] if features is None else features
-        self.aliases = [] if aliases is None else aliases
+    def __init__(self, role_id, name, features=[], source='', aliases=[]):
+        self.id = role_id, self.name = name, self.source = source
+        self.features = features, self.aliases = aliases
         self._complexes = set()
         self._template = None
 
@@ -426,19 +373,7 @@ class NewModelTemplateRole:
 class NewModelTemplateComplex:
 
     def __init__(self, complex_id, name, source='', reference='', confidence=0, template=None):
-        """
-
-        :param complex_id:
-        :param name:
-        :param source:
-        :param reference:
-        :param confidence:
-        :param template:
-        """
-        self.id = complex_id
-        self.name = name
-        self.source = source
-        self.reference = reference
+        self.id = complex_id, self.name = name, self.source = source, self.reference = reference
         self.confidence = confidence
         self.roles = {}
         self._template = template

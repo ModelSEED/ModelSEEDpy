@@ -5,7 +5,7 @@ CommKinetic
 CommKineticPkg()
 +++++++++++++++++++++
 
-This class applies kinetic constraints to the cross-feeding interactions within a community:
+This class applies kinetic constraints to the individual growth rates of community members:
 
 .. code-block:: python
 
@@ -33,5 +33,5 @@ Accessible content
 
 The ``CommKineticPkg`` class contains a couple of accessible content that may be useful for subsequent post-processing or troubleshooting:
 
-- *model* ``cobra.core.model.Model``: The cobrakbase model, with the corresponding constraints, that is simulated.
+- *model* ``cobra.core.model.Model``: The cobrakbase model, with the corresponding constraints, that is constrained.
 - *variables* & *parameters* ``dict``: Dictionaries of the linear programming variables and the simulation parameters, respectively.

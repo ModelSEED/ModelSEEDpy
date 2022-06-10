@@ -100,11 +100,11 @@ class MSModelUtil:
         self.model.add_reactions(drains)
         return drains
         
-    def reaction_scores(self):  #!!! Can this be deleted?
-        return {}
+    # def reaction_scores(self):  #!!! Can this be deleted?
+    #     return {}
     
     #adding gapfilling compounds to a KBase model saves gapfilled models 
-    def convert_cobra_compound_to_kbcompound(self, cpd, kbmodel = None):
+    def convert_cobra_compound_to_kbcompound(self, cpd, kbmodel, add_to_model = True):
         refid = "cpd00000"
         if re.search('cpd\d+_[a-z]+',cpd.id):
             refid = re.sub("_[a-z]\d+$","",cpd.id)
@@ -120,12 +120,12 @@ class MSModelUtil:
             "numerical_attributes": {},
             "string_attributes": {}
         }
-        if kbmodel:
+        if add_to_model:
             kbmodel["modelcompounds"].append(cpd_data)
         return cpd_data
 
     #adding gapfilling reactions to a KBase model saves gapfilled models   
-    def convert_cobra_reaction_to_kbreaction(self,rxn,kbmodel = None,cpd_hash = {},direction = "=",reaction_genes = {}):
+    def convert_cobra_reaction_to_kbreaction(self,rxn,kbmodel = None,cpd_hash = {},direction = "=",reaction_genes = {}, add_to_model = True):
         rxnref = "~/template/reactions/id/rxn00000_c"
         if re.search('rxn\d+_[a-z]+',rxn.id):
             rxnref = re.sub("\d+$","",f"~/template/reactions/id/{rxn.id}")
@@ -163,7 +163,7 @@ class MSModelUtil:
             rxn_data["modelReactionProteins"] = [{"note":"Added from gapfilling","modelReactionProteinSubunits":[],"source":"Unknown"}]
             rxn_data["modelReactionProteins"][0]["modelReactionProteinSubunits"] = [
                 {"note":"Added from gapfilling","optionalSubunit":0,"triggering":1,"feature_refs":["~/genome/features/id/"+best_gene],"role":"Unknown"}]
-        if kbmodel:
+        if add_to_model:
             kbmodel["modelreactions"].append(rxn_data)
         return rxn_data
     
@@ -191,7 +191,7 @@ class MSModelUtil:
             cpd_hash[cpd["id"]] = cpd
         for rxn in gapfilled_reactions["new"]:
             reaction = self.model.reactions.get_by_id(rxn)
-            kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,cpd_hash,newmodel,gapfilled_reactions["new"][rxn],reaction_genes)
+            kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,newmodel,cpd_hash,gapfilled_reactions["new"][rxn],reaction_genes)
             kbrxn["gapfill_data"][gfid] = dict()
             kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["new"][rxn],1,[]]
             rxn_table.append({

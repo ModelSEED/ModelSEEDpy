@@ -226,15 +226,14 @@ class FBAHelper:
     def _stoichiometry_to_string(stoichiometry):
         reactants, products = [], []
         for met, stoich in stoichiometry.items():
-            met_id = None
+            met_id = met
             if not isinstance(met, str):
                 if not FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067":
                     met_id = met.id
-            if met_id:
-                if stoich < 0:
-                    reactants.append(met_id)
-                else:
-                    products.append(met_id)
+            if stoich < 0:
+                reactants.append(met_id)
+            else:
+                products.append(met_id)
         return ["+".join(sorted(reactants))+"="+"+".join(sorted(products)),"+".join(sorted(products))+"="+"+".join(sorted(reactants))]
     
     @staticmethod
@@ -249,16 +248,16 @@ class FBAHelper:
             }
         stoichiometry = {}
         id_hash = FBAHelper.msid_hash(model)
-        for msid in coefs:
+        for msid, content in coefs.items():
             if msid not in id_hash:
                 logger.warning("Compound "+msid+" not found in model!")
                 return None
             else:
                 for cpd in id_hash[msid]:
-                    if cpd.compartment == coefs[msid][1]:
-                        stoichiometry[cpd] = coefs[msid][0]
+                    if cpd.compartment == content[1]:
+                        stoichiometry[cpd] = content[0]
         output = FBAHelper.find_reaction(model,stoichiometry)
-        if output != None and output[1] == 1: 
+        if output and output[1] == 1: 
             return {"reaction":output[0],"direction":">","new":False}
         cobra_reaction = Reaction("rxn00062_"+compartment, name="ATP hydrolysis", lower_bound=0, upper_bound=1000)
         cobra_reaction.annotation.update({"sbo":"SBO:0000176", "seed.reaction":"rxn00062"}) #biochemical reaction

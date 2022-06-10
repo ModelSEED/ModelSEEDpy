@@ -304,18 +304,18 @@ class GapfillingPkg(BaseFBAPkg):
         for cpd_id in new_exchange:
             drain_reaction = FBAHelper.add_drain_from_metabolite_id(
                 self.model, cpd_id, self.parameters["default_uptake"], self.parameters["default_excretion"])
-            if drain_reaction is not None and drain_reaction.id not in self.new_reactions:
+            if drain_reaction and drain_reaction.id not in self.new_reactions:
                 new_penalties[drain_reaction.id] = {
                     'added': 1,
                     'reverse': 1,
                     'forward': 1
-                }
+                } 
                 self.new_reactions[drain_reaction.id] = drain_reaction
         # Only run this on new demands so we don't read for all exchanges
         for cpd_id in new_demand:
             drain_reaction = FBAHelper.add_drain_from_metabolite_id(
                 self.model, cpd_id, self.parameters["default_uptake"], self.parameters["default_excretion"], "DM_")
-            if drain_reaction is not None and drain_reaction.id not in self.new_reactions:
+            if drain_reaction and drain_reaction.id not in self.new_reactions:
                 new_penalties[drain_reaction.id] = {
                     'added': 1,
                     'reverse': 1,
@@ -372,7 +372,7 @@ class GapfillingPkg(BaseFBAPkg):
         return cobra_rxn
     
     def binary_check_gapfilling_solution(self, solution=None, flux_values=None):
-        if solution is None:
+        if not solution:
             solution = self._compute_gapfilled_solution(flux_values)
         rxn_filter = {rxn_id:solution["reversed"][rxn_id] for rxn_id in solution["reversed"]}
         rxn_filter.update({rxn_id:solution["new"][rxn_id] for rxn_id in solution["new"]})

@@ -52,7 +52,7 @@ class MSMedia:
         """
         media = {}
         for compound in self.mediacompounds:
-            met_id = compound.id + cmp if cmp is not None else compound.id
+            met_id = compound.id + cmp if cmp else compound.id
             media[met_id] = (compound.lower_bound, compound.upper_bound)
         return media
     
@@ -60,8 +60,9 @@ class MSMedia:
         new_cpds = []
         for cpd in media.mediacompounds:
             newcpd = MediaCompound(cpd.id, -cpd.maxFlux, -cpd.minFlux, cpd.concentration)
-            if newcpd.id in self.mediacompounds and overwrite_overlap:
-                self.mediacompounds[newcpd.id] = newcpd
+            if newcpd.id in self.mediacompounds:
+                if overwrite_overlap:
+                    self.mediacompounds[newcpd.id] = newcpd
             else:
                 new_cpds.append(newcpd)
         self.mediacompounds += new_cpds

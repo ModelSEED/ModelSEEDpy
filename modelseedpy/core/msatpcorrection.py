@@ -18,13 +18,6 @@ class MSATPCorrection:
     def __init__(self, model, core_template, atp_medias,compartment="c0",
                  max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None):
         """
-
-        :param model:
-        :param core_template:
-        :param atp_medias:
-        :param compartment:
-        :param max_gapfilling:
-        :param gapfilling_delta:
         :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
         self.model = model
@@ -51,7 +44,6 @@ class MSATPCorrection:
     def disable_noncore_reactions(self):
         """
         Disables all noncore reactions in the model
-        :return:
         """
         #Must restore reactions before disabling to ensure bounds are not overwritten
         if len(self.noncore_reactions) > 0:
@@ -104,8 +96,6 @@ class MSATPCorrection:
     def evaluate_growth_media(self):
         """
         Determines how much gap filling each input test media requires to make ATP
-
-        :return:
         """
         self.disable_noncore_reactions()
         self.media_gapfill_stats = {}
@@ -137,7 +127,6 @@ class MSATPCorrection:
     def determine_growth_media(self):
         """
         Decides which of the test media to use as growth conditions for this model
-        :return:
         """
         self.selected_media = []
         best_score = None
@@ -159,7 +148,6 @@ class MSATPCorrection:
     def determine_growth_media2(self, max_gapfilling=None):
         """
         Decides which of the test media to use as growth conditions for this model
-        :return:
         """
         def scoring_function(media):
             return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * \
@@ -180,7 +168,6 @@ class MSATPCorrection:
     def apply_growth_media_gapfilling(self):
         """
         Applies the gapfilling to all selected growth media
-        :return:
         """
         for media in self.selected_media:
             if media in self.media_gapfill_stats and self.media_gapfill_stats[media]:
@@ -189,7 +176,6 @@ class MSATPCorrection:
     def expand_model_to_genome_scale(self):
         """
         Expands the model to genome-scale while preventing ATP overproduction
-        :return:
         """
         self.gapfilling_tests = []
         self.filtered_noncore = []
@@ -220,7 +206,6 @@ class MSATPCorrection:
     def restore_noncore_reactions(self,noncore = True,othercompartment = True):
         """
         Restores the bounds on all noncore reactions
-        :return:
         """
         # Restoring original reaction bounds
         if noncore:
@@ -239,7 +224,6 @@ class MSATPCorrection:
     def run_atp_correction(self):
         """
         Runs the entire ATP method
-        :return:
         """
         #Ensure all specified media work
         self.evaluate_growth_media()

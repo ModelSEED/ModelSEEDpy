@@ -48,8 +48,10 @@ and the path to this repository is passed as an argument to the corresponding pa
    :hidden:
 
    contents
-   core/core_index
-   community/community_index
-   fbapkg/fbapkg_index
+   build
+   gapfill
+   simulate
+   utilities
+   api
    
    

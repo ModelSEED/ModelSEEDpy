@@ -32,6 +32,7 @@ and include the following:
    bilevel_api
    changeoptpkg_api
    drainfluxes_api
+   elementuptakepkg_api
    flexiblebiomass_api
    fluxfitting_api
    gapfillingpkg_api
