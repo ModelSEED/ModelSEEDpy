@@ -35,7 +35,7 @@ Returns a ``MSTemplateMetabolite`` object from a metabolite dictionary:
 
 - *met_dict* ``dict``: A dictionary description of the ModelSEED compound that possesses the following keys ``"id"``, ``"formula"``, ``"name"``, ``"defaultCharge"``, ``"mass"``, ``"deltaG"``, ``"deltaGErr"``, ``"isCofactor"``, ``"abbreviation"``, & ``"aliases"``.
 
-**metabolite_template** ``modelseedpy.core.mstemplate.MSTemplateMetabolite``: The metabolite object that embodies the content from the dictionary.
+**Returns** *metabolite_template* ``modelseedpy.core.mstemplate.MSTemplateMetabolite``: The metabolite object that embodies the content from the dictionary.
 
 ------------------
 get_data()
@@ -326,4 +326,303 @@ Constructs strings of the template content.
  role_template_str = new_model_tmp.__str__()
  role_template_str = new_model_tmp.__repr_html__()
 
-**Returns** *met_template_str* ``str``: formulations of the ``MSTemplateMetabolite`` content.
+**Returns** *role_template_str* ``str``: formulations of the ``NewModelTemplateRole`` content.
+
++++++++++++++++++++++++++++++
+NewModelTemplateComplex
++++++++++++++++++++++++++++++
+
+A class that defines a template for a protein complex:
+
+.. code-block:: python
+
+ complex_template = NewModelTemplateComplex(complex_id, name, source='', reference='', confidence=0, template=None)
+
+- *complex_id*, *name*, *source*, *reference* ``str``: The ID, name, source, and reference of the complex that will be refined into a template.
+- *confidence* ``int``: A confidence rating of the 
+- *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template upon which the complex will be added.
+
+----------------
+from_dict()
+----------------
+
+Returns a complex template object that is constructed from a dictionary:
+
+.. code-block:: python
+
+ complex = complex_template.from_dict(complex_dict, template)
+
+- *complex_dict* ``dict``: A dictionary description of the ModelSEED compound that possesses the following keys ``"id"``, ``"name"``, ``"source"``, ``"reference"``, & ``"confidence"``.
+- *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template upon which the complex will be added.
+
+**Returns** *complex* ``modelseedpy.core.mstemplate.NewModelTemplateComplex``: A complex template object.
+
+-------------
+add_role()
+-------------
+
+Adds triggering and optional functions of a role to the dictionary of roles for the respective complex:
+
+.. code-block:: python
+
+ complex_template.add_role(role, triggering=True, optional=False)
+
+- *role* ``modelseedpy.core.mstemplate.NewModelTemplateRole``: The role that will be added to the collection of roles for the complex.
+- *triggering* & *optional* ``bool``: Descriptions of the role that will be added.
+
+-------------
+get_data()
+-------------
+
+Returns the complex template information:
+
+.. code-block:: python
+
+ complex_data = complex_template.get_data()
+
+**Returns** *complex_data* ``dict``: The complex template information.
+
+---------------------------------------
+__repr__() & __str__() & _repr_html_()
+---------------------------------------
+
+Constructs strings of the template content.
+
+.. code-block:: python
+
+ complex_template_str = complex_template.__repr__()
+ complex_template_str = complex_template.__str__()
+ complex_template_str = complex_template.__repr_html__()
+
+**Returns** *complex_template_str* ``str``: formulations of the ``NewModelTemplateComplex`` content.
+
+
++++++++++++++++++++++++++++++
+MSTemplateCompartment
++++++++++++++++++++++++++++++
+
+A class that defines template compartments:
+
+.. code-block:: python
+
+ complex_template = NewModelTemplateComplex(compartment_id: str, name: str, ph: float, hierarchy=0, aliases=None)
+
+- *compartment_id* & *name* ``str``: The ID and name of the compartment that will be refined into a template.
+- *ph* ``float``: The pH of the compartment.
+- *hierarchy* ``float``: The pH of the compartment.
+- *aliases* ``list``: The collection of alternative identifications for the compartment.
+
+----------------
+from_dict()
+----------------
+
+Returns a compartment template object that is constructed from a dictionary:
+
+.. code-block:: python
+
+ compartment = complex_template.from_dict(compartment_dict)
+
+- *compartment_dict* ``dict``: A dictionary description of the ModelSEED compound that possesses the following keys ``"id"``, ``"name"``, ``"pH"``, ``"hierarchy"``, & ``"aliases"``.
+
+**Returns** *compartment* ``modelseedpy.core.mstemplate.MSTemplateCompartment``: A compartment template object.
+
+-------------
+get_data()
+-------------
+
+Returns the compartment template information:
+
+.. code-block:: python
+
+ complex_data = complex_template.get_data()
+
+**Returns** *complex_data* ``dict``: The complex template information.
+
+
++++++++++++++++++++++++++++++
+MSTemplate
++++++++++++++++++++++++++++++
+
+A class that defines model templates, while leveraging the aforementioned classes:
+
+.. code-block:: python
+
+ template = MSTemplate(template_id, name='', domain='', template_type='', version=1, info=None, args=None)
+
+- *template_id*, *name*, *domain*, & *template_type* ``str``: The ID, name, domain, and type of the template that will be constructed.
+- *version* ``int``: The version of the template.
+
+-----------------------------------------------------------------------------------------------------------
+add_compartments(), add_roles(), add_complexes(), add_compounds(), add_comp_compounds(), & add_reactions()
+-----------------------------------------------------------------------------------------------------------
+
+Functions that add compartments, roles, complexes, compartment compounds, and reactions, respectively, to the developing template. These functions will only add the provided values to the template when they are all unique:
+
+.. code-block:: python
+
+ template.add_compartments(compartments)
+ template.add_roles(roles)
+ template.add_complexes(complexes)
+ template.add_compounds(compounds)
+ template.add_comp_compounds(comp_compounds)
+ template.add_reactions(reactions)
+
+- *compartments*, *roles*, *complexes*, *compounds*, *comp_compounds*, & *reactions* ``list``: The collections of compartments, roles, complexes, compounds, comp_compounds, and reactions that will be added to the template, provided that all list elements are not extant in the model.
+
+------------------------------
+get_complex_from_roles()
+------------------------------
+
+A function that yields a complex based upon a descriptive set of complex roles:
+
+.. code-block:: python
+
+ complex = template.get_complex_from_roles(roles)
+
+- *roles* ``list``: The collection of complex roles that will be used to discern the associated complex.
+
+**Returns** *complex* ``modelseedpy.core.mstemplate.NewModelTemplateComplex``: The complex that is discerned from the collection of roles.
+
+------------------------------
+get_last_id_value()
+------------------------------
+
+A function that yields the largest id from a collection of COBRA objects:
+
+.. code-block:: python
+
+ last_id = template.get_complex_from_roles(objects)
+
+- *objects* ``list``: The collection of COBRA objects whose IDs will be examined.
+
+**Returns** *last_id* ``int``: The largest ID from the collection of COBRA objects.
+
+------------------------------------------------
+get_complex(), get_reaction(), & get_role()
+------------------------------------------------
+
+A function that yields the largest id from a collection of COBRA objects:
+
+.. code-block:: python
+
+ complex = template.get_complex(obj_id)
+ reaction = template.get_reaction(obj_id)
+ role = template.get_role(obj_id)
+
+- *obj_id* ``str``: The COBRA ID whose associated complex, reaction, and role will be examined.
+
+**Returns** *complex* ``modelseedpy.core.mstemplate.NewModelTemplateComplex``: The complex that matches the COBRA object ID.
+**Returns** *reaction* ``cobra.core.reaction.Reaction``: The COBRA reaction that matches the ID.
+**Returns** *role* ``modelseedpy.core.mstemplate.NewModelTemplateRole``: The role that matches the COBRA objects.
+
+------------
+get_data()
+------------
+
+A function that returns the template data:
+
+.. code-block:: python
+
+ template_data = template.get_data()
+ 
+**Returns** *template_data* ``dict``: The template data organized into a dictionary structure.
+
+-----------------
+_repr_html_()
+-----------------
+
+Constructs and returns strings of the template content:
+
+.. code-block:: python
+
+ template_html = template.__repr_html__()
+ 
+**Returns** *template_html* ``str``: A str of the template data organized into HTML.
+
+
++++++++++++++++++++++++++++++
+MSTemplateBuilder
++++++++++++++++++++++++++++++
+
+A class that defines model templates, while leveraging the aforementioned classes:
+
+.. code-block:: python
+
+ template = MSTemplateBuilder(template_id, name='', domain='', template_type='', version=1, info=None,
+                 biochemistry=None, biomasses=None, pathways=None, subsystems=None)
+
+- *template_id*, *name*, *domain*, & *template_type* ``str``: The ID, name, domain, and type of the template that will be constructed.
+- *version* ``int``: The version of the template.
+- *info* ``str``: A description of the template that will be stored with the constructed template.
+
+----------------
+from_dict()
+----------------
+
+Returns a template builder object that is constructed from a dictionary:
+
+.. code-block:: python
+
+ builder = complex_template.from_dict(template_dict)
+
+- *template_dict* ``dict``: A dictionary description of the template, which possesses keys of ``"id"``, ``"name"``, ``"domain"``, ``"type"``, ``"__VERSION__"``, ``"compartments"``, ``"roles"``, ``"complexes"``, ``"compounds"``, ``"compcompounds"``, ``"reactions"``, ``"biochemistry_ref"``, & ``"biomasses"``. 
+
+**Returns** *builder* ``modelseedpy.core.mstemplate.MSTemplateBuilder``: The template builder object that was constructed from the dictionary.
+
+-----------------
+from_template()
+-----------------
+
+Returns a template builder object whose compartments are copied from an existing template:
+
+.. code-block:: python
+
+ builder = complex_template.from_dict(template)
+
+- *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template upon which the complex will be added.
+
+**Returns** *builder* ``modelseedpy.core.mstemplate.MSTemplateBuilder``: The template builder object that was partly copied from the existing template.
+
+-----------------
+with_role()
+-----------------
+
+Returns the complex reference for the given reaction and role IDs:
+
+.. code-block:: python
+
+ complex_ref = complex_template.with_role(template_rxn, role_ids, auto_complex=False)
+
+- *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template upon which the complex will be added.
+- *role_ids* ``list``: The collection of role IDs for the complex that will identify the corresponding complex ID.
+- *auto_complex* ``bool``: specifies whether a complex will be added from the roles if roles are not identified with an associated complex.
+
+**Returns** *complex_ref* ``str``: The complex reference path with the determined complex ID.
+
+----------------------
+with_compartment()
+----------------------
+
+Returns a matched compartment with the provided ID, otherwise the compartment is added to the MSTemplateBuilder object and the MSBuilder object is returned:
+
+.. code-block:: python
+
+ compartment = complex_template.with_compartment(cmp_id, name, ph=7, index='0')
+
+- *cmp_id*, *name*, & *index* ``str``: The ID, name, and index of the compartment that will be returned or added to the template.
+- *ph* ``float``: The pH of the corresponding compartment.
+
+**Returns** *compartment* ``str``: The compartment, or the first of numerous compartments, that matches the provided ID.
+
+-----------
+build()
+-----------
+
+The function that amalgamates the content of the MSTemplateBuilder object into a MSTemplate object:
+
+.. code-block:: python
+
+ template = complex_template.build()
+
+**Returns** *template* ``modelseedpy.core.mstemplate.MSTemplate``: The MSTemplate object that is constructed from the content of the MSTemplateBuilder object.
+

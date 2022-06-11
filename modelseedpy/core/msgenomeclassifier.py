@@ -3,8 +3,7 @@ from modelseedpy.ml.predict_phenotype import create_indicator_matrix
 
 class MSGenomeClassifier:
     def __init__(self, model, model_features):
-        self.features = model_features
-        self.model = model
+        self.model = model, self.features = model_features
 
     @staticmethod
     def extract_features_from_genome(genome, ontology_term):
@@ -26,9 +25,7 @@ class MSGenomeClassifier:
 
 
 def load_classifier_from_folder(directory, filename):
-    """
-    TEMPORARY SOLUTION TO LOAD AN EXISTING CLASSIFIER
-    """
+    """TEMPORARY SOLUTION TO LOAD AN EXISTING CLASSIFIER"""
     import pickle
     import json
     with open(f'{directory}/{filename}.pickle', 'rb') as fh:

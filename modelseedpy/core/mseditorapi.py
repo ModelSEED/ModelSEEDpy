@@ -9,9 +9,10 @@ class MSEditorAPI:
 
     @staticmethod
     def remove_reactions(model, rxn_id_list = []):
+        model_reactions = ' '.join([rxn.id for rxn in model.reactions]) # removed from loop for greater efficiency
         for rxn_id in rxn_id_list:
             if not model.reactions.has_id(rxn_id):
-                compartment = re.search(f'(?<={rxn_id})(\_\w\d)', ' '.join([rxn.id for rxn in model.reactions]))
+                compartment = re.search(f'(?<={rxn_id})(\_\w\d)', model_reactions)
                 if not compartment:
                     raise Exception('Reaction', rxn_id, 'is not in the model.')
                 else:
@@ -22,7 +23,7 @@ class MSEditorAPI:
     # ASSUMPTIONS:
     # an arrow will exist in the program, either =>, <=>, or <=
     @staticmethod
-    def edit_reaction(model, rxn_id, direction=None, gpr=None, genome=None):
+    def edit_reaction(model, rxn_id, direction=None, gpr=None):
         # Direction: =>, <=, or <=>
         if direction is not None:
             lower_bound = model.reactions.get_by_id(rxn_id).lower_bound
@@ -48,31 +49,27 @@ class MSEditorAPI:
 
         # Specify GPR as a string with boolean conditions (e.g. "(b0001 and b0002) or b1010").
         try:
-            if gpr is not None:
+            if gpr:
                 model.reactions.get_by_id(rxn_id).gene_reaction_rule = gpr
         except:
-            raise Exception('invalid gpr statement, check parentheses')  # not working, unsure exactly why
+            raise Exception(f'The gpr {gpr} is invalid. Perhaps check parentheses.')  # not working, unsure exactly why
     
     @staticmethod
-    def edit_biomass_compound(model,biomass_id,cpd_id,new_coef,rescale = 1):
+    def edit_biomass_compound(model,biomass_id,cpd_id,new_coef):
+        if cpd_id not in model.metabolites:
+            raise Exception('Metabolite', cpd_id, ' is not in the model.')
         if biomass_id in model.reactions:
-            if cpd_id in model.metabolites:
-                model.reactions.get_by_id(biomass_id).add_metabolites({model.metabolites.get_by_id(cpd_id): new_coef},
-                                                                      combine=False)
-            else:
-                raise Exception('Metabolite', cpd_id, ' is not in the model.')
+            model.reactions.get_by_id(biomass_id).add_metabolites(
+                    {model.metabolites.get_by_id(cpd_id): new_coef}, combine=False)
         else:  # if there is no biomass reaction
             biomass_rxn = Reaction(biomass_id)
             model.add_reaction(biomass_rxn)
-            if cpd_id in model.metabolites:
-                biomass_rxn.add_metabolites({model.metabolites.get_by_id(cpd_id): new_coef})
-            else:
-                raise Exception('Metabolite ', cpd_id, ' is not in the model.')
+            biomass_rxn.add_metabolites({model.metabolites.get_by_id(cpd_id): new_coef})
 
     @staticmethod
     def compute_molecular_weight(model, metabolite_id):
         if metabolite_id not in model.metabolites:
-            raise Exception('Error, metabolite', metabolite_id, 'not found in the model')
+            raise ValueError(f'The metabolite {metabolite_id} is not defined in the model')
         return model.metabolites.get_by_id(metabolite_id).formula_weight
 
     @staticmethod
