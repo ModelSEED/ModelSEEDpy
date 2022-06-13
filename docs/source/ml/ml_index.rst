@@ -1,4 +1,4 @@
-core
+ml
 ________________________________________________________________________
 
 |PyPI version| |License| |Downloads|
@@ -19,27 +19,12 @@ ________________________________________________________________________
    :target: https://pepy.tech/project/modelseedpy
    :alt: Downloads
 
-The ModelSEEDpy packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. These packages are imported via::
+These packages are imported via::
 
- from modelseedpy.core import *   
+ from modelseedpy.ml import *   
    
 and include the following
 
 .. toctree::
 
-   biology_api
-   fbahelper_api
-   gapfillinghelper_api
-   msbuilder_api
-   mseditorapi_api
-   msgenome_api
-   msgenomeclassifier_api
-   msgrowthphenotypes_api
-   msmedia_api
-   msmodel_api
-   msmodelutils_api
-   mstemplate_api
-   rpcclient_api
-   template_api
-    
-    
+   predict_phenotypes_api
