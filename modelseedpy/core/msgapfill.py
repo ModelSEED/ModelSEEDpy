@@ -1,47 +1,39 @@
 import logging
-import itertools
+logger = logging.getLogger(__name__)
+
 import cobra
 import re
-from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 
-logger = logging.getLogger(__name__)
-
-
-#Adding a few exception classes to handle different types of errors
 class GapfillingError(Exception):
     """Error in model gapfilling"""
     pass
-
 
 class MSGapfill:
 
     def __init__(self, model, default_gapfill_templates=[], default_gapfill_models=[],
                  test_conditions=[], reaction_scores={}, blacklist=[]):
+        self.gapfill_templates_by_index, self.gapfill_models_by_index = {}, {}
         self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]
-        self.model = model
-        self.gfmodel = None
-        self.model_penalty = 1
-        self.default_gapfill_models = default_gapfill_models
-        self.default_gapfill_templates = default_gapfill_templates
-        self.gapfill_templates_by_index = {}
-        self.gapfill_models_by_index = {}
+        
         self.gapfill_all_indecies_with_default_templates = True
         self.gapfill_all_indecies_with_default_models = True
+        self.gfmodel = self.lp_filename = self.last_solution = None
+        
+        self.default_gapfill_templates = default_gapfill_templates
         self.blacklist = list(set(default_blacklist+blacklist))
-        self.lp_filename = None
+        self.default_gapfill_models = default_gapfill_models
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
-        self.last_solution = None
+        self.model = model
+        self.model_penalty = 1
         
     def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, solver = 'optland-cplex'):
-        if target != None:
+        if target:
             self.model.objective = self.model.problem.Objective(
-                self.model.reactions.get_by_id(target).flux_expression, 
-                direction='max'
-            )
+                self.model.reactions.get_by_id(target).flux_expression, direction='max')
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
         self.gfmodel.solver = solver
         pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
@@ -91,26 +83,26 @@ class MSGapfill:
                 rxn.lower_bound = -100
         for rxn_id in solution["new"]:
             rxn = self.gfmodel.reactions.get_by_id(rxn_id)
-            rxn = rxn.copy()
-            self.model.add_reactions([rxn])
+            new_rxn = rxn.copy()
+            self.model.add_reactions([new_rxn])
             coreid = re.sub(r'_[a-z]\d+$', '', rxn_id)
             if coreid in self.reaction_scores:
                 bestgene = None
                 for gene in self.reaction_scores[coreid]:
-                    if bestgene == None or self.reaction_scores[coreid][gene] > self.reaction_scores[coreid][bestgene]:
+                    if not bestgene or self.reaction_scores[coreid][gene] > self.reaction_scores[coreid][bestgene]:
                         bestgene = gene
-                rxn = self.model.reactions.get_by_id(rxn_id)
-                rxn.gene_reaction_rule = bestgene
+                new_rxn = self.model.reactions.get_by_id(rxn_id)
+                new_rxn.gene_reaction_rule = bestgene
             if solution["new"][rxn_id] == ">":
-                rxn.upper_bound = 100
-                rxn.lower_bound = 0 
+                new_rxn.upper_bound = 100
+                new_rxn.lower_bound = 0 
             else:
-                rxn.upper_bound = 0
-                rxn.lower_bound = -100
+                new_rxn.upper_bound = 0
+                new_rxn.lower_bound = -100
         return self.model
     
     @staticmethod
-    def gapfill(model,media = None,target_reaction = "bio1",default_gapfill_templates = [],default_gapfill_models = [],test_conditions = [],reaction_scores = {},blacklist = []):
+    def gapfill(model, media=None, target_reaction="bio1", default_gapfill_templates=[], default_gapfill_models=[], test_conditions=[], reaction_scores={}, blacklist=[]):
         gapfiller = MSGapfill(model,default_gapfill_templates,default_gapfill_models,test_conditions,reaction_scores,blacklist)
         gfresults = gapfiller.run_gapfilling(media,target_reaction)
         return gapfiller.integrate_gapfill_solution(gfresults)

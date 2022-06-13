@@ -1,15 +1,14 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-from modelseedpy.core.msmodelutl import metabolite_msid, MSModelUtil
+from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
 #from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
-from modelseedpy.core import MSATPCorrection, MSGapfill, FBAHelper
+from modelseedpy.core import MSATPCorrection
 from cobra import Model, Reaction, Metabolite
 from cobra.core.dictlist import DictList
 from cobra.io import save_matlab_model
 from itertools import combinations
 from optlang.symbolics import Zero
-from cobra.core import Reaction
 from matplotlib import pyplot
 from pandas import DataFrame
 import logging
@@ -181,7 +180,7 @@ class MSCommunity:
                         met.id = output[0]+"_"+output[1]+str(index)
                 if met.id not in newmodel.metabolites:
                     new_metabolites.append(met)
-                    if metabolite_msid(met) == "cpd11416":
+                    if met.id == "cpd11416":
                         biomass_compounds.append(met)
             #Rename reactions
             for rxn in model.reactions:

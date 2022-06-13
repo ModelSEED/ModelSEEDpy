@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 class MSGrowthPhenotype:
     def __init__(self, obj_id, media=None, growth=None, gene_ko=[], additional_compounds=[], parent=None, name=None):
-        self.id = obj_id, self.name = name, self.media = media, self.growth = growth, self.gene_ko = gene_ko
-        self.additional_compounds = additional_compounds, self.parent = parent, self.gapfilling = None
+        self.id = obj_id; self.name = name; self.media = media; self.growth = growth; self.gene_ko = gene_ko
+        self.additional_compounds = additional_compounds; self.parent = parent; self.gapfilling = None
         self.name = name or obj_id
 
     def build_media(self):
@@ -73,7 +73,7 @@ class MSGrowthPhenotype:
     
 class MSGrowthPhenotypes:
     def __init__(self, base_media=None, base_uptake=0, base_excretion=1000): 
-        self.base_media = base_media, self.base_uptake = base_uptake, self.base_excretion = base_excretion
+        self.base_media = base_media; self.base_uptake = base_uptake; self.base_excretion = base_excretion
         self.phenotypes = DictList()
 
     @staticmethod

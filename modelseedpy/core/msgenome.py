@@ -39,7 +39,7 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
 
 class MSFeature:
     def __init__(self, feature_id, sequence, description=None):
-        self.id = feature_id, self.seq = sequence
+        self.id = feature_id; self.seq = sequence
         self.description = description  # temporary replace with proper parsing
         self.ontology_terms = {}
         self.aliases = []

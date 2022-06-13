@@ -29,7 +29,7 @@ class KBaseMediaPkg(BaseFBAPkg):
                 self.parameters["default_uptake"] = 0
             if self.parameters["default_excretion"] is None:
                 self.parameters["default_excretion"] = 100    
-        if self.parameters["media"] is None and self.parameters["default_uptake"] == 0:
+        if not self.parameters["media"] and self.parameters["default_uptake"] == 0:
             self.parameters["default_uptake"] = 100
         
         #First initializing all exchanges to default uptake and excretion

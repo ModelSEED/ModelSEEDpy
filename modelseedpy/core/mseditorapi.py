@@ -133,8 +133,8 @@ class MSEditorAPI:
         model.add_reactions([source_model.reactions.get_by_id(rxn.id) for rxn in source_model.reactions if rxn not in model.reactions])
 
 class MSEquation:
-    def __init__(self, stoichiometry, direction):
-        self.equation = stoichiometry, self.direction = direction
+    def __init__(self, stoichiometry, direction = None):
+        self.equation = stoichiometry; self.direction = direction
 
     @staticmethod
     def build_from_palsson_string(equation_string, default_group='c'):  # add default group
@@ -171,15 +171,17 @@ class MSEquation:
         if '=' not in equation_string:
             raise ValueError(f"Error: The '=' character is missing; hence, the reaction string {equation_string} cannot be split.")
         if '<=>' in equation_string:
-            ret_str = '='
+            direction = '='
         elif '=>' in equation_string: 
-            ret_str = '>'
+            direction = '>'
         elif '<=' in equation_string:
-            ret_str = '<'
+            direction = '<'
+        else:
+            direction = '?'
 
         # get substrings for either side of the equation
         reactants_substring_list = equation_string[0:equation_string.find('=') - 1].split('+')
         products_substring_list = equation_string[equation_string.find('=') + 2:len(equation_string)].split('+')
         reactant_dict = get_coef_and_group([x.strip() for x in reactants_substring_list], {}, -1)
         products_dict = get_coef_and_group([x.strip() for x in products_substring_list], reactant_dict, 1)
-        return MSEquation(reactant_dict.update(products_dict), ret_str)
+        return MSEquation(reactant_dict.update(products_dict), direction)

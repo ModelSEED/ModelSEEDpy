@@ -411,7 +411,7 @@ class GapfillingPkg(BaseFBAPkg):
     def run_test_conditions(self, condition_list, solution = None, max_iterations = 10):
         reaction_list, filtered_list = [], []
         if solution == None:
-            solution = self._compute_gapfilled_solution(flux_values)
+            solution = self._compute_gapfilled_solution()
         for rxnid in solution["reversed"]:
             reaction_list.append([self.model.reactions.get_by_id(rxnid),solution["reversed"][rxnid]])
         for rxnid in solution["new"]:

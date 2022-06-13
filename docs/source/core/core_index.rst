@@ -30,9 +30,11 @@ and include the following
    biology_api
    fbahelper_api
    gapfillinghelper_api
+   msatpcorrection_api
    msbuilder_api
    mseditorapi_api
    msgenome_api
+   msgapfill_api
    msgenomeclassifier_api
    msgrowthphenotypes_api
    msmedia_api

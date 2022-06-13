@@ -105,11 +105,12 @@ Redefining the objective to the minimum sum of the reaction fluxes that are in t
 
 .. code-block:: python
 
- gapfill.binary_check_gapfilling_solution(solution=None, flux_values=None)
+ check_solution = gapfill.binary_check_gapfilling_solution(solution=None, flux_values=None)
 
 - *solution* ``cobra.core.solution.Solution``: The FBA solution from a simulation of the respective model. 
 - *flux_values* ``dict``: The forward and reverse fluxes (``values``) are stored within "forward" and "reverse" keys for the IDs of all reactions (``keys``).
 
+**Returns** *check_solution* ``dict``: The collection of "<" or ">" directions for all reversed reactions in the model that are described with gapfilling penalties.
 
 ----------------------------------------------
 run_test_conditions()
