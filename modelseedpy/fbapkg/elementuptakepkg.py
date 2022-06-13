@@ -13,13 +13,13 @@ class ElementUptakePkg(BaseFBAPkg):
     def build_package(self,element_limits):
         for element, limit in element_limits.items():
             if element not in self.variables["elements"]:
-                self._build_variable(element, limit)
-                self._build_constraint(element)
+                self.build_variable(element, limit)
+                self.build_constraint(element)
                    
-    def _build_variable(self,element,limit):
+    def build_variable(self,element,limit):
         return BaseFBAPkg.build_variable(self,"elements",0,limit,"continuous",element)
     
-    def _build_constraint(self,element):
+    def build_constraint(self,element):
         coef = {self.variables["elements"][element] : -1}
         for reaction in self.model.reactions:
             if reaction.id[0:3] == "EX_":

@@ -18,9 +18,9 @@ class CommKineticPkg(BaseFBAPkg):
             "community":community_model if community_model else MSCommunity(self.model)
         })
         for species in self.parameters["community"].species:
-            self._build_constraint(species)
+            self.build_constraint(species)
 
-    def _build_constraint(self,species):
+    def build_constraint(self,species):
         coef = {species.biomasses[0].forward_variable:-1*self.parameters["kinetic_coef"]}
         for reaction in self.model.reactions:
             if int(FBAHelper.rxn_compartment(reaction)[1:]) == species.index and reaction != species.biomasses[0]:

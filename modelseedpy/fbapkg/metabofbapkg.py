@@ -21,11 +21,11 @@ class MetaboFBAPkg(BaseFBAPkg):
         for peak_data in self.parameters['peaks']: 
             peak_hash[peak_data["id"]] = peak_data
             self.find_metabolites_matching_peak(peak_data)
-            self._build_variable(peak_data,"pk")
+            self.build_variable(peak_data,"pk")
             for met in peak_data["metabolites"]:
-                self._build_variable(met,"met")
-                self._build_constraint(met,"metc")
-            self._build_constraint(peak_data,"pkc")
+                self.build_variable(met,"met")
+                self.build_constraint(met,"metc")
+            self.build_constraint(peak_data,"pkc")
         if parameters["set_objective"]:
             metabolite_objective = self.model.problem.Objective(Zero, direction="max")
             obj_coef = dict()
@@ -37,13 +37,13 @@ class MetaboFBAPkg(BaseFBAPkg):
             self.model.objective = metabolite_objective
             metabolite_objective.set_linear_coefficients(obj_coef)
     
-    def _build_variable(self,cobra_obj,obj_type):
+    def build_variable(self,cobra_obj,obj_type):
         if obj_type == "met":
             return BaseFBAPkg.build_variable(self,obj_type,0,1,"continuous",cobra_obj)
         elif obj_type == "pk":
             return BaseFBAPkg.build_variable(self,obj_type,0,1,"continuous",cobra_obj["id"])
     
-    def _build_constraint(self,cobra_obj,obj_type):
+    def build_constraint(self,cobra_obj,obj_type):
         #TODO: need to determine coefficients
         if obj_type == "metc":
             return BaseFBAPkg.build_constraint(self,"metc",0,0,{self.variables["met"][cobra_obj.id]:1},cobra_obj)

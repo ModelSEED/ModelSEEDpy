@@ -105,7 +105,7 @@ class GapfillingHelper():
                     rxn_obj = model.reactions.get_by_id(rxn.id())
                 else:
                     rxn_obj = model.add_reactions([rxn])
-                self._set_reaction_bounds_from_direction(rxn_obj,reactions[rxn]) 
+                self.set_reaction_bounds_from_direction(rxn_obj,reactions[rxn]) 
                 for test in tests:
                     testmodel = model
                     with testmodel:
@@ -134,9 +134,9 @@ class GapfillingHelper():
         for i, val in enumerate(indexlist):
             if val > 10:
                 if extend_with_template:
-                    gapfilling_penalties.update(self._temp_extend_model_index_for_gapfilling(i,input_templates))
+                    gapfilling_penalties.update(self.temp_extend_model_index_for_gapfilling(i,input_templates))
                 if i < len(source_models) and source_models[i]:
-                    gapfilling_penalties.update(self._mdl_extend_model_index_for_gapfilling(i,source_models[i],model_penalty))
+                    gapfilling_penalties.update(self.mdl_extend_model_index_for_gapfilling(i,source_models[i],model_penalty))
         #Rescaling penalties by reaction scores and saving genes
         for reaction in gapfilling_penalties:
             rxnid = reaction.split("_")[0]
@@ -154,7 +154,7 @@ class GapfillingHelper():
         return gapfilling_penalties
 
     #Possible new function to add to the KBaseFBAModelToCobraBuilder to extend a model with a template for gapfilling for a specific index
-    def _mdl_extend_model_index_for_gapfilling(self, model, index, source_model, model_penalty):
+    def mdl_extend_model_index_for_gapfilling(self, model, index, source_model, model_penalty):
         new_metabolites, new_reactions, new_penalties, local_remap = {}, {}, {}, {}
         new_exchange, new_demand = [], []
         comp = re.compile('(.*_*)(.)\d+$')
@@ -240,7 +240,7 @@ class GapfillingHelper():
         return new_penalties
 
     #Possible new function to add to the KBaseFBAModelToCobraBuilder to extend a model with a template for gapfilling for a specific index
-    def _temp_extend_model_index_for_gapfilling(self,index,input_templates = []):
+    def temp_extend_model_index_for_gapfilling(self,index,input_templates = []):
         new_metabolites, new_reactions, new_penalties = {}, {}, {}
         new_exchange, new_demand = [], []
         template = None
@@ -324,7 +324,7 @@ class GapfillingHelper():
         if rxn_id.startswith('rxn'):
             cobra_reaction.annotation["seed.reaction"] = id.split("_")[0]
         
-        cobra_reaction.add_metabolites(self._convert_modelreaction_stoichiometry(reaction))
+        cobra_reaction.add_metabolites(self.convert_modelreaction_stoichiometry(reaction))
         cobra_reaction.gene_reaction_rule = reaction.gene_reaction_rule
         for genes in reaction.get_gpr():
             for gene in genes:
@@ -346,14 +346,14 @@ class GapfillingHelper():
         met.annotation.update(metabolite.annotation)
         return met
     
-    def _convert_modelreaction_stoichiometry(self, reaction):
+    def convert_modelreaction_stoichiometry(self, reaction):
         object_stoichiometry = {}
         for met_id in reaction.stoichiometry:
             if met_id in self.metabolites_remap:
                 object_stoichiometry[self.cobramodel.metabolites.get_by_id(self.metabolites_remap[met_id])] = reaction.stoichiometry[met_id]
         return object_stoichiometry
     
-    def _create_binary_variables(self,rxnobj,forward = True,reverse = True):
+    def create_binary_variables(self,rxnobj,forward = True,reverse = True):
         if rxnobj.id not in self.binary_flux_variables: #!!! Where are binary_flux_variables and binary_flux_constraints defined?
             self.binary_flux_variables[rxnobj.id] = dict()
             self.binary_flux_constraints[rxnobj.id] = dict()
@@ -372,14 +372,14 @@ class GapfillingHelper():
     
     def binary_check_gapfilling_solution(self,gapfilling_penalties,add_solution_exclusion_constraint):
         objcoef = {}
-        flux_values = self._compute_flux_values_from_variables()
+        flux_values = self.compute_flux_values_from_variables()
         for rxnobj in self.cobramodel.reactions:
             if rxnobj.id in gapfilling_penalties:
                 if "reverse" in gapfilling_penalties[rxnobj.id] and flux_values[rxnobj.id]["reverse"] > Zero:
-                    self._create_binary_variables(rxnobj, forward=False)
+                    self.create_binary_variables(rxnobj, forward=False)
                     objcoef[self.binary_flux_variables[rxnobj.id]["reverse"]] = 1
                 if "forward" in gapfilling_penalties[rxnobj.id] and flux_values[rxnobj.id]["forward"] > Zero:
-                    self._create_binary_variables(rxnobj, reverse=False)
+                    self.create_binary_variables(rxnobj, reverse=False)
                     objcoef[self.binary_flux_variables[rxnobj.id]["forward"]] = 1
         with self.cobramodel:
             #Setting all gapfilled reactions not in the solution to zero
@@ -395,13 +395,13 @@ class GapfillingHelper():
             with open('GapfillBinary.lp', 'w') as out:
                 out.write(str(self.cobramodel.solver))
             self.cobramodel.optimize()
-            flux_values = self._compute_flux_values_from_variables()
+            flux_values = self.compute_flux_values_from_variables()
         if add_solution_exclusion_constraint:
-            self._add_binary_solution_exclusion_constraint(flux_values)
+            self.add_binary_solution_exclusion_constraint(flux_values)
         return flux_values
     
     #Adds a constraint that eliminates a gapfilled solution from feasibility so a new solution can be obtained
-    def _add_binary_solution_exclusion_constraint(self,flux_values):
+    def add_binary_solution_exclusion_constraint(self,flux_values):
         solution_coef = {}
         solution_size = 0
         for reaction, direction in self.binary_flux_variables.items():
@@ -502,7 +502,7 @@ class GapfillingHelper():
             lb=0, ub=0, name="old_objective_constraint")
         self.cobramodel.add_cons_vars([old_obj_variable, old_obj_constraint])
     
-    def _compute_flux_values_from_variables(self):
+    def compute_flux_values_from_variables(self):
         flux_values = {}
         for rxnobj in self.cobramodel.reactions:
             flux_values[rxnobj.id] = {}
@@ -511,7 +511,7 @@ class GapfillingHelper():
         return flux_values
             
     def compute_gapfilled_solution(self, penalty_hash, flux_values = None):
-        flux_values = flux_values or self._compute_flux_values_from_variables()
+        flux_values = flux_values or self.compute_flux_values_from_variables()
         directions = {"reversed" : {},"new" : {}}
         for reaction in self.cobramodel.reactions:
             if reaction.id in penalty_hash:
@@ -604,7 +604,7 @@ class GapfillingHelper():
                     rxn_obj = self.cobramodel.reactions.get_by_id(rxn.id)
                 else:
                     rxn_obj = self.cobramodel.add_reactions([rxn])
-                self._set_reaction_bounds_from_direction(rxn_obj,reactions[rxn])
+                self.set_reaction_bounds_from_direction(rxn_obj,reactions[rxn])
                 for test in tests:
                     testmodel = model
                     with testmodel:
@@ -616,7 +616,7 @@ class GapfillingHelper():
                                 filtered_tests.update({rxn_obj:reactions[rxn]})
         return filtered_tests
     
-    def _set_reaction_bounds_from_direction(self,reaction,direction,add=False):
+    def set_reaction_bounds_from_direction(self,reaction,direction,add=False):
         if direction == "<": 
             reaction.lower_bound = -100
             if add:

@@ -18,20 +18,20 @@ class MSModelUtil:
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         self.metabolite_hash = self.search_metabolite_hash = None
     
-    def _build_metabolite_hash(self):
+    def build_metabolite_hash(self):
         self.metabolite_hash = {}
         self.search_metabolite_hash = {}
         for met in self.model.metabolites:
-            self._add_name_to_metabolite_hash(met.id,met)
-            self._add_name_to_metabolite_hash(met.name,met)
+            self.add_name_to_metabolite_hash(met.id,met)
+            self.add_name_to_metabolite_hash(met.name,met)
             for item in met.annotation.values():
                 if isinstance(item, list):
                     for entry in item:
-                        self._add_name_to_metabolite_hash(entry,met)
+                        self.add_name_to_metabolite_hash(entry,met)
                 else:
-                    self._add_name_to_metabolite_hash(item,met)
+                    self.add_name_to_metabolite_hash(item,met)
     
-    def _add_name_to_metabolite_hash(self,name,met):
+    def add_name_to_metabolite_hash(self,name,met):
         if name not in self.metabolite_hash:
             self.metabolite_hash[name] = []
         self.metabolite_hash[name].append(met)
@@ -42,7 +42,7 @@ class MSModelUtil:
         
     def find_met(self,name):
         if self.metabolite_hash == None:
-            self._build_metabolite_hash()
+            self.build_metabolite_hash()
         if name in self.metabolite_hash:
             return self.metabolite_hash[name]
         sname = search_name(name)
@@ -66,7 +66,7 @@ class MSModelUtil:
     
     def add_missing_exchanges(self,media):
         output, exchange_list = [], []
-        self._build_metabolite_hash()
+        self.build_metabolite_hash()
         for mediacpd in media.mediacompounds:
             mets = self.find_met(mediacpd.id)
             if len(mets) > 0:

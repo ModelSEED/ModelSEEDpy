@@ -23,20 +23,20 @@ class ChangeOptPkg(BaseFBAPkg):
             if rxnid in self.model.reactions:
                 print("FOUND!")
                 rxn = self.model.reactions.get_by_id(rxnid)
-                var = self._build_variable("bgoal",rxn)
+                var = self.build_variable("bgoal",rxn)
                 obj_coef[var] = target_values[rxnid]["objcoef"]
-                self._build_constraint("bgoalc",rxn)    
+                self.build_constraint("bgoalc",rxn)    
         # setting the goal objective if build_objective is true
         if build_objective:
             self.model.objective = goal_objective
             goal_objective.set_linear_coefficients(obj_coef)
     
-    def _build_variable(self,obj_type,cobra_obj):
+    def build_variable(self,obj_type,cobra_obj):
         if obj_type == "bgoal":
             goal = self.parameters["target_values"][cobra_obj.id]
             return BaseFBAPkg.build_variable(self,obj_type,0,1,"binary",cobra_obj.id+goal["direction"])
                     
-    def _build_constraint(self,obj_type,cobra_obj):
+    def build_constraint(self,obj_type,cobra_obj):
         if obj_type == "bgoalc":
             #For lower: goal - vi + 1000 - 1000 gi >= 0
             #For higher: vi - goal  + 1000 - 1000 gi >= 0

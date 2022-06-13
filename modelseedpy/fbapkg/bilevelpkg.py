@@ -22,7 +22,7 @@ class BilevelPkg(BaseFBAPkg):
         #Creating new objective coefficient and bound variables
         if self.parameters["binary_variable_count"] > 0:
             for reaction in self.model.reactions: 
-                var = self._build_variable("flxcmp",reaction,None)
+                var = self.build_variable("flxcmp",reaction,None)
                 
         #Retrieving model data with componenent flux variables
         #Using the JSON calls because get_linear_coefficients is REALLY slow
@@ -36,15 +36,15 @@ class BilevelPkg(BaseFBAPkg):
         #Adding binary variables and constraints which should not be included in dual formulation
         if self.parameters["binary_variable_count"] > 0:
             for reaction in self.model.reactions: 
-                self._build_variable("bflxcmp",reaction,None)
-                self._build_constraint("bflxcmp",reaction,None,None,None)    
+                self.build_variable("bflxcmp",reaction,None)
+                self.build_constraint("bflxcmp",reaction,None,None,None)    
                 
         #Now implementing dual variables and constraints
         varhash, coefficients, obj_coef = {}, {}, {}
         for var in variables:
             varhash[var.name] = var
         for const in list(self.model.solver.constraints):
-            var = self._build_variable("dualconst",const,obj_coef)
+            var = self.build_variable("dualconst",const,obj_coef)
             if all([var != None, const.name in consthash, "expression" in consthash[const.name], "args" in consthash[const.name]["expression"]]):
                 for item in consthash[const.name]["expression"]["args"]:
                     if all(["args" in item, len(item["args"]) >= 2, item["args"][1]["name"] in varhash]):
@@ -54,20 +54,20 @@ class BilevelPkg(BaseFBAPkg):
                         coefficients[var_name][var] = item["args"][0]["value"]
         for var in variables:
             if var.type == "continuous":
-                dvar = self._build_variable("duallb",var,obj_coef)   #!!! why is this repeated twice?
+                dvar = self.build_variable("duallb",var,obj_coef)   #!!! why is this repeated twice?
                 if dvar != None:
                     if var not in coefficients:
                         coefficients[var] = {}
                     coefficients[var][dvar] = 1
-                dvar = self._build_variable("dualub",var,obj_coef)
+                dvar = self.build_variable("dualub",var,obj_coef)
                 if dvar != None:
                     if var not in coefficients:
                         coefficients[var] = {}
                     coefficients[var][dvar] = 1
-                self._build_constraint("dualvar",var,objective,objterms,coefficients)
-        self._build_constraint("objective",None,objective,objterms,obj_coef)
+                self.build_constraint("dualvar",var,objective,objterms,coefficients)
+        self.build_constraint("objective",None,objective,objterms,obj_coef)
     
-    def _build_variable(self,obj_type,cobra_obj,obj_coef):
+    def build_variable(self,obj_type,cobra_obj,obj_coef):
         if obj_type == "dualconst":
             lb = -1000000
             ub = -lb
@@ -137,7 +137,7 @@ class BilevelPkg(BaseFBAPkg):
                     BaseFBAPkg.build_constraint(self,"bfflxcmpc"+str(i),None,0,{othervar:1,var:-1000},cobra_obj)
             return None
                     
-    def _build_constraint(self,obj_type,cobra_obj,objective,objterms,coefficients):
+    def build_constraint(self,obj_type,cobra_obj,objective,objterms,coefficients):
         if obj_type == "dualvar":
             coef = {}
             lb = ub = 0

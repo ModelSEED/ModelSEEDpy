@@ -16,13 +16,13 @@ class ReactionUsePkg(BaseFBAPkg):
         for rxn in self.model.reactions:
             #Checking that reaction passes input filter if one is provided
             if rxn_filter == None:
-                self._build_variable(rxn,"=")
-                self._build_constraint(rxn,reversibility)
+                self.build_variable(rxn,"=")
+                self.build_constraint(rxn,reversibility)
             elif rxn.id in rxn_filter:
-                self._build_variable(rxn,rxn_filter[rxn.id])
-                self._build_constraint(rxn,reversibility)
+                self.build_variable(rxn,rxn_filter[rxn.id])
+                self.build_constraint(rxn,reversibility)
     
-    def _build_variable(self,cobra_obj,direction):
+    def build_variable(self,cobra_obj,direction):
         variable = None
         if (direction == ">" or direction == "=") and cobra_obj.upper_bound > 0 and cobra_obj.id not in self.variables["fu"]:
             variable = BaseFBAPkg.build_variable(self,"fu",0,1,"binary",cobra_obj)
@@ -30,7 +30,7 @@ class ReactionUsePkg(BaseFBAPkg):
             variable = BaseFBAPkg.build_variable(self,"ru",0,1,"binary",cobra_obj)
         return variable
         
-    def _build_constraint(self,cobra_obj,reversibility):
+    def build_constraint(self,cobra_obj,reversibility):
         constraint = None
         if cobra_obj.id not in self.constraints["fu"] and cobra_obj.id in self.variables["fu"]:
             constraint = BaseFBAPkg.build_constraint(self,"fu",0,None,{

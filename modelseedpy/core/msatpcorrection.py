@@ -31,7 +31,7 @@ class MSATPCorrection:
         self.selected_media, self.filtered_noncore = [], []
         self.lp_filename = None
 
-    def _disable_noncore_reactions(self):
+    def disable_noncore_reactions(self):
         #Must restore reactions before disabling to ensure bounds are not overwritten
         if len(self.noncore_reactions) > 0:
             self.restor_noncore_reactions(noncore = True,othercompartment = True)
@@ -70,9 +70,9 @@ class MSATPCorrection:
                             self.noncore_reactions.append([reaction, ">"])
                     reaction.lower_bound = reaction.upper_bound = 0
 
-    def _evaluate_growth_media(self):
+    def evaluate_growth_media(self):
         """Determines how much gap filling each input test media requires to make ATP"""
-        self._disable_noncore_reactions()
+        self.disable_noncore_reactions()
         self.media_gapfill_stats = {}
         self.msgapfill.default_gapfill_templates = [self.coretemplate]
         if self.lp_filename:
@@ -99,7 +99,7 @@ class MSATPCorrection:
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
         return results
 
-    def _determine_growth_media(self):
+    def determine_growth_media(self):
         """Decides which of the test media to use as growth conditions for this model"""
         from math import inf 
         
@@ -118,7 +118,7 @@ class MSATPCorrection:
             if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
                 self.selected_media.append(media)
 
-    # def _determine_growth_media2(self, max_gapfilling=None):  #!!! unused function
+    # def determine_growth_media2(self, max_gapfilling=None):  #!!! unused function
     #     """Decides which of the test media to use as growth conditions for this model"""
     #     def scoring_function(media):
     #         return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * \
@@ -134,13 +134,13 @@ class MSATPCorrection:
     #         if score <= max_gapfilling and score <= (best_score + self.gapfilling_delta):
     #             self.selected_media.append(media)
 
-    def _apply_growth_media_gapfilling(self):
+    def apply_growth_media_gapfilling(self):
         """Applies the gapfilling to all selected growth media"""
         for media in self.selected_media:
             if media in self.media_gapfill_stats and self.media_gapfill_stats[media]:
                 self.model = self.msgapfill.integrate_gapfill_solution(self.model, self.media_gapfill_stats[media])
 
-    def _expand_model_to_genome_scale(self):
+    def expand_model_to_genome_scale(self):
         """Expands the model to genome-scale while preventing ATP overproduction"""
         self.gapfilling_tests, self.filtered_noncore = [], []
         self.model.objective = self.atp_hydrolysis.id
@@ -151,7 +151,7 @@ class MSATPCorrection:
             logger.debug(media.name+" = "+str(solution.objective_value))
             self.gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value,"objective":self.atp_hydrolysis.id})
         #Must restore noncore reactions and NOT other compartment reactions before running this function - it is not detrimental to run this twice
-        self._restore_noncore_reactions(noncore = True,othercompartment = False)
+        self.restore_noncore_reactions(noncore = True,othercompartment = False)
         # Extending model with noncore reactions while retaining ATP accuracy
         self.filtered_noncore = FBAHelper.reaction_expansion_test(self.model,self.noncore_reactions,self.gapfilling_tests,pkgmgr)
         # Removing filtered reactions
@@ -165,9 +165,9 @@ class MSATPCorrection:
             if item[0].lower_bound == 0 and item[0].upper_bound == 0:
                 self.model.remove_reactions([item[0]])
         #Restoring other compartment reactions but not the core because this would undo reaction filtering
-        self._restore_noncore_reactions(noncore = False,othercompartment = True)
+        self.restore_noncore_reactions(noncore = False,othercompartment = True)
 
-    def _restore_noncore_reactions(self,noncore = True,othercompartment = True):
+    def restore_noncore_reactions(self,noncore = True,othercompartment = True):
         """Restores the bounds on all noncore reactions"""
         # Restoring original reaction bounds
         if noncore:
@@ -186,10 +186,10 @@ class MSATPCorrection:
     def run_atp_correction(self):
         """Runs the entire ATP method"""
         #Ensure all specified media work
-        self._evaluate_growth_media()
-        self._determine_growth_media()
-        self._apply_growth_media_gapfilling()
-        self._expand_model_to_genome_scale()
+        self.evaluate_growth_media()
+        self.determine_growth_media()
+        self.apply_growth_media_gapfilling()
+        self.expand_model_to_genome_scale()
 
     @staticmethod
     def atp_correction(model,coretemplate,atp_medias = None,max_gapfilling = None,gapfilling_delta = 0):

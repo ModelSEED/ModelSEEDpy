@@ -60,7 +60,7 @@ class CommunityModelSpecies:
                                       name="DM_" + self.biomass_cpd.name,
                                       lower_bound=0, upper_bound=100)
             self.community.model.add_reactions([self.biomass_drain])
-            self.biomass_drain.add_metabolites({self.biomass_cpd : -1})
+            self.biomass_drain.add_metabolites({self.biomass_cpd: -1})
             self.biomass_drain.annotation["sbo"] = 'SBO:0000627'
     
     def disable_species(self):
@@ -82,7 +82,7 @@ class CommunityModelSpecies:
             logger.critical("No ATP hydrolysis found for species:"+self.id)
         self.community.model.objective = self.community.model.problem.Objective(Zero,direction="max")
         self.community.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
-        if self.community.lp_filename != None:
+        if self.community.lp_filename:
             self.community.print_lp(self.community.lp_filename+"_"+self.id+"_ATP")
         return self.community.model.optimize()
 
@@ -157,7 +157,7 @@ class MSCommunity:
             #Rename metabolites
             for met in model.metabolites:
                 #Renaming compartments
-                if re.search('[a-z+](\d*)$', met.compartment) is not None:
+                if re.search('[a-z+](\d*)$', met.compartment):
                     m = re.search('([a-z]+)(\d*)$', met.compartment)
                     if len(m[2]) == 0:
                         if m[1] == "e":

@@ -49,12 +49,12 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                         if msid in contents:
                             met_class = dict(curr_class)
                             contents[msid] = met
-                if any([met_class == "none", self._class_complete(class_coef,met_class), self.parameters["use_"+met_class+"_class"] == None]) and msid not in refcpd:
+                if any([met_class == "none", self.class_complete(class_coef,met_class), self.parameters["use_"+met_class+"_class"] == None]) and msid not in refcpd:
                     drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,met.id,1000,1000,"FLEX_")
                     if drain_reaction.id not in self.new_reactions:
                         self.new_reactions[drain_reaction.id] = drain_reaction
                         self.model.add_reactions([drain_reaction])
-                    self._build_constraint(met,"flxcpd")
+                    self.build_constraint(met,"flxcpd")
         for met_class, content in class_coef.items():
             add = False
             total_coef = 0
@@ -85,10 +85,13 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                     self.new_reactions[met_class+"_flex"].add_metabolites(object_stoichiometry)
                     self.new_reactions[met_class+"_flex"].annotation["sbo"] = 'SBO:0000627'
                     self.model.add_reactions([self.new_reactions[met_class+"_flex"]])
-                self._build_constraint(self.new_reactions[met_class+"_flex"],"flxcls")
-        self._build_constraint(self.parameters["bio_rxn"],"flxbio")
+                self.build_constraint(self.new_reactions[met_class+"_flex"],"flxcls")
+        self.build_constraint(self.parameters["bio_rxn"],"flxbio")
+        
+    # def build_variable(self,object,type):
+        # pass
                    
-    def _build_constraint(self,cobra_obj,obj_type):
+    def build_constraint(self,cobra_obj,obj_type):
         if obj_type == "flxbio":
             #Sum(MW*(vdrn,for-vdrn,ref)) + Sum(massdiff*(vrxn,for-vrxn,ref)) = 0
             coef = {}
@@ -183,7 +186,7 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 cobra_obj.upper_bound = 0
             return const
             
-    def _class_complete(self,class_coef,met_class):
+    def class_complete(self,class_coef,met_class):
         for msid in classes[met_class]:
             if msid not in class_coef[met_class]:
                 return True
