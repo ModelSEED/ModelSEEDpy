@@ -1,4 +1,4 @@
-MSGenome Classifier Package
+msgenomeclassifier
 --------------------------------------
 
 -------------------------------------------

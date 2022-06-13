@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class MSATPCorrection:
-
-    def __init__(self, model, core_template, atp_medias,compartment="c0",
+    def __init__(self, model, core_template, atp_medias, compartment="c0",
                  max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None):
         """
         :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
@@ -32,13 +31,10 @@ class MSATPCorrection:
         self.gapfilling_delta = gapfilling_delta
         self.coretemplate = core_template
         self.msgapfill = MSGapfill(model, default_gapfill_templates=core_template)
-        self.original_bounds = {}
-        self.noncore_reactions = []
-        self.other_compartments = []
-        self.media_gapfill_stats = {}
-        self.gapfilling_tests = []
-        self.selected_media = []
-        self.filtered_noncore = []
+        
+        self.original_bounds, self.media_gapfill_stats = {}, {}
+        self.noncore_reactions, self.other_compartments, self.gapfilling_tests = [], [], []
+        self.selected_media, self.filtered_noncore = [], []
         self.lp_filename = None
 
     def disable_noncore_reactions(self):
