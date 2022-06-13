@@ -528,8 +528,7 @@ class GapfillingHelper():
         return directions
         
     def add_gapfilling_solution_to_kbase_model(self, newmodel, penalty_hash, media_ref):
-        for gapfilling in newmodel.gapfillings:
-            largest_index = max(largest_index, gapfilling.id.split(".").pop())
+        largest_index = max([gapfilling.id.split(".").pop() for gapfilling in newmodel.gapfillings])
         gfid = "gf."+str(largest_index+1)
         newmodel.gapfillings.append({
             "gapfill_id": newmodel.id+"."+gfid, "id": gfid, 

@@ -326,7 +326,7 @@ def _reaction_sinks(self,model):
 class MSBuilder:
     def __init__(self, genome, template=None):
         """for future methods with better customization"""
-        self.genome = genome, self.template = template
+        self.genome = genome; self.template = template
         self.search_name_to_genes, self.search_name_to_original = _aSearch(genome, 'RAST')
 
     def _get_template_reaction_complexes(self, template_reaction):

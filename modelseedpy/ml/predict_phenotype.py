@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+from pandas.DataFrame import from_dict
 
 
 def get_functional_roles(genome, ontology_term):
@@ -90,8 +90,5 @@ def create_indicator_matrix(ref_to_role, master_role_list=None):
                 resubmit the RAST annotated genome/genomeSets into the Predict Phenotype app. (')
         ref_to_indication[genome_id] = indicators.astype(int)
 
-    indicator_df = pd.DataFrame.from_dict(
-        data=ref_to_indication, orient='index', 
-        columns=master_role_list).reset_index().rename(columns={"index": "Genome Reference"})
-
+    indicator_df = from_dict(data=ref_to_indication, orient='index', columns=master_role_list).reset_index().rename(columns={"index": "Genome Reference"})
     return indicator_df, master_role_list

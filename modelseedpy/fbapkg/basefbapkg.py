@@ -18,9 +18,8 @@ class BaseFBAPkg:
     Base class for FBA packages
     """
     def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
-        self.model = model
+        self.model = model; self.name = name
         self.modelutl = MSModelUtil(model)
-        self.name = name
         
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         if self.pkgmgr is None:

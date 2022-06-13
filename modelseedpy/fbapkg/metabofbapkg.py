@@ -50,7 +50,7 @@ class MetaboFBAPkg(BaseFBAPkg):
         elif obj_type == "pkc":
             return BaseFBAPkg.build_constraint(self,"pkc",0,0,{self.variables["met"][cobra_obj.id]:1},cobra_obj["id"])
         
-    def find_metabolites_matching_peak(self,data):
-        #TODO: need to write this function
-        pass
+    # def find_metabolites_matching_peak(self,data):
+    #     #TODO: need to write this function
+    #     pass
       

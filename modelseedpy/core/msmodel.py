@@ -25,8 +25,9 @@ def get_direction_from_constraints(lower_bound, upper_bound):
         return '>'
     elif lower_bound < 0:
         return '<'
-    raise ValueError(f'The [{lower_bound}, {upper_bound}] bounds are not amenable with a direction string.')
-
+    else:
+        logger.error(f'The [{lower_bound}, {upper_bound}] bounds are not amenable with a direction string.')
+        return '?'
 
 def get_gpr_string(gpr):
     ors = []

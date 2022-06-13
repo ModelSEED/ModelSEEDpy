@@ -1,24 +1,20 @@
 import logging
-import copy
-import math
-from enum import Enum
+logger = logging.getLogger(__name__)
+
+from modelseedpy.core.msmodel import get_direction_from_constraints, get_reaction_constraints_from_direction, get_cmp_token
 from cobra.core import Metabolite, Reaction
 from cobra.core.dictlist import DictList
 from cobra.util import format_long_string
-from modelseedpy.core.msmodel import get_direction_from_constraints, get_reaction_constraints_from_direction, get_cmp_token
+from enum import Enum
+import copy
+import math
 #from cobrakbase.kbase_object_info import KBaseObjectInfo
 
-logger = logging.getLogger(__name__)
-
-
 class AttrDict(dict):
-    """
-    Base object to use for subobjects in KBase objects
-    """
+    """Base object to use for subobjects in KBase objects"""
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
-
 
 class TemplateReactionType(Enum):
     CONDITIONAL = 'conditional'
@@ -26,24 +22,11 @@ class TemplateReactionType(Enum):
     SPONTANEOUS = 'spontaneous'
     GAPFILLING = 'gapfilling'
 
-
 class MSTemplateMetabolite:
-
-    def __init__(self, cpd_id, formula=None, name='', default_charge=None,
-                 mass=None, delta_g=None, delta_g_error=None, is_cofactor=False,
-                 abbreviation='', aliases=None):
-        self.id = cpd_id
-        self.formula = formula
-        self.name = name
-        self.abbreviation = abbreviation
-        self.default_charge = default_charge
-        self.mass = mass
-        self.delta_g = delta_g
-        self.delta_g_error = delta_g_error
-        self.is_cofactor = is_cofactor
-        self.aliases = []
-        if aliases:
-            self.aliases = aliases
+    def __init__(self, cpd_id, formula=None, name='', default_charge=None, mass=None, delta_g=None, delta_g_error=None, is_cofactor=False, abbreviation='', aliases=[]):
+        self.id = cpd_id; self.formula = formula; self.name = name; self.abbreviation = abbreviation
+        self.default_charge = default_charge; self.mass = mass; self.delta_g = delta_g
+        self.delta_g_error = delta_g_error; self.is_cofactor = is_cofactor; self.aliases = aliases
         self.species = set()
         self._template = None
 
@@ -51,8 +34,7 @@ class MSTemplateMetabolite:
     def from_dict(d):
         return MSTemplateMetabolite(
             d['id'], d['formula'], d['name'], d['defaultCharge'], d['mass'],
-            d['deltaG'], d['deltaGErr'], d['isCofactor'] == 1, d['abbreviation'],d['aliases']
-        )
+            d['deltaG'], d['deltaGErr'], d['isCofactor'] == 1, d['abbreviation'],d['aliases'])
 
     def get_data(self):
         return {
@@ -98,7 +80,7 @@ class MSTemplateSpecies(Metabolite):
     def __init__(self, cobra_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
         super().__init__(cobra_cpd_id, '', '', charge, compartment)
-        self._template = template
+        self._template = template; 
         self.cpd_id = cpd_id
         self.max_uptake = max_uptake
         if self._template:
@@ -325,8 +307,7 @@ class MSTemplateReaction(Reaction):
 class NewModelTemplateRole:
 
     def __init__(self, role_id, name, features=[], source='', aliases=[]):
-        self.id = role_id, self.name = name, self.source = source
-        self.features = features, self.aliases = aliases
+        self.id = role_id; self.name = name; self.source = source; self.features = features; self.aliases = aliases
         self._complexes = set()
         self._template = None
 
@@ -373,10 +354,9 @@ class NewModelTemplateRole:
 class NewModelTemplateComplex:
 
     def __init__(self, complex_id, name, source='', reference='', confidence=0, template=None):
-        self.id = complex_id, self.name = name, self.source = source, self.reference = reference
-        self.confidence = confidence
+        self.id = complex_id; self.name = name; self.source = source; self.reference = reference
+        self.confidence = confidence; self._template = template
         self.roles = {}
-        self._template = template
 
     @staticmethod
     def from_dict(d, template):
@@ -436,9 +416,8 @@ class NewModelTemplateComplex:
 
 class MSTemplateCompartment:
     def __init__(self, compartment_id: str, name: str, ph: float, hierarchy=0, aliases=[]):
-        self.id = compartment_id, self.name = name, self.ph = ph
-        self.hierarchy = hierarchy
-        self.aliases = aliases
+        self.id = compartment_id; self.name = name; self.ph = ph
+        self.hierarchy = hierarchy; self.aliases = aliases
         self._template = None
 
     @staticmethod
@@ -451,9 +430,8 @@ class MSTemplateCompartment:
 
 class MSTemplate:
     def __init__(self, template_id, name='', domain='', template_type='', version=1):
-        self.id = template_id, self.name = name, self.domain = domain
-        self.template_type = template_type
-        self.__VERSION__ = version
+        self.id = template_id; self.name = name; self.domain = domain
+        self.template_type = template_type; self.__VERSION__ = version
         self.biochemistry_ref = ''
         self.compartments, self.biomasses, self.reactions = DictList(), DictList(), DictList()
         self.compounds, self.pathways, self.subsystems = DictList(), DictList(), DictList()
@@ -673,8 +651,8 @@ class MSTemplate:
 class MSTemplateBuilder:
 
     def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None):
-        self.id = template_id, self.version = version, self.name = name, self.domain = domain
-        self.template_type = template_type, self.info = info
+        self.id = template_id; self.version = version; self.name = name; self.domain = domain
+        self.template_type = template_type; self.info = info
         self.biochemistry_ref = None
         self.compartments, self.biomasses, self.roles, self.complexes = [], [], [], []
         self.compounds, self.compartment_compounds, self.reactions = [], [], []

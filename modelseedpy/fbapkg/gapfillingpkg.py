@@ -156,10 +156,7 @@ class GapfillingPkg(BaseFBAPkg):
             reaction_objective.set_linear_coefficients(obj_coef)
 
     def _get_model_index_hash(self):
-        """
-        Determine all indices that should be gap filled
-        :return:
-        """
+        """Determine all indices that should be gap filled"""
         index_hash = {"none": 0}
         for metabolite in self.model.metabolites:
             if re.search('_[a-z]\d+$', metabolite.id) is not None:
@@ -330,10 +327,8 @@ class GapfillingPkg(BaseFBAPkg):
     def _convert_template_compound(self, template_compound, index, template):
         base_id = template_compound.id.split("_")[0]
         base_compound = template.compounds.get_by_id(base_id)
-        new_id = template_compound.id
-        new_id += str(index)
-        compartment = template_compound.compartment
-        compartment += str(index)
+        new_id = template_compound.id+str(index)
+        compartment = template_compound.compartment+str(index)
 
         met = Metabolite(new_id, formula=base_compound.formula, name=base_compound.name,
                          charge=template_compound.charge, compartment=compartment)

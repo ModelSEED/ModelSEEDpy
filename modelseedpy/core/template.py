@@ -6,9 +6,7 @@ from cobra.core.model import Metabolite, Reaction
 
 class Template():
     def __init__(self):
-        self.compounds = DictList()
-        self.compcompounds = DictList()
-        self.reactions = DictList()
+        self.compounds, self.compcompounds, self.reactions = DictList(), DictList(), DictList()
         
     def convert_template_compound(self,cpdid,index):
         comp_compound = self.compcompounds.get_by_id(cpdid)
