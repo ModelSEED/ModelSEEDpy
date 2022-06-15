@@ -3,7 +3,7 @@ from cobra.core.dictlist import DictList
 
 logger = logging.getLogger(__name__)
 
-class MediaCompound: #!!! Can this class be deleted?
+class MediaCompound: 
 
     def __init__(self, compound_id, lower_bound, upper_bound, concentration=None):
         self.id = compound_id

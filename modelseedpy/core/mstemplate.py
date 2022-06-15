@@ -451,7 +451,7 @@ class MSTemplate:
         duplicates = list(set(self.roles).intersection(roles))
         if len(duplicates) > 0:
             logger.error(f"The duplicate roles {duplicates} cannot be added to the template")
-            return None  #!!! Should the non-duplicate compartments still be added?
+            return None  # !!! Should the non-duplicate compartments still be added?
 
         for x in roles:
             x._template = self

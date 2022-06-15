@@ -60,8 +60,8 @@ def split_compartment_from_index(cmp_str: str):
     elif len(cmp_str) == 1:
         cmp_val = s[0]
     if cmp_val is None:
-        raise ValueError(f"Bad value {cmp_str} Value of compartment string must start with letter(s) \
-         and ending (optional) with digits")
+        raise ValueError(f"""Bad value {cmp_str} Value of compartment string must start with letter(s)
+         and ending (optional) with digits""")
     return cmp_val, index_val
 
 
@@ -85,16 +85,16 @@ def get_cmp_token(compartments):
     return None
 
 
-def get_set(expr_str):
+def get_set_set(expr_str):
     if len(expr_str.strip()) == 0:
         return set()
     expr_str = expr_str.replace(' or ', ' | ')
     expr_str = expr_str.replace(' and ', ' & ')
     dnf = expr(expr_str).to_dnf()
     if len(dnf.inputs) == 1 or dnf.NAME == 'And':
-        return set(str(x) for x in dnf.inputs)
+        return {frozenset({str(x) for x in dnf.inputs})}
     else:
-        return set(str(x) for o in dnf.xs for x in o.inputs)
+        return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}  
 
 
 class MSModel(Model):

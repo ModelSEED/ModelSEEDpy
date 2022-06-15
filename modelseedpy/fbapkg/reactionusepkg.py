@@ -46,12 +46,11 @@ class ReactionUsePkg(BaseFBAPkg):
                 },cobra_obj)
         return constraint
     
-    def build_exclusion_constraint(self, flux_values = None):
+    def build_exclusion_constraint(self, flux_values=None):
+        flux_values = flux_values or FBAHelper.compute_flux_values_from_variables(self.model)
         count = len(self.constraints["exclusion"])
         solution_coef = {}
-        solution_size = 0
-        if flux_values == None:
-            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
+        solution_size = 0 
         for rxnid, flux in flux_values.items():
             if flux > Zero:
                 solution_size += 1

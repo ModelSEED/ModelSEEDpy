@@ -26,7 +26,7 @@ class ServerError(Exception):
         return self.name + ': ' + str(self.code) + '. ' + self.message + '\n' + self.data
 
 class RPCClient:
-    def __init__(self,url,token=None,version="1.0",timeout=30*60,trust_all_ssl_certificates=False):
+    def __init__(self, url, token=None, version="1.0", timeout=30*60, trust_all_ssl_certificates=False):
         self.url = url
         self.token = token
         self.version = version

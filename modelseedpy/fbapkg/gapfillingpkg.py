@@ -203,7 +203,7 @@ class GapfillingPkg(BaseFBAPkg):
                     if cobra_rxn.id not in self.model.reactions and cobra_rxn.id not in self.new_reactions:
                         self.new_reactions[cobra_rxn.id] = cobra_rxn
                         new_penalties[cobra_rxn.id] = {}
-                        new_penalties[cobra_rxn.id]["added"] = 1
+                        new_penalties[cobra_rxn.id]["added"] = True
                         if cobra_rxn.lower_bound < 0:
                             new_penalties[cobra_rxn.id]["reverse"] = self.parameters["model_penalty"]
                         if cobra_rxn.upper_bound > 0:
@@ -221,12 +221,12 @@ class GapfillingPkg(BaseFBAPkg):
                         self.model.reactions.get_by_id(cobra_rxn.id).lower_bound = cobra_rxn.lower_bound
                         self.model.reactions.get_by_id(cobra_rxn.id).update_variable_bounds()
                         new_penalties[cobra_rxn.id]["reverse"] = self.parameters["model_penalty"]
-                        new_penalties[cobra_rxn.id]["reversed"] = 1
+                        new_penalties[cobra_rxn.id]["reversed"] = True
                     elif cobra_rxn.upper_bound > 0 and self.model.reactions.get_by_id(cobra_rxn.id).upper_bound == 0:
                         self.model.reactions.get_by_id(cobra_rxn.id).upper_bound = cobra_rxn.upper_bound
                         self.model.reactions.get_by_id(cobra_rxn.id).update_variable_bounds()
                         new_penalties[cobra_rxn.id]["forward"] = self.parameters["model_penalty"]
-                        new_penalties[cobra_rxn.id]["reversed"] = 1
+                        new_penalties[cobra_rxn.id]["reversed"] = True
 
         # Only run this on new exchanges so we don't readd for all exchanges
         for cpd in new_exchange:
@@ -284,11 +284,11 @@ class GapfillingPkg(BaseFBAPkg):
                     new_penalties[cobra_rxn.id]["reverse"] = template_reaction.base_cost + template_reaction.reverse_penalty
                 if cobra_rxn.upper_bound > 0:
                     new_penalties[cobra_rxn.id]["forward"] = template_reaction.base_cost + template_reaction.forward_penalty
-                new_penalties[cobra_rxn.id]["added"] = 1
+                new_penalties[cobra_rxn.id]["added"] = True
             elif template_reaction.GapfillDirection == "=":
                 # Adjusting directionality as needed for existing reactions
                 model_reaction = self.model.reactions.get_by_id(cobra_rxn.id)
-                new_penalties[cobra_rxn.id]["reversed"] = 1
+                new_penalties[cobra_rxn.id]["reversed"] = True
                 if model_reaction.lower_bound == 0:
                     model_reaction.lower_bound = template_reaction.lower_bound
                     model_reaction.update_variable_bounds()
@@ -367,8 +367,8 @@ class GapfillingPkg(BaseFBAPkg):
         return cobra_rxn
     
     def binary_check_gapfilling_solution(self, solution=None, flux_values=None):
-        if not solution:
-            solution = self.compute_gapfilled_solution(flux_values)
+        solution = solution or self.compute_gapfilled_solution(flux_values)
+        flux_values = flux_values or FBAHelper.compute_flux_values_from_variables(self.model)
         rxn_filter = {rxn_id:solution["reversed"][rxn_id] for rxn_id in solution["reversed"]}
         rxn_filter.update({rxn_id:solution["new"][rxn_id] for rxn_id in solution["new"]})
         self.pkgmgr.getpkg("ReactionUsePkg").build_package(rxn_filter)

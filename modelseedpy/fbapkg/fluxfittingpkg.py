@@ -28,7 +28,7 @@ class FluxFittingPkg(BaseFBAPkg):
             if rxnid in self.model.reactions:
                 rxnobj = self.model.reactions.get_by_id(rxnid)
                 var = BaseFBAPkg.build_variable(self,"vfit",-1000,1000,"continuous",rxnobj)
-                objvars.append(var**2)   #!!! how can the variable be squared?
+                objvars.append(var**2)  
                 self.build_constraint(rxnobj)
         if self.parameters["set_objective"] == 1:
             self.model.objective = self.model.problem.Objective(add(objvars), direction="min", sloppy=True)
@@ -48,6 +48,6 @@ class FluxFittingPkg(BaseFBAPkg):
                 coef[cobra_obj.forward_variable] = 1
                 coef[cobra_obj.reverse_variable] = -1
             else:
-                coef[self.pkgmgr.getpkg("TotalFluxPkg").variables["tf"][cobra_obj.id]] = 1 #!!! the total flux package does not return anything
+                coef[self.pkgmgr.getpkg("TotalFluxPkg").variables["tf"][cobra_obj.id]] = 1  # !!! the total flux package does not return anything
                 flux = abs(flux)
             return BaseFBAPkg.build_constraint(self,"vfitc",flux,flux,coef,cobra_obj)

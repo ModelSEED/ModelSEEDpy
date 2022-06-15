@@ -192,7 +192,8 @@ class MSATPCorrection:
         self.expand_model_to_genome_scale()
 
     @staticmethod
-    def atp_correction(model,coretemplate,atp_medias = None,max_gapfilling = None,gapfilling_delta = 0):
-        msatpobj = MSATPCorrection(model,coretemplate,atp_medias,max_gapfilling,gapfilling_delta)
+    def atp_correction(model, coretemplate, atp_medias=None, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0):
+        msatpobj = MSATPCorrection(model, coretemplate, atp_medias, atp_objective, max_gapfilling, gapfilling_delta)
         msatpobj.run_atp_correction()
         return msatpobj
+

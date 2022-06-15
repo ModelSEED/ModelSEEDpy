@@ -22,8 +22,9 @@ class MSGrowthPhenotype:
         full_media = MSMedia.from_dict(cpd_hash)
         if self.media:
             full_media.merge(self.media, overwrite_overlap = False)
-        if self.parent and hasattr(self.parent, 'base_media'):
-            full_media.merge(self.parent.base_media, overwrite_overlap = False)
+        if self.parent:
+            if self.parent.base_media:
+                full_media.merge(self.parent.base_media, overwrite_overlap = False)
         return full_media
     
     def simulate(self, modelutl, growth_threshold=0.001, add_missing_exchanges=False, save_fluxes=False, pfba=False):        
@@ -104,14 +105,14 @@ class MSGrowthPhenotypes:
         new_phenos = []
         for index, row in table_df.iterrows():
             data = FBAHelper.validate_dictionary(
-                row.to_dict(),["media","growth"],{"mediaws":None,"geneko":[],"addtlCpd":[]})
-            media = kbase_api.get_from_ws(data["media"],data["mediaws"])
+                row.to_dict(),["media","growth"], {"mediaws":None, "geneko":[], "addtlCpd":[]})
+            media = kbase_api.get_from_ws(data["media"], data["mediaws"])
             media_id = data["media"]
             if len(data["geneko"]) > 0:
                 media_id += "-"+",".join(data["geneko"])
             if len(data["addtlCpd"]) > 0:
                 media_id += "-"+",".join(data["addtlCpd"])
-            new_phenos.append(MSGrowthPhenotype(media_id,media,data["growth"],data["geneko"],data["addtlCpd"]))
+            new_phenos.append(MSGrowthPhenotype(media_id, media, data["growth"], data["geneko"], data["addtlCpd"]))
         growthpheno.add_phenotypes(new_phenos)                
         return growthpheno
         
@@ -170,8 +171,10 @@ class MSGrowthPhenotypes:
                         gfl = ";".join(gpfl_rxns)
                 result = pheno.simulate(modelutl,growth_threshold,add_missing_exchanges)
                 data_df.loc[index] = {
-                    "Phenotype":pheno.id,"Observed growth":pheno.growth,"Simulated growth":result["growth"],
-                    "class":result["class"],"Transports missing":";".join(result["missing_transports"]),"Gapfilled reactions":gfl}
+                    "Phenotype":pheno.id, "Observed growth": pheno.growth,
+                    "Simulated growth":result["growth"], "class":result["class"], 
+                    "Transports missing": ";".join(result["missing_transports"]), 
+                    "Gapfilled reactions":gfl}
                 if result["class"] == "CP":
                     summary["Count"][1] += 1
                     summary["Count"][0] += 1

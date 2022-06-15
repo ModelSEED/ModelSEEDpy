@@ -55,7 +55,7 @@ class MSEditorAPI:
             raise Exception(f'The gpr {gpr} is invalid. Perhaps check parentheses.')  # not working, unsure exactly why
     
     @staticmethod
-    def edit_biomass_compound(model,biomass_id,cpd_id,new_coef):
+    def edit_biomass_compound(model, biomass_id, cpd_id, new_coef):
         if cpd_id not in model.metabolites:
             raise Exception('Metabolite', cpd_id, ' is not in the model.')
         if biomass_id in model.reactions:
@@ -106,9 +106,10 @@ class MSEditorAPI:
 
         metabolites_to_add = {}
         for metabolite, stoich in reaction_stoich.items():
-            metabolites_to_add[ cobra.Metabolite(
+            metabolites_to_add[cobra.Metabolite(
                     metabolite[0], name = modelseed.get_seed_compound(metabolite[0]).data['name'], 
-                    compartment = compartment_equivalents[metabolite[1]] )] = stoich
+                    compartment = compartment_equivalents[metabolite[1]])
+                ] = stoich
 
         cobra_reaction.add_metabolites(metabolites_to_add)
         cobra_reaction.lower_bound = 0
