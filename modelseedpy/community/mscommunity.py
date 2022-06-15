@@ -27,20 +27,20 @@ class CommunityModelSpecies:
                  names=[]           # names of the community species
                  ):
         self.community, self.biomass_cpd = community, biomass_cpd
-        self.species_num = int(self.biomass_cpd.compartment[1:])
+        self.index = int(self.biomass_cpd.compartment[1:])
         self.abundance = 0
         if self.biomass_cpd in self.community.primary_biomass.metabolites:
             self.abundance = abs(self.community.primary_biomass.metabolites[self.biomass_cpd])
-        if self.species_num <= len(names) and names[self.species_num-1]:
-            self.id = names[self.species_num-1]
+        if self.index <= len(names) and names[self.index-1]:
+            self.id = names[self.index-1]
         else:
             if "species_name" in self.biomass_cpd.annotation:
                 self.id = self.biomass_cpd.annotation["species_name"]
             else:
-                self.id = "Species"+str(self.species_num)
+                self.id = "Species"+str(self.index)
                 
         logger.info("Making atp hydrolysis reaction for species: "+self.id)
-        atp_rxn = FBAHelper.add_atp_hydrolysis(self.community.model,"c"+str(self.species_num))
+        atp_rxn = FBAHelper.add_atp_hydrolysis(self.community.model,"c"+str(self.index))
         # FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)  #!!! FIXME This FBAHelper function is not defined.
         self.atp_hydrolysis = atp_rxn["reaction"]
         self.biomass_drain = None
@@ -65,8 +65,8 @@ class CommunityModelSpecies:
     
     def disable_species(self):
         for reaction in self.community.model.reactions:
-            if int(FBAHelper.rxn_compartment(reaction)[1:]) == self.species_num:
-                reaction.upper_bound, reaction.lower_bound = 0, 0
+            if int(FBAHelper.rxn_compartment(reaction)[1:]) == self.index:
+                reaction.upper_bound = reaction.lower_bound = 0
     
     def compute_max_biomass(self):
         if len(self.biomasses) == 0:
@@ -301,9 +301,9 @@ class MSCommunity:
                     
         for individual in self.species:
             species_data[individual.id], species_collection[individual.id] = {}, {}
-            species_list[individual.species_num] = individual
+            species_list[individual.index] = individual
             data[individual.id] = []
-            data["IDs"].append(individual.species_num)
+            data["IDs"].append(individual.index)
             data["Metabolites/Donor"].append(individual.id)
             for other in self.species:
                 species_data[individual.id][other.id] = 0
@@ -315,7 +315,7 @@ class MSCommunity:
         data["IDs"].append("Environment")
         data["Metabolites/Donor"].append("Environment")
         for individual in self.species:
-            data["IDs"].append(individual.species_num)
+            data["IDs"].append(individual.index)
             data["Metabolites/Donor"].append(individual.id+" list")
             
         # computing net metabolite flux from each reaction
@@ -401,11 +401,11 @@ class MSCommunity:
         self.graph = networkx.Graph()
         species_nums = {}
         for species in self.species:
-            species_nums[species.species_num]= set()
-            self.graph.add_node(species.species_num)
-            for index, entry in net_cross_feeding[f'Species{species.species_num} list'].iteritems():
-                if 'Species' in index and re.search('(\d+)', index).group() != species.species_num:
-                    species_nums[species.species_num].update(entry.split('; '))
+            species_nums[species.index]= set()
+            self.graph.add_node(species.index)
+            for index, entry in net_cross_feeding[f'Species{species.index} list'].iteritems():
+                if 'Species' in index and re.search('(\d+)', index).group() != species.index:
+                    species_nums[species.index].update(entry.split('; '))
                     
         # define the net fluxes for each combination of two species
         for species_1, species_2 in combinations(list(species_nums.keys()), 2):
@@ -467,8 +467,8 @@ class MSCommunity:
         logger.info(df)
         return df
     
-    def atp_correction(self,core_template, atp_medias, max_gapfilling=None, gapfilling_delta=0): 
-        self.atpcorrect = MSATPCorrection(self.model,core_template, atp_medias, compartment="c0", max_gapfilling=None, gapfilling_delta=0)      
+    def atp_correction(self,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0): 
+        self.atpcorrect = MSATPCorrection(self.model,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0)      
     
     def predict_abundances(self,media=None,pfba=True,kinetic_coeff = None):
         with self.model:   # WITH, here, discards changes after each simulation

@@ -23,7 +23,7 @@ class FBAHelper:
                 met_id = metabolite.id
                 if all([rxn not in model.reactions for rxn in [f"EX_{met_id}", f"DM_{met_id}", f"SK_{met_id}"]]):
                     drain_reaction = FBAHelper.add_drain_from_metabolite_id(model,metabolite.id,0,100,"DM_")
-                    if drain_reaction != None:
+                    if not drain_reaction:
                         logger.info("Adding "+met_id+" DM")
                         drain_reactions.append(drain_reaction)
         model.add_reactions(drain_reactions)
@@ -182,7 +182,7 @@ class FBAHelper:
 
     @staticmethod
     def find_reaction(model,stoichiometry):
-        reaction_strings = FBAHelper._stoichiometry_to_string(stoichiometry)
+        reaction_strings = FBAHelper.stoichiometry_to_string(stoichiometry)
         atpstring = reaction_strings[0]
         rxn_hash = FBAHelper.rxn_hash(model)
         if atpstring in rxn_hash:
@@ -204,7 +204,7 @@ class FBAHelper:
     def rxn_hash(model): 
         output = {}
         for rxn in model.reactions:
-            reaction_strings = FBAHelper._stoichiometry_to_string(rxn.metabolites)
+            reaction_strings = FBAHelper.stoichiometry_to_string(rxn.metabolites)
             output[reaction_strings[0]] = [rxn,1]
             output[reaction_strings[1]] = [rxn,-1]
         return output
@@ -223,7 +223,7 @@ class FBAHelper:
         return cytosol
     
     @staticmethod
-    def _stoichiometry_to_string(stoichiometry):
+    def stoichiometry_to_string(stoichiometry):
         reactants, products = [], []
         for met, stoich in stoichiometry.items():
             met_id = met
@@ -238,14 +238,9 @@ class FBAHelper:
     
     @staticmethod
     def add_atp_hydrolysis(model,compartment):
-        #Searching for ATP hydrolysis compounds
-        coefs = {
-            "cpd00002":[-1,compartment],
-            "cpd00001":[-1,compartment],
-            "cpd00008":[1,compartment],
-            "cpd00009":[1,compartment],
-            "cpd00067":[1,compartment]
-            }
+        # Searching for ATP hydrolysis compounds
+        coefs = {"cpd00002": [-1,compartment], "cpd00001": [-1,compartment], "cpd00008": [1,compartment],
+            "cpd00009": [1,compartment], "cpd00067": [1,compartment]}
         stoichiometry = {}
         id_hash = FBAHelper.msid_hash(model)
         for msid, content in coefs.items():

@@ -94,7 +94,7 @@ class GapfillingHelper():
                 self.auto_sink.extend([sink_id + str(i) for i in range(0,100)])
         
         self.auto_exchange = "e0"
-        self.COBRA_0_BOUND = 0, self.COBRA_DEFAULT_LB = -1000, self.COBRA_DEFAULT_UB = 1000
+        self.COBRA_0_BOUND = 0; self.COBRA_DEFAULT_LB = -1000; self.COBRA_DEFAULT_UB = 1000
     
     #FBA macro analyses
     def test_reaction_additions_againt_limits(self,model,reactions,tests):
@@ -118,8 +118,6 @@ class GapfillingHelper():
         return filtered
 
     def build_model_extended_for_gapfilling(self,extend_with_template = True, source_models = [], input_templates = [], model_penalty = 1, reaction_scores = {}):
-        model_id = self.fbamodel["id"]+".gf"  #!!! where is fbamodel defined?
-        
         #Determine all indecies that should be gapfilled
         indices = [0]*1000
         compounds = self.fbamodel["modelcompounds"]
@@ -127,11 +125,11 @@ class GapfillingHelper():
             compartment = compound['modelcompartment_ref'].split("/").pop()
             basecomp = compartment[0:1]
             if not basecomp == "e":
-                indexlist[int(compartment[1:])] += 1
+                indices[int(compartment[1:])] += 1
 
         #Iterating over all indecies with more than 10 intracellular compounds:
         gapfilling_penalties = dict()
-        for i, val in enumerate(indexlist):
+        for i, val in enumerate(indices):
             if val > 10:
                 if extend_with_template:
                     gapfilling_penalties.update(self.temp_extend_model_index_for_gapfilling(i,input_templates))
@@ -147,9 +145,9 @@ class GapfillingHelper():
                         highest_score = reaction_scores[rxnid][gene]
                 factor = 1-0.9*highest_score
                 if "reverse" in gapfilling_penalties[reaction]:
-                    penalties[reaction.id]["reverse"] = factor*penalties[reaction.id]["reverse"]
+                    gapfilling_penalties[reaction.id]["reverse"] = factor*gapfilling_penalties[reaction.id]["reverse"]
                 if "forward" in gapfilling_penalties[reaction]:
-                    penalties[reaction.id]["forward"] = factor*penalties[reaction.id]["forward"]
+                    gapfilling_penalties[reaction.id]["forward"] = factor*gapfilling_penalties[reaction.id]["forward"]
         self.cobramodel.solver.update()
         return gapfilling_penalties
 

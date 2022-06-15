@@ -507,7 +507,7 @@ class MSTemplate:
         duplicates = list(set(self.reactions).intersection(reaction_list))
         if len(duplicates) > 0:
             logger.error("unable to add reactions [%s] already present in the template", duplicates)
-            return None  #!!! Should the non-duplicate compartments still be added?
+            return None  # !!! Should the non-duplicate compartments still be added?
 
         for rxn in reaction_list:
             metabolites_replace = {}
