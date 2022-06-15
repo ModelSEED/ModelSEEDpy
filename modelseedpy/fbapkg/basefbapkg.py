@@ -7,16 +7,14 @@ from optlang.symbolics import Zero
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
-#Adding a few exception classes to handle different types of errors
+# Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):
     """Error in FBA formulation"""
     pass
 
 
 class BaseFBAPkg:
-    """
-    Base class for FBA packages
-    """
+    """Base class for FBA packages"""
     def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
         self.model = model; self.name = name
         self.modelutl = MSModelUtil(model)
@@ -64,11 +62,11 @@ class BaseFBAPkg:
         else:
             name = cobra_obj.id
         if name not in self.variables[obj_type]:
-            self.variables[obj_type][name] = self.model.problem.Variable(name+"_"+obj_type, lb=lower_bound,ub=upper_bound,type=vartype)
+            self.variables[obj_type][name] = self.model.problem.Variable(name+"_"+obj_type, lb=lower_bound, ub=upper_bound, type=vartype)
             self.model.add_cons_vars(self.variables[obj_type][name])
         return self.variables[obj_type][name]
         
-    def build_constraint(self,obj_type,lower_bound,upper_bound,coef = {},cobra_obj = None):
+    def build_constraint(self, obj_type, lower_bound, upper_bound, coef={}, cobra_obj=None):
         name = None
         if self.constraint_types[obj_type] == "none":
             count = len(self.constraints[obj_type])

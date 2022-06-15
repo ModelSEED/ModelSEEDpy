@@ -531,7 +531,7 @@ class MSTemplate:
     # def get_complex_sources(self):
     #     pass
 
-    def get_complex_from_roles(self, roles):
+    def get_complex_from_role(self, roles):
         cpx_role_str = ';'.join(sorted(roles))
         if cpx_role_str in self.role_set_to_cpx:
             return self.role_set_to_cpx[cpx_role_str]
