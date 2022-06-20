@@ -21,16 +21,17 @@ def read_fasta(f, split='|', h_func=None):
         return parse_fasta_str(fh.read(), split, h_func)
 
 def parse_fasta_str(faa_str, split='|', h_func=None):
+    lines = faa_str.split('\n')
     features = []
     seq = None
-    for line in faa_str.split('\n'):
+    for line in lines:
         if line.startswith('>'):
             if seq:
                 features.append(seq)
-            desc = None
             seq_id = line[1:]
+            desc = None
             if h_func:
-                seq_id, desc = h_func(line[1:])
+                seq_id, desc = h_func(seq_id)
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
