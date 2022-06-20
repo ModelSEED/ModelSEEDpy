@@ -37,7 +37,7 @@ class dFBAPkg(BaseFBAPkg):
                  warnings: bool = True, verbose: bool = False, printing: bool = False, jupyter: bool = False
                  ):
         # define the parameter and variable dictionaries
-        BaseFBAPkg.__init__(self,model,"BasedFBA", {"met":"metabolite"}, {"conc": 'metabolite'})
+        BaseFBAPkg.__init__(self, model, "BasedFBA", {"met": "metabolite"}, {"conc": 'metabolite'})
         self.pkgmgr.addpkgs(["FullThermoPkg"])
         # self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_db_path"])
             
@@ -52,16 +52,16 @@ class dFBAPkg(BaseFBAPkg):
             self.met_ids[met.id] = met.name
             self.met_names.append(met.name)
             
-    #user functions
-    def print_lp(self,filename = None):
+    # user functions
+    def print_lp(self, filename=None):
         BaseFBAPkg.print_lp(self, filename.removesuffix('.lp'))
                             
     def simulate(self, 
                  kinetics_path: str = None,                             # the path of the kinetics data JSON file
                  initial_concentrations_M: dict = {},                   # a dictionary of the initial metabolic concentrations , which supplants concentrations from the defined kinetics data
-                 total_time: cython.float = 200, timestep: float = 20,  # total simulation time and the simulation timestep in minutes
+                 total_time: cython.float = 200, timestep: cython.float = 20,  # total simulation time and the simulation timestep in minutes
                  export_name: str = None, export_directory: str = None, # the location to which simulation content will be exported
-                 chemostat_L: float = None, feed_profile: dict = {},    # the volume (l) and feed profile for a chemostat simulation, where None ignores a chemostat
+                 chemostat_L: cython.float = None, feed_profile: dict = {},    # the volume (l) and feed profile for a chemostat simulation, where None ignores a chemostat
                  exchange_rate: cython.float = None,                    # the flow rate (Molar/Liter) of addition to and removal from the chemostat system 
                  thermo_constraints: bool = False,                      # specifies whether thermodynamic constraints will be layered with the kinetic constraints
                  kinetics_data: dict = {},                              # A dictionary of custom kinetics data
@@ -76,7 +76,7 @@ class dFBAPkg(BaseFBAPkg):
         # define the dataframe for the time series content
         self.cellular_dry_mass_fg: cython.float = cellular_dry_mass_fg*femto; self.cellular_fL: cython.float = cellular_fL*femto
         self.parameters['timesteps'] = int(total_time/timestep)    
-        self.timestep_value: cython.float  = timestep; self.total_time: cython.float = total_time
+        self.timestep_value: cython.float = timestep; self.total_time: cython.float = total_time
         self.constrained = OrderedDict()
         self.solutions = []
         self.minimum = inf
@@ -87,7 +87,7 @@ class dFBAPkg(BaseFBAPkg):
         
         # define initial concentrations
         self.initial_concentrations_M = initial_concentrations_M
-        self._initial_concentrations(kinetics_path,kinetics_data)
+        self._initial_concentrations(kinetics_path, kinetics_data)
                 
         # apply constraints and system specifications
         chemostat_requirements = [isnumber(chemostat_L), feed_profile != {}, isnumber(exchange_rate)]
@@ -162,7 +162,7 @@ class dFBAPkg(BaseFBAPkg):
             if not os.path.exists(kinetics_path):
                 raise ValueError('The path {kinetics_data} is not a valid path')
             with open(kinetics_path) as data:
-                self.kinetics_data  = json.load(data)
+                self.kinetics_data = json.load(data)
         if kinetics_data != {}:
             for reaction in kinetics_data:
                 self.kinetics_data[reaction] = kinetics_data[reaction]
@@ -171,8 +171,8 @@ class dFBAPkg(BaseFBAPkg):
                 
         # define the DataFrames
         self.col = '0 min'     
-        self.concentrations = pandas.DataFrame(index = set(self.met_names), columns = [self.col])
-        self.chemical_moles = pandas.DataFrame(index = set(self.met_names), columns = [self.col])
+        self.concentrations = pandas.DataFrame(index=set(self.met_names), columns=[self.col])
+        self.chemical_moles = pandas.DataFrame(index=set(self.met_names), columns=[self.col])
         self.concentrations.index.name = self.chemical_moles.index.name = 'metabolite (\u0394mM)'
         
         self.fluxes = pandas.DataFrame(index = set(rxn.name for rxn in self.model.reactions), columns = [self.col])
@@ -243,7 +243,7 @@ class dFBAPkg(BaseFBAPkg):
                             add_or_write = 'a'
                             if 'metadata' in self.kinetics_data[reaction_name][source]:
                                 add_or_write = self.__find_data_match(reaction_name, source)
-                            if add_or_write == 'a':                                    
+                            if add_or_write == 'a':
                                 fluxes.append(flux) 
                             elif add_or_write == 'w':
                                 fluxes = [flux]
@@ -282,7 +282,7 @@ class dFBAPkg(BaseFBAPkg):
     def _update_concentrations(self,):
         for met in self.model.metabolites:      
             self.concentrations.at[self.met_ids[met.id], self.col] = 0
-            for rxn in met.reactions: # flux units: mmol/(g_(dry weight)*hour)
+            for rxn in met.reactions:  # flux units: mmol/(g_(dry weight)*hour)
                 stoich = rxn.metabolites[met]
                 flux = self.fluxes.at[rxn.name, self.col] 
                 delta_conc = stoich * (flux * self.timestep_value*(minute/hour) * self.cellular_dry_mass_fg/self.cellular_fL) 
