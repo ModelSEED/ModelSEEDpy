@@ -71,9 +71,9 @@ class MSGenome:
         genome.features += read_fasta(filename, split, h_func)
         return genome
 
-    # @staticmethod
-    # def from_dna_fasta(filename):
-    #     pass
+    @staticmethod
+    def from_dna_fasta(filename):
+        pass
 
     @staticmethod
     def from_protein_sequences_hash(sequences):
