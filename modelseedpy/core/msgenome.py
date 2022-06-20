@@ -1,15 +1,23 @@
 import logging
-logger = logging.getLogger(__name__)
-from cobra.core.dictlist import DictList
+
 import re
+import copy
+from cobra.core.dictlist import DictList
+
+logger = logging.getLogger(__name__)
 
 def normalize_role(s):
     s = s.strip().lower()
     s = re.sub('[\W_]+', '', s)
     return s
 
-def read_fasta(fasta, split='|', h_func=None):
-    with open(fasta, 'r') as fh:
+#Static factory functions:
+            
+#def build_from_kbase_gto:
+
+
+def read_fasta(f, split='|', h_func=None):
+    with open(f, 'r') as fh:
         return parse_fasta_str(fh.read(), split, h_func)
 
 def parse_fasta_str(faa_str, split='|', h_func=None):
@@ -26,7 +34,7 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                desc = header_data[1]
+                desc = header_data[1]  # The unit test throws an error when this is commented
 
             seq = MSFeature(seq_id, "", desc)
         else:
@@ -56,7 +64,7 @@ class MSGenome:
         self.features = DictList()
 
     @staticmethod
-    def from_fasta(filename, split='|', h_func=None):
+    def from_fasta(filename, contigs=0, split='|', h_func=None):
         genome = MSGenome()
         genome.features += read_fasta(filename, split, h_func)
         return genome
