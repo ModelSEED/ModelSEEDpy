@@ -7,6 +7,7 @@ from cobra.core.dictlist import DictList
 logger = logging.getLogger(__name__)
 
 def normalize_role(s):
+    # print(s)
     s = s.strip().lower()
     s = re.sub('[\W_]+', '', s)
     return s
