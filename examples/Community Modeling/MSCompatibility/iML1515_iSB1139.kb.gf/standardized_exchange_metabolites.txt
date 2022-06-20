@@ -1,0 +1,210 @@
+[
+   {
+      "original": {
+         "id": "metsox-S-L-e_e0",
+         "name": "L-Methionine Sulfoxide"
+      },
+      "new": {
+         "id": "cpd15498_e0",
+         "name": "L-Methionine Sulfoxide_e0"
+      },
+      "justification": "The metsox-S-L-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd00609_e0",
+         "name": "D-Glucarate_e0"
+      },
+      "new": {
+         "id": "cpd00571_e0",
+         "name": "D-Glucarate_e0"
+      },
+      "justification": "The cpd00609_e0 and cpd00571_e0 distinction is incompatible. The ID match was verified with BiGG cross-references."
+   },
+   {
+      "original": {
+         "id": "dhps-e_e0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate"
+      },
+      "new": {
+         "id": "cpd31356_e0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate_e0"
+      },
+      "justification": "The dhps-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd03191_e0",
+         "name": "D-Glucuronate 1-phosphate_e0"
+      },
+      "new": {
+         "id": "cpd00880_e0",
+         "name": "D-Glucuronate 1-phosphate_e0"
+      },
+      "justification": "The cpd03191_e0 and cpd00880_e0 distinction is incompatible. The ID match was verified with BiGG cross-references."
+   },
+   {
+      "original": {
+         "id": "metsox-R-L-e_e0",
+         "name": "L-methionine-R-sulfoxide"
+      },
+      "new": {
+         "id": "cpd14720_e0",
+         "name": "L-methionine-R-sulfoxide_e0"
+      },
+      "justification": "The metsox-R-L-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "4abzglu-e_e0",
+         "name": "4-aminobenzoyl-glutamate"
+      },
+      "new": {
+         "id": "cpd26527_e0",
+         "name": "4-aminobenzoyl-glutamate_e0"
+      },
+      "justification": "The 4abzglu-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "tartr-D-e_e0",
+         "name": "D-tartrate"
+      },
+      "new": {
+         "id": "cpd19018_e0",
+         "name": "D-tartrate_e0"
+      },
+      "justification": "The tartr-D-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1423_e0",
+         "name": "alpha-ketoglutarate"
+      },
+      "new": {
+         "id": "cpd00024_e0",
+         "name": "alpha-ketoglutarate_e0"
+      },
+      "justification": "The r1423_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r505_e0",
+         "name": "heme"
+      },
+      "new": {
+         "id": "cpd00028_e0",
+         "name": "Heme_e0"
+      },
+      "justification": "The r505_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r307_e0",
+         "name": "Mn2+"
+      },
+      "new": {
+         "id": "cpd00030_e0",
+         "name": "Mn2+_e0"
+      },
+      "justification": "The r307_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r277_e0",
+         "name": "2-dehydro-D-gluconate"
+      },
+      "new": {
+         "id": "cpd00480_e0",
+         "name": "2-dehydro-D-gluconate_e0"
+      },
+      "justification": "The r277_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r293_e0",
+         "name": "Fe2+"
+      },
+      "new": {
+         "id": "cpd10515_e0",
+         "name": "Fe2+_e0"
+      },
+      "justification": "The r293_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd00609_e0",
+         "name": "D-Glucarate"
+      },
+      "new": {
+         "id": "cpd00571_e0",
+         "name": "D-Glucarate_e0"
+      },
+      "justification": "The cpd00609_e0 and cpd00571_e0 distinction is incompatible. The ID match was verified with BiGG cross-references."
+   },
+   {
+      "original": {
+         "id": "r1262_e0",
+         "name": "Mo2+"
+      },
+      "new": {
+         "id": "cpd00131_e0",
+         "name": "Mo2+_e0"
+      },
+      "justification": "The r1262_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "reaction": "cpd15411_e0 <=> "
+      },
+      "new": {
+         "reaction": null
+      },
+      "justification": "A cpd03294_e0 exchange reaction already exists, thus this duplicative exchange reaction (EX_cpd15411_e0) is deleted. The ID match was verified with BiGG cross-references."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_p0 + cpd15411_p0 --> cpd00067_c0 + cpd15411_e0"
+      },
+      "new": {
+         "reaction": "cpd00067_p0 + cpd15411_p0 --> cpd00067_c0 + cpd03294_e0"
+      },
+      "justification": "The cpd03294_e0 replacement for cpd15411_e0 already exists in the model, so each reaction (here ARBTNtex_p0) must be updated."
+   },
+   {
+      "original": {
+         "reaction": "r1400_e0 <=> "
+      },
+      "new": {
+         "reaction": null
+      },
+      "justification": "A cpd00028_e0 exchange reaction already exists, thus this duplicative exchange reaction (EX_r1400_e0) is deleted."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + r1400_e0 --> cpd00008_c0 + cpd00009_c0 + r1399_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00028_e0 --> cpd00008_c0 + cpd00009_c0 + r1399_c0"
+      },
+      "justification": "The cpd00028_e0 replacement for r1400_e0 already exists in the model, so each reaction (here ENZRXN3EM__DASH__4700_c0) must be updated."
+   },
+   {
+      "original": {
+         "reaction": "r192_b0 --> cpd00002_c0 + r1400_e0"
+      },
+      "new": {
+         "reaction": "r192_b0 --> cpd00002_c0 + cpd00028_e0"
+      },
+      "justification": "The cpd00028_e0 replacement for r1400_e0 already exists in the model, so each reaction (here MIRXN__DASH__94_c0) must be updated."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + r1399_c0 --> cpd00008_c0 + cpd00009_c0 + r1400_e0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + r1399_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00028_e0"
+      },
+      "justification": "The cpd00028_e0 replacement for r1400_e0 already exists in the model, so each reaction (here ENZRXN3EM__DASH__748_c0) must be updated."
+   }
+]

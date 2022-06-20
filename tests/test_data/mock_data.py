@@ -1,6 +1,3 @@
-import cobra.test
-
-
 def mock_atp_biomass():
     return {
         'cellwall': 0,
@@ -231,7 +228,9 @@ def remap(model, bigg_to_seed_cpd, bigg_to_seed_rxn, index='0'):
 
 
 def mock_model_ecoli_core(seed=True):
-    model = cobra.test.create_test_model('textbook')
+    from cobra.io import load_json_model
+    from os import path
+    model = load_json_model(path.join(path.dirname(__file__),'e_coli_core.json'))
     if not seed:
         return model
     bigg_to_seed_cpd = {'pyr': 'cpd00020',

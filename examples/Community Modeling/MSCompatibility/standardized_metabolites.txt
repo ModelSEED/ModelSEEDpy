@@ -1,0 +1,4445 @@
+[
+   {
+      "original": {
+         "id": "r293_e0",
+         "name": "Fe2+"
+      },
+      "new": {
+         "id": "cpd10515_e0",
+         "name": "Fe2+_e0"
+      },
+      "justification": "The r293_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "mchtbs6p-c_c0",
+         "name": "N-monoacetylchitobiose 6'-phosphate"
+      },
+      "new": {
+         "id": "cpd33279_c0",
+         "name": "N-monoacetylchitobiose 6'-phosphate_c0"
+      },
+      "justification": "The mchtbs6p-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "metsox-S-L-e_e0",
+         "name": "L-Methionine Sulfoxide"
+      },
+      "new": {
+         "id": "cpd15498_e0",
+         "name": "L-Methionine Sulfoxide_e0"
+      },
+      "justification": "The metsox-S-L-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "metsox-S-L-c_c0",
+         "name": "L-Methionine Sulfoxide"
+      },
+      "new": {
+         "id": "cpd15498_c0",
+         "name": "L-Methionine Sulfoxide_c0"
+      },
+      "justification": "The metsox-S-L-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "metsox-S-L-p_p0",
+         "name": "L-Methionine Sulfoxide"
+      },
+      "new": {
+         "id": "cpd15498_p0",
+         "name": "L-Methionine Sulfoxide_p0"
+      },
+      "justification": "The metsox-S-L-p_p0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "sq-p_p0",
+         "name": "Sulphoquinovose"
+      },
+      "new": {
+         "id": "cpd32553_p0",
+         "name": "_p0"
+      },
+      "justification": "The sq-p_p0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "moadcoo-c_c0",
+         "name": "MoaD Protein with carboxylate"
+      },
+      "new": {
+         "id": "cpd32553_c0",
+         "name": "_c0"
+      },
+      "justification": "The moadcoo-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "sq-e_e0",
+         "name": "Sulphoquinovose"
+      },
+      "new": {
+         "id": "cpd32553_e0",
+         "name": "_e0"
+      },
+      "justification": "The sq-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd00609_p0",
+         "name": "D-Glucarate_p0"
+      },
+      "new": {
+         "id": "cpd00571_p0",
+         "name": "D-Glucarate_p0"
+      },
+      "justification": "The cpd00609_p0 and cpd00571_p0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "cpd00609_c0",
+         "name": "D-Glucarate_c0"
+      },
+      "new": {
+         "id": "cpd00571_c0",
+         "name": "D-Glucarate_c0"
+      },
+      "justification": "The cpd00609_c0 and cpd00571_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "cpd00609_e0",
+         "name": "D-Glucarate_e0"
+      },
+      "new": {
+         "id": "cpd00571_e0",
+         "name": "D-Glucarate_e0"
+      },
+      "justification": "The cpd00609_e0 and cpd00571_e0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "cpd19046_c0",
+         "name": "(R)-2,3-Dihydroxy-3-methylpentanoate_c0"
+      },
+      "new": {
+         "id": "cpd02535_c0",
+         "name": "(R)-2,3-Dihydroxy-3-methylpentanoate_c0"
+      },
+      "justification": "The cpd19046_c0 and cpd02535_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "2hptcl-c_c0",
+         "name": "2-hydroxycyclohepta-1,4,6-triene-1-carboxylate"
+      },
+      "new": {
+         "id": "cpd31397_c0",
+         "name": "2-hydroxycyclohepta-1,4,6-triene-1-carboxylate_c0"
+      },
+      "justification": "The 2hptcl-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "uaagmda-c_c0",
+         "name": "Undecaprenyl-diphospho-N-acetylmuramoyl-(N-acetylglucosamine)-L-ala-D-glu-meso-2,6-diaminopimeloyl-D-ala-D-ala"
+      },
+      "new": {
+         "id": "cpd22495_c0",
+         "name": "Undecaprenyl-diphospho-N-acetylmuramoyl-(N-acetylglucosamine)-L-ala-D-glu-meso-2,6-diaminopimeloyl-D-ala-D-ala_c0"
+      },
+      "justification": "The uaagmda-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd03732_c0",
+         "name": "UDP-N-acetyl-D-mannosaminouronate_c0"
+      },
+      "new": {
+         "id": "cpd02703_c0",
+         "name": "UDP-N-acetyl-D-mannosaminouronate_c0"
+      },
+      "justification": "The cpd03732_c0 and cpd02703_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "dhps-c_c0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate"
+      },
+      "new": {
+         "id": "cpd31356_c0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate_c0"
+      },
+      "justification": "The dhps-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "dhps-e_e0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate"
+      },
+      "new": {
+         "id": "cpd31356_e0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate_e0"
+      },
+      "justification": "The dhps-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "dhps-p_p0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate"
+      },
+      "new": {
+         "id": "cpd31356_p0",
+         "name": "2,3-Dihydroxypropane-1-sulfonate_p0"
+      },
+      "justification": "The dhps-p_p0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "acampnt-c_c0",
+         "name": "2-N-acetamidomethylphosphonate"
+      },
+      "new": {
+         "id": "cpd35393_c0",
+         "name": "2-N-acetamidomethylphosphonate_c0"
+      },
+      "justification": "The acampnt-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd00491_c0",
+         "name": "D-mannitol-1-phosphate_c0"
+      },
+      "new": {
+         "id": "cpd27436_c0",
+         "name": "D-mannitol-1-phosphate_c0"
+      },
+      "justification": "The cpd00491_c0 and cpd27436_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "cpd03191_p0",
+         "name": "D-Glucuronate 1-phosphate_p0"
+      },
+      "new": {
+         "id": "cpd00880_p0",
+         "name": "D-Glucuronate 1-phosphate_p0"
+      },
+      "justification": "The cpd03191_p0 and cpd00880_p0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "cpd03191_e0",
+         "name": "D-Glucuronate 1-phosphate_e0"
+      },
+      "new": {
+         "id": "cpd00880_e0",
+         "name": "D-Glucuronate 1-phosphate_e0"
+      },
+      "justification": "The cpd03191_e0 and cpd00880_e0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "tartr-D-p_p0",
+         "name": "D-tartrate"
+      },
+      "new": {
+         "id": "cpd19018_p0",
+         "name": "D-tartrate_p0"
+      },
+      "justification": "The tartr-D-p_p0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "tartr-D-e_e0",
+         "name": "D-tartrate"
+      },
+      "new": {
+         "id": "cpd19018_e0",
+         "name": "D-tartrate_e0"
+      },
+      "justification": "The tartr-D-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "tartr-D-c_c0",
+         "name": "D-tartrate"
+      },
+      "new": {
+         "id": "cpd19018_c0",
+         "name": "D-tartrate_c0"
+      },
+      "justification": "The tartr-D-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "dtgcl-c_c0",
+         "name": "2-hydroxyethyldisulfide"
+      },
+      "new": {
+         "id": "cpd26318_c0",
+         "name": "2-hydroxyethyldisulfide_c0"
+      },
+      "justification": "The dtgcl-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "2dh3dgal-c_c0",
+         "name": "2-Dehydro-3-deoxy-D-galactonate"
+      },
+      "new": {
+         "id": "cpd00894_c0",
+         "name": "2-Dehydro-3-deoxy-D-galactonate_c0"
+      },
+      "justification": "The 2dh3dgal-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd15377_c0",
+         "name": "3-Oxooctadecanoyl-[acyl-carrier protein]_c0"
+      },
+      "new": {
+         "id": "cpd14938_c0",
+         "name": "3-Oxooctadecanoyl-[acyl-carrier protein]_c0"
+      },
+      "justification": "The cpd15377_c0 and cpd14938_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "sfp-c_c0",
+         "name": "6-deoxy-6-sulphofructose 1-phosphate"
+      },
+      "new": {
+         "id": "cpd32891_c0",
+         "name": "6-deoxy-6-sulphofructose 1-phosphate_c0"
+      },
+      "justification": "The sfp-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd00804_c0",
+         "name": "Sorbitol 6-phosphate_c0"
+      },
+      "new": {
+         "id": "cpd00491_c0",
+         "name": "Sorbitol 6-phosphate_c0"
+      },
+      "justification": "The cpd00804_c0 and cpd00491_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "2hptcoa-c_c0",
+         "name": "2-hydroxycyclohepta-1,4,6-triene-1-carboxyl-CoA"
+      },
+      "new": {
+         "id": "cpd34745_c0",
+         "name": "2-hydroxycyclohepta-1,4,6-triene-1-carboxyl-CoA_c0"
+      },
+      "justification": "The 2hptcoa-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "xylu-D-c_c0",
+         "name": "D-Xylulose"
+      },
+      "new": {
+         "id": "cpd00259_c0",
+         "name": "D-Xylulose_c0"
+      },
+      "justification": "The xylu-D-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd15268_c0",
+         "name": "Octadecanoyl-ACP_c0"
+      },
+      "new": {
+         "id": "cpd12458_c0",
+         "name": "Octadecanoyl-ACP_c0"
+      },
+      "justification": "The cpd15268_c0 and cpd12458_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "metsox-R-L-p_p0",
+         "name": "L-methionine-R-sulfoxide"
+      },
+      "new": {
+         "id": "cpd14720_p0",
+         "name": "L-methionine-R-sulfoxide_p0"
+      },
+      "justification": "The metsox-R-L-p_p0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "metsox-R-L-c_c0",
+         "name": "L-methionine-R-sulfoxide"
+      },
+      "new": {
+         "id": "cpd14720_c0",
+         "name": "L-methionine-R-sulfoxide_c0"
+      },
+      "justification": "The metsox-R-L-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "metsox-R-L-e_e0",
+         "name": "L-methionine-R-sulfoxide"
+      },
+      "new": {
+         "id": "cpd14720_e0",
+         "name": "L-methionine-R-sulfoxide_e0"
+      },
+      "justification": "The metsox-R-L-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd15478_c0",
+         "name": "gamma-glutamyl-putrescine_c0"
+      },
+      "new": {
+         "id": "cpd11340_c0",
+         "name": "gamma-glutamyl-putrescine_c0"
+      },
+      "justification": "The cpd15478_c0 and cpd11340_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "4abzglu-e_e0",
+         "name": "4-aminobenzoyl-glutamate"
+      },
+      "new": {
+         "id": "cpd26527_e0",
+         "name": "4-aminobenzoyl-glutamate_e0"
+      },
+      "justification": "The 4abzglu-e_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "4abzglu-c_c0",
+         "name": "4-aminobenzoyl-glutamate"
+      },
+      "new": {
+         "id": "cpd26527_c0",
+         "name": "4-aminobenzoyl-glutamate_c0"
+      },
+      "justification": "The 4abzglu-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd15494_c0",
+         "name": "Maltoheptaose_c0"
+      },
+      "new": {
+         "id": "cpd03718_c0",
+         "name": "Maltoheptaose_c0"
+      },
+      "justification": "The cpd15494_c0 and cpd03718_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "4abzglu-p_p0",
+         "name": "4-aminobenzoyl-glutamate"
+      },
+      "new": {
+         "id": "cpd26527_p0",
+         "name": "4-aminobenzoyl-glutamate_p0"
+      },
+      "justification": "The 4abzglu-p_p0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "sf-c_c0",
+         "name": "6-deoxy-6-sulphofructose"
+      },
+      "new": {
+         "id": "cpd35501_c0",
+         "name": "6-deoxy-6-sulphofructose_c0"
+      },
+      "justification": "The sf-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "bmocogdp-c_c0",
+         "name": "Bis-molybdopterin guanine dinucleotide"
+      },
+      "new": {
+         "id": "cpd37287_c0",
+         "name": "Molybdopterin guanine dinucleotide_c0"
+      },
+      "justification": "The bmocogdp-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "xylu-L-c_c0",
+         "name": "L-Xylulose"
+      },
+      "new": {
+         "id": "cpd00261_c0",
+         "name": "L-Xylulose_c0"
+      },
+      "justification": "The xylu-L-c_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1373_c0",
+         "name": "phosphoribosyl-formamido-carboxamide"
+      },
+      "new": {
+         "id": "cpd02884_c0",
+         "name": "phosphoribosyl-formamido-carboxamide_c0"
+      },
+      "justification": "The r1373_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1374_c0",
+         "name": "phosphoribosylformiminoAICAR-phosphate"
+      },
+      "new": {
+         "id": "cpd02979_c0",
+         "name": "phosphoribosylformiminoAICAR-phosphate_c0"
+      },
+      "justification": "The r1374_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1146_c0",
+         "name": "L,L-diaminopimelate"
+      },
+      "new": {
+         "id": "cpd00504_c0",
+         "name": "L,L-diaminopimelate_c0"
+      },
+      "justification": "The r1146_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1339_c0",
+         "name": "octaprenyl diphosphate"
+      },
+      "new": {
+         "id": "cpd02557_c0",
+         "name": "octaprenyl diphosphate_c0"
+      },
+      "justification": "The r1339_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1331_c0",
+         "name": "O2-"
+      },
+      "new": {
+         "id": "cpd00532_c0",
+         "name": "O2-_c0"
+      },
+      "justification": "The r1331_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1131_c0",
+         "name": "isopropylmaleate"
+      },
+      "new": {
+         "id": "cpd32553_c0",
+         "name": "_c0"
+      },
+      "justification": "The r1131_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1124_c0",
+         "name": "isobutanal"
+      },
+      "new": {
+         "id": "cpd24683_c0",
+         "name": "isobutanal_c0"
+      },
+      "justification": "The r1124_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1399_c0",
+         "name": "protoheme IX"
+      },
+      "new": {
+         "id": "cpd00028_c0",
+         "name": "protoheme IX_c0"
+      },
+      "justification": "The r1399_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1375_c0",
+         "name": "phosphoribulosylformimino-AICAR-P"
+      },
+      "new": {
+         "id": "cpd02991_c0",
+         "name": "phosphoribulosylformimino-AICAR-P_c0"
+      },
+      "justification": "The r1375_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r698_c0",
+         "name": "7-keto-8-aminopelargonate"
+      },
+      "new": {
+         "id": "cpd00800_c0",
+         "name": "7-keto-8-aminopelargonate_c0"
+      },
+      "justification": "The r698_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r672_c0",
+         "name": "5-methyl-THF"
+      },
+      "new": {
+         "id": "cpd00345_c0",
+         "name": "5-methyl-THF_c0"
+      },
+      "justification": "The r672_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r675_c0",
+         "name": "5-phospho-beta-D-ribosyl-amine"
+      },
+      "new": {
+         "id": "cpd01982_c0",
+         "name": "5-phospho-beta-D-ribosyl-amine_c0"
+      },
+      "justification": "The r675_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r198_b0",
+         "name": "p-hydroxybenzoate"
+      },
+      "new": {
+         "id": "cpd00136_b0",
+         "name": "p-hydroxybenzoate_b0"
+      },
+      "justification": "The r198_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r199_b0",
+         "name": "acetate"
+      },
+      "new": {
+         "id": "cpd00029_b0",
+         "name": "acetate_b0"
+      },
+      "justification": "The r199_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r193_b0",
+         "name": "xanthine"
+      },
+      "new": {
+         "id": "cpd00309_b0",
+         "name": "xanthine_b0"
+      },
+      "justification": "The r193_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r192_b0",
+         "name": "protoheme IX"
+      },
+      "new": {
+         "id": "cpd00028_b0",
+         "name": "protoheme IX_b0"
+      },
+      "justification": "The r192_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r195_b0",
+         "name": "2-dehydro-D-gluconate"
+      },
+      "new": {
+         "id": "cpd00480_b0",
+         "name": "2-dehydro-D-gluconate_b0"
+      },
+      "justification": "The r195_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r197_b0",
+         "name": "4-aminobutyrate"
+      },
+      "new": {
+         "id": "cpd00281_b0",
+         "name": "4-aminobutyrate_b0"
+      },
+      "justification": "The r197_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r196_b0",
+         "name": "alpha-ketoglutarate"
+      },
+      "new": {
+         "id": "cpd00024_b0",
+         "name": "alpha-ketoglutarate_b0"
+      },
+      "justification": "The r196_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r873_c0",
+         "name": "D-beta-D-heptose-1,7-bisphosphate"
+      },
+      "new": {
+         "id": "cpd08316_c0",
+         "name": "D-beta-D-heptose-1,7-bisphosphate_c0"
+      },
+      "justification": "The r873_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r682_c0",
+         "name": "6-(2-amino-2-carboxyethyl)-7,8-dioxo-1,2,3,4,5,6,7,8-octahydroquinoline 2,4-dicarboxylate"
+      },
+      "new": {
+         "id": "cpd16330_c0",
+         "name": "6-(2-amino-2-carboxyethyl)-7,8-dioxo-1,2,3,4,5,6,7,8-octahydroquinoline 2,4-dicarboxylate_c0"
+      },
+      "justification": "The r682_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r654_c0",
+         "name": "5-amino-6-ribitylamino-2,4(1H,3H)-pyrimidinedione"
+      },
+      "new": {
+         "id": "cpd02882_c0",
+         "name": "5-amino-6-ribitylamino-2,4(1H,3H)-pyrimidinedione_c0"
+      },
+      "justification": "The r654_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1325_c0",
+         "name": "2-aceto-2-hydroxy-butyrate"
+      },
+      "new": {
+         "id": "cpd00498_c0",
+         "name": "2-aceto-2-hydroxy-butyrate_c0"
+      },
+      "justification": "The r1325_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1328_c0",
+         "name": "N-succinyl-L,L-2,6-diaminopimelate"
+      },
+      "new": {
+         "id": "cpd02698_c0",
+         "name": "N-succinyl-L,L-2,6-diaminopimelate_c0"
+      },
+      "justification": "The r1328_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r663_c0",
+         "name": "5-enolpyruvyl-shikimate-3-phosphate"
+      },
+      "new": {
+         "id": "cpd00932_c0",
+         "name": "5-enolpyruvyl-shikimate-3-phosphate_c0"
+      },
+      "justification": "The r663_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1313_c0",
+         "name": "alpha-ketoglutarate"
+      },
+      "new": {
+         "id": "cpd00024_c0",
+         "name": "alpha-ketoglutarate_c0"
+      },
+      "justification": "The r1313_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r638_c0",
+         "name": "4-hydroxybenzyl alcohol"
+      },
+      "new": {
+         "id": "cpd15378_c0",
+         "name": "4-hydroxybenzyl alcohol_c0"
+      },
+      "justification": "The r638_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r635_c0",
+         "name": "4-hydroxy-2-ketovalerate"
+      },
+      "new": {
+         "id": "cpd02258_c0",
+         "name": "4-hydroxy-2-ketovalerate_c0"
+      },
+      "justification": "The r635_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r630_c0",
+         "name": "4-carboxy-4-hydroxy-2-oxoadipate"
+      },
+      "new": {
+         "id": "cpd02544_c0",
+         "name": "4-carboxy-4-hydroxy-2-oxoadipate_c0"
+      },
+      "justification": "The r630_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r631_c0",
+         "name": "4-carboxyaminoimidazole ribonucleotide"
+      },
+      "new": {
+         "id": "cpd02893_c0",
+         "name": "4-carboxyaminoimidazole ribonucleotide_c0"
+      },
+      "justification": "The r631_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd28667_c0",
+         "name": "5,10-methenyl-THF"
+      },
+      "new": {
+         "id": "cpd00347_c0",
+         "name": "5,10-methenyl-THF_c0"
+      },
+      "justification": "The cpd28667_c0 and cpd00347_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "r644_c0",
+         "name": "4-oxohex-2-enedioate"
+      },
+      "new": {
+         "id": "cpd01498_c0",
+         "name": "4-oxohex-2-enedioate_c0"
+      },
+      "justification": "The r644_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r140_b0",
+         "name": "L-arginine"
+      },
+      "new": {
+         "id": "cpd00051_b0",
+         "name": "L-arginine_b0"
+      },
+      "justification": "The r140_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r142_b0",
+         "name": "L-carnitine"
+      },
+      "new": {
+         "id": "cpd00266_b0",
+         "name": "L-carnitine_b0"
+      },
+      "justification": "The r142_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r141_b0",
+         "name": "L-aspartate"
+      },
+      "new": {
+         "id": "cpd00041_b0",
+         "name": "L-aspartate_b0"
+      },
+      "justification": "The r141_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r743_c0",
+         "name": "adenosyl-cobyrinic acid a,c-diamide"
+      },
+      "new": {
+         "id": "cpd03916_c0",
+         "name": "adenosyl-cobyrinic acid a,c-diamide_c0"
+      },
+      "justification": "The r743_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r143_b0",
+         "name": "L-cysteine"
+      },
+      "new": {
+         "id": "cpd00084_b0",
+         "name": "L-cysteine_b0"
+      },
+      "justification": "The r143_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r144_b0",
+         "name": "L-glutamate"
+      },
+      "new": {
+         "id": "cpd00023_b0",
+         "name": "L-glutamate_b0"
+      },
+      "justification": "The r144_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r145_b0",
+         "name": "L-glutamine"
+      },
+      "new": {
+         "id": "cpd00053_b0",
+         "name": "L-glutamine_b0"
+      },
+      "justification": "The r145_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r147_b0",
+         "name": "L-histidine"
+      },
+      "new": {
+         "id": "cpd00119_b0",
+         "name": "L-histidine_b0"
+      },
+      "justification": "The r147_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r148_b0",
+         "name": "L-isoleucine"
+      },
+      "new": {
+         "id": "cpd00322_b0",
+         "name": "L-isoleucine_b0"
+      },
+      "justification": "The r148_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r149_b0",
+         "name": "L-lactate"
+      },
+      "new": {
+         "id": "cpd00159_b0",
+         "name": "L-lactate_b0"
+      },
+      "justification": "The r149_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r131_b0",
+         "name": "H+"
+      },
+      "new": {
+         "id": "cpd00067_b0",
+         "name": "H+_b0"
+      },
+      "justification": "The r131_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r130_b0",
+         "name": "glycolate"
+      },
+      "new": {
+         "id": "cpd00139_b0",
+         "name": "glycolate_b0"
+      },
+      "justification": "The r130_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r938_c0",
+         "name": "dimethylallyl-PP"
+      },
+      "new": {
+         "id": "cpd00202_c0",
+         "name": "dimethylallyl-PP_c0"
+      },
+      "justification": "The r938_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r134_b0",
+         "name": "Hexadecanoate (n-C16:0)"
+      },
+      "new": {
+         "id": "cpd00214_b0",
+         "name": "Hexadecanoate (n-C16:0)_b0"
+      },
+      "justification": "The r134_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r132_b0",
+         "name": "H2"
+      },
+      "new": {
+         "id": "cpd11640_b0",
+         "name": "H2_b0"
+      },
+      "justification": "The r132_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r133_b0",
+         "name": "H2O"
+      },
+      "new": {
+         "id": "cpd00001_b0",
+         "name": "H2O_b0"
+      },
+      "justification": "The r133_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r138_b0",
+         "name": "K+"
+      },
+      "new": {
+         "id": "cpd00205_b0",
+         "name": "K+_b0"
+      },
+      "justification": "The r138_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r139_b0",
+         "name": "L-alanine"
+      },
+      "new": {
+         "id": "cpd00035_b0",
+         "name": "L-alanine_b0"
+      },
+      "justification": "The r139_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r136_b0",
+         "name": "Hexanoate (n-C6:0)"
+      },
+      "new": {
+         "id": "cpd01113_b0",
+         "name": "Hexanoate (n-C6:0)_b0"
+      },
+      "justification": "The r136_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r137_b0",
+         "name": "isocitrate"
+      },
+      "new": {
+         "id": "cpd00353_b0",
+         "name": "isocitrate_b0"
+      },
+      "justification": "The r137_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r120_b0",
+         "name": "Dodecanoate (n-C12:0)"
+      },
+      "new": {
+         "id": "cpd01741_b0",
+         "name": "Dodecanoate (n-C12:0)_b0"
+      },
+      "justification": "The r120_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r125_b0",
+         "name": "fumarate"
+      },
+      "new": {
+         "id": "cpd00106_b0",
+         "name": "fumarate_b0"
+      },
+      "justification": "The r125_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r126_b0",
+         "name": "glycerol"
+      },
+      "new": {
+         "id": "cpd00100_b0",
+         "name": "glycerol_b0"
+      },
+      "justification": "The r126_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r127_b0",
+         "name": "sn-glycerol-3-phosphate"
+      },
+      "new": {
+         "id": "cpd00080_b0",
+         "name": "sn-glycerol-3-phosphate_b0"
+      },
+      "justification": "The r127_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r128_b0",
+         "name": "glycine"
+      },
+      "new": {
+         "id": "cpd00033_b0",
+         "name": "glycine_b0"
+      },
+      "justification": "The r128_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r123_b0",
+         "name": "Fe2+"
+      },
+      "new": {
+         "id": "cpd10515_b0",
+         "name": "Fe2+_b0"
+      },
+      "justification": "The r123_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r917_c0",
+         "name": "D-glucuronolactone"
+      },
+      "new": {
+         "id": "cpd01735_c0",
+         "name": "D-glucuronolactone_c0"
+      },
+      "justification": "The r917_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd00609_e0",
+         "name": "D-Glucarate"
+      },
+      "new": {
+         "id": "cpd00571_e0",
+         "name": "D-Glucarate_e0"
+      },
+      "justification": "The cpd00609_e0 and cpd00571_e0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "cpd00609_c0",
+         "name": "D-Glucarate"
+      },
+      "new": {
+         "id": "cpd00571_c0",
+         "name": "D-Glucarate_c0"
+      },
+      "justification": "The cpd00609_c0 and cpd00571_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "r912_c0",
+         "name": "D-glucono-delta-lactone-6-phosphate"
+      },
+      "new": {
+         "id": "cpd00911_c0",
+         "name": "D-glucono-delta-lactone-6-phosphate_c0"
+      },
+      "justification": "The r912_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r119_b0",
+         "name": "D-methionine"
+      },
+      "new": {
+         "id": "cpd00637_b0",
+         "name": "D-methionine_b0"
+      },
+      "justification": "The r119_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r116_b0",
+         "name": "D-malate"
+      },
+      "new": {
+         "id": "cpd00386_b0",
+         "name": "D-malate_b0"
+      },
+      "justification": "The r116_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r117_b0",
+         "name": "mannitol"
+      },
+      "new": {
+         "id": "cpd00314_b0",
+         "name": "mannitol_b0"
+      },
+      "justification": "The r117_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r114_b0",
+         "name": "glyceraldehyde"
+      },
+      "new": {
+         "id": "cpd00448_b0",
+         "name": "glyceraldehyde_b0"
+      },
+      "justification": "The r114_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r115_b0",
+         "name": "D-lactate"
+      },
+      "new": {
+         "id": "cpd00221_b0",
+         "name": "D-lactate_b0"
+      },
+      "justification": "The r115_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r110_b0",
+         "name": "gluconate"
+      },
+      "new": {
+         "id": "cpd00222_b0",
+         "name": "gluconate_b0"
+      },
+      "justification": "The r110_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r180_b0",
+         "name": "succinate"
+      },
+      "new": {
+         "id": "cpd00036_b0",
+         "name": "succinate_b0"
+      },
+      "justification": "The r180_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r182_b0",
+         "name": "taurine"
+      },
+      "new": {
+         "id": "cpd00210_b0",
+         "name": "taurine_b0"
+      },
+      "justification": "The r182_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r94_b0",
+         "name": "allantoin"
+      },
+      "new": {
+         "id": "cpd01092_b0",
+         "name": "allantoin_b0"
+      },
+      "justification": "The r94_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r183_b0",
+         "name": "tetradecanoate (n-C14:0)"
+      },
+      "new": {
+         "id": "cpd03847_b0",
+         "name": "tetradecanoate (n-C14:0)_b0"
+      },
+      "justification": "The r183_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r95_b0",
+         "name": "ammonia"
+      },
+      "new": {
+         "id": "cpd00013_b0",
+         "name": "ammonia_b0"
+      },
+      "justification": "The r95_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r96_b0",
+         "name": "HCO3-"
+      },
+      "new": {
+         "id": "cpd00242_b0",
+         "name": "HCO3-_b0"
+      },
+      "justification": "The r96_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r97_b0",
+         "name": "choline"
+      },
+      "new": {
+         "id": "cpd00098_b0",
+         "name": "choline_b0"
+      },
+      "justification": "The r97_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r98_b0",
+         "name": "citrate"
+      },
+      "new": {
+         "id": "cpd00137_b0",
+         "name": "citrate_b0"
+      },
+      "justification": "The r98_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r188_b0",
+         "name": "D-glucarate"
+      },
+      "new": {
+         "id": "cpd00571_b0",
+         "name": "D-glucarate_b0"
+      },
+      "justification": "The r188_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r187_b0",
+         "name": "3-phenylpropionate"
+      },
+      "new": {
+         "id": "cpd03343_b0",
+         "name": "3-phenylpropionate_b0"
+      },
+      "justification": "The r187_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r189_b0",
+         "name": "Hg0"
+      },
+      "new": {
+         "id": "cpd00965_b0",
+         "name": "Hg0_b0"
+      },
+      "justification": "The r189_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r382_c0",
+         "name": "trans-Tetradec-2-enoyl-CoA"
+      },
+      "new": {
+         "id": "cpd03127_c0",
+         "name": "trans-Tetradec-2-enoyl-CoA_c0"
+      },
+      "justification": "The r382_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r170_b0",
+         "name": "nicotinamide mononucleotide"
+      },
+      "new": {
+         "id": "cpd32553_b0",
+         "name": "_b0"
+      },
+      "justification": "The r170_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r174_b0",
+         "name": "L-ornithine"
+      },
+      "new": {
+         "id": "cpd00064_b0",
+         "name": "L-ornithine_b0"
+      },
+      "justification": "The r174_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r963_c0",
+         "name": "D-ribose-5-phosphate"
+      },
+      "new": {
+         "id": "cpd00101_c0",
+         "name": "D-ribose-5-phosphate_c0"
+      },
+      "justification": "The r963_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r960_c0",
+         "name": "D-myo-inositol (3)-monophosphate"
+      },
+      "new": {
+         "id": "cpd02484_c0",
+         "name": "D-myo-inositol (3)-monophosphate_c0"
+      },
+      "justification": "The r960_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r162_b0",
+         "name": "malonate"
+      },
+      "new": {
+         "id": "cpd00308_b0",
+         "name": "malonate_b0"
+      },
+      "justification": "The r162_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r164_b0",
+         "name": "homoserine"
+      },
+      "new": {
+         "id": "cpd00227_b0",
+         "name": "homoserine_b0"
+      },
+      "justification": "The r164_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r160_b0",
+         "name": "L-valine"
+      },
+      "new": {
+         "id": "cpd00156_b0",
+         "name": "L-valine_b0"
+      },
+      "justification": "The r160_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r169_b0",
+         "name": "Na+"
+      },
+      "new": {
+         "id": "cpd00971_b0",
+         "name": "Na+_b0"
+      },
+      "justification": "The r169_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r361_c0",
+         "name": "Undecaprenyl-diphospho-N-acetylmuramoyl-(N-acetylglucosamine)-L-ala-D-glu-meso-2,6-diaminopimeloyl-D-ala-D-ala"
+      },
+      "new": {
+         "id": "cpd22495_c0",
+         "name": "Undecaprenyl-diphospho-N-acetylmuramoyl-(N-acetylglucosamine)-L-ala-D-glu-meso-2,6-diaminopimeloyl-D-ala-D-ala_c0"
+      },
+      "justification": "The r361_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r166_b0",
+         "name": "Mn2+"
+      },
+      "new": {
+         "id": "cpd00030_b0",
+         "name": "Mn2+_b0"
+      },
+      "justification": "The r166_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r167_b0",
+         "name": "Mo2+"
+      },
+      "new": {
+         "id": "cpd00131_b0",
+         "name": "Mo2+_b0"
+      },
+      "justification": "The r167_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r950_c0",
+         "name": "di-trans,poly-cis-undecaprenyl diphosphate"
+      },
+      "new": {
+         "id": "cpd29584_c0",
+         "name": "di-trans,poly-cis-undecaprenyl diphosphate_c0"
+      },
+      "justification": "The r950_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r152_b0",
+         "name": "malate"
+      },
+      "new": {
+         "id": "cpd00130_b0",
+         "name": "malate_b0"
+      },
+      "justification": "The r152_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r153_b0",
+         "name": "L-methionine"
+      },
+      "new": {
+         "id": "cpd00060_b0",
+         "name": "L-methionine_b0"
+      },
+      "justification": "The r153_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r150_b0",
+         "name": "L-leucine"
+      },
+      "new": {
+         "id": "cpd00107_b0",
+         "name": "L-leucine_b0"
+      },
+      "justification": "The r150_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r151_b0",
+         "name": "L-lysine"
+      },
+      "new": {
+         "id": "cpd00039_b0",
+         "name": "L-lysine_b0"
+      },
+      "justification": "The r151_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r354_c0",
+         "name": "cis-octadec-11-enoyl-[acyl-carrier protein] (n-C18:1)"
+      },
+      "new": {
+         "id": "cpd11825_c0",
+         "name": "cis-octadec-11-enoyl-[acyl-carrier protein] (n-C18:1)_c0"
+      },
+      "justification": "The r354_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd15268_c0",
+         "name": "Octadecanoyl-ACP"
+      },
+      "new": {
+         "id": "cpd12458_c0",
+         "name": "Octadecanoyl-ACP_c0"
+      },
+      "justification": "The cpd15268_c0 and cpd12458_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "r159_b0",
+         "name": "L-tyrosine"
+      },
+      "new": {
+         "id": "cpd00069_b0",
+         "name": "L-tyrosine_b0"
+      },
+      "justification": "The r159_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r158_b0",
+         "name": "L-threonine"
+      },
+      "new": {
+         "id": "cpd00161_b0",
+         "name": "L-threonine_b0"
+      },
+      "justification": "The r158_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r156_b0",
+         "name": "L-serine"
+      },
+      "new": {
+         "id": "cpd00054_b0",
+         "name": "L-serine_b0"
+      },
+      "justification": "The r156_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r155_b0",
+         "name": "L-proline"
+      },
+      "new": {
+         "id": "cpd00129_b0",
+         "name": "L-proline_b0"
+      },
+      "justification": "The r155_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r154_b0",
+         "name": "L-phenylalanine"
+      },
+      "new": {
+         "id": "cpd00066_b0",
+         "name": "L-phenylalanine_b0"
+      },
+      "justification": "The r154_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r347_b0",
+         "name": "L-tryptophan"
+      },
+      "new": {
+         "id": "cpd00065_b0",
+         "name": "L-tryptophan_b0"
+      },
+      "justification": "The r347_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r100_b0",
+         "name": "CO2"
+      },
+      "new": {
+         "id": "cpd00011_b0",
+         "name": "CO2_b0"
+      },
+      "justification": "The r100_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r106_b0",
+         "name": "D-serine"
+      },
+      "new": {
+         "id": "cpd00550_b0",
+         "name": "D-serine_b0"
+      },
+      "justification": "The r106_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r105_b0",
+         "name": "D-cysteine"
+      },
+      "new": {
+         "id": "cpd00587_b0",
+         "name": "D-cysteine_b0"
+      },
+      "justification": "The r105_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r104_b0",
+         "name": "D-alanine"
+      },
+      "new": {
+         "id": "cpd00117_b0",
+         "name": "D-alanine_b0"
+      },
+      "justification": "The r104_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r103_b0",
+         "name": "cytosine"
+      },
+      "new": {
+         "id": "cpd00307_b0",
+         "name": "cytosine_b0"
+      },
+      "justification": "The r103_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r109_b0",
+         "name": "D-galactonate"
+      },
+      "new": {
+         "id": "cpd00653_b0",
+         "name": "D-galactonate_b0"
+      },
+      "justification": "The r109_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r107_b0",
+         "name": "Decanoate (n-C10:0)"
+      },
+      "new": {
+         "id": "cpd01107_b0",
+         "name": "Decanoate (n-C10:0)_b0"
+      },
+      "justification": "The r107_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r307_e0",
+         "name": "Mn2+"
+      },
+      "new": {
+         "id": "cpd00030_e0",
+         "name": "Mn2+_e0"
+      },
+      "justification": "The r307_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r306_c0",
+         "name": "Mn2+"
+      },
+      "new": {
+         "id": "cpd00030_c0",
+         "name": "Mn2+_c0"
+      },
+      "justification": "The r306_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1273_c0",
+         "name": "N-(5'-phosphoribosyl)-anthranilate"
+      },
+      "new": {
+         "id": "cpd02642_c0",
+         "name": "N-(5'-phosphoribosyl)-anthranilate_c0"
+      },
+      "justification": "The r1273_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1274_c0",
+         "name": "N10-formyl-THF"
+      },
+      "new": {
+         "id": "cpd00201_c0",
+         "name": "N10-formyl-THF_c0"
+      },
+      "justification": "The r1274_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd21167_c0",
+         "name": "Molybdopterin guanine dinucleotide"
+      },
+      "new": {
+         "id": "cpd37287_c0",
+         "name": "Molybdopterin guanine dinucleotide_c0"
+      },
+      "justification": "The cpd21167_c0 and cpd37287_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "r1262_e0",
+         "name": "Mo2+"
+      },
+      "new": {
+         "id": "cpd00131_e0",
+         "name": "Mo2+_e0"
+      },
+      "justification": "The r1262_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1261_c0",
+         "name": "Mo2+"
+      },
+      "new": {
+         "id": "cpd00131_c0",
+         "name": "Mo2+_c0"
+      },
+      "justification": "The r1261_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1290_c0",
+         "name": "N-acetylglutamyl-phosphate"
+      },
+      "new": {
+         "id": "cpd02552_c0",
+         "name": "N-acetylglutamyl-phosphate_c0"
+      },
+      "justification": "The r1290_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1281_c0",
+         "name": "N5-carboxyaminoimidazole ribonucleotide"
+      },
+      "new": {
+         "id": "cpd11310_c0",
+         "name": "N5-carboxyaminoimidazole ribonucleotide_c0"
+      },
+      "justification": "The r1281_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1280_c0",
+         "name": "2,5-dihydro-5-oxofuran-2-acetate"
+      },
+      "new": {
+         "id": "cpd02536_c0",
+         "name": "2,5-dihydro-5-oxofuran-2-acetate_c0"
+      },
+      "justification": "The r1280_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r509_c0",
+         "name": "a protein-histidine"
+      },
+      "new": {
+         "id": "cpd00572_c0",
+         "name": "Histidine_c0"
+      },
+      "justification": "The r509_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r505_e0",
+         "name": "heme"
+      },
+      "new": {
+         "id": "cpd32553_e0",
+         "name": "_e0"
+      },
+      "justification": "The r505_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r595_c0",
+         "name": "3-hydrohydroxyphosphorylpyruvate"
+      },
+      "new": {
+         "id": "cpd03804_c0",
+         "name": "3-hydrohydroxyphosphorylpyruvate_c0"
+      },
+      "justification": "The r595_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r598_c0",
+         "name": "3-hydroxybutyryl-CoA"
+      },
+      "new": {
+         "id": "cpd03043_c0",
+         "name": "3-hydroxybutyryl-CoA_c0"
+      },
+      "justification": "The r598_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r993_c0",
+         "name": "erythronate-4-phosphate"
+      },
+      "new": {
+         "id": "cpd02147_c0",
+         "name": "erythronate-4-phosphate_c0"
+      },
+      "justification": "The r993_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1243_c0",
+         "name": "meso-diaminopimelate"
+      },
+      "new": {
+         "id": "cpd00516_c0",
+         "name": "meso-diaminopimelate_c0"
+      },
+      "justification": "The r1243_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1246_c0",
+         "name": "methionol"
+      },
+      "new": {
+         "id": "cpd24696_c0",
+         "name": "methionol_c0"
+      },
+      "justification": "The r1246_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1232_c0",
+         "name": "maltotetraose"
+      },
+      "new": {
+         "id": "cpd01399_c0",
+         "name": "maltotetraose_c0"
+      },
+      "justification": "The r1232_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1238_c0",
+         "name": "mannose-6-phosphate"
+      },
+      "new": {
+         "id": "cpd00235_c0",
+         "name": "mannose-6-phosphate_c0"
+      },
+      "justification": "The r1238_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r553_c0",
+         "name": "2-nonaprenyl-3-methyl-6-methoxy-1,4-benzoquinol"
+      },
+      "new": {
+         "id": "cpd25887_c0",
+         "name": "2-nonaprenyl-3-methyl-6-methoxy-1,4-benzoquinol_c0"
+      },
+      "justification": "The r553_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r569_c0",
+         "name": "2-oxo-hept-3-ene-1,7-dioate"
+      },
+      "new": {
+         "id": "cpd01960_c0",
+         "name": "2-oxo-hept-3-ene-1,7-dioate_c0"
+      },
+      "justification": "The r569_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1400_e0",
+         "name": "protoheme IX"
+      },
+      "new": {
+         "id": "cpd00028_e0",
+         "name": "protoheme IX_e0"
+      },
+      "justification": "The r1400_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1003_c0",
+         "name": "1-(o-carboxyphenylamino)-1'-deoxyribulose-5'-phosphate"
+      },
+      "new": {
+         "id": "cpd00956_c0",
+         "name": "1-(o-carboxyphenylamino)-1'-deoxyribulose-5'-phosphate_c0"
+      },
+      "justification": "The r1003_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1004_c0",
+         "name": "Fe2+"
+      },
+      "new": {
+         "id": "cpd10515_c0",
+         "name": "Fe2+_c0"
+      },
+      "justification": "The r1004_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r585_c0",
+         "name": "3-carboxy-cis,cis-muconate"
+      },
+      "new": {
+         "id": "cpd00856_c0",
+         "name": "3-carboxy-cis,cis-muconate_c0"
+      },
+      "justification": "The r585_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r54_c0",
+         "name": "2-oxoarginine"
+      },
+      "new": {
+         "id": "cpd02364_c0",
+         "name": "2-oxoarginine_c0"
+      },
+      "justification": "The r54_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1012_c0",
+         "name": "fructose-1-phosphate"
+      },
+      "new": {
+         "id": "cpd00802_c0",
+         "name": "fructose-1-phosphate_c0"
+      },
+      "justification": "The r1012_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1423_e0",
+         "name": "alpha-ketoglutarate"
+      },
+      "new": {
+         "id": "cpd00024_e0",
+         "name": "alpha-ketoglutarate_e0"
+      },
+      "justification": "The r1423_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1029_c0",
+         "name": "GDP-D-rhamnose"
+      },
+      "new": {
+         "id": "cpd01999_c0",
+         "name": "GDP-D-rhamnose_c0"
+      },
+      "justification": "The r1029_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1032_c0",
+         "name": "GDP-mannuronate"
+      },
+      "new": {
+         "id": "cpd00719_c0",
+         "name": "GDP-mannuronate_c0"
+      },
+      "justification": "The r1032_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1037_c0",
+         "name": "geranyl-PP"
+      },
+      "new": {
+         "id": "cpd23795_c0",
+         "name": "geranyl-PP_c0"
+      },
+      "justification": "The r1037_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r16_c0",
+         "name": "Tetradecanoyl-CoA (n-C14:0CoA)"
+      },
+      "new": {
+         "id": "cpd01695_c0",
+         "name": "Tetradecanoyl-CoA (n-C14:0CoA)_c0"
+      },
+      "justification": "The r16_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1040_c0",
+         "name": "glucono-delta-lactone"
+      },
+      "new": {
+         "id": "cpd00170_c0",
+         "name": "glucono-delta-lactone_c0"
+      },
+      "justification": "The r1040_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1446_c0",
+         "name": "2-dehydro-D-gluconate"
+      },
+      "new": {
+         "id": "cpd00480_c0",
+         "name": "2-dehydro-D-gluconate_c0"
+      },
+      "justification": "The r1446_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1431_c0",
+         "name": "S"
+      },
+      "new": {
+         "id": "cpd00074_c0",
+         "name": "S_c0"
+      },
+      "justification": "The r1431_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1432_c0",
+         "name": "S-2-methyl-butyryl-CoA"
+      },
+      "new": {
+         "id": "cpd00760_c0",
+         "name": "S-2-methyl-butyryl-CoA_c0"
+      },
+      "justification": "The r1432_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1074_c0",
+         "name": "guanosine 5'-diphosphate,3'-diphosphate"
+      },
+      "new": {
+         "id": "cpd00905_c0",
+         "name": "guanosine 5'-diphosphate,3'-diphosphate_c0"
+      },
+      "justification": "The r1074_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r615_c0",
+         "name": "3-phospho-serine"
+      },
+      "new": {
+         "id": "cpd00738_c0",
+         "name": "3-phospho-serine_c0"
+      },
+      "justification": "The r615_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r617_c0",
+         "name": "3-sulfinyl-pyruvate"
+      },
+      "new": {
+         "id": "cpd03284_c0",
+         "name": "3-sulfinyl-pyruvate_c0"
+      },
+      "justification": "The r617_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r1538_b0",
+         "name": "choline sulfate"
+      },
+      "new": {
+         "id": "cpd00681_b0",
+         "name": "choline sulfate_b0"
+      },
+      "justification": "The r1538_b0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r277_e0",
+         "name": "2-dehydro-D-gluconate"
+      },
+      "new": {
+         "id": "cpd00480_e0",
+         "name": "2-dehydro-D-gluconate_e0"
+      },
+      "justification": "The r277_e0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r864_c0",
+         "name": "cyclic-AMP"
+      },
+      "new": {
+         "id": "cpd00446_c0",
+         "name": "cyclic-AMP_c0"
+      },
+      "justification": "The r864_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r469_c0",
+         "name": "2-methyl-3-hydroxybutyryl-CoA"
+      },
+      "new": {
+         "id": "cpd02691_c0",
+         "name": "2-methyl-3-hydroxybutyryl-CoA_c0"
+      },
+      "justification": "The r469_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "r453_c0",
+         "name": "xanthosine-5-phosphate"
+      },
+      "new": {
+         "id": "cpd00497_c0",
+         "name": "xanthosine-5-phosphate_c0"
+      },
+      "justification": "The r453_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "id": "cpd15377_c0",
+         "name": "3-Oxooctadecanoyl-[acyl-carrier protein]"
+      },
+      "new": {
+         "id": "cpd14938_c0",
+         "name": "3-Oxooctadecanoyl-[acyl-carrier protein]_c0"
+      },
+      "justification": "The cpd15377_c0 and cpd14938_c0 distinction is incompatible."
+   },
+   {
+      "original": {
+         "id": "r428_c0",
+         "name": "UDP-N-acetylmuramoyl-L-alanyl-D-glutamyl-meso-2,6-diaminoheptanedioate"
+      },
+      "new": {
+         "id": "cpd02964_c0",
+         "name": "UDP-N-acetylmuramoyl-L-alanyl-D-glutamyl-meso-2,6-diaminoheptanedioate_c0"
+      },
+      "justification": "The r428_c0 ID is not a ModelSEED Database ID."
+   },
+   {
+      "original": {
+         "reaction": "cpd19503_c0 + cpd21090_c0 --> bmoco-c_c0 + cpd00018_c0 + cpd00058_c0"
+      },
+      "new": {
+         "reaction": "cpd21090_c0 --> cpd00018_c0 + cpd00058_c0 + cpd19503_c0"
+      },
+      "justification": "The non-ModelSEED ID bmoco-c_c0 in this reaction (BMOCOS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "bmoco-c_c0 + cpd00038_c0 + cpd00067_c0 --> bmoco1gdp-c_c0 + cpd00012_c0"
+      },
+      "new": {
+         "reaction": "cpd00038_c0 + cpd00067_c0 + cpd19503_c0 --> bmoco1gdp-c_c0 + cpd00012_c0"
+      },
+      "justification": "The non-ModelSEED ID bmoco-c_c0 in this reaction (BMOGDS1_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 + iscu-2fe2s-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 iscs-c_c0 + iscu-2fe2s2-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 + iscu-2fe2s-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s2-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscs-c_c0 in this reaction (I2FE2SS2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2fe1s-c_c0 + iscssh-c_c0 + iscu-c_c0 --> 4.0 cpd00067_c0 + iscs-c_c0 + iscu-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "2fe1s-c_c0 + iscssh-c_c0 + iscu-c_c0 --> 4.0 cpd00067_c0 + cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscs-c_c0 in this reaction (I2FE2SR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + iscssh-c_c0 + moadamp-c_c0 --> cpd00003_c0 + cpd00018_c0 + iscs-c_c0 + moadcosh-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + iscssh-c_c0 + moadamp-c_c0 --> cpd00003_c0 + cpd00018_c0 + cpd32553_c0 + moadcosh-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscs-c_c0 in this reaction (MOADSUx_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00084_c0 + iscs-c_c0 --> cpd00035_c0 + iscssh-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00084_c0 + cpd32553_c0 --> cpd00035_c0 + iscssh-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscs-c_c0 in this reaction (ICYSDS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00005_c0 + cpd00067_c0 + cpd08289_c0 + cpd14545_c0 + iscssh-c_c0 --> 2.0 cpd00001_c0 + cpd00006_c0 + cpd00011_c0 + cpd00012_c0 + cpd00018_c0 + cpd02654_c0 + iscs-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00005_c0 + cpd00067_c0 + cpd08289_c0 + cpd14545_c0 + iscssh-c_c0 --> 2.0 cpd00001_c0 + cpd00006_c0 + cpd00011_c0 + cpd00012_c0 + cpd00018_c0 + cpd02654_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID iscs-c_c0 in this reaction (THZPSN3_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 + iscu-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 iscs-c_c0 + iscu-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 + iscu-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscs-c_c0 in this reaction (I2FE2SS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd32553_p0 --> sq-c_c0"
+      },
+      "new": {
+         "reaction": "cpd32553_p0 --> cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID sq-c_c0 in this reaction (SQtr_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + sqg-c_c0 --> cpd00100_c0 + sq-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + sqg-c_c0 --> cpd00100_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID sq-c_c0 in this reaction (SQGH_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "sq-c_c0 --> sf-c_c0"
+      },
+      "new": {
+         "reaction": "cpd32553_c0 --> sf-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sq-c_c0 in this reaction (SQVOSI_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + sla-c_c0 --> cpd00003_c0 + dhps-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd32553_c0 --> cpd00003_c0 + dhps-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sla-c_c0 in this reaction (3SLAR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "sfp-c_c0 --> cpd00095_c0 + sla-c_c0"
+      },
+      "new": {
+         "reaction": "sfp-c_c0 --> cpd00095_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID sla-c_c0 in this reaction (6D6SPA_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00038_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00241_c0 + 2.0 flxso-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00038_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00241_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID flxso-c_c0 in this reaction (RNTR2c2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00052_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00356_c0 + 2.0 flxso-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00052_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00356_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID flxso-c_c0 in this reaction (RNTR3c2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd08301_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd08615_c0 + 2.0 flxso-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd08301_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd08615_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID flxso-c_c0 in this reaction (MECDPDH5_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00010_c0 + cpd00020_c0 + 2.0 flxso-c_c0 <=> cpd00011_c0 + cpd00022_c0 + cpd00067_c0 + 2.0 cpd15465_c0"
+      },
+      "new": {
+         "reaction": "cpd00010_c0 + cpd00020_c0 + 2.0 cpd32553_c0 <=> cpd00011_c0 + cpd00022_c0 + cpd00067_c0 + 2.0 cpd15465_c0"
+      },
+      "justification": "The non-ModelSEED ID flxso-c_c0 in this reaction (POR5_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00115_c0 + 2.0 flxso-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00115_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID flxso-c_c0 in this reaction (RNTR1c2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00005_c0 + 2.0 flxso-c_c0 --> cpd00006_c0 + cpd00067_c0 + 2.0 cpd15465_c0"
+      },
+      "new": {
+         "reaction": "cpd00005_c0 + 2.0 cpd32553_c0 --> cpd00006_c0 + cpd00067_c0 + 2.0 cpd15465_c0"
+      },
+      "justification": "The non-ModelSEED ID flxso-c_c0 in this reaction (FLDR2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00062_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00358_c0 + 2.0 flxso-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00062_c0 + 2.0 cpd00067_c0 + 2.0 cpd15465_c0 --> cpd00001_c0 + cpd00358_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID flxso-c_c0 in this reaction (RNTR4c2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "4.0 cpd00067_c0 + sufbcd-4fe4s-c_c0 --> cpd24682_c0 + sufbcd-c_c0"
+      },
+      "new": {
+         "reaction": "4.0 cpd00067_c0 + sufbcd-4fe4s-c_c0 --> cpd24682_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID sufbcd-c_c0 in this reaction (S4FE4ST_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2fe1s-c_c0 + cpd00001_c0 + cpd00002_c0 + sufbcd-c_c0 + sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + 5.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 + sufse-c_c0"
+      },
+      "new": {
+         "reaction": "2fe1s-c_c0 + cpd00001_c0 + cpd00002_c0 + cpd32553_c0 + sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + 5.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 + sufse-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufbcd-c_c0 in this reaction (S2FE2SR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "4.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 --> cpd24604_c0 + sufbcd-c_c0"
+      },
+      "new": {
+         "reaction": "4.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 --> cpd24604_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID sufbcd-c_c0 in this reaction (S2FE2ST_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + sufbcd-c_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 + 2.0 sufse-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + cpd32553_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 + 2.0 sufse-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufbcd-c_c0 in this reaction (S2FE2SS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + dhmpt-c_c0 --> cpd00006_c0 + cpd26424_c0"
+      },
+      "new": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + cpd32553_c0 --> cpd00006_c0 + cpd26424_c0"
+      },
+      "justification": "The non-ModelSEED ID dhmpt-c_c0 in this reaction (DHMPTR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd02961_c0 <=> dhmpt-c_c0"
+      },
+      "new": {
+         "reaction": "cpd02961_c0 <=> cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID dhmpt-c_c0 in this reaction (DHNPTE_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2.0 cpd00067_c0 + cpd15574_c0 + cpd21090_c0 --> cpd00001_c0 + cpd00018_c0 + cpd00058_c0 + wco-c_c0"
+      },
+      "new": {
+         "reaction": "2.0 cpd00067_c0 + cpd15574_c0 + cpd21090_c0 --> cpd00001_c0 + cpd00018_c0 + cpd00058_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID wco-c_c0 in this reaction (WCOS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd21090_c0 + wco-c_c0 --> bwco-c_c0 + cpd00018_c0 + cpd00058_c0"
+      },
+      "new": {
+         "reaction": "cpd21090_c0 + cpd32553_c0 --> bwco-c_c0 + cpd00018_c0 + cpd00058_c0"
+      },
+      "justification": "The non-ModelSEED ID wco-c_c0 in this reaction (BWCOS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00003_c0 + 2.0 cpd00017_c0 + cpd00067_c0 + cpd24682_c0 + octapb-c_c0 --> cpd00004_c0 + 2.0 cpd00060_c0 + 2.0 cpd03091_c0 + 2.0 cpd10515_c0 + cpd24604_c0 + lipopb-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00003_c0 + 2.0 cpd00017_c0 + cpd00067_c0 + cpd24682_c0 + cpd32553_c0 --> cpd00004_c0 + 2.0 cpd00060_c0 + 2.0 cpd03091_c0 + 2.0 cpd10515_c0 + cpd24604_c0 + lipopb-c_c0"
+      },
+      "justification": "The non-ModelSEED ID octapb-c_c0 in this reaction (LIPOS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd11470_c0 --> cpd11493_c0 + octapb-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd11470_c0 --> cpd11493_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID octapb-c_c0 in this reaction (LIPOCT_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00067_c0 + cpd03846_c0 --> cpd00012_c0 + cpd00018_c0 + octapb-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00067_c0 + cpd03846_c0 --> cpd00012_c0 + cpd00018_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID octapb-c_c0 in this reaction (OCTNLL_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "bwco-c_c0 + cpd00038_c0 + cpd00067_c0 --> bwco1gdp-c_c0 + cpd00012_c0"
+      },
+      "new": {
+         "reaction": "cpd00038_c0 + cpd00067_c0 + cpd32553_c0 --> bwco1gdp-c_c0 + cpd00012_c0"
+      },
+      "justification": "The non-ModelSEED ID bwco-c_c0 in this reaction (BWCOGDS1_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd21090_c0 + cpd32553_c0 --> bwco-c_c0 + cpd00018_c0 + cpd00058_c0"
+      },
+      "new": {
+         "reaction": "cpd21090_c0 --> cpd00018_c0 + cpd00058_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID bwco-c_c0 in this reaction (BWCOS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00084_c0 + sufse-c_c0 --> cpd00035_c0 + sufsesh-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00084_c0 + cpd32553_c0 --> cpd00035_c0 + sufsesh-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufse-c_c0 in this reaction (SCYSDS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2fe1s-c_c0 + cpd00001_c0 + cpd00002_c0 + cpd32553_c0 + sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + 5.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 + sufse-c_c0"
+      },
+      "new": {
+         "reaction": "2fe1s-c_c0 + cpd00001_c0 + cpd00002_c0 + sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + 5.0 cpd00067_c0 + cpd32553_c0 + sufbcd-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufse-c_c0 in this reaction (S2FE2SR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + sufbcd-2fe2s-c_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + sufbcd-2fe2s2-c_c0 + 2.0 sufse-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + sufbcd-2fe2s-c_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + 2.0 cpd32553_c0 + sufbcd-2fe2s2-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufse-c_c0 in this reaction (S2FE2SS2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + cpd32553_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + sufbcd-2fe2s-c_c0 + 2.0 sufse-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + 2.0 cpd32553_c0 + sufbcd-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufse-c_c0 in this reaction (S2FE2SS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "bwco1gdp-c_c0 + cpd00038_c0 + cpd00067_c0 --> bwcogdp-c_c0 + cpd00012_c0"
+      },
+      "new": {
+         "reaction": "bwco1gdp-c_c0 + cpd00038_c0 + cpd00067_c0 --> cpd00012_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID bwcogdp-c_c0 in this reaction (BWCOGDS2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00084_c0 + cpd32553_c0 --> cpd00035_c0 + sufsesh-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00084_c0 --> cpd00035_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID sufsesh-c_c0 in this reaction (SCYSDS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + 2.0 cpd32553_c0 + sufbcd-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + 2.0 cpd32553_c0 + sufbcd-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufsesh-c_c0 in this reaction (S2FE2SS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + sufbcd-2fe2s-c_c0 + 2.0 sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + 2.0 cpd32553_c0 + sufbcd-2fe2s2-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd00982_c0 + 2.0 cpd10515_c0 + sufbcd-2fe2s-c_c0 --> cpd00008_c0 + cpd00009_c0 + cpd00015_c0 + 7.0 cpd00067_c0 + 2.0 cpd32553_c0 + sufbcd-2fe2s2-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufsesh-c_c0 in this reaction (S2FE2SS2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2fe1s-c_c0 + cpd00001_c0 + cpd00002_c0 + sufsesh-c_c0 --> cpd00008_c0 + cpd00009_c0 + 5.0 cpd00067_c0 + cpd32553_c0 + sufbcd-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "2fe1s-c_c0 + cpd00001_c0 + cpd00002_c0 --> cpd00008_c0 + cpd00009_c0 + 5.0 cpd00067_c0 + cpd32553_c0 + sufbcd-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID sufsesh-c_c0 in this reaction (S2FE2SR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cdigmp-c_c0 + cpd00001_c0 --> cpd00067_c0 + cpd18057_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd32553_c0 --> cpd00067_c0 + cpd18057_c0"
+      },
+      "justification": "The non-ModelSEED ID cdigmp-c_c0 in this reaction (CDGUNPD_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2.0 cpd00038_c0 --> cdigmp-c_c0 + 2.0 cpd00012_c0"
+      },
+      "new": {
+         "reaction": "2.0 cpd00038_c0 --> 2.0 cpd00012_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID cdigmp-c_c0 in this reaction (DGUNC_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00058_c0 + cpd19505_c0 + 2.0 moadcosh-c_c0 --> 5.0 cpd00067_c0 + cpd03520_c0 + 2.0 cpd32553_c0"
+      },
+      "new": {
+         "reaction": "cpd00058_c0 + cpd19505_c0 --> 5.0 cpd00067_c0 + cpd03520_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID moadcosh-c_c0 in this reaction (MPTS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + iscssh-c_c0 + moadamp-c_c0 --> cpd00003_c0 + cpd00018_c0 + cpd32553_c0 + moadcosh-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + iscssh-c_c0 + moadamp-c_c0 --> cpd00003_c0 + cpd00018_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID moadcosh-c_c0 in this reaction (MOADSUx_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_p0 + cpd15411_c0 --> cpd00067_c0 + cpd15411_p0"
+      },
+      "new": {
+         "reaction": "cpd00067_p0 + cpd15411_c0 --> cpd00067_c0 + cpd03294_p0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_p0 in this reaction (ARBTNtpp_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_p0 + cpd15411_p0 --> cpd00067_c0 + cpd15411_e0"
+      },
+      "new": {
+         "reaction": "cpd00067_p0 + cpd03294_p0 --> cpd00067_c0 + cpd15411_e0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_p0 in this reaction (ARBTNtex_p0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd10516_e0 + cpd15411_e0 --> cpd03294_e0"
+      },
+      "new": {
+         "reaction": "cpd10516_e0 --> cpd03294_e0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_e0 in this reaction (rxn08144_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_p0 + cpd03294_p0 --> cpd00067_c0 + cpd15411_e0"
+      },
+      "new": {
+         "reaction": "cpd00067_p0 + cpd03294_p0 --> cpd00067_c0 + cpd03294_e0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_e0 in this reaction (ARBTNtex_p0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd15411_e0 <=> "
+      },
+      "new": {
+         "reaction": "cpd03294_e0 <=> "
+      },
+      "justification": "The non-ModelSEED ID cpd15411_e0 in this reaction (EX_cpd15411_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd01270_c0 + 2.0 cpd03294_c0 --> cpd00050_c0 + 2.0 cpd00067_c0 + 2.0 cpd10515_c0 + 2.0 cpd15411_c0"
+      },
+      "new": {
+         "reaction": "cpd01270_c0 --> cpd00050_c0 + 2.0 cpd00067_c0 + 2.0 cpd03294_c0 + 2.0 cpd10515_c0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_c0 in this reaction (rxn08146_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_p0 + cpd15411_c0 --> cpd00067_c0 + cpd03294_p0"
+      },
+      "new": {
+         "reaction": "cpd00067_p0 + cpd03294_c0 --> cpd00067_c0 + cpd03294_p0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_c0 in this reaction (ARBTNtpp_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00739_c0 + 2.0 cpd03294_c0 --> 2.0 cpd00067_c0 + cpd00220_c0 + 2.0 cpd10515_c0 + 2.0 cpd15411_c0"
+      },
+      "new": {
+         "reaction": "cpd00739_c0 --> 2.0 cpd00067_c0 + cpd00220_c0 + 2.0 cpd03294_c0 + 2.0 cpd10515_c0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_c0 in this reaction (rxn08147_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00982_c0 + 2.0 cpd03294_c0 --> cpd00015_c0 + 2.0 cpd00067_c0 + 2.0 cpd10515_c0 + 2.0 cpd15411_c0"
+      },
+      "new": {
+         "reaction": "cpd00982_c0 --> cpd00015_c0 + 2.0 cpd00067_c0 + 2.0 cpd03294_c0 + 2.0 cpd10515_c0"
+      },
+      "justification": "The non-ModelSEED ID cpd15411_c0 in this reaction (rxn08145_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd14955_c0 --> cpd00018_c0 + lipopb-c_c0"
+      },
+      "new": {
+         "reaction": "cpd14955_c0 --> cpd00018_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID lipopb-c_c0 in this reaction (LIPAMPL_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "70.028756 cpd00001_c0 + 75.55223 cpd00002_c0 + 0.001787 cpd00003_c0 + 4.5e-05 cpd00004_c0 + 0.000335 cpd00005_c0 + 0.000112 cpd00006_c0 + 0.000168 cpd00010_c0 + 0.012379 cpd00013_c0 + 0.000223 cpd00015_c0 + 0.000223 cpd00016_c0 + 0.000223 cpd00017_c0 + 0.000279 cpd00022_c0 + 0.255712 cpd00023_c0 + 0.000223 cpd00028_c0 + 0.000658 cpd00030_c0 + 0.595297 cpd00033_c0 + 0.000324 cpd00034_c0 + 0.499149 cpd00035_c0 + 0.209121 cpd00038_c0 + 0.333448 cpd00039_c0 + 0.234232 cpd00041_c0 + 0.000223 cpd00042_c0 + 0.004126 cpd00048_c0 + 0.28742 cpd00051_c0 + 0.129799 cpd00052_c0 + 0.255712 cpd00053_c0 + 0.209684 cpd00054_c0 + 0.000223 cpd00056_c0 + 0.000674 cpd00058_c0 + 0.149336 cpd00060_c0 + 0.140101 cpd00062_c0 + 0.004952 cpd00063_c0 + 0.055234 cpd00065_c0 + 0.180021 cpd00066_c0 + 0.133993 cpd00069_c0 + 3.1e-05 cpd00070_c0 + 9.8e-05 cpd00078_c0 + 0.088988 cpd00084_c0 + 0.000223 cpd00087_c0 + 0.004952 cpd00099_c0 + 2e-06 cpd00104_c0 + 0.437778 cpd00107_c0 + 0.024805 cpd00115_c0 + 0.03327 cpd00118_c0 + 0.092056 cpd00119_c0 + 0.000223 cpd00125_c0 + 0.214798 cpd00129_c0 + 0.234232 cpd00132_c0 + 2.4e-05 cpd00149_c0 + 0.154187 cpd00155_c0 + 0.411184 cpd00156_c0 + 0.246506 cpd00161_c0 + 0.000223 cpd00166_c0 + 0.000223 cpd00201_c0 + 0.18569 cpd00205_c0 + 0.000223 cpd00216_c0 + 0.000223 cpd00220_c0 + 0.025612 cpd00241_c0 + 0.000307 cpd00244_c0 + 0.008253 cpd00254_c0 + 0.006744 cpd00264_c0 + 0.282306 cpd00322_c0 + 0.000223 cpd00345_c0 + 0.025612 cpd00356_c0 + 0.024805 cpd00357_c0 + 0.000223 cpd00557_c0 + 0.000223 cpd03453_c0 + 0.006388 cpd10515_c0 + 0.007428 cpd10516_c0 + 0.000223 cpd11313_c0 + 7e-06 cpd11574_c0 + 0.000223 cpd15353_c0 + 0.002944 cpd15428_p0 + 0.00229 cpd15429_p0 + 0.00118 cpd15431_p0 + 0.008151 cpd15432_e0 + 0.000223 cpd15499_c0 + 0.001345 cpd15501_p0 + 0.000605 cpd15503_p0 + 0.005381 cpd15505_p0 + 0.005448 cpd15506_p0 + 0.000673 cpd15508_p0 + 0.044164 cpd15531_p0 + 0.03435 cpd15532_p0 + 0.017704 cpd15534_p0 + 0.010599 cpd15538_p0 + 0.008244 cpd15539_p0 + 0.004249 cpd15541_p0 + 0.000223 cpd15561_c0 + 7e-06 cpd21288_c0 + 2.5e-05 cpd24604_c0 + 0.000248 cpd24682_c0 + 5.5e-05 cpd25775_c0 + 3e-06 lipopb-c_c0 + 7e-06 mocogdp-c_c0 --> 75.37723 cpd00008_c0 + 75.37323 cpd00009_c0 + 0.749831 cpd00012_c0 + 75.37723 cpd00067_c0"
+      },
+      "new": {
+         "reaction": "70.028756 cpd00001_c0 + 75.55223 cpd00002_c0 + 0.001787 cpd00003_c0 + 4.5e-05 cpd00004_c0 + 0.000335 cpd00005_c0 + 0.000112 cpd00006_c0 + 0.000168 cpd00010_c0 + 0.012379 cpd00013_c0 + 0.000223 cpd00015_c0 + 0.000223 cpd00016_c0 + 0.000223 cpd00017_c0 + 0.000279 cpd00022_c0 + 0.255712 cpd00023_c0 + 0.000223 cpd00028_c0 + 0.000658 cpd00030_c0 + 0.595297 cpd00033_c0 + 0.000324 cpd00034_c0 + 0.499149 cpd00035_c0 + 0.209121 cpd00038_c0 + 0.333448 cpd00039_c0 + 0.234232 cpd00041_c0 + 0.000223 cpd00042_c0 + 0.004126 cpd00048_c0 + 0.28742 cpd00051_c0 + 0.129799 cpd00052_c0 + 0.255712 cpd00053_c0 + 0.209684 cpd00054_c0 + 0.000223 cpd00056_c0 + 0.000674 cpd00058_c0 + 0.149336 cpd00060_c0 + 0.140101 cpd00062_c0 + 0.004952 cpd00063_c0 + 0.055234 cpd00065_c0 + 0.180021 cpd00066_c0 + 0.133993 cpd00069_c0 + 3.1e-05 cpd00070_c0 + 9.8e-05 cpd00078_c0 + 0.088988 cpd00084_c0 + 0.000223 cpd00087_c0 + 0.004952 cpd00099_c0 + 2e-06 cpd00104_c0 + 0.437778 cpd00107_c0 + 0.024805 cpd00115_c0 + 0.03327 cpd00118_c0 + 0.092056 cpd00119_c0 + 0.000223 cpd00125_c0 + 0.214798 cpd00129_c0 + 0.234232 cpd00132_c0 + 2.4e-05 cpd00149_c0 + 0.154187 cpd00155_c0 + 0.411184 cpd00156_c0 + 0.246506 cpd00161_c0 + 0.000223 cpd00166_c0 + 0.000223 cpd00201_c0 + 0.18569 cpd00205_c0 + 0.000223 cpd00216_c0 + 0.000223 cpd00220_c0 + 0.025612 cpd00241_c0 + 0.000307 cpd00244_c0 + 0.008253 cpd00254_c0 + 0.006744 cpd00264_c0 + 0.282306 cpd00322_c0 + 0.000223 cpd00345_c0 + 0.025612 cpd00356_c0 + 0.024805 cpd00357_c0 + 0.000223 cpd00557_c0 + 0.000223 cpd03453_c0 + 0.006388 cpd10515_c0 + 0.007428 cpd10516_c0 + 0.000223 cpd11313_c0 + 7e-06 cpd11574_c0 + 0.000223 cpd15353_c0 + 0.002944 cpd15428_p0 + 0.00229 cpd15429_p0 + 0.00118 cpd15431_p0 + 0.008151 cpd15432_e0 + 0.000223 cpd15499_c0 + 0.001345 cpd15501_p0 + 0.000605 cpd15503_p0 + 0.005381 cpd15505_p0 + 0.005448 cpd15506_p0 + 0.000673 cpd15508_p0 + 0.044164 cpd15531_p0 + 0.03435 cpd15532_p0 + 0.017704 cpd15534_p0 + 0.010599 cpd15538_p0 + 0.008244 cpd15539_p0 + 0.004249 cpd15541_p0 + 0.000223 cpd15561_c0 + 7e-06 cpd21288_c0 + 2.5e-05 cpd24604_c0 + 0.000248 cpd24682_c0 + 5.5e-05 cpd25775_c0 + 3e-06 cpd32553_c0 + 7e-06 mocogdp-c_c0 --> 75.37723 cpd00008_c0 + 75.37323 cpd00009_c0 + 0.749831 cpd00012_c0 + 75.37723 cpd00067_c0"
+      },
+      "justification": "The non-ModelSEED ID lipopb-c_c0 in this reaction (bio2) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00003_c0 + 2.0 cpd00017_c0 + cpd00067_c0 + cpd24682_c0 + cpd32553_c0 --> cpd00004_c0 + 2.0 cpd00060_c0 + 2.0 cpd03091_c0 + 2.0 cpd10515_c0 + cpd24604_c0 + lipopb-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00003_c0 + 2.0 cpd00017_c0 + cpd00067_c0 + cpd24682_c0 --> cpd00004_c0 + 2.0 cpd00060_c0 + 2.0 cpd03091_c0 + 2.0 cpd10515_c0 + cpd24604_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID lipopb-c_c0 in this reaction (LIPOS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "ampnt-c_c0 + cpd00022_c0 --> cpd00010_c0 + cpd35393_c0"
+      },
+      "new": {
+         "reaction": "cpd00022_c0 + cpd32553_c0 --> cpd00010_c0 + cpd35393_c0"
+      },
+      "justification": "The non-ModelSEED ID ampnt-c_c0 in this reaction (AMPNTAT_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "apoACP-c_c0 + cpd00010_c0 --> cpd00045_c0 + cpd00067_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00010_c0 + cpd32553_c0 --> cpd00045_c0 + cpd00067_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID apoACP-c_c0 in this reaction (ACPS1_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "4.0 cpd00067_c0 + iscu-4fe4s-c_c0 --> cpd24682_c0 + iscu-c_c0"
+      },
+      "new": {
+         "reaction": "4.0 cpd00067_c0 + iscu-4fe4s-c_c0 --> cpd24682_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID iscu-c_c0 in this reaction (I4FE4ST_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "4.0 cpd00067_c0 + iscu-2fe2s-c_c0 --> cpd24604_c0 + iscu-c_c0"
+      },
+      "new": {
+         "reaction": "4.0 cpd00067_c0 + iscu-2fe2s-c_c0 --> cpd24604_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID iscu-c_c0 in this reaction (I2FE2ST_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2fe1s-c_c0 + iscssh-c_c0 + iscu-c_c0 --> 4.0 cpd00067_c0 + cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "2fe1s-c_c0 + iscssh-c_c0 --> 4.0 cpd00067_c0 + cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscu-c_c0 in this reaction (I2FE2SR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 + iscu-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscu-c_c0 in this reaction (I2FE2SS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00005_c0 + gslnt-c_c0 --> cpd00006_c0 + cpd00042_c0 + cpd01078_c0"
+      },
+      "new": {
+         "reaction": "cpd00005_c0 + cpd32553_c0 --> cpd00006_c0 + cpd00042_c0 + cpd01078_c0"
+      },
+      "justification": "The non-ModelSEED ID gslnt-c_c0 in this reaction (SELGTHR3_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + cpd20131_c0 --> cpd00006_c0 + cpd00042_c0 + gslnt-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + cpd20131_c0 --> cpd00006_c0 + cpd00042_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID gslnt-c_c0 in this reaction (SELGTHR2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00067_c0 + cpd32553_c0 --> cpd00012_c0 + moadamp-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00067_c0 --> cpd00012_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID moadamp-c_c0 in this reaction (MPTSS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + iscssh-c_c0 + moadamp-c_c0 --> cpd00003_c0 + cpd00018_c0 + cpd32553_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + iscssh-c_c0 --> cpd00003_c0 + cpd00018_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID moadamp-c_c0 in this reaction (MOADSUx_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 + iscu-2fe2s-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s2-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + iscu-2fe2s-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s2-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscssh-c_c0 in this reaction (I2FE2SS2_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "2fe1s-c_c0 + iscssh-c_c0 --> 4.0 cpd00067_c0 + cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "2fe1s-c_c0 --> 4.0 cpd00067_c0 + cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscssh-c_c0 in this reaction (I2FE2SR_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + iscssh-c_c0 --> cpd00003_c0 + cpd00018_c0 + cpd32553_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 --> cpd00003_c0 + cpd00018_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID iscssh-c_c0 in this reaction (MOADSUx_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00084_c0 + cpd32553_c0 --> cpd00035_c0 + iscssh-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00084_c0 --> cpd00035_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID iscssh-c_c0 in this reaction (ICYSDS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00005_c0 + cpd00067_c0 + cpd08289_c0 + cpd14545_c0 + iscssh-c_c0 --> 2.0 cpd00001_c0 + cpd00006_c0 + cpd00011_c0 + cpd00012_c0 + cpd00018_c0 + cpd02654_c0 + cpd32553_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00005_c0 + cpd00067_c0 + cpd08289_c0 + cpd14545_c0 --> 2.0 cpd00001_c0 + cpd00006_c0 + cpd00011_c0 + cpd00012_c0 + cpd00018_c0 + cpd02654_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID iscssh-c_c0 in this reaction (THZPSN3_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 + 2.0 iscssh-c_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00982_c0 + 2.0 cpd10515_c0 --> cpd00015_c0 + 6.0 cpd00067_c0 + 2.0 cpd32553_c0 + iscu-2fe2s-c_c0"
+      },
+      "justification": "The non-ModelSEED ID iscssh-c_c0 in this reaction (I2FE2SS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00038_c0 + cpd00067_c0 + cpd19503_c0 --> cpd00012_c0 + mocogdp-c_c0"
+      },
+      "new": {
+         "reaction": "cpd00038_c0 + cpd00067_c0 + cpd19503_c0 --> cpd00012_c0 + cpd37287_c0"
+      },
+      "justification": "The non-ModelSEED ID mocogdp-c_c0 in this reaction (MOGDS_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "70.028756 cpd00001_c0 + 75.55223 cpd00002_c0 + 0.001787 cpd00003_c0 + 4.5e-05 cpd00004_c0 + 0.000335 cpd00005_c0 + 0.000112 cpd00006_c0 + 0.000168 cpd00010_c0 + 0.012379 cpd00013_c0 + 0.000223 cpd00015_c0 + 0.000223 cpd00016_c0 + 0.000223 cpd00017_c0 + 0.000279 cpd00022_c0 + 0.255712 cpd00023_c0 + 0.000223 cpd00028_c0 + 0.000658 cpd00030_c0 + 0.595297 cpd00033_c0 + 0.000324 cpd00034_c0 + 0.499149 cpd00035_c0 + 0.209121 cpd00038_c0 + 0.333448 cpd00039_c0 + 0.234232 cpd00041_c0 + 0.000223 cpd00042_c0 + 0.004126 cpd00048_c0 + 0.28742 cpd00051_c0 + 0.129799 cpd00052_c0 + 0.255712 cpd00053_c0 + 0.209684 cpd00054_c0 + 0.000223 cpd00056_c0 + 0.000674 cpd00058_c0 + 0.149336 cpd00060_c0 + 0.140101 cpd00062_c0 + 0.004952 cpd00063_c0 + 0.055234 cpd00065_c0 + 0.180021 cpd00066_c0 + 0.133993 cpd00069_c0 + 3.1e-05 cpd00070_c0 + 9.8e-05 cpd00078_c0 + 0.088988 cpd00084_c0 + 0.000223 cpd00087_c0 + 0.004952 cpd00099_c0 + 2e-06 cpd00104_c0 + 0.437778 cpd00107_c0 + 0.024805 cpd00115_c0 + 0.03327 cpd00118_c0 + 0.092056 cpd00119_c0 + 0.000223 cpd00125_c0 + 0.214798 cpd00129_c0 + 0.234232 cpd00132_c0 + 2.4e-05 cpd00149_c0 + 0.154187 cpd00155_c0 + 0.411184 cpd00156_c0 + 0.246506 cpd00161_c0 + 0.000223 cpd00166_c0 + 0.000223 cpd00201_c0 + 0.18569 cpd00205_c0 + 0.000223 cpd00216_c0 + 0.000223 cpd00220_c0 + 0.025612 cpd00241_c0 + 0.000307 cpd00244_c0 + 0.008253 cpd00254_c0 + 0.006744 cpd00264_c0 + 0.282306 cpd00322_c0 + 0.000223 cpd00345_c0 + 0.025612 cpd00356_c0 + 0.024805 cpd00357_c0 + 0.000223 cpd00557_c0 + 0.000223 cpd03453_c0 + 0.006388 cpd10515_c0 + 0.007428 cpd10516_c0 + 0.000223 cpd11313_c0 + 7e-06 cpd11574_c0 + 0.000223 cpd15353_c0 + 0.002944 cpd15428_p0 + 0.00229 cpd15429_p0 + 0.00118 cpd15431_p0 + 0.008151 cpd15432_e0 + 0.000223 cpd15499_c0 + 0.001345 cpd15501_p0 + 0.000605 cpd15503_p0 + 0.005381 cpd15505_p0 + 0.005448 cpd15506_p0 + 0.000673 cpd15508_p0 + 0.044164 cpd15531_p0 + 0.03435 cpd15532_p0 + 0.017704 cpd15534_p0 + 0.010599 cpd15538_p0 + 0.008244 cpd15539_p0 + 0.004249 cpd15541_p0 + 0.000223 cpd15561_c0 + 7e-06 cpd21288_c0 + 2.5e-05 cpd24604_c0 + 0.000248 cpd24682_c0 + 5.5e-05 cpd25775_c0 + 3e-06 cpd32553_c0 + 7e-06 mocogdp-c_c0 --> 75.37723 cpd00008_c0 + 75.37323 cpd00009_c0 + 0.749831 cpd00012_c0 + 75.37723 cpd00067_c0"
+      },
+      "new": {
+         "reaction": "70.028756 cpd00001_c0 + 75.55223 cpd00002_c0 + 0.001787 cpd00003_c0 + 4.5e-05 cpd00004_c0 + 0.000335 cpd00005_c0 + 0.000112 cpd00006_c0 + 0.000168 cpd00010_c0 + 0.012379 cpd00013_c0 + 0.000223 cpd00015_c0 + 0.000223 cpd00016_c0 + 0.000223 cpd00017_c0 + 0.000279 cpd00022_c0 + 0.255712 cpd00023_c0 + 0.000223 cpd00028_c0 + 0.000658 cpd00030_c0 + 0.595297 cpd00033_c0 + 0.000324 cpd00034_c0 + 0.499149 cpd00035_c0 + 0.209121 cpd00038_c0 + 0.333448 cpd00039_c0 + 0.234232 cpd00041_c0 + 0.000223 cpd00042_c0 + 0.004126 cpd00048_c0 + 0.28742 cpd00051_c0 + 0.129799 cpd00052_c0 + 0.255712 cpd00053_c0 + 0.209684 cpd00054_c0 + 0.000223 cpd00056_c0 + 0.000674 cpd00058_c0 + 0.149336 cpd00060_c0 + 0.140101 cpd00062_c0 + 0.004952 cpd00063_c0 + 0.055234 cpd00065_c0 + 0.180021 cpd00066_c0 + 0.133993 cpd00069_c0 + 3.1e-05 cpd00070_c0 + 9.8e-05 cpd00078_c0 + 0.088988 cpd00084_c0 + 0.000223 cpd00087_c0 + 0.004952 cpd00099_c0 + 2e-06 cpd00104_c0 + 0.437778 cpd00107_c0 + 0.024805 cpd00115_c0 + 0.03327 cpd00118_c0 + 0.092056 cpd00119_c0 + 0.000223 cpd00125_c0 + 0.214798 cpd00129_c0 + 0.234232 cpd00132_c0 + 2.4e-05 cpd00149_c0 + 0.154187 cpd00155_c0 + 0.411184 cpd00156_c0 + 0.246506 cpd00161_c0 + 0.000223 cpd00166_c0 + 0.000223 cpd00201_c0 + 0.18569 cpd00205_c0 + 0.000223 cpd00216_c0 + 0.000223 cpd00220_c0 + 0.025612 cpd00241_c0 + 0.000307 cpd00244_c0 + 0.008253 cpd00254_c0 + 0.006744 cpd00264_c0 + 0.282306 cpd00322_c0 + 0.000223 cpd00345_c0 + 0.025612 cpd00356_c0 + 0.024805 cpd00357_c0 + 0.000223 cpd00557_c0 + 0.000223 cpd03453_c0 + 0.006388 cpd10515_c0 + 0.007428 cpd10516_c0 + 0.000223 cpd11313_c0 + 7e-06 cpd11574_c0 + 0.000223 cpd15353_c0 + 0.002944 cpd15428_p0 + 0.00229 cpd15429_p0 + 0.00118 cpd15431_p0 + 0.008151 cpd15432_e0 + 0.000223 cpd15499_c0 + 0.001345 cpd15501_p0 + 0.000605 cpd15503_p0 + 0.005381 cpd15505_p0 + 0.005448 cpd15506_p0 + 0.000673 cpd15508_p0 + 0.044164 cpd15531_p0 + 0.03435 cpd15532_p0 + 0.017704 cpd15534_p0 + 0.010599 cpd15538_p0 + 0.008244 cpd15539_p0 + 0.004249 cpd15541_p0 + 0.000223 cpd15561_c0 + 7e-06 cpd21288_c0 + 2.5e-05 cpd24604_c0 + 0.000248 cpd24682_c0 + 5.5e-05 cpd25775_c0 + 3e-06 cpd32553_c0 + 7e-06 cpd37287_c0 --> 75.37723 cpd00008_c0 + 75.37323 cpd00009_c0 + 0.749831 cpd00012_c0 + 75.37723 cpd00067_c0"
+      },
+      "justification": "The non-ModelSEED ID mocogdp-c_c0 in this reaction (bio2) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "colipap-p_p0 + cpd00001_c0 + cpd00002_c0 --> colipap-e_e0 + cpd00008_c0 + cpd00009_c0 + cpd00067_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd32553_p0 --> colipap-e_e0 + cpd00008_c0 + cpd00009_c0 + cpd00067_c0"
+      },
+      "justification": "The non-ModelSEED ID colipap-p_p0 in this reaction (COLIPAPabctex_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd15432_p0 + cpd25775_p0 --> colipap-p_p0 + cpd00286_p0"
+      },
+      "new": {
+         "reaction": "cpd15432_p0 + cpd25775_p0 --> cpd00286_p0 + cpd32553_p0"
+      },
+      "justification": "The non-ModelSEED ID colipap-p_p0 in this reaction (COLIPAKpp_p0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd32553_p0 --> colipap-e_e0 + cpd00008_c0 + cpd00009_c0 + cpd00067_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00002_c0 + cpd32553_p0 --> cpd00008_c0 + cpd00009_c0 + cpd00067_c0 + cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID colipap-e_e0 in this reaction (COLIPAPabctex_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "colipap-e_e0 <=> "
+      },
+      "new": {
+         "reaction": "cpd32553_e0 <=> "
+      },
+      "justification": "The non-ModelSEED ID colipap-e_e0 in this reaction (EX_colipap-e_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + r922_c0 <=> cpd00002_c0 + cpd00008_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd32553_c0 <=> cpd00002_c0 + cpd00008_c0"
+      },
+      "justification": "The non-ModelSEED ID r922_c0 in this reaction (ENZRXN3EM__DASH__0_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r91_b0 --> cpd00281_e0"
+      },
+      "new": {
+         "reaction": "cpd00281_b0 --> cpd00281_e0"
+      },
+      "justification": "The non-ModelSEED ID r91_b0 in this reaction (MIRXN__DASH__3_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r92_b0 --> cpd00136_e0"
+      },
+      "new": {
+         "reaction": "cpd00136_b0 --> cpd00136_e0"
+      },
+      "justification": "The non-ModelSEED ID r92_b0 in this reaction (MIRXN__DASH__4_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r93_b0 --> cpd00029_e0"
+      },
+      "new": {
+         "reaction": "cpd00029_b0 --> cpd00029_e0"
+      },
+      "justification": "The non-ModelSEED ID r93_b0 in this reaction (MIRXN__DASH__5_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + r389_c0 --> cpd00003_c0 + r410_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd32553_c0 --> cpd00003_c0 + r410_c0"
+      },
+      "justification": "The non-ModelSEED ID r389_c0 in this reaction (MVRXN__DASH__139_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd11836_c0 --> cpd00001_c0 + r389_c0"
+      },
+      "new": {
+         "reaction": "cpd11836_c0 --> cpd00001_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r389_c0 in this reaction (MVRXN__DASH__79__DASH__MVRXN__DASH__91_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r89_b0 --> r1423_e0"
+      },
+      "new": {
+         "reaction": "cpd00024_b0 --> r1423_e0"
+      },
+      "justification": "The non-ModelSEED ID r89_b0 in this reaction (MIRXN__DASH__2_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r88_b0 --> r277_e0"
+      },
+      "new": {
+         "reaction": "cpd00480_b0 --> r277_e0"
+      },
+      "justification": "The non-ModelSEED ID r88_b0 in this reaction (MIRXN__DASH__1_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r345_b0 --> cpd00065_e0"
+      },
+      "new": {
+         "reaction": "cpd00065_b0 --> cpd00065_e0"
+      },
+      "justification": "The non-ModelSEED ID r345_b0 in this reaction (MIRXN__DASH__103_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00035_c0 + r1494_c0 --> cpd00012_c0 + cpd00018_c0 + r64_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00035_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r64_c0"
+      },
+      "justification": "The non-ModelSEED ID r1494_c0 in this reaction (ENZRXN3EM__DASH__1390__DASH__ENZRXN3EM__DASH__405_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00051_c0 + r1495_c0 --> cpd00012_c0 + cpd00018_c0 + r65_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00051_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r65_c0"
+      },
+      "justification": "The non-ModelSEED ID r1495_c0 in this reaction (ENZRXN3EM__DASH__961_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r504_c0 --> r505_e0"
+      },
+      "new": {
+         "reaction": "cpd32553_c0 --> r505_e0"
+      },
+      "justification": "The non-ModelSEED ID r504_c0 in this reaction (ENZRXN3EM__DASH__139_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r504_c0 --> r275_b0"
+      },
+      "new": {
+         "reaction": "cpd32553_c0 --> r275_b0"
+      },
+      "justification": "The non-ModelSEED ID r504_c0 in this reaction (MERXN__DASH__71_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00084_c0 + r1498_c0 --> cpd00012_c0 + cpd00018_c0 + r67_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00084_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r67_c0"
+      },
+      "justification": "The non-ModelSEED ID r1498_c0 in this reaction (ENZRXN3EM__DASH__1314_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00053_c0 + r1499_c0 --> cpd00012_c0 + cpd00018_c0 + r69_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00053_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r69_c0"
+      },
+      "justification": "The non-ModelSEED ID r1499_c0 in this reaction (ENZRXN3EM__DASH__532_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00041_c0 + r1497_c0 --> cpd00012_c0 + cpd00018_c0 + r66_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00041_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r66_c0"
+      },
+      "justification": "The non-ModelSEED ID r1497_c0 in this reaction (ENZRXN3EM__DASH__374_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + r1032_c0 --> cpd00031_c0 + r1239_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + r1032_c0 --> cpd00031_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r1239_c0 in this reaction (ENZRXN3EM__DASH__1595_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.68 r1239_c0 + 0.32 r727_c0 --> r1540_b0"
+      },
+      "new": {
+         "reaction": "0.68 cpd32553_c0 + 0.32 r727_c0 --> r1540_b0"
+      },
+      "justification": "The non-ModelSEED ID r1239_c0 in this reaction (ENZRXN3EM__DASH__1585_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00022_c0 + r1239_c0 --> cpd00010_c0 + r727_c0"
+      },
+      "new": {
+         "reaction": "cpd00022_c0 + cpd32553_c0 --> cpd00010_c0 + r727_c0"
+      },
+      "justification": "The non-ModelSEED ID r1239_c0 in this reaction (ENZRXN3EM__DASH__1590_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.81 r1239_c0 + 0.19 r727_c0 --> r1539_b0"
+      },
+      "new": {
+         "reaction": "0.81 cpd32553_c0 + 0.19 r727_c0 --> r1539_b0"
+      },
+      "justification": "The non-ModelSEED ID r1239_c0 in this reaction (ENZRXN3EM__DASH__1586_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00054_c0 + r85_c0 --> cpd00012_c0 + cpd00018_c0 + r80_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00054_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r80_c0"
+      },
+      "justification": "The non-ModelSEED ID r85_c0 in this reaction (ENZRXN3EM__DASH__563_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd27328_c0 + r59_c0 <=> cpd11493_c0 + cpd15493_c0"
+      },
+      "new": {
+         "reaction": "cpd27328_c0 + cpd32553_c0 <=> cpd11493_c0 + cpd15493_c0"
+      },
+      "justification": "The non-ModelSEED ID r59_c0 in this reaction (ENZRXN3EM__DASH__3452__DASH__ENZRXN3EM__DASH__3454_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r1140_c0 + r59_c0 <=> cpd03587_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd32553_c0 + r1140_c0 <=> cpd03587_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r59_c0 in this reaction (ENZRXN3EM__DASH__1852_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd11467_c0 --> cpd00003_c0 + r59_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd11467_c0 --> cpd00003_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r59_c0 in this reaction (MVRXN__DASH__133_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + r58_c0 + r59_c0 --> cpd00011_c0 + cpd11485_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r58_c0 --> cpd00011_c0 + cpd11485_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r59_c0 in this reaction (MVRXN__DASH__11__DASH__MVRXN__DASH__122_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + r58_c0 --> cpd00011_c0 + r55_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + r58_c0 --> cpd00011_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r55_c0 in this reaction (MVRXN__DASH__144_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00022_c0 + cpd11493_c0 <=> cpd00010_c0 + r55_c0"
+      },
+      "new": {
+         "reaction": "cpd00022_c0 + cpd11493_c0 <=> cpd00010_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r55_c0 in this reaction (ENZRXN3EM__DASH__1571_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r55_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + r56_c0"
+      },
+      "new": {
+         "reaction": "cpd32553_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + r56_c0"
+      },
+      "justification": "The non-ModelSEED ID r55_c0 in this reaction (ENZRXN3EM__DASH__1246__DASH__ENZRXN3EM__DASH__727__DASH__ENZRXN3EM__DASH__953__DASH__ENZRXN3EM__DASH__1115_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + r55_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + r56_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + r56_c0"
+      },
+      "justification": "The non-ModelSEED ID r55_c0 in this reaction (MVRXN__DASH__142_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + r56_c0 <=> cpd00006_c0 + cpd11836_c0"
+      },
+      "new": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + cpd32553_c0 <=> cpd00006_c0 + cpd11836_c0"
+      },
+      "justification": "The non-ModelSEED ID r56_c0 in this reaction (MVRXN__DASH__103_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00022_c0 + cpd00067_c0 + r58_c0 --> cpd00010_c0 + cpd00011_c0 + r56_c0"
+      },
+      "new": {
+         "reaction": "cpd00022_c0 + cpd00067_c0 + r58_c0 --> cpd00010_c0 + cpd00011_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r56_c0 in this reaction (MVRXN__DASH__143_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd32553_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + r56_c0"
+      },
+      "new": {
+         "reaction": "r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r56_c0 in this reaction (ENZRXN3EM__DASH__1246__DASH__ENZRXN3EM__DASH__727__DASH__ENZRXN3EM__DASH__953__DASH__ENZRXN3EM__DASH__1115_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + r56_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r56_c0 in this reaction (MVRXN__DASH__142_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd15415_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15374_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd15415_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15374_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__110__DASH__MVRXN__DASH__121_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + r410_c0 + r58_c0 --> cpd00011_c0 + cpd11486_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r410_c0 --> cpd00011_c0 + cpd11486_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__115__DASH__MVRXN__DASH__126_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd28719_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15373_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd28719_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15373_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__108__DASH__MVRXN__DASH__119_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00070_c0 + cpd11493_c0 <=> cpd00010_c0 + r58_c0"
+      },
+      "new": {
+         "reaction": "cpd00070_c0 + cpd11493_c0 <=> cpd00010_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (ENZRXN3EM__DASH__1398__DASH__ENZRXN3EM__DASH__1463_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd11472_c0 + r58_c0 --> cpd00011_c0 + cpd11490_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd11472_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11490_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__116__DASH__MVRXN__DASH__127_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd11470_c0 + r58_c0 --> cpd00011_c0 + cpd11487_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd11470_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11487_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__106__DASH__MVRXN__DASH__117_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r58_c0 --> cpd00011_c0 + cpd11485_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11485_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__11__DASH__MVRXN__DASH__122_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd32553_c0"
+      },
+      "new": {
+         "reaction": " --> cpd00011_c0 + cpd11493_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (ENZRXN3EM__DASH__1246__DASH__ENZRXN3EM__DASH__727__DASH__ENZRXN3EM__DASH__953__DASH__ENZRXN3EM__DASH__1115_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd11474_c0 + r58_c0 --> cpd00011_c0 + cpd11489_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd11474_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11489_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__107__DASH__MVRXN__DASH__118_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd32553_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 --> cpd00011_c0 + cpd11493_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__142_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + r404_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15375_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r404_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15375_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__112__DASH__MVRXN__DASH__123_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00022_c0 + cpd00067_c0 + r58_c0 --> cpd00010_c0 + cpd00011_c0 + cpd32553_c0"
+      },
+      "new": {
+         "reaction": "cpd00022_c0 + cpd00067_c0 --> cpd00010_c0 + cpd00011_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__143_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd15277_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15377_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd15277_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15377_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__113__DASH__MVRXN__DASH__124_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + r58_c0 --> cpd00011_c0 + cpd32553_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 --> cpd00011_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__144_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd11468_c0 + r58_c0 --> cpd00011_c0 + cpd11491_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd11468_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11491_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__109__DASH__MVRXN__DASH__120_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd15239_c0 + r58_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15376_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd15239_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15376_c0"
+      },
+      "justification": "The non-ModelSEED ID r58_c0 in this reaction (MVRXN__DASH__114__DASH__MVRXN__DASH__125_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd02507_c0 --> cpd00011_c0 + r571_c0"
+      },
+      "new": {
+         "reaction": "cpd02507_c0 --> cpd00011_c0 + cpd01960_c0"
+      },
+      "justification": "The non-ModelSEED ID r571_c0 in this reaction (ENZRXN3EM__DASH__25__DASH__ENZRXN3EM__DASH__599_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00069_c0 + cpd08289_c0 + r60_c0 + r61_c0 <=> cpd02654_c0 + cpd15378_c0 + r62_c0 + r63_c0"
+      },
+      "new": {
+         "reaction": "cpd00069_c0 + cpd08289_c0 + r60_c0 + r61_c0 <=> cpd02654_c0 + cpd15378_c0 + cpd32553_c0 + r63_c0"
+      },
+      "justification": "The non-ModelSEED ID r62_c0 in this reaction (ENZRXN3EM__DASH__102_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00069_c0 + cpd08289_c0 + r60_c0 + r61_c0 <=> cpd02654_c0 + cpd15378_c0 + cpd32553_c0 + r63_c0"
+      },
+      "new": {
+         "reaction": "cpd00069_c0 + cpd08289_c0 + r60_c0 <=> cpd02654_c0 + cpd15378_c0 + cpd32553_c0 + r63_c0"
+      },
+      "justification": "The non-ModelSEED ID r61_c0 in this reaction (ENZRXN3EM__DASH__102_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd15443_c0 --> cpd00012_c0 + r40_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd15443_c0 --> cpd00012_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r40_c0 in this reaction (MVRXN__DASH__216_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + r40_c0 --> cpd00009_c0 + r927_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd32553_c0 --> cpd00009_c0 + r927_c0"
+      },
+      "justification": "The non-ModelSEED ID r40_c0 in this reaction (MVRXN__DASH__217_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00015_c0 + cpd01695_c0 <=> cpd00982_c0 + r15_c0"
+      },
+      "new": {
+         "reaction": "cpd00015_c0 + cpd01695_c0 <=> cpd00982_c0 + cpd03127_c0"
+      },
+      "justification": "The non-ModelSEED ID r15_c0 in this reaction (MVRXN__DASH__155_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd03115_c0 <=> cpd00001_c0 + r15_c0"
+      },
+      "new": {
+         "reaction": "cpd03115_c0 <=> cpd00001_c0 + cpd03127_c0"
+      },
+      "justification": "The non-ModelSEED ID r15_c0 in this reaction (MVRXN__DASH__162__DASH__MVRXN__DASH__169_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00051_c0 --> r241_b0"
+      },
+      "new": {
+         "reaction": "cpd00051_c0 --> cpd00051_b0"
+      },
+      "justification": "The non-ModelSEED ID r241_b0 in this reaction (MERXN__DASH__40_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00035_c0 --> r240_b0"
+      },
+      "new": {
+         "reaction": "cpd00035_c0 --> cpd00035_b0"
+      },
+      "justification": "The non-ModelSEED ID r240_b0 in this reaction (MERXN__DASH__39_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00053_c0 --> r247_b0"
+      },
+      "new": {
+         "reaction": "cpd00053_c0 --> cpd00053_b0"
+      },
+      "justification": "The non-ModelSEED ID r247_b0 in this reaction (MERXN__DASH__45_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00119_c0 --> r248_b0"
+      },
+      "new": {
+         "reaction": "cpd00119_c0 --> cpd00119_b0"
+      },
+      "justification": "The non-ModelSEED ID r248_b0 in this reaction (MERXN__DASH__46_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00322_c0 --> r249_b0"
+      },
+      "new": {
+         "reaction": "cpd00322_c0 --> cpd00322_b0"
+      },
+      "justification": "The non-ModelSEED ID r249_b0 in this reaction (MERXN__DASH__47_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00266_c0 --> r243_b0"
+      },
+      "new": {
+         "reaction": "cpd00266_c0 --> cpd00266_b0"
+      },
+      "justification": "The non-ModelSEED ID r243_b0 in this reaction (MERXN__DASH__42_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00084_c0 --> r244_b0"
+      },
+      "new": {
+         "reaction": "cpd00084_c0 --> cpd00084_b0"
+      },
+      "justification": "The non-ModelSEED ID r244_b0 in this reaction (MERXN__DASH__43_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00023_c0 --> r245_b0"
+      },
+      "new": {
+         "reaction": "cpd00023_c0 --> cpd00023_b0"
+      },
+      "justification": "The non-ModelSEED ID r245_b0 in this reaction (MERXN__DASH__44_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00322_c0 + r1504_c0 --> cpd00012_c0 + cpd00018_c0 + r72_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00322_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r72_c0"
+      },
+      "justification": "The non-ModelSEED ID r1504_c0 in this reaction (ENZRXN3EM__DASH__906_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00107_c0 + r1505_c0 --> cpd00012_c0 + cpd00018_c0 + r73_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00107_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r73_c0"
+      },
+      "justification": "The non-ModelSEED ID r1505_c0 in this reaction (ENZRXN3EM__DASH__303_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00039_c0 + r1506_c0 --> cpd00012_c0 + cpd00018_c0 + r74_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00039_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r74_c0"
+      },
+      "justification": "The non-ModelSEED ID r1506_c0 in this reaction (ENZRXN3EM__DASH__840_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00060_c0 + r1507_c0 --> cpd00012_c0 + cpd00018_c0 + r75_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00060_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r75_c0"
+      },
+      "justification": "The non-ModelSEED ID r1507_c0 in this reaction (ENZRXN3EM__DASH__844_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00066_c0 + r1508_c0 --> cpd00012_c0 + cpd00018_c0 + r76_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00066_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r76_c0"
+      },
+      "justification": "The non-ModelSEED ID r1508_c0 in this reaction (ENZRXN3EM__DASH__488_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00129_c0 + r1509_c0 --> cpd00012_c0 + cpd00018_c0 + r77_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00129_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r77_c0"
+      },
+      "justification": "The non-ModelSEED ID r1509_c0 in this reaction (ENZRXN3EM__DASH__367_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00033_c0 --> r230_b0"
+      },
+      "new": {
+         "reaction": "cpd00033_c0 --> cpd00033_b0"
+      },
+      "justification": "The non-ModelSEED ID r230_b0 in this reaction (MERXN__DASH__30_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + r70_c0 --> cpd00006_c0 + cpd02345_c0 + r1500_c0"
+      },
+      "new": {
+         "reaction": "cpd00005_c0 + cpd00067_c0 + r70_c0 --> cpd00006_c0 + cpd02345_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r1500_c0 in this reaction (ENZRXN3EM__DASH__914_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00023_c0 + r1500_c0 --> cpd00012_c0 + cpd00018_c0 + r70_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00023_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r70_c0"
+      },
+      "justification": "The non-ModelSEED ID r1500_c0 in this reaction (ENZRXN3EM__DASH__472_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00119_c0 + r1503_c0 --> cpd00012_c0 + cpd00018_c0 + r71_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00119_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r71_c0"
+      },
+      "justification": "The non-ModelSEED ID r1503_c0 in this reaction (ENZRXN3EM__DASH__354_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd01113_c0 --> r237_b0"
+      },
+      "new": {
+         "reaction": "cpd01113_c0 --> cpd01113_b0"
+      },
+      "justification": "The non-ModelSEED ID r237_b0 in this reaction (MERXN__DASH__36_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00260_c0 --> r238_b0"
+      },
+      "new": {
+         "reaction": "cpd00260_c0 --> cpd00353_b0"
+      },
+      "justification": "The non-ModelSEED ID r238_b0 in this reaction (MERXN__DASH__37_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00214_c0 --> r236_b0"
+      },
+      "new": {
+         "reaction": "cpd00214_c0 --> cpd00214_b0"
+      },
+      "justification": "The non-ModelSEED ID r236_b0 in this reaction (MERXN__DASH__35_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd11640_c0 --> r233_b0"
+      },
+      "new": {
+         "reaction": "cpd11640_c0 --> cpd11640_b0"
+      },
+      "justification": "The non-ModelSEED ID r233_b0 in this reaction (MERXN__DASH__33_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 --> r234_b0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 --> cpd00001_b0"
+      },
+      "justification": "The non-ModelSEED ID r234_b0 in this reaction (MERXN__DASH__34_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00139_c0 --> r231_b0"
+      },
+      "new": {
+         "reaction": "cpd00139_c0 --> cpd00139_b0"
+      },
+      "justification": "The non-ModelSEED ID r231_b0 in this reaction (MERXN__DASH__31_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 --> r232_b0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 --> cpd00067_b0"
+      },
+      "justification": "The non-ModelSEED ID r232_b0 in this reaction (MERXN__DASH__32_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00205_c0 --> r239_b0"
+      },
+      "new": {
+         "reaction": "cpd00205_c0 --> cpd00205_b0"
+      },
+      "justification": "The non-ModelSEED ID r239_b0 in this reaction (MERXN__DASH__38_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00156_c0 + r1515_c0 --> cpd00012_c0 + cpd00018_c0 + r84_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00156_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r84_c0"
+      },
+      "justification": "The non-ModelSEED ID r1515_c0 in this reaction (ENZRXN3EM__DASH__861_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00065_c0 + r1513_c0 --> cpd00012_c0 + cpd00018_c0 + r82_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00065_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r82_c0"
+      },
+      "justification": "The non-ModelSEED ID r1513_c0 in this reaction (ENZRXN3EM__DASH__1058_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00069_c0 + r1514_c0 --> cpd00012_c0 + cpd00018_c0 + r83_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00069_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r83_c0"
+      },
+      "justification": "The non-ModelSEED ID r1514_c0 in this reaction (ENZRXN3EM__DASH__284_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00161_c0 + r1511_c0 --> cpd00012_c0 + cpd00018_c0 + r81_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00161_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r81_c0"
+      },
+      "justification": "The non-ModelSEED ID r1511_c0 in this reaction (ENZRXN3EM__DASH__487_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00156_c0 --> r261_b0"
+      },
+      "new": {
+         "reaction": "cpd00156_c0 --> cpd00156_b0"
+      },
+      "justification": "The non-ModelSEED ID r261_b0 in this reaction (MERXN__DASH__58_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00069_c0 --> r260_b0"
+      },
+      "new": {
+         "reaction": "cpd00069_c0 --> cpd00069_b0"
+      },
+      "justification": "The non-ModelSEED ID r260_b0 in this reaction (MERXN__DASH__57_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00054_c0 + r1510_c0 --> cpd00012_c0 + cpd00018_c0 + r78_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00054_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r78_c0"
+      },
+      "justification": "The non-ModelSEED ID r1510_c0 in this reaction (ENZRXN3EM__DASH__564_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00227_c0 --> r263_b0"
+      },
+      "new": {
+         "reaction": "cpd00227_c0 --> cpd00227_b0"
+      },
+      "justification": "The non-ModelSEED ID r263_b0 in this reaction (MERXN__DASH__60_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00308_c0 --> r262_b0"
+      },
+      "new": {
+         "reaction": "cpd00308_c0 --> cpd00308_b0"
+      },
+      "justification": "The non-ModelSEED ID r262_b0 in this reaction (MERXN__DASH__59_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00971_c0 --> r264_b0"
+      },
+      "new": {
+         "reaction": "cpd00971_c0 --> cpd00971_b0"
+      },
+      "justification": "The non-ModelSEED ID r264_b0 in this reaction (MERXN__DASH__61_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00355_c0 --> r265_b0"
+      },
+      "new": {
+         "reaction": "cpd00355_c0 --> cpd32553_b0"
+      },
+      "justification": "The non-ModelSEED ID r265_b0 in this reaction (MERXN__DASH__62_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00064_c0 --> r266_b0"
+      },
+      "new": {
+         "reaction": "cpd00064_c0 --> cpd00064_b0"
+      },
+      "justification": "The non-ModelSEED ID r266_b0 in this reaction (MERXN__DASH__63_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00036_c0 --> r267_b0"
+      },
+      "new": {
+         "reaction": "cpd00036_c0 --> cpd00036_b0"
+      },
+      "justification": "The non-ModelSEED ID r267_b0 in this reaction (MERXN__DASH__64_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00210_c0 --> r269_b0"
+      },
+      "new": {
+         "reaction": "cpd00210_c0 --> cpd00210_b0"
+      },
+      "justification": "The non-ModelSEED ID r269_b0 in this reaction (MERXN__DASH__65_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00006_c0 + r703_c0 <=> cpd00005_c0 + cpd00067_c0 + cpd29213_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00006_c0 + r703_c0 <=> cpd00005_c0 + cpd00067_c0 + cpd08615_c0"
+      },
+      "justification": "The non-ModelSEED ID cpd29213_c0 in this reaction (ENZRXN3EM__DASH__901_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00039_c0 --> r252_b0"
+      },
+      "new": {
+         "reaction": "cpd00039_c0 --> cpd00039_b0"
+      },
+      "justification": "The non-ModelSEED ID r252_b0 in this reaction (MERXN__DASH__50_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r1081_c0 <=> cpd00001_c0 + cpd00011_c0"
+      },
+      "new": {
+         "reaction": "cpd00242_c0 <=> cpd00001_c0 + cpd00011_c0"
+      },
+      "justification": "The non-ModelSEED ID r1081_c0 in this reaction (ENZRXN3EM__DASH__919__DASH__ENZRXN3EM__DASH__999_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00107_c0 --> r251_b0"
+      },
+      "new": {
+         "reaction": "cpd00107_c0 --> cpd00107_b0"
+      },
+      "justification": "The non-ModelSEED ID r251_b0 in this reaction (MERXN__DASH__49_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00159_c0 --> r250_b0"
+      },
+      "new": {
+         "reaction": "cpd00159_c0 --> cpd00159_b0"
+      },
+      "justification": "The non-ModelSEED ID r250_b0 in this reaction (MERXN__DASH__48_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00066_c0 --> r255_b0"
+      },
+      "new": {
+         "reaction": "cpd00066_c0 --> cpd00066_b0"
+      },
+      "justification": "The non-ModelSEED ID r255_b0 in this reaction (MERXN__DASH__53_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00129_c0 --> r256_b0"
+      },
+      "new": {
+         "reaction": "cpd00129_c0 --> cpd00129_b0"
+      },
+      "justification": "The non-ModelSEED ID r256_b0 in this reaction (MERXN__DASH__54_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00130_c0 --> r253_b0"
+      },
+      "new": {
+         "reaction": "cpd00130_c0 --> cpd00130_b0"
+      },
+      "justification": "The non-ModelSEED ID r253_b0 in this reaction (MERXN__DASH__51_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00060_c0 --> r254_b0"
+      },
+      "new": {
+         "reaction": "cpd00060_c0 --> cpd00060_b0"
+      },
+      "justification": "The non-ModelSEED ID r254_b0 in this reaction (MERXN__DASH__52_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00161_c0 --> r259_b0"
+      },
+      "new": {
+         "reaction": "cpd00161_c0 --> cpd00161_b0"
+      },
+      "justification": "The non-ModelSEED ID r259_b0 in this reaction (MERXN__DASH__56_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00054_c0 --> r258_b0"
+      },
+      "new": {
+         "reaction": "cpd00054_c0 --> cpd00054_b0"
+      },
+      "justification": "The non-ModelSEED ID r258_b0 in this reaction (MERXN__DASH__55_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + 4 r1534_c0 + 2 r467_c0 --> cpd00001_c0 + 4 r1535_e0 + 2 r468_c0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 + 4.0 r1534_c0 + 2.0 r467_c0 --> cpd00001_c0 + 4.0 cpd32553_e0 + 2.0 r468_c0"
+      },
+      "justification": "The non-ModelSEED ID r1535_e0 in this reaction (ENZRXN3EM__DASH__1025__DASH__ENZRXN3EM__DASH__44__DASH__ENZRXN3EM__DASH__715_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2 r1534_c0 --> cpd00001_c0 + cpd15560_c0 + 2 r1535_e0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2.0 r1534_c0 --> cpd00001_c0 + cpd15560_c0 + 2.0 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r1535_e0 in this reaction (ENZRXN3EM__DASH__1128_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2.5 r1534_c0 --> cpd00001_c0 + cpd15560_c0 + 2.5 r1535_e0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2.5 r1534_c0 --> cpd00001_c0 + cpd15560_c0 + 2.5 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r1535_e0 in this reaction (ENZRXN3EM__DASH__1445__DASH__ENZRXN3EM__DASH__3_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r1535_e0 <=> "
+      },
+      "new": {
+         "reaction": "cpd32553_e0 <=> "
+      },
+      "justification": "The non-ModelSEED ID r1535_e0 in this reaction (EX_r1535_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd15560_c0 + 2 r1534_c0 --> cpd00003_c0 + cpd15561_c0 + 2 r1535_e0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd15560_c0 + 2.0 r1534_c0 --> cpd00003_c0 + cpd15561_c0 + 2.0 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r1535_e0 in this reaction (ENZRXN3EM__DASH__535_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00008_c0 + cpd00009_c0 + 4 r1535_e0 <=> cpd00001_c0 + cpd00002_c0 + 4 r1534_c0"
+      },
+      "new": {
+         "reaction": "cpd00008_c0 + cpd00009_c0 + 4.0 cpd32553_e0 <=> cpd00001_c0 + cpd00002_c0 + 4.0 r1534_c0"
+      },
+      "justification": "The non-ModelSEED ID r1535_e0 in this reaction (ENZRXN3EM__DASH__178_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + 4.0 r1534_c0 + 2.0 r467_c0 --> cpd00001_c0 + 4.0 cpd32553_e0 + 2.0 r468_c0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 + 4.0 cpd32553_c0 + 2.0 r467_c0 --> cpd00001_c0 + 4.0 cpd32553_e0 + 2.0 r468_c0"
+      },
+      "justification": "The non-ModelSEED ID r1534_c0 in this reaction (ENZRXN3EM__DASH__1025__DASH__ENZRXN3EM__DASH__44__DASH__ENZRXN3EM__DASH__715_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2.0 r1534_c0 --> cpd00001_c0 + cpd15560_c0 + 2.0 cpd32553_e0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2.0 cpd32553_c0 --> cpd00001_c0 + cpd15560_c0 + 2.0 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r1534_c0 in this reaction (ENZRXN3EM__DASH__1128_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2.5 r1534_c0 --> cpd00001_c0 + cpd15560_c0 + 2.5 cpd32553_e0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 + cpd15561_c0 + 2.5 cpd32553_c0 --> cpd00001_c0 + cpd15560_c0 + 2.5 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r1534_c0 in this reaction (ENZRXN3EM__DASH__1445__DASH__ENZRXN3EM__DASH__3_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd15560_c0 + 2.0 r1534_c0 --> cpd00003_c0 + cpd15561_c0 + 2.0 cpd32553_e0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd15560_c0 + 2.0 cpd32553_c0 --> cpd00003_c0 + cpd15561_c0 + 2.0 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r1534_c0 in this reaction (ENZRXN3EM__DASH__535_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00008_c0 + cpd00009_c0 + 4.0 cpd32553_e0 <=> cpd00001_c0 + cpd00002_c0 + 4.0 r1534_c0"
+      },
+      "new": {
+         "reaction": "cpd00008_c0 + cpd00009_c0 + 4.0 cpd32553_e0 <=> cpd00001_c0 + cpd00002_c0 + 4.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r1534_c0 in this reaction (ENZRXN3EM__DASH__178_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.81 cpd32553_c0 + 0.19 r727_c0 --> r1539_b0"
+      },
+      "new": {
+         "reaction": "0.81 cpd32553_c0 + 0.19 r727_c0 --> cpd32553_b0"
+      },
+      "justification": "The non-ModelSEED ID r1539_b0 in this reaction (ENZRXN3EM__DASH__1586_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "r1537_b0 --> cpd00681_e0"
+      },
+      "new": {
+         "reaction": "cpd00681_b0 --> cpd00681_e0"
+      },
+      "justification": "The non-ModelSEED ID r1537_b0 in this reaction (MIRXN__DASH__104_e0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00965_c0 --> r273_b0"
+      },
+      "new": {
+         "reaction": "cpd00965_c0 --> cpd00965_b0"
+      },
+      "justification": "The non-ModelSEED ID r273_b0 in this reaction (MERXN__DASH__69_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.68 cpd32553_c0 + 0.32 r727_c0 --> r1540_b0"
+      },
+      "new": {
+         "reaction": "0.68 cpd32553_c0 + 0.32 r727_c0 --> cpd32553_b0"
+      },
+      "justification": "The non-ModelSEED ID r1540_b0 in this reaction (ENZRXN3EM__DASH__1585_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00028_c0 --> r274_b0"
+      },
+      "new": {
+         "reaction": "cpd00028_c0 --> cpd00028_b0"
+      },
+      "justification": "The non-ModelSEED ID r274_b0 in this reaction (MERXN__DASH__70_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd03343_c0 --> r271_b0"
+      },
+      "new": {
+         "reaction": "cpd03343_c0 --> cpd03343_b0"
+      },
+      "justification": "The non-ModelSEED ID r271_b0 in this reaction (MERXN__DASH__67_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00571_c0 --> r272_b0"
+      },
+      "new": {
+         "reaction": "cpd00571_c0 --> cpd00571_b0"
+      },
+      "justification": "The non-ModelSEED ID r272_b0 in this reaction (MERXN__DASH__68_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd03847_c0 --> r270_b0"
+      },
+      "new": {
+         "reaction": "cpd03847_c0 --> cpd03847_b0"
+      },
+      "justification": "The non-ModelSEED ID r270_b0 in this reaction (MERXN__DASH__66_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00309_c0 --> r276_b0"
+      },
+      "new": {
+         "reaction": "cpd00309_c0 --> cpd00309_b0"
+      },
+      "justification": "The non-ModelSEED ID r276_b0 in this reaction (MERXN__DASH__72_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd32553_c0 --> r275_b0"
+      },
+      "new": {
+         "reaction": "cpd32553_c0 --> cpd32553_b0"
+      },
+      "justification": "The non-ModelSEED ID r275_b0 in this reaction (MERXN__DASH__71_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd22495_c0 --> cpd00067_c0 + cpd16743_c0 + r431_c0"
+      },
+      "new": {
+         "reaction": "cpd22495_c0 --> cpd00067_c0 + cpd16743_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r431_c0 in this reaction (MVRXN__DASH__64_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + r431_c0 --> cpd00009_c0 + cpd00067_c0 + cpd00286_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd32553_c0 --> cpd00009_c0 + cpd00067_c0 + cpd00286_c0"
+      },
+      "justification": "The non-ModelSEED ID r431_c0 in this reaction (MVRXN__DASH__67_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00350_c0 + 8 r703_c0 --> 8 cpd00012_c0 + r431_c0"
+      },
+      "new": {
+         "reaction": "cpd00350_c0 + 8.0 r703_c0 --> 8.0 cpd00012_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r431_c0 in this reaction (MVRXN__DASH__284_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00002_c0 + cpd00033_c0 + r462_c0 --> cpd00012_c0 + cpd00018_c0 + r463_c0"
+      },
+      "new": {
+         "reaction": "cpd00002_c0 + cpd00033_c0 + cpd32553_c0 --> cpd00012_c0 + cpd00018_c0 + r463_c0"
+      },
+      "justification": "The non-ModelSEED ID r462_c0 in this reaction (ENZRXN3EM__DASH__1011_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00159_c0 + 2 r468_c0 --> cpd00020_c0 + 2 cpd00067_c0 + 2 r467_c0"
+      },
+      "new": {
+         "reaction": "cpd00159_c0 + 2.0 cpd32553_c0 --> cpd00020_c0 + 2.0 cpd00067_c0 + 2.0 r467_c0"
+      },
+      "justification": "The non-ModelSEED ID r468_c0 in this reaction (ENZRXN3EM__DASH__574_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + 4.0 cpd32553_c0 + 2.0 r467_c0 --> cpd00001_c0 + 4.0 cpd32553_e0 + 2.0 r468_c0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 + 2.0 r467_c0 --> cpd00001_c0 + 2.0 cpd32553_c0 + 4.0 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r468_c0 in this reaction (ENZRXN3EM__DASH__1025__DASH__ENZRXN3EM__DASH__44__DASH__ENZRXN3EM__DASH__715_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd15561_c0 + 2 r468_c0 --> cpd15560_c0 + 2 r467_c0"
+      },
+      "new": {
+         "reaction": "cpd15561_c0 + 2.0 cpd32553_c0 --> cpd15560_c0 + 2.0 r467_c0"
+      },
+      "justification": "The non-ModelSEED ID r468_c0 in this reaction (ENZRXN3EM__DASH__894_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00020_c0 + 2 r468_c0 --> cpd00011_c0 + cpd00029_c0 + 2 cpd00067_c0 + 2 r467_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00020_c0 + 2.0 cpd32553_c0 --> cpd00011_c0 + cpd00029_c0 + 2.0 cpd00067_c0 + 2.0 r467_c0"
+      },
+      "justification": "The non-ModelSEED ID r468_c0 in this reaction (ENZRXN3EM__DASH__661_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "0.5 cpd00007_c0 + 2.0 r467_c0 --> cpd00001_c0 + 2.0 cpd32553_c0 + 4.0 cpd32553_e0"
+      },
+      "new": {
+         "reaction": "0.5 cpd00007_c0 --> cpd00001_c0 + 2.0 cpd32553_c0 + 4.0 cpd32553_e0"
+      },
+      "justification": "The non-ModelSEED ID r467_c0 in this reaction (ENZRXN3EM__DASH__1025__DASH__ENZRXN3EM__DASH__44__DASH__ENZRXN3EM__DASH__715_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd15561_c0 + 2.0 cpd32553_c0 --> cpd15560_c0 + 2.0 r467_c0"
+      },
+      "new": {
+         "reaction": "cpd15561_c0 --> cpd15560_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r467_c0 in this reaction (ENZRXN3EM__DASH__894_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00159_c0 + 2.0 cpd32553_c0 --> cpd00020_c0 + 2.0 cpd00067_c0 + 2.0 r467_c0"
+      },
+      "new": {
+         "reaction": "cpd00159_c0 --> cpd00020_c0 + 2.0 cpd00067_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r467_c0 in this reaction (ENZRXN3EM__DASH__574_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd00020_c0 + 2.0 cpd32553_c0 --> cpd00011_c0 + cpd00029_c0 + 2.0 cpd00067_c0 + 2.0 r467_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd00020_c0 --> cpd00011_c0 + cpd00029_c0 + 2.0 cpd00067_c0 + 2.0 cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r467_c0 in this reaction (ENZRXN3EM__DASH__661_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00001_c0 + cpd02705_c0 <=> cpd01498_c0 + r458_c0"
+      },
+      "new": {
+         "reaction": "cpd00001_c0 + cpd02705_c0 <=> cpd01498_c0"
+      },
+      "justification": "The non-ModelSEED ID r458_c0 in this reaction (ENZRXN3EM__DASH__586_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00137_c0 --> r209_b0"
+      },
+      "new": {
+         "reaction": "cpd00137_c0 --> cpd00137_b0"
+      },
+      "justification": "The non-ModelSEED ID r209_b0 in this reaction (MERXN__DASH__12_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00098_c0 --> r208_b0"
+      },
+      "new": {
+         "reaction": "cpd00098_c0 --> cpd00098_b0"
+      },
+      "justification": "The non-ModelSEED ID r208_b0 in this reaction (MERXN__DASH__11_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00242_c0 --> r207_b0"
+      },
+      "new": {
+         "reaction": "cpd00242_c0 --> cpd00242_b0"
+      },
+      "justification": "The non-ModelSEED ID r207_b0 in this reaction (MERXN__DASH__10_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00041_c0 --> r205_b0"
+      },
+      "new": {
+         "reaction": "cpd00041_c0 --> cpd00041_b0"
+      },
+      "justification": "The non-ModelSEED ID r205_b0 in this reaction (MERXN__DASH__41_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00013_c0 --> r204_b0"
+      },
+      "new": {
+         "reaction": "cpd00013_c0 --> cpd00013_b0"
+      },
+      "justification": "The non-ModelSEED ID r204_b0 in this reaction (MERXN__DASH__7_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd01092_c0 --> r203_b0"
+      },
+      "new": {
+         "reaction": "cpd01092_c0 --> cpd01092_b0"
+      },
+      "justification": "The non-ModelSEED ID r203_b0 in this reaction (MERXN__DASH__6_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd15570_c0 --> cpd00003_c0 + r404_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd15570_c0 --> cpd00003_c0 + cpd01695_c0"
+      },
+      "justification": "The non-ModelSEED ID r404_c0 in this reaction (MVRXN__DASH__134_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r404_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15375_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd01695_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11493_c0 + cpd15375_c0"
+      },
+      "justification": "The non-ModelSEED ID r404_c0 in this reaction (MVRXN__DASH__112__DASH__MVRXN__DASH__123_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00080_c0 --> r229_b0"
+      },
+      "new": {
+         "reaction": "cpd00080_c0 --> cpd00080_b0"
+      },
+      "justification": "The non-ModelSEED ID r229_b0 in this reaction (MERXN__DASH__29_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00100_c0 --> r228_b0"
+      },
+      "new": {
+         "reaction": "cpd00100_c0 --> cpd00100_b0"
+      },
+      "justification": "The non-ModelSEED ID r228_b0 in this reaction (MERXN__DASH__28_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00314_c0 --> r222_b0"
+      },
+      "new": {
+         "reaction": "cpd00314_c0 --> cpd00314_b0"
+      },
+      "justification": "The non-ModelSEED ID r222_b0 in this reaction (MERXN__DASH__24_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00386_c0 --> r221_b0"
+      },
+      "new": {
+         "reaction": "cpd00386_c0 --> cpd00386_b0"
+      },
+      "justification": "The non-ModelSEED ID r221_b0 in this reaction (MERXN__DASH__23_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00221_c0 --> r220_b0"
+      },
+      "new": {
+         "reaction": "cpd00221_c0 --> cpd00221_b0"
+      },
+      "justification": "The non-ModelSEED ID r220_b0 in this reaction (MERXN__DASH__22_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00106_c0 --> r227_b0"
+      },
+      "new": {
+         "reaction": "cpd00106_c0 --> cpd00106_b0"
+      },
+      "justification": "The non-ModelSEED ID r227_b0 in this reaction (MERXN__DASH__27_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd01741_c0 --> r226_b0"
+      },
+      "new": {
+         "reaction": "cpd01741_c0 --> cpd01741_b0"
+      },
+      "justification": "The non-ModelSEED ID r226_b0 in this reaction (MERXN__DASH__26_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00637_c0 --> r225_b0"
+      },
+      "new": {
+         "reaction": "cpd00637_c0 --> cpd00637_b0"
+      },
+      "justification": "The non-ModelSEED ID r225_b0 in this reaction (MERXN__DASH__25_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00222_c0 --> r218_b0"
+      },
+      "new": {
+         "reaction": "cpd00222_c0 --> cpd00222_b0"
+      },
+      "justification": "The non-ModelSEED ID r218_b0 in this reaction (MERXN__DASH__20_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00653_c0 --> r217_b0"
+      },
+      "new": {
+         "reaction": "cpd00653_c0 --> cpd00653_b0"
+      },
+      "justification": "The non-ModelSEED ID r217_b0 in this reaction (MERXN__DASH__19_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00448_c0 --> r219_b0"
+      },
+      "new": {
+         "reaction": "cpd00448_c0 --> cpd00448_b0"
+      },
+      "justification": "The non-ModelSEED ID r219_b0 in this reaction (MERXN__DASH__21_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00011_c0 --> r210_b0"
+      },
+      "new": {
+         "reaction": "cpd00011_c0 --> cpd00011_b0"
+      },
+      "justification": "The non-ModelSEED ID r210_b0 in this reaction (MERXN__DASH__13_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00307_c0 --> r211_b0"
+      },
+      "new": {
+         "reaction": "cpd00307_c0 --> cpd00307_b0"
+      },
+      "justification": "The non-ModelSEED ID r211_b0 in this reaction (MERXN__DASH__14_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00587_c0 --> r214_b0"
+      },
+      "new": {
+         "reaction": "cpd00587_c0 --> cpd00587_b0"
+      },
+      "justification": "The non-ModelSEED ID r214_b0 in this reaction (MERXN__DASH__16_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00117_c0 --> r213_b0"
+      },
+      "new": {
+         "reaction": "cpd00117_c0 --> cpd00117_b0"
+      },
+      "justification": "The non-ModelSEED ID r213_b0 in this reaction (MERXN__DASH__15_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd01107_c0 --> r216_b0"
+      },
+      "new": {
+         "reaction": "cpd01107_c0 --> cpd01107_b0"
+      },
+      "justification": "The non-ModelSEED ID r216_b0 in this reaction (MERXN__DASH__18_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00550_c0 --> r215_b0"
+      },
+      "new": {
+         "reaction": "cpd00550_c0 --> cpd00550_b0"
+      },
+      "justification": "The non-ModelSEED ID r215_b0 in this reaction (MERXN__DASH__17_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 + cpd32553_c0 --> cpd00003_c0 + r410_c0"
+      },
+      "new": {
+         "reaction": "cpd00004_c0 + cpd00067_c0 --> cpd00003_c0 + cpd32553_c0"
+      },
+      "justification": "The non-ModelSEED ID r410_c0 in this reaction (MVRXN__DASH__139_c0) must be replaced."
+   },
+   {
+      "original": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 + r410_c0 --> cpd00011_c0 + cpd11486_c0 + cpd11493_c0"
+      },
+      "new": {
+         "reaction": "cpd00067_c0 + cpd32553_c0 --> cpd00011_c0 + cpd11486_c0 + cpd11493_c0"
+      },
+      "justification": "The non-ModelSEED ID r410_c0 in this reaction (MVRXN__DASH__115__DASH__MVRXN__DASH__126_c0) must be replaced."
+   }
+]
