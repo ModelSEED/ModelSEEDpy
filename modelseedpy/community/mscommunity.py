@@ -13,6 +13,7 @@ from matplotlib import pyplot
 from pandas import DataFrame
 import logging
 #import itertools
+import reframed
 import cobra
 import networkx
 import sigfig
@@ -41,7 +42,7 @@ class CommunityModelSpecies:
                 
         logger.info("Making atp hydrolysis reaction for species: "+self.id)
         atp_rxn = FBAHelper.add_atp_hydrolysis(self.community.model,"c"+str(self.index))
-        # FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)  #!!! FIXME This FBAHelper function is not defined.
+        # FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)  # !!! FIXME This FBAHelper function is not defined.
         self.atp_hydrolysis = atp_rxn["reaction"]
         self.biomass_drain = None
         self.biomasses = []
@@ -525,3 +526,9 @@ class MSCommunity:
             logger.warning("No solution found for the simulation.")
             return
         self.solution = solution
+
+    def steady_com(self,):
+        from reframed.community import SteadyCom, SteadyComVA
+        
+        reframed_model = FBAHelper.get_reframed_model(self.model)
+        

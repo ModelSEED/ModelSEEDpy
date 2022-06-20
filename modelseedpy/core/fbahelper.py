@@ -282,3 +282,23 @@ class FBAHelper:
             if key not in dictionary:
                 dictionary[key] = defaults[key]
         return dictionary
+    
+    @staticmethod
+    def get_reframed_model(kbase_model,):
+        from reframed import from_cobrapy
+        
+        reframed_model = from_cobrapy(kbase_model)
+        if hasattr(kbase_model, 'id'):
+            reframed_model.id = kbase_model.id
+        reframed_model.compartments.e0.external = True
+        return reframed_model
+    
+    @staticmethod
+    def parse_media(media):
+        # from pandas import DataFrame
+        return [cpd.id for cpd in media.data['mediacompounds']]
+    
+    @staticmethod
+    def parse_df(df):
+        from numpy import array
+        return array(dtype=object, object=[df.index, df.columns, df.to_numpy()])
