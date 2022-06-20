@@ -3,23 +3,20 @@
 from __future__ import absolute_import
 
 import logging
-import re
-from optlang.symbolics import Zero, add
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.mscommunity import MSCommunity, FBAHelper
+from modelseedpy.community.mscommunity import MSCommunity
+from modelseedpy.core.fbahelper import FBAHelper
 
 #Base class for FBA packages
 class CommKineticPkg(BaseFBAPkg):
     def __init__(self,model):
-        BaseFBAPkg.__init__(self,model,"community kinetics",{},{"compkin":"string"})
+        BaseFBAPkg.__init__(self,model,"community kinetics",{},{"commkin":"string"})
 
     def build_package(self,kinetic_coef,community_model=None):
         self.validate_parameters({},[],{
             "kinetic_coef":kinetic_coef,
-            "community":community_model
+            "community":community_model if community_model else MSCommunity(self.model)
         })
-        if self.parameters["community"] == None:
-            self.parameters["community"] = MSCommunity(self.model)
         for species in self.parameters["community"].species:
             self.build_constraint(species)
 
@@ -29,4 +26,4 @@ class CommKineticPkg(BaseFBAPkg):
             if int(FBAHelper.rxn_compartment(reaction)[1:]) == species.index and reaction != species.biomasses[0]:
                 coef[reaction.forward_variable] = 1
                 coef[reaction.reverse_variable] = 1
-        return BaseFBAPkg.build_constraint(self,"compkin",None,0,coef,"Species"+str(species.index))
+        return BaseFBAPkg.build_constraint(self,"commkin",None,0,coef,"Species"+str(species.index))
