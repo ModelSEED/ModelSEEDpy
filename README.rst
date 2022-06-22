@@ -33,7 +33,7 @@ Metabolic modeling is an pivotal method for computational research in synthetic 
 Installation
 ----------------------
 
-ModelSEEDpy will so be installable via the ``PyPI`` channel::
+ModelSEEDpy will soon be installable via the ``PyPI`` channel::
 
  pip install modelseedpy
  
