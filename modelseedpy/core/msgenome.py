@@ -3,7 +3,9 @@ logger = logging.getLogger(__name__)
 from cobra.core.dictlist import DictList
 import re
 
+
 def normalize_role(s):
+    # print(s)
     s = s.strip().lower()
     s = re.sub('[\W_]+', '', s)
     return s
@@ -26,7 +28,8 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                desc = header_data[1]
+                desc = header_data[1]  # The unit test throws an error when this is commented
+
 
             seq = MSFeature(seq_id, "", desc)
         else:

@@ -3,7 +3,6 @@ logger = logging.getLogger(__name__)
 from cobra.core import Reaction
 import cobra
 import re
-#from modelseedpy.core.msgenome import MSGenome
 
 class MSEditorAPI:
 
