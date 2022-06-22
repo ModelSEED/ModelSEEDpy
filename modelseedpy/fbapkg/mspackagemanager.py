@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
+from modelseedpy.core.exceptions import PackageError
 
 import sys
 import inspect
-
-
-class PackageError(Exception):
-    """Error in package manager"""
-    pass
-
 
 class MSPackageManager:
     """
