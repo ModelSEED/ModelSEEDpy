@@ -9,13 +9,7 @@ import json as _json
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
-
-
-#Adding a few exception classes to handle different types of errors
-class FeasibilityError(Exception):
-    """Error in FBA formulation"""
-    pass
-
+from modelseedpy.core.exceptions import FeasibilityError  # moved excpetion classes to a designated exceptions file for broader use
 
 class BaseFBAPkg:
     """
