@@ -296,7 +296,6 @@ class dFBAPkg(BaseFBAPkg):
         # define the figure
         pyplot.rcParams['figure.figsize'] = (11, 7)
         pyplot.rcParams['figure.dpi'] = 150
-        
         self.figure, ax = pyplot.subplots()
         ax.set_title(figure_title)
         ax.set_ylabel('Concentrations (mM)') 
