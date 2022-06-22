@@ -5,12 +5,8 @@ from __future__ import absolute_import
 import logging
 from optlang.symbolics import Zero
 from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.exceptions import FeasibilityError  # moved excpetion classes to a designated exceptions file for broader use
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-
-# Adding a few exception classes to handle different types of errors
-class FeasibilityError(Exception):
-    """Error in FBA formulation"""
-    pass
 
 
 class BaseFBAPkg:

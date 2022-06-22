@@ -8,8 +8,11 @@ class MSGenomeClassifier:
     @staticmethod
     def extract_features_from_genome(genome, ontology_term):
         """
+        
         :param genome: ModelSEED Genome to classify
         :param ontology_term: Ontology Term to classify (Example: RAST)
+        :return: 
+
         """
         features = set()
         for feat in genome.features:
@@ -24,13 +27,21 @@ class MSGenomeClassifier:
         return predictions_numerical[0]
 
 
-def load_classifier_from_folder(directory, filename):
-    """TEMPORARY SOLUTION TO LOAD AN EXISTING CLASSIFIER"""
+def load_classifier_from_folder(path, filename):
+    """
+    TEMPORARY SOLUTION TO LOAD AN EXISTING CLASSIFIER
+    :param path: 
+    :type path: str
+    :param filename: 
+    :type filename: str
+    :return: 
+
+    """
     import pickle
     import json
-    with open(f'{directory}/{filename}.pickle', 'rb') as fh:
+    with open(f'{path}/{filename}.pickle', 'rb') as fh:
         model_filter = pickle.load(fh)
-    with open(f'{directory}/{filename}_features.json', 'r') as fh:
+    with open(f'{path}/{filename}_features.json', 'r') as fh:
         features = json.load(fh)
 
     return MSGenomeClassifier(model_filter, features)

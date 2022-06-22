@@ -35,10 +35,8 @@ def molecular_weight(formula):
 class PeriodicTable:
     
     def __init__(self):
-        self.elements_v = self.elements = {}
-        for element in periodic_table:
-            self.elements_v[element.symbol] = element.protons
-            self.elements[element.symbol] = element.name
+        self.elements_v = {ele.symbol:ele.protons for ele in periodic_table} 
+        self.elements = {ele.symbol:ele.name for ele in periodic_table}
 
     def get_element_name(self, e):
         if e in self.elements:
