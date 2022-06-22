@@ -41,7 +41,7 @@ def get_list_functional_roles_from_kbase(genome_ref, ws_client):
                 pass
             else:
                 list_functional_roles.append(role_to_insert)
-        except: #KeyError as e:
+        except KeyError as e:
             # print("this is funcitonal role")
             # print(functional_role)
             # print("this is list_functional_roles")

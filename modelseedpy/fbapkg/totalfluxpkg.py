@@ -3,12 +3,12 @@
 from __future__ import absolute_import
 
 import logging
+# import re   
+# from optlang.symbolics import Zero, add
+# import json as _json
+# from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-
-#Adding a few exception classes to handle different types of errors
-class FeasibilityError(Exception):
-    """Error in FBA formulation"""
-    pass
+from modelseedpy.core.exceptions import FeasibilityError
 
 #Base class for FBA packages
 class TotalFluxPkg(BaseFBAPkg):

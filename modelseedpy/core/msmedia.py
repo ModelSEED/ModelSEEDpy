@@ -35,11 +35,11 @@ class MSMedia:
         """
         media = MSMedia('media')
         media_compounds = []
-        for cpd_id, value in media_dict.items():
-            if len(value) == 2:
-                media_compounds.append(MediaCompound(cpd_id, value[0], value[1]))
+        for cpd_id, v in media_dict.items():
+            if isinstance(v, tuple):
+                media_compounds.append(MediaCompound(cpd_id, v[0], v[1]))
             else:
-                media_compounds.append(MediaCompound(cpd_id, -value, 1000))
+                media_compounds.append(MediaCompound(cpd_id, -v, 1000))
         media.mediacompounds += media_compounds
         return media
 
@@ -52,7 +52,9 @@ class MSMedia:
         """
         media = {}
         for compound in self.mediacompounds:
-            met_id = compound.id + cmp if cmp else compound.id
+            met_id = compound.id
+            if cmp is not None:
+                met_id += '_' + cmp
             media[met_id] = (compound.lower_bound, compound.upper_bound)
         return media
     

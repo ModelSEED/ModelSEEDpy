@@ -115,8 +115,8 @@ class BiologPlate:
             well = self.wells[well_id]
             for compound in self.base:
                 media[compound] = self.base[compound]
-            for well_compound in well['compounds']:
-                media[well_compound] = well['value']
+            for compound in well['compounds']:
+                media[compound] = well['value']
             return media
         return None
 
@@ -147,7 +147,7 @@ class Biolog:
             print('replace existing plate')
         self.plates[plate.id] = plate
 
-    def run_plates(self, model, cmp='e'):
+    def run_plates(self, model, biomass = None, cmp='e'):  # !!! biomass is never used
         prev_medium = model.medium
         compound_exchange = {}
         for ex_rxn in model.exchanges:

@@ -1,3 +1,4 @@
+# import pandas as pd  # unused
 import logging
 import cobra
 from cobra.core.dictlist import DictList
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 class MSGrowthPhenotype:
     def __init__(self, obj_id, media=None, growth=None, gene_ko=[], additional_compounds=[], parent=None, name=None):
         self.id = obj_id; self.name = name; self.media = media; self.growth = growth; self.gene_ko = gene_ko
-        self.additional_compounds = additional_compounds; self.parent = parent; self.gapfilling = None
+        self.gapfilling = None; self.additional_compounds = additional_compounds; self.parent = parent
         self.name = name or obj_id
 
     def build_media(self):
@@ -22,8 +23,7 @@ class MSGrowthPhenotype:
         full_media = MSMedia.from_dict(cpd_hash)
         if self.media:
             full_media.merge(self.media, overwrite_overlap = False)
-        if self.parent:
-            if self.parent.base_media:
+        if self.parent and self.parent.base_media:
                 full_media.merge(self.parent.base_media, overwrite_overlap = False)
         return full_media
     
@@ -31,7 +31,7 @@ class MSGrowthPhenotype:
         if not isinstance(modelutl,MSModelUtil):
             modelutl = MSModelUtil(modelutl)
         media = self.build_media()
-        results = {"growth":None,"class":None,"missing_transports":[]}
+        results = {"growth":None, "class":None, "missing_transports":[]}
         if add_missing_exchanges:
             results["missing_transports"] = modelutl.add_missing_exchanges(media)
         pkgmgr = MSPackageManager.get_pkg_mgr(modelutl.model)
@@ -80,7 +80,8 @@ class MSGrowthPhenotypes:
     @staticmethod
     def from_compound_hash(compounds,base_media,base_uptake=0,base_excretion=1000):
         growthpheno = MSGrowthPhenotypes(base_media,base_uptake,base_excretion)
-        growthpheno.add_phenotypes([MSGrowthPhenotype(cpd,None,compounds[cpd],[],[cpd]) for cpd in compounds])
+        growthpheno.add_phenotypes(
+            [MSGrowthPhenotype(cpd, None, compounds[cpd] ,[] ,[cpd]) for cpd in compounds])
         return growthpheno
     
     @staticmethod
@@ -90,13 +91,14 @@ class MSGrowthPhenotypes:
         for pheno in data["phenotypes"]:
             new_phenos.append(MSGrowthPhenotype(
                 pheno["id"], kbase_api.get_from_ws(pheno["media_ref"],None),
-                pheno["normalizedGrowth"], [gene.split("/").pop() for gene in pheno["geneko_refs"]], 
+                pheno["normalizedGrowth"], 
+                [gene.split("/").pop() for gene in pheno["geneko_refs"]], 
                 [added_cpd.split("/").pop() for added_cpd in pheno["additionalcompound_refs"]]))
         growthpheno.add_phenotypes(new_phenos)                
         return growthpheno
         
     @staticmethod
-    def from_kbase_file(filename, base_media, kbase_api):
+    def from_kbase_file(filename, base_media, kbase_api):   # The base_media was called in line 105 but was never defined
         #TSV file with the following headers:media    mediaws    growth    geneko    addtlCpd
         from pandas import read_table
         table_df = read_table(filename)
@@ -105,14 +107,15 @@ class MSGrowthPhenotypes:
         new_phenos = []
         for index, row in table_df.iterrows():
             data = FBAHelper.validate_dictionary(
-                row.to_dict(),["media","growth"], {"mediaws":None, "geneko":[], "addtlCpd":[]})
+                row.to_dict(), ["media","growth"], {"mediaws":None, "geneko":[], "addtlCpd":[]})
             media = kbase_api.get_from_ws(data["media"], data["mediaws"])
             media_id = data["media"]
             if len(data["geneko"]) > 0:
                 media_id += "-"+",".join(data["geneko"])
             if len(data["addtlCpd"]) > 0:
                 media_id += "-"+",".join(data["addtlCpd"])
-            new_phenos.append(MSGrowthPhenotype(media_id, media, data["growth"], data["geneko"], data["addtlCpd"]))
+            new_phenos.append(MSGrowthPhenotype(
+                media_id, media, data["growth"], data["geneko"], data["addtlCpd"]))
         growthpheno.add_phenotypes(new_phenos)                
         return growthpheno
         
