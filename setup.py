@@ -30,7 +30,7 @@ setup(
         "chemw >= 0.3.2",
         "matplotlib >= 3.0.0",
         "pyeda",
-        "cython"
+        # "cython"
     ],
     project_urls={
         'Documentation': 'https://modelseedpy.readthedocs.io/en/stable/',
