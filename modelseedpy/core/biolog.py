@@ -115,8 +115,8 @@ class BiologPlate:
             well = self.wells[well_id]
             for compound in self.base:
                 media[compound] = self.base[compound]
-            for compound in well['compounds']:
-                media[compound] = well['value']
+            for well_compound in well['compounds']:
+                media[well_compound] = well['value']
             return media
         return None
 
