@@ -31,9 +31,7 @@ def load_classifier_from_folder(path, filename):
     """
     TEMPORARY SOLUTION TO LOAD AN EXISTING CLASSIFIER
     :param path: 
-    :type path: str
     :param filename: 
-    :type filename: str
     :return: 
 
     """
