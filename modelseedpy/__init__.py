@@ -42,7 +42,7 @@ if sys.version_info[0] == 2:
 import modelseedpy
 from modelseedpy.core import (
     RastClient, MSGenome, MSBuilder, MSMedia, MSGrowthPhenotypes,MSModelUtil,
-    FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation
+    FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation, exceptions
 )
 
 from modelseedpy.community import (MSCommunity, MSCompatibility, CommKineticPkg)
