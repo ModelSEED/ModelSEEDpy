@@ -62,7 +62,7 @@ class MSGapfill:
             logger.warning("No solution found for %s", media)
             return None
 
-        # self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() #!!! this function does not exist
+        self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() 
         if self.test_conditions:
             self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions, self.last_solution, self.test_condition_iteration_limit)
             if self.last_solution is None:
