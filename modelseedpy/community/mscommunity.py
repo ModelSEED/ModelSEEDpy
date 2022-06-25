@@ -13,7 +13,6 @@ from matplotlib import pyplot
 from pandas import DataFrame
 import logging
 #import itertools
-import reframed
 import cobra
 import networkx
 import sigfig
