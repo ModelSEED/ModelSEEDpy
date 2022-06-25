@@ -82,22 +82,22 @@ class MSGapfill:
                 rxn.lower_bound = -100
         for rxn_id in solution["new"]:
             rxn = self.gfmodel.reactions.get_by_id(rxn_id)
-            new_rxn = rxn.copy()
-            self.model.add_reactions([new_rxn])
+            rxn = rxn.copy()
+            self.model.add_reactions([rxn])
             coreid = re.sub(r'_[a-z]\d+$', '', rxn_id)
             if coreid in self.reaction_scores:
                 bestgene = None
                 for gene in self.reaction_scores[coreid]:
                     if not bestgene or self.reaction_scores[coreid][gene] > self.reaction_scores[coreid][bestgene]:
                         bestgene = gene
-                new_rxn = self.model.reactions.get_by_id(rxn_id)
-                new_rxn.gene_reaction_rule = bestgene
+                rxn = self.model.reactions.get_by_id(rxn_id)
+                rxn.gene_reaction_rule = bestgene
             if solution["new"][rxn_id] == ">":
-                new_rxn.upper_bound = 100
-                new_rxn.lower_bound = 0 
+                rxn.upper_bound = 100
+                rxn.lower_bound = 0 
             else:
-                new_rxn.upper_bound = 0
-                new_rxn.lower_bound = -100
+                rxn.upper_bound = 0
+                rxn.lower_bound = -100
         return self.model
     
     @staticmethod
