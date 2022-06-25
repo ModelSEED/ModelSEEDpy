@@ -5,7 +5,7 @@ from modelseedpy.core.msgenome import MSGenome
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.core.msbuilder import MSBuilder
 from modelseedpy.core.msmedia import MSMedia
-from modelseedpy.core.mseditorapi import MSEditorAPI,MSEquation
+from modelseedpy.core.mseditorapi import MSEditorAPI, MSEquation
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.msatpcorrection import MSATPCorrection
 from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes
