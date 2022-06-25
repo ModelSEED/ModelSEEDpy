@@ -3,12 +3,10 @@ logger = logging.getLogger(__name__)
 
 import cobra
 import re
+from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
-
-class GapfillingError(Exception):
-    """Error in model gapfilling"""
-    pass
+from modelseedpy.core.exceptions import GapfillingError
 
 class MSGapfill:
 
