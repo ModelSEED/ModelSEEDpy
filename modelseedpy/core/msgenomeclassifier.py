@@ -2,22 +2,23 @@ from modelseedpy.ml.predict_phenotype import create_indicator_matrix
 
 
 class MSGenomeClassifier:
+
     def __init__(self, model, model_features):
-        self.model = model; self.features = model_features
+        self.features = model_features
+        self.model = model
 
     @staticmethod
     def extract_features_from_genome(genome, ontology_term):
         """
-        
+
         :param genome: ModelSEED Genome to classify
         :param ontology_term: Ontology Term to classify (Example: RAST)
-        :return: 
-
+        :return:
         """
         features = set()
-        for feat in genome.features:
-            if ontology_term in feat.ontology_terms:
-                features.update(feat.ontology_terms[ontology_term])
+        for feature in genome.features:
+            if ontology_term in feature.ontology_terms:
+                features.update(feature.ontology_terms[ontology_term])
         return {'genome': list(features)}
 
     def classify(self, genome, ontology_term='RAST'):
@@ -30,10 +31,9 @@ class MSGenomeClassifier:
 def load_classifier_from_folder(path, filename):
     """
     TEMPORARY SOLUTION TO LOAD AN EXISTING CLASSIFIER
-    :param path: 
-    :param filename: 
-    :return: 
-
+    :param path:
+    :param filename:
+    :return:
     """
     import pickle
     import json
