@@ -1,4 +1,5 @@
 import logging
+import itertools  # !!! the import is never used
 logger = logging.getLogger(__name__)
 
 import cobra
