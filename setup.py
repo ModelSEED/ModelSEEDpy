@@ -17,15 +17,22 @@ setup(
     author_email='chenry@anl.gov',
     url='https://github.com/ModelSEED/ModelSEEDpy',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs')),
+    packages=find_packages(exclude=('docs')),
     package_data={
-        'modelseedpy': ['config.cfg']
+        'modelseedpy': ['config.cfg'],
     },
     install_requires=[
         "networkx >= 2.4",
         "cobra >= 0.17.1",
         "scikit-learn == 0.23.2",  # too support KBase pickle models
         "scipy >= 1.5.4",
-        "chemicals >= 1.0.13"
-    ]
+        "chemicals >= 1.0.13",
+        "chemw >= 0.3.2",
+        "matplotlib >= 3.0.0",
+        "pyeda"
+    ],
+    project_urls={
+        'Documentation': 'https://modelseedpy.readthedocs.io/en/stable/',
+        'Issues': 'https://github.com/ModelSEED/ModelSEEDpy/issues',
+    }
 )
