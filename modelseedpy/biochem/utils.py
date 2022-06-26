@@ -16,26 +16,30 @@ def get_mapping(df, valid_databases, pd):
                     mapping[id][db] = value
     return mapping
 
+
 def atom_count(formula):
     chem_mw = ChemMW()
     try:
         chem_mw.mass(formula)
         return chem_mw.proportions
-    except:
+    except ValueError:
         warn(f'The {formula} formula is invalid')
         return None
-    
+
+
 def is_valid_formula(f, pt):
     warn('The "utils.is_valid_formula" is deprecated in favor of "utils.molecular_weight(formula)"')
     return molecular_weight(f)
-    
+
+
 def molecular_weight(formula):
     chem_mw = ChemMW()
     try:
         return chem_mw.mass(formula)
-    except:
+    except ValueError:
         warn(f'The {formula} formula is invalid')
         return None
+
 
 class PeriodicTable:
     
