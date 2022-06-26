@@ -1,4 +1,4 @@
-.. image:: https://raw.githubusercontent.com/freiburgermsu/modelseedpy/main/examples/ms-logo-horizontal.png?sanitize=true
+.. image:: https://raw.githubusercontent.com/modelseed/modelseedpy/main/examples/ms-logo-horizontal.png?sanitize=true
 
 Metabolic modeling with the ModelSEED Database
 ________________________________________________________________________
@@ -13,8 +13,8 @@ ________________________________________________________________________
    :target: https://pypi.org/project/modelseedpy/
    :alt: PyPI version
 
-.. |Actions Status| image:: https://github.com/freiburgermsu/modelseedpy/workflows/Test%20modelseedpy/badge.svg
-   :target: https://github.com/freiburgermsu/modelseedpy/actions
+.. |Actions Status| image:: https://github.com/modelseed/modelseedpy/workflows/Test%20modelseedpy/badge.svg
+   :target: https://github.com/modelseed/modelseedpy/actions
    :alt: Actions Status
 
 .. |License| image:: https://img.shields.io/badge/License-MIT-blue.svg
@@ -33,9 +33,19 @@ Metabolic modeling is an pivotal method for computational research in synthetic 
 Installation
 ----------------------
 
-ModelSEEDpy can be installed via ``pip`` through the ``PyPI`` channel::
+ModelSEEDpy will soon be installable via the ``PyPI`` channel::
 
  pip install modelseedpy
+ 
+but, until then, the repository must cloned::
+
+ git clone https://github.com/ModelSEED/ModelSEEDpy.git
+
+and then locally installed with ``pip``::
+
+ cd path/to/modelseedpy
+ pip install .
+
    
 The associated ModelSEED Database, which is required for a few packages, is simply downloaded by cloning the GitHub repository::
 

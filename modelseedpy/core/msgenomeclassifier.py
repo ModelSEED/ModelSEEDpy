@@ -15,9 +15,10 @@ class MSGenomeClassifier:
 
         """
         features = set()
-        for feat in genome.features:
-            if ontology_term in feat.ontology_terms:
-                features.update(feat.ontology_terms[ontology_term])
+        for feature in genome.features:
+            if ontology_term in feature.ontology_terms:
+                features.update(feature.ontology_terms[ontology_term])
+
         return {'genome': list(features)}
 
     def classify(self, genome, ontology_term='RAST'):

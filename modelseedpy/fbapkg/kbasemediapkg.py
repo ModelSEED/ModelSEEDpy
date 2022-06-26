@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.core.fbahelper import FBAHelper   # !!! imported but not used
 from numpy import log as ln
 import logging
 

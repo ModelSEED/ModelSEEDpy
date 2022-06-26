@@ -12,7 +12,7 @@ from pprint import pprint
 from datetime import date
 from math import inf 
 import pandas
-import cython
+# import cython
 import json, re, os
 
    
@@ -59,24 +59,24 @@ class dFBAPkg(BaseFBAPkg):
     def simulate(self, 
                  kinetics_path: str = None,                             # the path of the kinetics data JSON file
                  initial_concentrations_M: dict = {},                   # a dictionary of the initial metabolic concentrations , which supplants concentrations from the defined kinetics data
-                 total_time: cython.float = 200, timestep: cython.float = 20,  # total simulation time and the simulation timestep in minutes
+                 total_time: float = 200, timestep: float = 20,  # total simulation time and the simulation timestep in minutes
                  export_name: str = None, export_directory: str = None, # the location to which simulation content will be exported
-                 chemostat_L: cython.float = None, feed_profile: dict = {},    # the volume (l) and feed profile for a chemostat simulation, where None ignores a chemostat
-                 exchange_rate: cython.float = None,                    # the flow rate (Molar/Liter) of addition to and removal from the chemostat system 
+                 chemostat_L: float = None, feed_profile: dict = {},    # the volume (l) and feed profile for a chemostat simulation, where None ignores a chemostat
+                 exchange_rate: float = None,                    # the flow rate (Molar/Liter) of addition to and removal from the chemostat system 
                  thermo_constraints: bool = False,                      # specifies whether thermodynamic constraints will be layered with the kinetic constraints
                  kinetics_data: dict = {},                              # A dictionary of custom kinetics data
-                 temperature: cython.float = 25, p_h: cython.float = 7, # simulation conditions 
-                 cellular_dry_mass_fg: cython.float = 222,              # mass of the simulated cell in femtograms
-                 cellular_fL: cython.float = 1,                         # volume of the simulated cell in femtoliters
+                 temperature: float = 25, p_h: float = 7, # simulation conditions 
+                 cellular_dry_mass_fg: float = 222,              # mass of the simulated cell in femtograms
+                 cellular_fL: float = 1,                         # volume of the simulated cell in femtoliters
                  figure_title: str = 'Metabolic perturbation',          # title of the concentrations figure
                  included_metabolites: list = [],                       # A list of the metabolites that will be graphically displayed
                  labeled_plots: bool = True,                            # specifies whether plots will be individually labeled 
                  visualize: bool = True, export: bool = True            # specifies whether simulation content will be visualized or exported, respectively
                  ):
         # define the dataframe for the time series content
-        self.cellular_dry_mass_fg: cython.float = cellular_dry_mass_fg*femto; self.cellular_fL: cython.float = cellular_fL*femto
+        self.cellular_dry_mass_fg: float = cellular_dry_mass_fg*femto; self.cellular_fL: float = cellular_fL*femto
         self.parameters['timesteps'] = int(total_time/timestep)    
-        self.timestep_value: cython.float = timestep; self.total_time: cython.float = total_time
+        self.timestep_value: float = timestep; self.total_time: float = total_time
         self.constrained = OrderedDict()
         self.solutions = []
         self.minimum = inf

@@ -65,7 +65,8 @@ def create_indicator_matrix_from_genomes(genomes, ontology_term, master_role_lis
 def _create_sorted_master_role_list(ref_to_role):
     master_role_set = set()
     for i, feature in ref_to_role.items():
-        master_role_set.add(feature)
+        master_role_set.update(feature)
+
     master_role_list = sorted(list(master_role_set))
     return master_role_list
 
@@ -90,5 +91,8 @@ def create_indicator_matrix(ref_to_role, master_role_list=None):
                 resubmit the RAST annotated genome/genomeSets into the Predict Phenotype app. (')
         ref_to_indication[genome_id] = indicators.astype(int)
 
-    indicator_df = from_dict(data=ref_to_indication, orient='index', columns=master_role_list).reset_index().rename(columns={"index": "Genome Reference"})
+    indicator_df = from_dict(
+        data=ref_to_indication, orient='index', 
+        columns=master_role_list).reset_index().rename(columns={"index": "Genome Reference"})
+
     return indicator_df, master_role_list

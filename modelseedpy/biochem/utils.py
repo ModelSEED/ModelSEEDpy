@@ -20,10 +20,14 @@ def atom_count(formula):
     chem_mw = ChemMW()
     try:
         chem_mw.mass(formula)
-        return len(chem_mw.proportions)
+        return chem_mw.proportions
     except:
         warn(f'The {formula} formula is invalid')
-        return False
+        return None
+    
+def is_valid_formula(f, pt):
+    warn('The "utils.is_valid_formula" is deprecated in favor of "utils.molecular_weight(formula)"')
+    return molecular_weight(f)
     
 def molecular_weight(formula):
     chem_mw = ChemMW()
@@ -31,6 +35,7 @@ def molecular_weight(formula):
         return chem_mw.mass(formula)
     except:
         warn(f'The {formula} formula is invalid')
+        return None
 
 class PeriodicTable:
     
