@@ -8,3 +8,7 @@ class FeasibilityError(Exception):
 class PackageError(Exception):
     """Error in package manager"""
     pass
+
+class GapfillingError(Exception):
+    """Error in model gapfilling"""
+    pass

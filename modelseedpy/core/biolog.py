@@ -148,6 +148,7 @@ class Biolog:
         self.plates[plate.id] = plate
 
     def run_plates(self, model, biomass=None, cmp='e'):  # !!! biomass is never used
+
         prev_medium = model.medium
         compound_exchange = {}
         for ex_rxn in model.exchanges:

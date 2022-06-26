@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from optlang.symbolics import Zero
-import re
 
 #Base class for FBA packages
 class SimpleThermoPkg(BaseFBAPkg):

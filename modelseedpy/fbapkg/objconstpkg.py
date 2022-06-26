@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
 #Base class for FBA packages
@@ -11,8 +10,5 @@ class ObjConstPkg(BaseFBAPkg):
         BaseFBAPkg.__init__(self,model,"objective constraint",{},{"objc":"none"})
         
     def build_package(self,lower_bound,upper_bound):
-        self.build_constraint(lower_bound,upper_bound)
-                   
-    def build_constraint(self,lower_bound,upper_bound):
         coef = self.model.solver.objective.get_linear_coefficients(self.model.solver.objective.variables)
         return BaseFBAPkg.build_constraint(self,"objc",lower_bound,upper_bound,coef,None)
