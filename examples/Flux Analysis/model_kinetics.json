@@ -1,0 +1,1980 @@
+{
+    "2-Oxogluterate dehydrogenase": {
+        "55199": {
+            "RateLaw": "Vmax*S/(Km+S)",
+            "initial_concentrations_M": {
+                "S": 1.6e-08
+            },
+            "metadata": {
+                "Buffer": "[50 mm Mops, 8 mm TCEP, 50 mm Mops, 8 mm TCEP]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Pisum sativum",
+                "Pathway": NaN,
+                "Product": "NADH;H+;Oxidized N-alpha-(benzyloxycarbonyl)-N-omega-(D,L-1,2-dithiolane-3-pentanoyl)-L-lysine",
+                "Publication": "Neuburger M, Polidori AM, Pi\u00e8tre E, Faure M, Jourdain A, Bourguignon J, Pucci B, Douce R: Interaction between the lipoamide-containing H-protein and the lipoamide dehydrogenase (L-protein) of the glycine decarboxylase multienzyme system. 1. Biochemical studies., Eur J Biochem 2000 (267) , 2882-9",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "1.8.1.4",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 10806385.0,
+                    "SabioReactionID": 13969
+                },
+                "pH": "7.5",
+                "reaction_string": " <-> Nicotinamide adenine dinucleotide-reduced + H+"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "10",
+                    "end val.": "-",
+                    "species": "N-alpha-(benzyloxycarbonyl)-N-omega-(D,L-1,2-dithiolane-3-pentanoyl)-L-lysine",
+                    "start val.": "170.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "7",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "90.0",
+                    "type": "Vmax",
+                    "unit": "nmol/min"
+                }
+            },
+            "substituted_rate_law": "1.5000000000000002e-09*S/(0.00016999999999999999+S)",
+            "variables_molar": {
+                "Km": "0.00016999999999999999",
+                "Vmax": "1.5000000000000002e-09"
+            },
+            "variables_name": {
+                "Km": "N-alpha-(benzyloxycarbonyl)-N-omega-(D,L-1,2-dithiolane-3-pentanoyl)-L-lysine",
+                "S": "N-alpha-(benzyloxycarbonyl)-N-omega-(D,L-1,2-dithiolane-3-pentanoyl)-L-lysine",
+                "Vmax": "-"
+            }
+        }
+    },
+    "ATP maintenance requirement": {
+        "40468": {
+            "RateLaw": "kcat*E*S/(Km+S)",
+            "initial_concentrations_M": {
+                "E": 4.9999999999999996e-06,
+                "S": 7.9e-05
+            },
+            "metadata": {
+                "Buffer": "[25 mM Mops, 10 mM MgCl2, 5 mM DTT, 200 \u00b5M MESG, 0.2 U/ml PNP, 25 mM Mops, 10 mM MgCl2, 5 mM DTT, 200 \u00b5M MESG, 0.2 U/ml PNP]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Homo sapiens",
+                "Pathway": NaN,
+                "Product": "Phosphate;TDP",
+                "Publication": "Placzek WJ, Almeida MS, W\u00fcthrich K: NMR structure and functional characterization of a human cancer-related nucleoside triphosphatase, J Mol Biol 2007 (367) , 788-801",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "3.6.1.15",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 17291528.0,
+                    "SabioReactionID": 9599
+                },
+                "pH": "7.0",
+                "reaction_string": "H2O H2O + DTTP C10H13N2O14P3 <-> Phosphate + TDP"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "1",
+                    "end val.": "-",
+                    "species": "dTTP",
+                    "start val.": "7.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "0.2E-3",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "0.0074",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "0.0074*E*S/(7e-06+S)",
+            "variables_molar": {
+                "Km": "7e-06",
+                "kcat": "0.0074"
+            },
+            "variables_name": {
+                "E": "Enzyme",
+                "Km": "dTTP",
+                "S": "dTTP",
+                "kcat": "-"
+            }
+        }
+    },
+    "Acetaldehyde dehydrogenase (acetylating)": {
+        "44039": {
+            "RateLaw": "kcat*E*S/(Km+S)",
+            "initial_concentrations_M": {
+                "S": 0.038884999999999996
+            },
+            "metadata": {
+                "Buffer": "[100 mM HEPES, 100 mM HEPES]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Burkholderia xenovorans LB400",
+                "Pathway": NaN,
+                "Product": "2-Methylpropanal-CoA;H+;NADH",
+                "Publication": "Baker P, Pan D, Carere J, Rossi A, Wang W, Seah SY: Characterization of an aldolase-dehydrogenase complex that exhibits substrate channeling in the polychlorinated biphenyls degradation pathway, Biochemistry 2009 (48) , 6551-8",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "1.2.1.10",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 19476337.0,
+                    "SabioReactionID": 12861
+                },
+                "pH": "8.0",
+                "reaction_string": "Coenzyme A <-> Nicotinamide adenine dinucleotide-reduced + H+"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "apparent",
+                    "deviat.": "0.5",
+                    "end val.": "-",
+                    "species": "2-Methylpropanal",
+                    "start val.": "7.7",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "0.3",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "11.2",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "11.2*E*S/(0.0077+S)",
+            "variables_molar": {
+                "Km": "0.0077",
+                "kcat": "11.2"
+            },
+            "variables_name": {
+                "E": "Enzyme",
+                "Km": "2-Methylpropanal",
+                "S": "2-Methylpropanal",
+                "kcat": "-"
+            }
+        }
+    },
+    "Acetate kinase": {
+        "68679": {
+            "RateLaw": "(E*kcat)*B/(Km+B)",
+            "initial_concentrations_M": {
+                "B": 0.176
+            },
+            "metadata": {
+                "Buffer": "[50 mM Hepes-NaOH, 3 mM phosphoenolpyruvate, 0.25 mM NADH, 2.5 U/ml lactate dehydrogenase, 2 U/ml pyruvate kinase, 50 mM Hepes-NaOH, 3 mM phosphoenolpyruvate, 0.25 mM NADH, 2.5 U/ml lactate dehydrogenase, 2 U/ml pyruvate kinase]",
+                "Enzyme Variant": "wildtype N-terminal His6-tagged",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Salmonella typhimurium",
+                "Pathway": "Methane metabolism",
+                "Product": "Acetyl phosphate;ADP",
+                "Publication": "Simanshu DK, Savithri HS, Murthy MR: Crystal structures of ADP and AMPPNP-bound propionate kinase (TdcD) from Salmonella typhimurium: comparison with members of acetate and sugar kinase/heat shock cognate 70/actin superfamily, J Mol Biol 2005 (352) , 876-92",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "2.7.2.15",
+                    "KeggReactionID": "R00315",
+                    "PubMedID": 16139298.0,
+                    "SabioReactionID": 71
+                },
+                "pH": "7.5",
+                "reaction_string": "ATP C10H12N5O13P3 + Acetate <-> ADP C10H12N5O10P2 + Acetyl phosphate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "4.70",
+                    "end val.": "-",
+                    "species": "Acetate",
+                    "start val.": "26.92",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "9",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "125.0",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "(E*125.0)*B/(0.026920000000000003+B)",
+            "variables_molar": {
+                "Km": "0.026920000000000003",
+                "kcat": "125.0"
+            },
+            "variables_name": {
+                "B": "Acetate",
+                "E": "Enzyme",
+                "Km": "Acetate",
+                "kcat": "-"
+            }
+        }
+    },
+    "Aconitase (half-reaction A, Citrate hydro-lyase)": {},
+    "Aconitase (half-reaction B, Isocitrate hydro-lyase)": {},
+    "Alcohol dehydrogenase (ethanol)": {
+        "42640": {
+            "RateLaw": "kcat*E*A/(Km+A)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[0.1 M Glycine, 20 mM NaCl, 2% Methanol, 0.1 M Glycine, 20 mM NaCl, 2% Methanol]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Homo sapiens",
+                "Pathway": NaN,
+                "Product": "H+;Unknown;NADH",
+                "Publication": "Moulis JM, Holmquist B, Vallee BL: Hydrophobic anion activation of human liver chi chi alcohol dehydrogenase, Biochemistry 1991 (30) , 5743-9",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.1",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 2043614.0,
+                    "SabioReactionID": 12753
+                },
+                "pH": "10.0",
+                "reaction_string": " <-> Nicotinamide adenine dinucleotide-reduced + H+"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "5beta-cholane-3alpha,7alpha,12alpha,24-tetrol",
+                    "start val.": "0.2",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "55.0",
+                    "type": "kcat",
+                    "unit": "min^(-1)"
+                }
+            },
+            "substituted_rate_law": "0.9166666666666666*E*A/(0.0002+A)",
+            "variables_molar": {
+                "Km": "0.0002",
+                "kcat": "0.9166666666666666"
+            },
+            "variables_name": {
+                "A": "5beta-cholane-3alpha,7alpha,12alpha,24-tetrol",
+                "E": "Enzyme",
+                "Km": "5beta-cholane-3alpha,7alpha,12alpha,24-tetrol",
+                "kcat": "-"
+            }
+        }
+    },
+    "Citrate synthase": {},
+    "D-lactate dehydrogenase": {
+        "48283": {
+            "RateLaw": "kcat*E*A/(Km+A)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[50 mM Sodium MES, 50 mM Sodium MES]",
+                "Enzyme Variant": "mutant R235K",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Lactobacillus plantarum",
+                "Pathway": "Tropane, piperidine and pyridine alkaloid biosynthesis",
+                "Product": "NAD+;Phenyllactate",
+                "Publication": "Taguchi H, Ohta T: Essential role of arginine 235 in the substrate-binding of Lactobacillus plantarum D-lactate dehydrogenase, J Biochem 1994 (115) , 930-6",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.28",
+                    "KeggReactionID": "R01370",
+                    "PubMedID": 7961609.0,
+                    "SabioReactionID": 1572
+                },
+                "pH": "6.0",
+                "reaction_string": "Phenyllactate <-> Nicotinamide adenine dinucleotide-reduced + Phenylpyruvate + H+"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "Phenylpyruvate",
+                    "start val.": "20.0",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "0.24",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "0.24*E*A/(0.02+A)",
+            "variables_molar": {
+                "Km": "0.02",
+                "kcat": "0.24"
+            },
+            "variables_name": {
+                "A": "Phenylpyruvate",
+                "E": "Enzyme",
+                "Km": "Phenylpyruvate",
+                "kcat": "-"
+            }
+        }
+    },
+    "Enolase": {
+        "56563": {
+            "RateLaw": "kcat*E*S/(Km+S)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[100 mM MES, 100 mM KCl, 0.15 mM NADH, 10 mM ADP, 14 U/ml pyruvate kinase, 20 U/ml lactate dehydrogenase, 5 mM MgCl2, 100 mM MES, 100 mM KCl, 0.15 mM NADH, 10 mM ADP, 14 U/ml pyruvate kinase, 20 U/ml lactate dehydrogenase, 5 mM MgCl2]",
+                "Enzyme Variant": "wildtype isozyme Eno1p, C-terminal GST-tag",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Saccharomyces cerevisiae",
+                "Pathway": NaN,
+                "Product": "H2O;Phosphoenolpyruvate",
+                "Publication": "Smallbone K, Messiha HL, Carroll KM, Winder CL, Malys N, Dunn WB, Murabito E, Swainston N, Dada JO, Khan F, Pir P, Simeonidis E, Spasi\u0107 I, Wishart J, Weichart D, Hayes NW, Jameson D, Broomhead DS, Oliver SG, Gaskell SJ, McCarthy JE, Paton NW, Westerhoff HV, Kell DB, Mendes P: A model of yeast glycolysis based on a consistent kinetic characterisation of all its enzymes., FEBS Lett 2013 (587) , 2832-41",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "4.2.1.11",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 23831062.0,
+                    "SabioReactionID": 14111
+                },
+                "pH": "6.5",
+                "reaction_string": "3-Phospho-D-glycerate <-> Phosphoenolpyruvate + H2O H2O"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "0.063",
+                    "end val.": "-",
+                    "species": "3-Phospho-D-glycerate",
+                    "start val.": "0.617",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "0.15",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "5.07",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "5.07*E*S/(0.000617+S)",
+            "variables_molar": {
+                "Km": "0.000617",
+                "kcat": "5.07"
+            },
+            "variables_name": {
+                "E": "Enzyme",
+                "Km": "3-Phospho-D-glycerate",
+                "S": "3-Phospho-D-glycerate",
+                "kcat": "-"
+            }
+        }
+    },
+    "Fructose-bisphosphatase": {
+        "72877": {
+            "RateLaw": "((E*kcat)*S^n)/(S_half^n+S^n)",
+            "initial_concentrations_M": {
+                "E": 1.5e-06,
+                "S": 2.9999999999999997e-05
+            },
+            "metadata": {
+                "Buffer": "[50 mM Tris-HCl, 0.5 mM NADP+, 1 U/ml glucose-6-phosphate dehydrogenase, 1 U/ml phosphoglucose isomerase, 50 mM Tris-HCl, 0.5 mM NADP+, 1 U/ml glucose-6-phosphate dehydrogenase, 1 U/ml phosphoglucose isomerase]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Hill Cooperativity",
+                "Organism": "Vigna radiata",
+                "Pathway": NaN,
+                "Product": "Phosphate;Fructose 6-phosphate",
+                "Publication": "Chen L, Zhao X, He Y, Yang H: Cloning, purification and characterisation of cytosolic fructose-1,6-bisphosphatase from mung bean (Vigna radiata), Food Chem 2021 (347) , 128973",
+                "Temperature": "22.0",
+                "annotations": {
+                    "ECNumber": "3.1.3.11",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 33444888.0,
+                    "SabioReactionID": 10378
+                },
+                "pH": "7.5",
+                "reaction_string": "H2O H2O <-> Phosphate"
+            },
+            "substituted_parameters": {
+                "S_half": {
+                    "comment": "-",
+                    "deviat.": "1.18",
+                    "end val.": "-",
+                    "species": "Fructose 1,6-bisphosphate",
+                    "start val.": "7.96",
+                    "type": "S_half",
+                    "unit": "\u00b5M"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "1.52",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "8.65",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                },
+                "n": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "Fructose 1,6-bisphosphate",
+                    "start val.": "3.19",
+                    "type": "Hill coefficient",
+                    "unit": "-"
+                }
+            },
+            "substituted_rate_law": "((E*8.65)*S**3.19)/(7.96e-06**3.19+S**3.19)",
+            "variables_molar": {
+                "S_half": "7.96e-06",
+                "kcat": "8.65",
+                "n": "3.19"
+            },
+            "variables_name": {
+                "E": "Enzyme",
+                "S": "Fructose 1,6-bisphosphate",
+                "S_half": "Fructose 1,6-bisphosphate",
+                "kcat": "-",
+                "n": "Fructose 1,6-bisphosphate"
+            }
+        }
+    },
+    "Fructose-bisphosphate aldolase": {
+        "68998": {
+            "RateLaw": "Vmax*S/(Km+S)",
+            "initial_concentrations_M": {
+                "S": 0.001
+            },
+            "metadata": {
+                "Buffer": "[25 mM Tris-HCl, 1 mM MgCl2, 0.15 mM NADH, rabbit muscle triose phosphate isomerase (3.5 U/ml), glycerol\u20103\u2010phosphate dehydrogenase (1 U/ml)]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Rattus norvegicus",
+                "Pathway": NaN,
+                "Product": "Erythrose;Glycerone phosphate",
+                "Publication": "Kardon T, Stroobant V, Veiga-da-Cunha M, Schaftingen EV: Characterization of mammalian sedoheptulokinase and mechanism of formation of erythritol in sedoheptulokinase deficiency, FEBS Lett 2008 (582) , 3330-4",
+                "Temperature": "-",
+                "annotations": {
+                    "ECNumber": "4.1.2.13",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 18775706.0,
+                    "SabioReactionID": 15741
+                },
+                "pH": "7.5",
+                "reaction_string": " <-> "
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "Sedoheptulose 1-phosphate",
+                    "start val.": "0.6",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "0.4",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                }
+            },
+            "substituted_rate_law": "6.666666666666666e-06*S/(0.0006+S)",
+            "variables_molar": {
+                "Km": "0.0006",
+                "Vmax": "6.666666666666666e-06"
+            },
+            "variables_name": {
+                "Km": "Sedoheptulose 1-phosphate",
+                "S": "Sedoheptulose 1-phosphate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Fumarase": {
+        "36039": {
+            "RateLaw": "E*kcat*A/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.05
+            },
+            "metadata": {
+                "Buffer": "[100 mM Tris-HCl, 100 mM Tris-HCl]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Corynebacterium glutamicum",
+                "Pathway": "Biosynthesis of secondary metabolites",
+                "Product": "Fumarate;H2O",
+                "Publication": "Genda T, Watabe S, Ozaki H: Purification and characterization of fumarase from Corynebacterium glutamicum, Biosci Biotechnol Biochem 2006 (70) , 1102-9",
+                "Temperature": "20.0",
+                "annotations": {
+                    "ECNumber": "4.2.1.2",
+                    "KeggReactionID": "R01082",
+                    "PubMedID": 16717409.0,
+                    "SabioReactionID": 256
+                },
+                "pH": "8.0",
+                "reaction_string": "L-Malate <-> H2O H2O + Fumarate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "L-Malate",
+                    "start val.": "0.005",
+                    "type": "Km",
+                    "unit": "M"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "290.0",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "E*290.0*A/(0.005+A)",
+            "variables_molar": {
+                "Km": "0.005",
+                "kcat": "290.0"
+            },
+            "variables_name": {
+                "A": "L-Malate",
+                "E": "Enzyme",
+                "Km": "L-Malate",
+                "kcat": "-"
+            }
+        }
+    },
+    "Glucose 6-phosphate dehydrogenase": {
+        "48465": {
+            "RateLaw": "Vmax*A/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.00062
+            },
+            "metadata": {
+                "Buffer": "[125 mM Tris-HCl, 10 mM MgCl2, 125 mM Tris-HCl, 10 mM MgCl2]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Homo sapiens",
+                "Pathway": "Pentose phosphate pathway",
+                "Product": "6-Phospho-D-glucono-1,5-lactone;deamino-NADPH;H+",
+                "Publication": "Ozer N, Aksoy Y, Og\u00fcs IH: Kinetic properties of human placental glucose-6-phosphate dehydrogenase, Int J Biochem Cell Biol 2001 (33) , 221-6",
+                "Temperature": "37.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.49",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 11311853.0,
+                    "SabioReactionID": 13299
+                },
+                "pH": "7.4",
+                "reaction_string": " <-> H+ + 6-Phospho-D-glucono-1,5-lactone"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "apparent",
+                    "deviat.": "0.0055",
+                    "end val.": "-",
+                    "species": "Nicotinamide hypoxanthine dinucleotide phosphate",
+                    "start val.": "0.0205",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "apparent",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "29.0",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                }
+            },
+            "substituted_rate_law": "0.0004833333333333333*A/(2.05e-05+A)",
+            "variables_molar": {
+                "Km": "2.05e-05",
+                "Vmax": "0.0004833333333333333"
+            },
+            "variables_name": {
+                "A": "Nicotinamide hypoxanthine dinucleotide phosphate",
+                "Km": "Nicotinamide hypoxanthine dinucleotide phosphate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Glucose-6-phosphate isomerase": {
+        "16091": {
+            "RateLaw": "Vmax*S/(Km+S)",
+            "initial_concentrations_M": {
+                "S": 0.0012
+            },
+            "metadata": {
+                "Buffer": "[ 100 mM Tris-HCl,  100 mM Tris-HCl]",
+                "Enzyme Variant": "wildtype from C",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Lactobacillus casei",
+                "Pathway": "Carbon metabolism",
+                "Product": "D-Ribulose 5-phosphate",
+                "Publication": "Pradhan PG, Nadkarni GB: Functional multiplicity of phosphoglucose isomerase from Lactobacillus casei, Biochim Biophys Acta 1980 (615) , 465-73",
+                "Temperature": "37.0",
+                "annotations": {
+                    "ECNumber": "5.3.1.9",
+                    "KeggReactionID": "R01056",
+                    "PubMedID": 6251893.0,
+                    "SabioReactionID": 65
+                },
+                "pH": "7.0",
+                "reaction_string": " <-> D-Ribulose 5-phosphate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "D-Ribose 5-phosphate",
+                    "start val.": "2.0E-4",
+                    "type": "Km",
+                    "unit": "M"
+                }
+            },
+            "substituted_rate_law": "Vmax*S/(0.0002+S)",
+            "variables_molar": {
+                "Km": "0.0002"
+            },
+            "variables_name": {
+                "Km": "D-Ribose 5-phosphate",
+                "S": "D-Ribose 5-phosphate"
+            }
+        }
+    },
+    "Glutamate dehydrogenase (NADP)": {
+        "16705": {
+            "RateLaw": "(E*kcat*A)/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.00115,
+                "E": 4e-07
+            },
+            "metadata": {
+                "Buffer": "[ 50 mM potassium phosphate,  50 mM potassium phosphate]",
+                "Enzyme Variant": "mutant K286E",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Salmonella typhimurium",
+                "Pathway": "D-Glutamine and D-Glutamate metabolism",
+                "Product": "NAD+;H2O;L-Glutamate",
+                "Publication": "Haeffner-Gormley L, Chen Z, Zalkin H, Colman RF: Importance of lysine-286 at the NADP site of glutamate dehydrogenase from Salmonella typhimurium, Biochemistry 1992 (31) , 7807-14",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "1.4.1.4",
+                    "KeggReactionID": "R00243",
+                    "PubMedID": 1510967.0,
+                    "SabioReactionID": 755
+                },
+                "pH": "8.0",
+                "reaction_string": "L-Glutamate + H2O H2O <-> 2-Oxoglutarate + H+ + Nicotinamide adenine dinucleotide-reduced + NH3"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "NADH",
+                    "start val.": "2100.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "950.0",
+                    "type": "kcat",
+                    "unit": "min^(-1)"
+                }
+            },
+            "substituted_rate_law": "(E*15.833333333333334*A)/(0.0021+A)",
+            "variables_molar": {
+                "Km": "0.0021",
+                "kcat": "15.833333333333334"
+            },
+            "variables_name": {
+                "A": "NADH",
+                "E": "Enzyme",
+                "Km": "NADH",
+                "kcat": "-"
+            }
+        }
+    },
+    "Glutamate synthase (NADPH)": {
+        "52315": {
+            "RateLaw": "((E*kcat)*A*B)/(Km_A*B+Km_B*A+A*B)",
+            "initial_concentrations_M": {
+                "A": 0.00010999999999999999,
+                "B": 0.00028
+            },
+            "metadata": {
+                "Buffer": "[50 mM Hepes/KOH, 50 mM Hepes/KOH]",
+                "Enzyme Variant": "mutant G298A",
+                "KineticMechanismType": "Ping Pong",
+                "Organism": "Azospirillum brasilense",
+                "Pathway": NaN,
+                "Product": "NADP+;Reduced iodonitrotetrazolium",
+                "Publication": "Morandi P, Valzasina B, Colombo C, Curti B, Vanoni MA: Glutamate synthase: identification of the NADPH-binding site by site-directed mutagenesis, Biochemistry 2000 (39) , 727-35",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "1.4.1.13",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 10651638.0,
+                    "SabioReactionID": 13648
+                },
+                "pH": "7.5",
+                "reaction_string": "NADPH + H+ <-> "
+            },
+            "substituted_parameters": {
+                "Km_A": {
+                    "comment": "apparent, at 0.5 mM Iodonitrotetrazolium",
+                    "deviat.": "5.8",
+                    "end val.": "-",
+                    "species": "NADPH",
+                    "start val.": "84.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "Km_B": {
+                    "comment": "apparent",
+                    "deviat.": "8.3",
+                    "end val.": "-",
+                    "species": "Iodonitrotetrazolium",
+                    "start val.": "122.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "kcat": {
+                    "comment": "apparent",
+                    "deviat.": "1.5",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "44.0",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "((E*44.0)*A*B)/(8.4e-05*B+0.000122*A+A*B)",
+            "variables_molar": {
+                "Km_A": "8.4e-05",
+                "Km_B": "0.000122",
+                "kcat": "44.0"
+            },
+            "variables_name": {
+                "A": "NADPH",
+                "B": "Iodonitrotetrazolium",
+                "E": "Enzyme",
+                "Km_A": "NADPH",
+                "Km_B": "Iodonitrotetrazolium",
+                "kcat": "-"
+            }
+        }
+    },
+    "Glutaminase": {
+        "52315": {
+            "RateLaw": "((E*kcat)*A*B)/(Km_A*B+Km_B*A+A*B)",
+            "initial_concentrations_M": {
+                "A": 0.00010999999999999999,
+                "B": 0.00028
+            },
+            "metadata": {
+                "Buffer": "[50 mM Hepes/KOH, 50 mM Hepes/KOH]",
+                "Enzyme Variant": "mutant G298A",
+                "KineticMechanismType": "Ping Pong",
+                "Organism": "Azospirillum brasilense",
+                "Pathway": NaN,
+                "Product": "Reduced iodonitrotetrazolium;NADP+",
+                "Publication": "Morandi P, Valzasina B, Colombo C, Curti B, Vanoni MA: Glutamate synthase: identification of the NADPH-binding site by site-directed mutagenesis, Biochemistry 2000 (39) , 727-35",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "1.4.1.13",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 10651638.0,
+                    "SabioReactionID": 13648
+                },
+                "pH": "7.5",
+                "reaction_string": "NADPH + H+ <-> "
+            },
+            "substituted_parameters": {
+                "Km_A": {
+                    "comment": "apparent, at 0.5 mM Iodonitrotetrazolium",
+                    "deviat.": "5.8",
+                    "end val.": "-",
+                    "species": "NADPH",
+                    "start val.": "84.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "Km_B": {
+                    "comment": "apparent",
+                    "deviat.": "8.3",
+                    "end val.": "-",
+                    "species": "Iodonitrotetrazolium",
+                    "start val.": "122.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "kcat": {
+                    "comment": "apparent",
+                    "deviat.": "1.5",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "44.0",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "((E*44.0)*A*B)/(8.4e-05*B+0.000122*A+A*B)",
+            "variables_molar": {
+                "Km_A": "8.4e-05",
+                "Km_B": "0.000122",
+                "kcat": "44.0"
+            },
+            "variables_name": {
+                "A": "NADPH",
+                "B": "Iodonitrotetrazolium",
+                "E": "Enzyme",
+                "Km_A": "NADPH",
+                "Km_B": "Iodonitrotetrazolium",
+                "kcat": "-"
+            }
+        }
+    },
+    "Glutamine synthetase": {
+        "51597": {
+            "RateLaw": "Vmax*A/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.01255
+            },
+            "metadata": {
+                "Buffer": "[20 mM sodium arsenate, 25 mM imidazole, 25 mM Tris, 0.33 mM MnCl2 and 0.4 M K2SO4]",
+                "Enzyme Variant": "mutant S186F",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Bacillus subtilis",
+                "Pathway": NaN,
+                "Product": "L-gamma-Glutamyl hydroxamate;NH3",
+                "Publication": "Wray LV Jr, Fisher SH: A feedback-resistant mutant of Bacillus subtilis glutamine synthetase with pleiotropic defects in nitrogen-regulated gene expression, J Biol Chem 2005 (280) , 33298-304",
+                "Temperature": "-",
+                "annotations": {
+                    "ECNumber": "6.3.1.2",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 16055443.0,
+                    "SabioReactionID": 11669
+                },
+                "pH": "7.5",
+                "reaction_string": "L-Glutamine + Hydroxylamine <-> NH3"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "0.4",
+                    "end val.": "-",
+                    "species": "Hydroxylamine",
+                    "start val.": "3.4",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "2",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "140.0",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                }
+            },
+            "substituted_rate_law": "0.002333333333333333*A/(0.0034+A)",
+            "variables_molar": {
+                "Km": "0.0034",
+                "Vmax": "0.002333333333333333"
+            },
+            "variables_name": {
+                "A": "Hydroxylamine",
+                "Km": "Hydroxylamine",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Glyceraldehyde-3-phosphate dehydrogenase": {
+        "48909": {
+            "RateLaw": "Vmax*A/(Km+A)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[90 mM Tris/HCl, 24 mM 2-Mercaptoethanol, 90 mM Tris/HCl, 24 mM 2-Mercaptoethanol]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Methanothermus fervidus",
+                "Pathway": NaN,
+                "Product": "3-Phospho-D-glyceroyl arsenate;NADPH;H+",
+                "Publication": "Fabry S, Hensel R: Purification and characterization of D-glyceraldehyde-3-phosphate dehydrogenase from the thermophilic archaebacterium Methanothermus fervidus, Eur J Biochem 1987 (165) , 147-55",
+                "Temperature": "40.0",
+                "annotations": {
+                    "ECNumber": "1.2.1.59",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 3569291.0,
+                    "SabioReactionID": 9640
+                },
+                "pH": "8.0",
+                "reaction_string": "Arsenate <-> H+ + NADPH"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "NADP+",
+                    "start val.": "0.003",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "4.3",
+                    "type": "Vmax",
+                    "unit": "U/mg"
+                }
+            },
+            "substituted_rate_law": "4300.0*A/(3e-06+A)",
+            "variables_molar": {
+                "Km": "3e-06",
+                "Vmax": "4300.0"
+            },
+            "variables_name": {
+                "A": "NADP+",
+                "Km": "NADP+",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Isocitrate dehydrogenase (NADP)": {
+        "66843": {
+            "RateLaw": "kcat*E*A*B/(Ki_A*Km_B+Km_A*B+Km_B*A+A*B)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[25 mM MOPS, 100 mM NaCl, 1 mM DTT, 25 mM MOPS, 100 mM NaCl, 1 mM DTT]",
+                "Enzyme Variant": "mutant S113L",
+                "KineticMechanismType": "Rapid equilibrium random",
+                "Organism": "Escherichia coli",
+                "Pathway": "Microbial metabolism in diverse environments",
+                "Product": "H+;CO2;NADPH;Pyruvate",
+                "Publication": "Dean AM, Koshland DE Jr: Kinetic mechanism of Escherichia coli isocitrate dehydrogenase., Biochemistry 1993 (32) , 9302-9",
+                "Temperature": "21.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.42",
+                    "KeggReactionID": "R00216",
+                    "PubMedID": 8369299.0,
+                    "SabioReactionID": 142
+                },
+                "pH": "7.3",
+                "reaction_string": "L-Malate <-> NADPH + CO2 CO2 + Pyruvate + H+"
+            },
+            "substituted_parameters": {
+                "Ki_A": {
+                    "comment": "apparent",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "NADP+",
+                    "start val.": "0.412",
+                    "type": "Ki",
+                    "unit": "mM"
+                },
+                "Km_A": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "NADP+",
+                    "start val.": "0.42",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Km_B": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "L-Malate",
+                    "start val.": "5.2",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "4.7E-4",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "0.00047*E*A*B/(0.000412*0.005200000000000001+0.00042*B+0.005200000000000001*A+A*B)",
+            "variables_molar": {
+                "Ki_A": "0.000412",
+                "Km_A": "0.00042",
+                "Km_B": "0.005200000000000001",
+                "kcat": "0.00047"
+            },
+            "variables_name": {
+                "A": "NADP+",
+                "B": "L-Malate",
+                "E": "Enzyme",
+                "Ki_A": "NADP+",
+                "Km_A": "NADP+",
+                "Km_B": "L-Malate",
+                "kcat": "-"
+            }
+        }
+    },
+    "Isocitrate lyase": {
+        "72842": {
+            "RateLaw": "Vmax*A/(Km+A)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[25 mM imidazole-HCl, 4 mM phenylhydrazine hydrochloride, 25 mM imidazole-HCl, 4 mM phenylhydrazine hydrochloride]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Phycomyces blakesleeanus",
+                "Pathway": NaN,
+                "Product": "Glyoxylate;Succinate",
+                "Publication": "R\u00faa J, de Arriaga D, Busto F, Soler J: Isocitrate lyase from Phycomyces blakesleeanus. The role of Mg2+ ions, kinetics and evidence for two classes of modifiable thiol groups, Biochem J 1990 (272) , 359-67",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "4.1.3.1",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 2268266.0,
+                    "SabioReactionID": 14841
+                },
+                "pH": "6.8",
+                "reaction_string": " <-> Glyoxylate + Succinate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "1",
+                    "end val.": "-",
+                    "species": "D-Isocitrate",
+                    "start val.": "58.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "0.03E-3",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "0.0034",
+                    "type": "Vmax",
+                    "unit": "min^(-1)"
+                }
+            },
+            "substituted_rate_law": "5.6666666666666664e-05*A/(5.8e-05+A)",
+            "variables_molar": {
+                "Km": "5.8e-05",
+                "Vmax": "5.6666666666666664e-05"
+            },
+            "variables_name": {
+                "A": "D-Isocitrate",
+                "Km": "D-Isocitrate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Malate dehydrogenase": {
+        "64069": {
+            "RateLaw": "Vmax*A/(Km+A)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[0.13 M triethanolamine, 0.13 M triethanolamine]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Trypanosoma cruzi",
+                "Pathway": NaN,
+                "Product": "NAD+;2-Hydroxyisocaproate",
+                "Publication": "Montemartini M, Santom\u00e9 JA, Cazzulo JJ, Nowicki C: Purification and partial structural and kinetic characterization of an aromatic L-alpha-hydroxy acid dehydrogenase from epimastigotes of Trypanosoma cruzi., Mol Biochem Parasitol 1994 (68) , 15-23",
+                "Temperature": "37.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.37",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 7891739.0,
+                    "SabioReactionID": 9852
+                },
+                "pH": "7.5",
+                "reaction_string": "4-Methyl-2-oxopentanoate + Nicotinamide adenine dinucleotide-reduced + H+ <-> "
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "apparent",
+                    "deviat.": "0.127",
+                    "end val.": "-",
+                    "species": "4-Methyl-2-oxopentanoate",
+                    "start val.": "0.88",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "apparent",
+                    "deviat.": "14",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "210.0",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                }
+            },
+            "substituted_rate_law": "0.0034999999999999996*A/(0.00088+A)",
+            "variables_molar": {
+                "Km": "0.00088",
+                "Vmax": "0.0034999999999999996"
+            },
+            "variables_name": {
+                "A": "4-Methyl-2-oxopentanoate",
+                "Km": "4-Methyl-2-oxopentanoate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Malic enzyme (NAD)": {
+        "73663": {
+            "RateLaw": "((E*kcat)*A^n)/(A_half^n+A^n)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[50 mM Tris-HCl]",
+                "Enzyme Variant": "wildtype SfcA, N-terminal His6-tag",
+                "KineticMechanismType": "Hill Cooperativity",
+                "Organism": "Escherichia coli",
+                "Pathway": "Citrate cycle (TCA cycle)",
+                "Product": "CO2;NADPH;Pyruvate;H+",
+                "Publication": "Bologna FP, Andreo CS, Drincovich MF: Escherichia coli malic enzymes: two isoforms with substantial differences in kinetic properties, metabolic regulation, and structure, J Bacteriol 2007 (189) , 5937-46",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.38",
+                    "KeggReactionID": "R00216",
+                    "PubMedID": 17557829.0,
+                    "SabioReactionID": 142
+                },
+                "pH": "-",
+                "reaction_string": "L-Malate <-> NADPH + CO2 CO2 + Pyruvate + H+"
+            },
+            "substituted_parameters": {
+                "A_half": {
+                    "comment": "apparent",
+                    "deviat.": "78",
+                    "end val.": "-",
+                    "species": "NADP+",
+                    "start val.": "1000.0",
+                    "type": "S_half",
+                    "unit": "\u00b5M"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "0.6",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "12.4",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                },
+                "n": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "NADP+",
+                    "start val.": "1.95",
+                    "type": "Hill coefficient",
+                    "unit": "-"
+                }
+            },
+            "substituted_rate_law": "((E*12.4)*A**1.95)/(0.001**1.95+A**1.95)",
+            "variables_molar": {
+                "A_half": "0.001",
+                "kcat": "12.4",
+                "n": "1.95"
+            },
+            "variables_name": {
+                "A": "NADP+",
+                "A_half": "NADP+",
+                "E": "Enzyme",
+                "kcat": "-",
+                "n": "NADP+"
+            }
+        }
+    },
+    "Malic enzyme (NADP)": {
+        "35236": {
+            "RateLaw": "E*kcat*A/(Km+A)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[50 mM Tris-HCl, 50 mM Tris-HCl]",
+                "Enzyme Variant": "mutant K435/6L",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Zea mays",
+                "Pathway": "Microbial metabolism in diverse environments",
+                "Product": "H+;Pyruvate;CO2;NADH",
+                "Publication": "Detarsio E, Andreo CS, Drincovich MF: Basic residues play key roles in catalysis and NADP(+)-specificity in maize (Zea mays L.) photosynthetic NADP(+)-dependent malic enzyme, Biochem J 2004 (382) , 1025-30",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.40",
+                    "KeggReactionID": "R00214",
+                    "PubMedID": 15245332.0,
+                    "SabioReactionID": 141
+                },
+                "pH": "7.0",
+                "reaction_string": "L-Malate <-> CO2 CO2 + Pyruvate + H+ + Nicotinamide adenine dinucleotide-reduced"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "0.09",
+                    "end val.": "-",
+                    "species": "NAD+",
+                    "start val.": "1.9",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "0.7",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "18.4",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "E*18.4*A/(0.0019+A)",
+            "variables_molar": {
+                "Km": "0.0019",
+                "kcat": "18.4"
+            },
+            "variables_name": {
+                "A": "NAD+",
+                "E": "Enzyme",
+                "Km": "NAD+",
+                "kcat": "-"
+            }
+        }
+    },
+    "NAD transhydrogenase": {},
+    "Phosphoenolpyruvate carboxykinase": {
+        "9320": {
+            "RateLaw": "E*kcat*A/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.01
+            },
+            "metadata": {
+                "Buffer": "[ 100 mM MOPS, 0.20 mM NADH, 50 mM KHCO3,  100 mM MOPS, 0.20 mM NADH, 50 mM KHCO3]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Saccharomyces cerevisiae",
+                "Pathway": NaN,
+                "Product": "CTP;Oxaloacetate",
+                "Publication": " Villarreal JM, Bueno C, Arenas F, Jabalquinto AM, Gonz\u00e1lez-Nilo FD, Encinas MV, Cardemil E: Nucleotide specificity of Saccharomyces cerevisiae phosphoenolpyruvate carboxykinase Kinetics, fluorescence spectroscopy, and molecular simulation studies, Int J Biochem Cell Biol 2006 (38) , 576-88",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "4.1.1.49",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 16330239.0,
+                    "SabioReactionID": 7853
+                },
+                "pH": "6.9",
+                "reaction_string": "CTP C9H12N3O14P3 + Oxaloacetate <-> CDP C9H12N3O11P2 + CO2 CO2 + Phosphoenolpyruvate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "value might be higher",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "CDP",
+                    "start val.": "11.0",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "approximate value",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "3.8",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "E*3.8*A/(0.011+A)",
+            "variables_molar": {
+                "Km": "0.011",
+                "kcat": "3.8"
+            },
+            "variables_name": {
+                "A": "CDP",
+                "E": "Enzyme",
+                "Km": "CDP",
+                "kcat": "-"
+            }
+        }
+    },
+    "Phosphoenolpyruvate carboxylase": {
+        "62006": {
+            "RateLaw": "(Vmax*S^h)/(S_half^h+S^h)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[50 mM Hepes-KOH, 10 mM MgCl2, 0.15 mM NADH, 10 U/ml NADH-malate dehydrogenase, 50 mM Hepes-KOH, 10 mM MgCl2, 0.15 mM NADH, 10 U/ml NADH-malate dehydrogenase]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Hill Cooperativity",
+                "Organism": "Flaveria pringlei",
+                "Pathway": "Carbon fixation in photosynthetic organisms",
+                "Product": "Phosphate;Oxaloacetate",
+                "Publication": "Bl\u00e4sing OE, Ernst K, Streubel M, Westhoff P, Svensson P: The non-photosynthetic phosphoenolpyruvate carboxylases of the C4 dicot Flaveria trinervia -- implications for the evolution of C4 photosynthesis., Planta 2002 (215) , 448-56",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "4.1.1.31",
+                    "KeggReactionID": "R00345",
+                    "PubMedID": 12111227.0,
+                    "SabioReactionID": 150
+                },
+                "pH": "7.6",
+                "reaction_string": "Phosphate + Oxaloacetate <-> CO2 CO2 + Phosphoenolpyruvate + H2O H2O"
+            },
+            "substituted_parameters": {
+                "S_half": {
+                    "comment": "-",
+                    "deviat.": "0.3",
+                    "end val.": "-",
+                    "species": "Phosphoenolpyruvate",
+                    "start val.": "16.0",
+                    "type": "S_half",
+                    "unit": "\u00b5M"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "2.1",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "28.0",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                },
+                "h": {
+                    "comment": "-",
+                    "deviat.": "0.06",
+                    "end val.": "-",
+                    "species": "Phosphoenolpyruvate",
+                    "start val.": "1.2",
+                    "type": "Hill coefficient",
+                    "unit": "-"
+                }
+            },
+            "substituted_rate_law": "(0.00046666666666666666*S**1.2)/(S_1.2alf**1.2+S**1.2)",
+            "variables_molar": {
+                "S_half": "1.6e-05",
+                "Vmax": "0.00046666666666666666",
+                "h": "1.2"
+            },
+            "variables_name": {
+                "S": "Phosphoenolpyruvate",
+                "S_half": "Phosphoenolpyruvate",
+                "Vmax": "-",
+                "h": "Phosphoenolpyruvate"
+            }
+        }
+    },
+    "Phosphofructokinase": {
+        "63249": {
+            "RateLaw": "kcat*E*S/(Km+S)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[0.1 M triethanolamine hydrochloride, 1 mM EDTA, 0.42 mM NADH, 2.2 mM PEP, 2.5 mM MgCl2, 1 mM NaHCO3, 1.1 U/ml PyK/LDH (1/1), 0.1 M triethanolamine hydrochloride, 1 mM EDTA, 0.42 mM NADH, 2.2 mM PEP, 2.5 mM MgCl2, 1 mM NaHCO3, 1.1 U/ml PyK/LDH (1/1)]",
+                "Enzyme Variant": "wildtype His6-tagged",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Trypanosoma brucei",
+                "Pathway": NaN,
+                "Product": "ADP;Fructose 1,6-bisphosphate",
+                "Publication": "Claustre S, Denier C, Lakhdar-Ghazal F, Lougare A, Lopez C, Chevalier N, Michels PA, P\u00e9ri\u00e9 J, Willson M: Exploring the active site of Trypanosoma brucei phosphofructokinase by inhibition studies: specific irreversible inhibition., Biochemistry 2002 (41) , 10183-93",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "2.7.1.11",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 12162732.0,
+                    "SabioReactionID": 12923
+                },
+                "pH": "7.6",
+                "reaction_string": "ATP C10H12N5O13P3 <-> ADP C10H12N5O10P2"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "ATP",
+                    "start val.": "144.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "196.0",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "196.0*E*S/(0.000144+S)",
+            "variables_molar": {
+                "Km": "0.000144",
+                "kcat": "196.0"
+            },
+            "variables_name": {
+                "E": "Enzyme",
+                "Km": "ATP",
+                "S": "ATP",
+                "kcat": "-"
+            }
+        }
+    },
+    "Phosphogluconate dehydrogenase": {
+        "29008": {
+            "RateLaw": "Vmax*A/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.0012
+            },
+            "metadata": {
+                "Buffer": "[ 50 mM triethanolamine-HCl, 0.1 mM EDTA,  50 mM triethanolamine-HCl, 0.1 mM EDTA]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Ovis aries",
+                "Pathway": NaN,
+                "Product": "3-Keto-2-deoxy-6-phospho-D-gluconate;NADPH;H+",
+                "Publication": "Hanau S, Dallocchio F, Rippa M: NADPH activates a decarboxylation reaction catalysed by lamb liver 6-phosphogluconate dehydrogenase, Biochim Biophys Acta 1992 (1122) , 273-7",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "1.1.1.44",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 1504088.0,
+                    "SabioReactionID": 11153
+                },
+                "pH": "8.0",
+                "reaction_string": " <-> NADPH + H+"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "2-Deoxy-6-phospho-D-gluconate",
+                    "start val.": "1.42",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "purified enzyme",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "4.1",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                }
+            },
+            "substituted_rate_law": "6.833333333333332e-05*A/(0.00142+A)",
+            "variables_molar": {
+                "Km": "0.00142",
+                "Vmax": "6.833333333333332e-05"
+            },
+            "variables_name": {
+                "A": "2-Deoxy-6-phospho-D-gluconate",
+                "Km": "2-Deoxy-6-phospho-D-gluconate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Phosphoglycerate kinase": {
+        "35796": {
+            "RateLaw": "Vmax*S/(Km+S)",
+            "initial_concentrations_M": {
+                "S": 0.00101
+            },
+            "metadata": {
+                "Buffer": "[50 mM potassium phosphate, 10 mM Acetic acid/Mes/Tris, 5 mM MgCl2, 2 mM dithiothreitol, 1 mM EDTA, 0.7 mM NAD+, 1.6-3.2 U GAPDH, 50 mM potassium phosphate, 10 mM Acetic acid/Mes/Tris, 5 mM MgCl2, 2 mM dithiothreitol, 1 mM EDTA, 0.7 mM NAD+, 1.6-3.2 U GAPDH]",
+                "Enzyme Variant": "wildtype His-tagged",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Entamoeba histolytica",
+                "Pathway": NaN,
+                "Product": "GTP;3-Phospho-D-glycerate",
+                "Publication": "Saavedra E, Encalada R, Pineda E, Jasso-Ch\u00e1vez R, Moreno-S\u00e1nchez R: Glycolysis in Entamoeba histolytica, FEBS J 2005 (272) , 1767-1783",
+                "Temperature": "37.0",
+                "annotations": {
+                    "ECNumber": "2.7.2.3",
+                    "KeggReactionID": "R01517",
+                    "PubMedID": 15794763.0,
+                    "SabioReactionID": 9393
+                },
+                "pH": "6.0",
+                "reaction_string": "GTP C10H12N5O14P3 + 3-Phospho-D-glycerate <-> GDP C10H12N5O11P2 + 3-Phospho-D-glyceroyl phosphate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "26",
+                    "end val.": "-",
+                    "species": "GDP",
+                    "start val.": "40.0",
+                    "type": "Km",
+                    "unit": "\u00b5M"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "90",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "279.0",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                }
+            },
+            "substituted_rate_law": "0.0046500000000000005*S/(3.9999999999999996e-05+S)",
+            "variables_molar": {
+                "Km": "3.9999999999999996e-05",
+                "Vmax": "0.0046500000000000005"
+            },
+            "variables_name": {
+                "Km": "GDP",
+                "S": "GDP",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Phosphoglycerate mutase": {
+        "45560": {
+            "RateLaw": "Vmax*S/(Km+S)",
+            "initial_concentrations_M": {
+                "S": 0.002
+            },
+            "metadata": {
+                "Buffer": "[0.1 mM Tris-HCl, 5 mM MgSO4,1 mM ADP, 1 mM phosphoenolpyruvate, 0.3 mM NADH, glycerate kinase, 0.5 U lactate dehydrogenase, 0.4 U pyruvate kinase, 0.1 mM Tris-HCl, 5 mM MgSO4,1 mM ADP, 1 mM phosphoenolpyruvate, 0.3 mM NADH, glycerate kinase, 0.5 U lactate dehydrogenase, 0.4 U pyruvate kinase]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Archaeoglobus fulgidus",
+                "Pathway": "Glycine, Serine and Threonine metabolism",
+                "Product": "3-Phospho-D-glycerate",
+                "Publication": "Johnsen U, Sch\u00f6nheit P: Characterization of cofactor-dependent and cofactor-independent phosphoglycerate mutases from Archaea, Extremophiles 2007 (11) , 647-57",
+                "Temperature": "50.0",
+                "annotations": {
+                    "ECNumber": "5.4.2.12",
+                    "KeggReactionID": "R01518",
+                    "PubMedID": 17576516.0,
+                    "SabioReactionID": 7641
+                },
+                "pH": "7.0",
+                "reaction_string": "3-Phospho-D-glycerate <-> "
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "0.01",
+                    "end val.": "-",
+                    "species": "2-Phospho-D-glycerate",
+                    "start val.": "0.2",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "0.01",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "0.8",
+                    "type": "Vmax",
+                    "unit": "U/mg"
+                }
+            },
+            "substituted_rate_law": "800.0*S/(0.0002+S)",
+            "variables_molar": {
+                "Km": "0.0002",
+                "Vmax": "800.0"
+            },
+            "variables_name": {
+                "Km": "2-Phospho-D-glycerate",
+                "S": "2-Phospho-D-glycerate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Phosphotransacetylase": {
+        "73183": {
+            "RateLaw": "Vmax*S/(Km+S)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[50 mM Tris-HCl, 20 mM KCl, 0.1 mM 5',5-Dithiobis(2-nitrobenzoic acid)]",
+                "Enzyme Variant": "mutant Pta-F3 (last 470 amino acids), N-terminal His-tag",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Escherichia coli",
+                "Pathway": "Carbon metabolism",
+                "Product": "Acetyl phosphate;Coenzyme A",
+                "Publication": "Campos-Bermudez VA, Bologna FP, Andreo CS, Drincovich MF: Functional dissection of Escherichia coli phosphotransacetylase structural domains and analysis of key compounds involved in activity regulation, FEBS J 2010 (277) , 1957-66",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "2.3.1.8",
+                    "KeggReactionID": "R00230",
+                    "PubMedID": 20236319.0,
+                    "SabioReactionID": 72
+                },
+                "pH": "-",
+                "reaction_string": "Acetyl-CoA + Phosphate <-> Coenzyme A + Acetyl phosphate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "0.3",
+                    "end val.": "-",
+                    "species": "Phosphate",
+                    "start val.": "3.0",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "0.2",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "0.51",
+                    "type": "Vmax",
+                    "unit": "U/mg"
+                }
+            },
+            "substituted_rate_law": "510.0*S/(0.003+S)",
+            "variables_molar": {
+                "Km": "0.003",
+                "Vmax": "510.0"
+            },
+            "variables_name": {
+                "Km": "Phosphate",
+                "S": "Phosphate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Pyruvate dehydrogenase": {
+        "13273": {
+            "RateLaw": "(Vmax*A)/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.004
+            },
+            "metadata": {
+                "Buffer": "[ 50 mM Tris/HCl, 10 mM acetylphosphate, 0.13 mM CoA, 2 U phosphotransacetylase,  50 mM Tris/HCl, 10 mM acetylphosphate, 0.13 mM CoA, 2 U phosphotransacetylase]",
+                "Enzyme Variant": "wildtype E2",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Enterococcus faecalis",
+                "Pathway": "Glycolysis/Gluconeogenesis",
+                "Product": "Coenzyme A;S-Acetyldihydrolipoamide",
+                "Publication": "Snoep JL, Westphal AH, Benen JA, Teixeira de Mattos MJ, Neijssel OM, de Kok A: Isolation and characterisation of the pyruvate dehydrogenase complex of anaerobically grown Enterococcus faecalis NCTC 775, Eur J Biochem 1992 (203) , 245-50",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "2.3.1.12",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 1730230.0,
+                    "SabioReactionID": 59
+                },
+                "pH": "7.5",
+                "reaction_string": "Dihydrolipoamide C8H17NOS2 + Acetyl-CoA <-> Coenzyme A + S-Acetyldihydrolipoamide"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "Dihydrolipoamide",
+                    "start val.": "5.0",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "51.0",
+                    "type": "Vmax",
+                    "unit": "U/mg"
+                }
+            },
+            "substituted_rate_law": "(51000.0*A)/(0.005+A)",
+            "variables_molar": {
+                "Km": "0.005",
+                "Vmax": "51000.0"
+            },
+            "variables_name": {
+                "A": "Dihydrolipoamide",
+                "Km": "Dihydrolipoamide",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Pyruvate kinase": {
+        "14739": {
+            "RateLaw": "(Vmax*A)/(Km+A)",
+            "initial_concentrations_M": {},
+            "metadata": {
+                "Buffer": "[ 50 mM Tris-HCl, 80 mM KCl, 6 mM MgCl2, 0.05 mM NADH, 3 U/ml lactate dehydrogenase,  50 mM Tris-HCl, 80 mM KCl, 6 mM MgCl2, 0.05 mM NADH, 3 U/ml lactate dehydrogenase]",
+                "Enzyme Variant": "wildtype isoenzyme M1",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Oryctolagus cuniculus",
+                "Pathway": "Pyruvate metabolism",
+                "Product": "8-Bromoadenosine 5'-triphosphate;Pyruvate",
+                "Publication": "B\u00e2rzu O, Abrudan I, Proinov I, Kiss L, Ty NG, Jebeleanu G, Goia I, Kezdi M, Mantsch HH: Nucleotide specificity of pyruvate kinase and phosphoenolpyruvate carboxykinase, Biochem Biophys Acta 1976 (452) , 406-12",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "2.7.1.40",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 1009117.0,
+                    "SabioReactionID": 9725
+                },
+                "pH": "7.4",
+                "reaction_string": "Phosphoenolpyruvate <-> Pyruvate"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "8-Bromoadenosine 5'-diphosphate",
+                    "start val.": "1.18",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "-",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "12.5",
+                    "type": "Vmax",
+                    "unit": "\u00b5mol/(min*mg)"
+                }
+            },
+            "substituted_rate_law": "(0.0002083333333333333*A)/(0.00118+A)",
+            "variables_molar": {
+                "Km": "0.00118",
+                "Vmax": "0.0002083333333333333"
+            },
+            "variables_name": {
+                "A": "8-Bromoadenosine 5'-diphosphate",
+                "Km": "8-Bromoadenosine 5'-diphosphate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Ribose-5-phosphate isomerase": {
+        "63848": {
+            "RateLaw": "(E*kcat)*S/(Km+S)",
+            "initial_concentrations_M": {
+                "E": 3.16e-07,
+                "S": 0.005
+            },
+            "metadata": {
+                "Buffer": "[50 mM Tris-HCl, 5 mM MESNA, 50 mM Tris-HCl, 5 mM MESNA]",
+                "Enzyme Variant": "wildtype MtRpiB N-terminal His-tag",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Mycobacterium tuberculosis",
+                "Pathway": NaN,
+                "Product": "D-Psicose 6-phosphate",
+                "Publication": "Roos AK, Mariano S, Kowalinski E, Salmon L, Mowbray SL: D-ribose-5-phosphate isomerase B from Escherichia coli is also a functional D-allose-6-phosphate isomerase, while the Mycobacterium tuberculosis enzyme is not, J Mol Biol 2008 (382) , 667-79",
+                "Temperature": "37.0",
+                "annotations": {
+                    "ECNumber": "5.3.1.6",
+                    "KeggReactionID": NaN,
+                    "PubMedID": 18640127.0,
+                    "SabioReactionID": 15050
+                },
+                "pH": "7.5",
+                "reaction_string": "D-Allose 6-phosphate <-> "
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "2",
+                    "end val.": "-",
+                    "species": "D-Allose 6-phosphate",
+                    "start val.": "16.0",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "about 0.22 1/s",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "0.22",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "(E*0.22)*S/(0.016+S)",
+            "variables_molar": {
+                "Km": "0.016",
+                "kcat": "0.22"
+            },
+            "variables_name": {
+                "E": "Enzyme",
+                "Km": "D-Allose 6-phosphate",
+                "S": "D-Allose 6-phosphate",
+                "kcat": "-"
+            }
+        }
+    },
+    "Ribulose 5-phosphate 3-epimerase": {},
+    "Succinyl-CoA synthetase (ADP-forming)": {
+        "30257": {
+            "RateLaw": "Vmax*A/(Km+A)",
+            "initial_concentrations_M": {
+                "A": 0.005125
+            },
+            "metadata": {
+                "Buffer": "[ 0.1 M Tris acetate, 7.1 mM Magnesium acetate, 10 mM KCl, 1 mM Glucose, 0.1 mM NADP+, 5 U/ml hexokinase, 5 U/ml glucose-6-phosphate dehydrogenase,  0.1 M Tris acetate, 7.1 mM Magnesium acetate, 10 mM KCl, 1 mM Glucose, 0.1 mM NADP+, 5 U/ml hexokinase, 5 U/ml glucose-6-phosphate dehydrogenase]",
+                "Enzyme Variant": "wildtype isoform A-SCS",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Columba livia",
+                "Pathway": "Citrate cycle (TCA cycle)",
+                "Product": "ATP;Coenzyme A;Succinate",
+                "Publication": "Johnson JD, Muhonen WW, Lambeth DO: Characterization of the ATP- and GTP-specific succinyl-CoA synthetases in pigeon. The enzymes incorporate the same alpha-subunit, J Biol Chem 1998 (273) , 27573-9",
+                "Temperature": "30.0",
+                "annotations": {
+                    "ECNumber": "6.2.1.5",
+                    "KeggReactionID": "R00405",
+                    "PubMedID": 9765290.0,
+                    "SabioReactionID": 260
+                },
+                "pH": "8.0",
+                "reaction_string": "ATP C10H12N5O13P3 + Coenzyme A + Succinate <-> ADP C10H12N5O10P2 + Phosphate + Succinyl-CoA"
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "apparent",
+                    "deviat.": "0.14",
+                    "end val.": "-",
+                    "species": "Phosphate",
+                    "start val.": "0.72",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "Vmax": {
+                    "comment": "purified enzyme",
+                    "deviat.": "-",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "6.61",
+                    "type": "Vmax",
+                    "unit": "U/mg"
+                }
+            },
+            "substituted_rate_law": "6610.0*A/(0.0007199999999999999+A)",
+            "variables_molar": {
+                "Km": "0.0007199999999999999",
+                "Vmax": "6610.0"
+            },
+            "variables_name": {
+                "A": "Phosphate",
+                "Km": "Phosphate",
+                "Vmax": "-"
+            }
+        }
+    },
+    "Transketolase": {},
+    "Triose-phosphate isomerase": {
+        "60968": {
+            "RateLaw": "kcat*E*S/(Km+S)",
+            "initial_concentrations_M": {
+                "E": 2.7000000000000005e-10,
+                "S": 0.0015500000000000002
+            },
+            "metadata": {
+                "Buffer": "[100 mM TEA, 10 mM EDTA, 1 mM DTT, 20 \u00b5g/ml alpha-Glycerolphosphate dehydrogenase, 0.2 mM NADH, 100 mM TEA, 10 mM EDTA, 1 mM DTT, 20 \u00b5g/ml alpha-Glycerolphosphate dehydrogenase, 0.2 mM NADH]",
+                "Enzyme Variant": "wildtype",
+                "KineticMechanismType": "Michaelis-Menten",
+                "Organism": "Clostridium perfringens",
+                "Pathway": "Fructose and Mannose metabolism",
+                "Product": "Glycerone phosphate",
+                "Publication": "Romero-Romero S, Costas M, Rodr\u00edguez-Romero A, Alejandro Fern\u00e1ndez-Velasco D: Reversibility and two state behaviour in the thermal unfolding of oligomeric TIM barrel proteins, Phys Chem Chem Phys 2015 (17) , 20699-714",
+                "Temperature": "25.0",
+                "annotations": {
+                    "ECNumber": "5.3.1.1",
+                    "KeggReactionID": "R01015",
+                    "PubMedID": 26206330.0,
+                    "SabioReactionID": 4
+                },
+                "pH": "8.0",
+                "reaction_string": " <-> "
+            },
+            "substituted_parameters": {
+                "Km": {
+                    "comment": "-",
+                    "deviat.": "0.04",
+                    "end val.": "-",
+                    "species": "D-Glyceraldehyde 3-phosphate",
+                    "start val.": "0.72",
+                    "type": "Km",
+                    "unit": "mM"
+                },
+                "kcat": {
+                    "comment": "-",
+                    "deviat.": "127",
+                    "end val.": "-",
+                    "species": "-",
+                    "start val.": "6348.0",
+                    "type": "kcat",
+                    "unit": "s^(-1)"
+                }
+            },
+            "substituted_rate_law": "6348.0*E*S/(0.0007199999999999999+S)",
+            "variables_molar": {
+                "Km": "0.0007199999999999999",
+                "kcat": "6348.0"
+            },
+            "variables_name": {
+                "E": "Enzyme",
+                "Km": "D-Glyceraldehyde 3-phosphate",
+                "S": "D-Glyceraldehyde 3-phosphate",
+                "kcat": "-"
+            }
+        }
+    }
+}

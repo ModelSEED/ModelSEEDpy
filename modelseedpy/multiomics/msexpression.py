@@ -55,10 +55,11 @@ class MSCondition:
         
 class MSExpressionFeature:
 
-    def __init__(self, feature):
+    def __init__(self,feature,parent):
         self.id = feature.id
         self.feature = feature
         self.values = {}
+        self.parent = parent
         
     def add_value(self,condition,value):
         if condition in self.values:
@@ -72,6 +73,11 @@ class MSExpressionFeature:
         self.values[condition] = value
         
     def get_value(self,condition,normalization = None):
+        if isinstance(condition,str):
+            if condition not in self.parent.conditions:
+                logger.warning("Condition "+condition+" not found in expression object!")
+                return None
+            condition = self.parent.conditions.get_by_id(condition)
         if condition not in self.values:
             logger.info("Condition "+condition.id+" has no value in "+self.feature.id)
             return None
@@ -133,11 +139,11 @@ class MSExpression:
             if id in self.object.reactions:
                 feature = self.object.reactions.get_by_id(id)
         if feature == None:
-            logger.warning("Gene referred by expression "+id+" not found in genome object!")
+            logger.warning("Feature referred by expression "+id+" not found in genome object!")
             return None
         if feature.id in self.features:
             return self.features.get_by_id(feature.id)
-        protfeature = MSExpressionFeature(feature)
+        protfeature = MSExpressionFeature(feature,self)
         self.features.append(protfeature)
         return protfeature
             
@@ -147,11 +153,6 @@ class MSExpression:
                 logger.warning("Feature "+feature+" not found in expression object!")
                 return None
             feature = self.features.get_by_id(feature)
-        if isinstance(condition,str):
-            if condition not in self.conditions:
-                logger.warning("Condition "+condition+" not found in expression object!")
-                return None
-            condition = self.conditions.get_by_id(condition)
         return feature.get_value(condition,normalization)
             
     def build_reaction_expression(self,model,default):
