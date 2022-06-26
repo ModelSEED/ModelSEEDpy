@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.fbahelper import FBAHelper
+from modelseedpy.core.fbahelper import FBAHelper   # !!! imported but not used
 
 logger = logging.getLogger(__name__)
 
