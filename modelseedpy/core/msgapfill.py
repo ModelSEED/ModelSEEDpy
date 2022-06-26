@@ -1,6 +1,7 @@
 import logging
 import itertools
 import cobra
+import re
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
@@ -36,14 +37,16 @@ class MSGapfill:
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
-        self.solutions = {}
+        self.last_solution = None
         
-    def run_gapfilling(self, media=None, target="bio1", minimum_obj=0.01, binary_check=False):
-        self.model.objective = self.model.problem.Objective(
-            self.model.reactions.get_by_id(target).flux_expression, 
-            direction='max'
-        )
+    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False):
+        if target != None:
+            self.model.objective = self.model.problem.Objective(
+                self.model.reactions.get_by_id(target).flux_expression, 
+                direction='max'
+            )
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        self.gfmodel.solver = 'optlang-cplex'
         pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
         pkgmgr.getpkg("GapfillingPkg").build_package({
             "auto_sink": self.auto_sink,
@@ -72,17 +75,15 @@ class MSGapfill:
             logger.warning("No solution found for %s", media)
             return None
 
-        if media not in self.solutions:
-            self.solutions[media] = {}
-        self.solutions[media][target] = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
+        self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         if self.test_conditions:
-            self.solutions[media][target] = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions,self.solutions[media][target],self.test_condition_iteration_limit)
-            if self.solutions[media][target] is None:
+            self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions,self.last_solution,self.test_condition_iteration_limit)
+            if self.last_solution is None:
                 logger.warning("no solution could be found that satisfied all specified test conditions in specified iterations!")
                 return None
         if binary_check:
             return pkgmgr.getpkg("GapfillingPkg").binary_check_gapfilling_solution()
-        return self.solutions[media][target] 
+        return self.last_solution
     
     def integrate_gapfill_solution(self, solution):
         for rxn_id in solution["reversed"]:
@@ -95,6 +96,14 @@ class MSGapfill:
             rxn = self.gfmodel.reactions.get_by_id(rxn_id)
             rxn = rxn.copy()
             self.model.add_reactions([rxn])
+            coreid = re.sub(r'_[a-z]\d+$', '', rxn_id)
+            if coreid in self.reaction_scores:
+                bestgene = None
+                for gene in self.reaction_scores[coreid]:
+                    if bestgene == None or self.reaction_scores[coreid][gene] > self.reaction_scores[coreid][bestgene]:
+                        bestgene = gene
+                rxn = self.model.reactions.get_by_id(rxn_id)
+                rxn.gene_reaction_rule = bestgene
             if solution["new"][rxn_id] == ">":
                 rxn.upper_bound = 100
                 rxn.lower_bound = 0 

@@ -62,6 +62,10 @@ class FBAHelper:
         for condition in condition_list:
             pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
             model.objective = condition["objective"]
+            if condition["is_max_threshold"]:
+                model.objective.direction = "max"
+            else:
+                model.objective.direction = "min"
             objective = model.slim_optimize()
             if model.solver.status != 'optimal':
                 with open("debug.lp", 'w') as out:
@@ -303,4 +307,13 @@ class FBAHelper:
         if media == None:
             return "Complete"
         return media.id
-        
+    
+    @staticmethod
+    def validate_dictionary(dictionary,required_keys,optional_keys):
+        for item in required_keys:
+            if item not in dictionary:
+                raise ValueError('Required key '+item+' is missing!')
+        for key in optional_keys:
+            if key not in dictionary:
+                dictionary[key] = defaults[key]
+        return dictionary

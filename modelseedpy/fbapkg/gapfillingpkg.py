@@ -4,10 +4,13 @@ from __future__ import absolute_import
 
 import logging
 import re
+import json
 from optlang.symbolics import Zero, add
 from cobra import Model, Reaction, Metabolite
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
+
+logger = logging.getLogger(__name__)
 
 default_blacklist = ["rxn12985", "rxn00238", "rxn07058", "rxn05305", "rxn00154", "rxn09037", "rxn10643",
                      "rxn11317", "rxn05254", "rxn05257", "rxn05258", "rxn05259", "rxn05264", "rxn05268",
@@ -155,11 +158,11 @@ class GapfillingPkg(BaseFBAPkg):
                 for gene in self.parameters["reaction_scores"][rxnid]:
                     if highest_score < self.parameters["reaction_scores"][rxnid][gene]:
                         highest_score = self.parameters["reaction_scores"][rxnid][gene]
-                factor = 1 - 0.9 * highest_score
+                factor = 0.1
                 if "reverse" in self.gapfilling_penalties[reaction]:
-                    penalties[reaction.id]["reverse"] = factor * penalties[reaction.id]["reverse"]
+                    self.gapfilling_penalties[reaction]["reverse"] = factor * self.gapfilling_penalties[reaction]["reverse"]
                 if "forward" in self.gapfilling_penalties[reaction]:
-                    penalties[reaction.id]["forward"] = factor * penalties[reaction.id]["forward"]
+                    self.gapfilling_penalties[reaction]["forward"] = factor * self.gapfilling_penalties[reaction]["forward"]
 
         self.model.solver.update()
         if self.parameters["set_objective"] == 1:
@@ -480,22 +483,47 @@ class GapfillingPkg(BaseFBAPkg):
         with self.model:
             #Setting all gapfilled reactions not in the solution to zero
             self.knockout_gf_reactions_outside_solution(solution)
-            filtered_list = FBAHelper.reaction_expansion_test(self.model,reaction_list,condition_list)
+            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+            filtered_list = FBAHelper.reaction_expansion_test(self.model,reaction_list,condition_list,self.pkgmgr)
         if len(filtered_list) > 0:
             if max_iterations > 0:
+                print("Gapfilling test failed "+str(11-max_iterations))
                 #Forcing filtered reactions to zero
                 for item in filtered_list:
                     if item[1] == ">":
-                        self.model.reactions.get_by_id(item[0]).upper_bound = 0
+                        self.model.reactions.get_by_id(item[0].id).upper_bound = 0
                     else:
-                        self.model.reactions.get_by_id(item[0]).lower_bound = 0
-                #Eliminating current solution
-                self.pkgmgr.getpkg("ReactionUsePkg").build_exclusion_constraint()
+                        self.model.reactions.get_by_id(item[0].id).lower_bound = 0
+                #Restoring lower bound on biomass constraint
+                self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = self.parameters["minimum_obj"]
                 #Reoptimizing
                 self.model.optimize()
                 return self.run_test_conditions(condition_list,None,max_iterations-1)
             return None
         return solution
+    
+    def filter_database_based_on_tests(self,test_conditions):
+        filetered_list = []
+        with self.model:
+            rxnlist = []
+            for reaction in self.model.reactions:
+                if reaction.id in self.gapfilling_penalties:
+                    if "reverse" in self.gapfilling_penalties[reaction.id]:
+                        reaction.lower_bound = 0
+                        rxnlist.append([reaction,"<"])
+                    if "forward" in self.gapfilling_penalties[reaction.id]:
+                        reaction.upper_bound = 0
+                        rxnlist.append([reaction,">"])
+                    reaction.update_variable_bounds()
+            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+            filtered_list = FBAHelper.reaction_expansion_test(self.model,rxnlist,test_conditions,self.pkgmgr)
+        #Now constraining filtered reactions to zero
+        for item in filtered_list:
+            print("Filtering:",item[0].id,item[1])
+            if item[1] == ">":
+                self.model.reactions.get_by_id(item[0].id).upper_bound = 0
+            else:
+                self.model.reactions.get_by_id(item[0].id).lower_bound = 0
     
     def compute_gapfilled_solution(self, flux_values=None):
         if flux_values is None:

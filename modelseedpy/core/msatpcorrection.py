@@ -41,7 +41,6 @@ class MSATPCorrection:
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
-        
         self.media_gapfill_stats = {}
         self.gapfilling_tests = []
         self.selected_media = []
@@ -112,6 +111,7 @@ class MSATPCorrection:
         self.msgapfill.default_gapfill_templates = [self.coretemplate]
         if self.lp_filename:
             self.msgapfill.lp_filename = self.lp_filename
+        output = {}
         with self.model:
             self.model.objective = self.atp_hydrolysis.id
             #self.model.objective = self.model.problem.Objective(Zero,direction="max")
@@ -125,12 +125,14 @@ class MSATPCorrection:
                 solution = self.model.optimize()
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
+                output[media.id] = solution.objective_value
                 if solution.objective_value == 0 or solution.status != 'optimal':
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
                 elif solution.objective_value > 0 or solution.status == 'optimal':
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
-    
+        return output
+
     def determine_growth_media(self):
         """
         Decides which of the test media to use as growth conditions for this model

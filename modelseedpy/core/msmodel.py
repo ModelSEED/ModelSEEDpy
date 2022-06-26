@@ -75,7 +75,7 @@ def get_cmp_token(compartments):
     """
     if len(compartments) == 0:
         logger.warning('compartments empty assume z')
-        return 'z'
+        return 'c'
     if len(compartments) == 1:
         return list(compartments)[0]
     if len(compartments) == 2:
