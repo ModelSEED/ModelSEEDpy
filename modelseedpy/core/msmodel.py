@@ -67,6 +67,11 @@ def split_compartment_from_index(cmp_str: str):
 
 
 def get_cmp_token(compartments):
+    """
+    
+    :param compartments:
+    :return:
+    """
     if len(compartments) == 0:
         logger.warning('The compartments parameter is empty. The "c" parameter is assumed.')
         return 'c'
