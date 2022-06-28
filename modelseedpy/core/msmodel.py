@@ -86,7 +86,7 @@ def get_cmp_token(compartments):
     return None
 
 
-def get_set_set(expr_str):
+def get_set_set(expr_str):   # !!! this currently returns dictionaries, not sets??
     if len(expr_str.strip()) == 0:
         return {}
     expr_str = expr_str.replace(' or ', ' | ')
