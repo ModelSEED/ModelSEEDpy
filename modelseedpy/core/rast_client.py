@@ -1,7 +1,6 @@
 from modelseedpy.core.rpcclient import RPCClient
-from modelseedpy.core.msgenome import MSFeature
 import re
-from modelseedpy.core.msgenome import MSGenome, read_fasta, normalize_role #move this to this lib
+from modelseedpy.core.msgenome import MSGenome, normalize_role #move this to this lib
 
 ### delete this after ####
 def aux_rast_result(res, g):
