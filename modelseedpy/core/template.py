@@ -1,6 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import re  # !!! import never used
+import copy  # !!! import never used
 from cobra.core.dictlist import DictList
 from cobra.core.model import Metabolite, Reaction
 
@@ -9,9 +11,9 @@ class Template():
         self.compounds, self.compcompounds, self.reactions = DictList(), DictList(), DictList()
         
     def convert_template_compound(self,cpdid,index):
+        comp_compound = self.compcompounds.get_by_id(cpdid)
         base_id = cpdid.split("_")[0]
-        comp_compound = self.compcompounds.get_by_id(base_id)
-        base_compound = self.compounds.get_by_id(cpdid.split("_")[0])
+        base_compound = self.compounds.get_by_id(base_id)
         compartment = comp_compound.templatecompartment_ref.split("/").pop() + str(index)
         new_id = base_compound.id + str(index)
         met = Metabolite(new_id, formula=base_compound.formula, name=base_compound.name, 
