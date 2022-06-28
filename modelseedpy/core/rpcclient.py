@@ -39,13 +39,16 @@ class RPCClient:
             headers['AUTHORIZATION'] = token
         elif self.token:
             headers['AUTHORIZATION'] = self.token
-        arg_hash = {
-            'method': method, 'params': params, 'context': {},
-            'version': self.version, 'id': str(_random.random())[2:]
+        arg_hash = {'method': method,
+            'params': params,
+            'version': self.version,
+            'id': str(_random.random())[2:],
+            'context': {}
            }
         body = _json.dumps(arg_hash, cls=_JSONObjectEncoder)
-        ret = _requests.post(
-            self.url, data=body, headers=headers,timeout=self.timeout, verify=not self.trust_all_ssl_certificates)
+        ret = _requests.post(self.url, data=body, headers=headers,
+             timeout=self.timeout,
+             verify=not self.trust_all_ssl_certificates)
         ret.encoding = 'utf-8'
         if ret.status_code == 500:
             if ret.headers.get('content-type') == 'application/json':

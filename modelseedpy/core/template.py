@@ -9,14 +9,15 @@ class Template():
         self.compounds, self.compcompounds, self.reactions = DictList(), DictList(), DictList()
         
     def convert_template_compound(self,cpdid,index):
-        comp_compound = self.compcompounds.get_by_id(cpdid)
+        base_id = cpdid.split("_")[0]
+        comp_compound = self.compcompounds.get_by_id(base_id)
         base_compound = self.compounds.get_by_id(cpdid.split("_")[0])
         compartment = comp_compound.templatecompartment_ref.split("/").pop() + str(index)
         new_id = base_compound.id + str(index)
         met = Metabolite(new_id, formula=base_compound.formula, name=base_compound.name, 
             charge=comp_compound.charge, compartment=compartment)
         met.annotation["sbo"] = "SBO:0000247" #simple chemical - Simple, non-repetitive chemical entity.
-        met.annotation["seed.compound"] = cpdid.split("_")[0]
+        met.annotation["seed.compound"] = base_id
         return met
     
     def convert_template_reaction(self,model,rxnid,index,for_gapfilling=True):   

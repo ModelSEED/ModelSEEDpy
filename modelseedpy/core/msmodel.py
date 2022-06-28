@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 def get_reaction_constraints_from_direction(direction: str) -> (float, float):
     """
     Converts direction symbols ( > or <) to lower and upper bound, any other value is returned as reversible bounds
+    :param direction:
+    :return:
     """
     if direction == '>':
         return 0, 1000
@@ -18,16 +20,15 @@ def get_reaction_constraints_from_direction(direction: str) -> (float, float):
         return -1000, 1000
 
 
-def get_direction_from_constraints(lower_bound, upper_bound):
-    if lower_bound < 0 < upper_bound:
+def get_direction_from_constraints(lower, upper):
+    if lower < 0 < upper:
         return '='
-    elif upper_bound > 0:
+    elif upper > 0:
         return '>'
-    elif lower_bound < 0:
+    elif lower < 0:
         return '<'
-    else:
-        logger.error(f'The [{lower_bound}, {upper_bound}] bounds are not amenable with a direction string.')
-        return '?'
+    logger.error(f'The [{lower}, {upper}] bounds are not amenable with a direction string.')
+    return '?'
 
 def get_gpr_string(gpr):
     ors = []
@@ -87,14 +88,14 @@ def get_cmp_token(compartments):
 
 def get_set_set(expr_str):
     if len(expr_str.strip()) == 0:
-        return set()
+        return {}
     expr_str = expr_str.replace(' or ', ' | ')
     expr_str = expr_str.replace(' and ', ' & ')
     dnf = expr(expr_str).to_dnf()
     if len(dnf.inputs) == 1 or dnf.NAME == 'And':
         return {frozenset({str(x) for x in dnf.inputs})}
     else:
-        return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}  
+        return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
 
 
 class MSModel(Model):
