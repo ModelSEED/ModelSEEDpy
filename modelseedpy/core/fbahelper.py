@@ -301,4 +301,4 @@ class FBAHelper:
     @staticmethod
     def parse_df(df):
         from numpy import array
-        return array(dtype=object, object=[df.index, df.columns, df.to_numpy()])
+        return array(dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()])
