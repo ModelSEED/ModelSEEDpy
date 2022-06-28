@@ -68,7 +68,7 @@ def split_compartment_from_index(cmp_str: str):
 
 def get_cmp_token(compartments):
     """
-    
+
     :param compartments:
     :return:
     """
