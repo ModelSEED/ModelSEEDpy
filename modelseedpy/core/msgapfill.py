@@ -13,21 +13,20 @@ class MSGapfill:
 
     def __init__(self, model, default_gapfill_templates=[], default_gapfill_models=[],
                  test_conditions=[], reaction_scores={}, blacklist=[]):
+        self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]  # the cpd11416 compound is filtered during model extension with templates
+        self.gfmodel = self.lp_filename = self.last_solution = None
+        self.model = model
+        self.model_penalty = 1
+        self.default_gapfill_models = default_gapfill_models
+        self.default_gapfill_templates = default_gapfill_templates
         self.gapfill_templates_by_index, self.gapfill_models_by_index = {}, {}
-        self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]
-        
         self.gapfill_all_indecies_with_default_templates = True
         self.gapfill_all_indecies_with_default_models = True
-        self.gfmodel = self.lp_filename = self.last_solution = None
-        
-        self.default_gapfill_templates = default_gapfill_templates
         self.blacklist = list(set(default_blacklist+blacklist))
-        self.default_gapfill_models = default_gapfill_models
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
-        self.model = model
-        self.model_penalty = 1
+        
         
     def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, solver = 'optland-cplex'):
         if target:

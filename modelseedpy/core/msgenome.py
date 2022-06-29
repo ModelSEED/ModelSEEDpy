@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import re 
+import re
 import copy  # !!! the import is never used
 from cobra.core.dictlist import DictList
 
