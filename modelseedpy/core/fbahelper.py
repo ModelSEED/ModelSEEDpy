@@ -3,8 +3,10 @@ from __future__ import absolute_import
 import logging
 from chemicals import periodic_table
 import re
-from cobra.core import Reaction
+from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene, Metabolite, and Model are never used
+from cobra.util import solver as sutil  # !!! sutil is never used
 from modelseedpy.biochem import from_local
+from scipy.odr.odrpack import Output  # !!! Output is never used
 from chemw import ChemMW
 from warnings import warn
 #from Carbon.Aliases import false
@@ -19,17 +21,27 @@ class FBAHelper:
         drain_reactions = []
         for metabolite in model.metabolites:
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
-            if msid in auto_sink and metabolite.compartment == "c0":
-                met_id = metabolite.id
-                if all([rxn not in model.reactions for rxn in [f"EX_{met_id}", f"DM_{met_id}", f"SK_{met_id}"]]):
-                    drain_reaction = FBAHelper.add_drain_from_metabolite_id(model,metabolite.id,0,100,"DM_")
-                    if not drain_reaction:
-                        logger.info("Adding "+met_id+" DM")
-                        drain_reactions.append(drain_reaction)
+            if msid in auto_sink:
+                if metabolite.compartment == "c0":
+                    met_id = metabolite.id
+                    if all([rxn not in model.reactions for rxn in [f"EX_{met_id}", f"DM_{met_id}", f"SK_{met_id}"]]):
+                        drain_reaction = FBAHelper.add_drain_from_metabolite_id(model,metabolite.id,0,100,"DM_")
+                        if not drain_reaction:
+                            logger.info("Adding "+met_id+" DM")
+                            drain_reactions.append(drain_reaction)
         model.add_reactions(drain_reactions)
         
     @staticmethod
     def add_drain_from_metabolite_id(model, cpd_id, uptake, excretion, prefix='EX_', prefix_name='Exchange for '):
+        """
+        :param model:
+        :param cpd_id:
+        :param uptake:
+        :param excretion:
+        :param prefix:
+        :param prefix_name:
+        :return:
+        """
         if cpd_id in model.metabolites:
             cobra_metabolite = model.metabolites.get_by_id(cpd_id)
             drain_reaction = Reaction(
@@ -68,7 +80,7 @@ class FBAHelper:
         return True
         
     @staticmethod
-    def reaction_expansion_test(model, reaction_list, condition_list, pkgmgr):  
+    def reaction_expansion_test(model, reaction_list, condition_list, pkgmgr):
         # First knockout all reactions in the input list and save original bounds
         original_bound = []
         for item in reaction_list:
@@ -171,14 +183,14 @@ class FBAHelper:
         # TODO: check for SBO
         return reaction.id[0:3] == "bio"
     
-    # @staticmethod
-    # def exchange_hash(model):  #!!! What is the point of this function?
-    #     # exchange_hash = {}
-    #     for reaction in model.reactions:
-    #         if len(reaction.metabolites) == 1:
-    #             for metabolite in reaction.metabolites:
-    #                 (base,comp,index) = FBAHelper.parse_id(metabolite)
-    #                 #exchange_hash[base][comp]
+    @staticmethod
+    def exchange_hash(model):  #!!! This function is pointless?
+        # exchange_hash = {}
+        for reaction in model.reactions:
+            if len(reaction.metabolites) == 1:
+                for metabolite in reaction.metabolites:
+                    (base,comp,index) = FBAHelper.parse_id(metabolite)
+                    #exchange_hash[base][comp]
 
     @staticmethod
     def find_reaction(model,stoichiometry):
@@ -252,7 +264,7 @@ class FBAHelper:
                     if cpd.compartment == content[1]:
                         stoichiometry[cpd] = content[0]
         output = FBAHelper.find_reaction(model,stoichiometry)
-        if output and output[1] == 1: 
+        if output and output[1] == 1:  # !!! the second element of the output is 1/0 and not a direction string
             return {"reaction":output[0],"direction":">","new":False}
         cobra_reaction = Reaction("rxn00062_"+compartment, name="ATP hydrolysis", lower_bound=0, upper_bound=1000)
         cobra_reaction.annotation.update({"sbo":"SBO:0000176", "seed.reaction":"rxn00062"}) #biochemical reaction
@@ -274,13 +286,13 @@ class FBAHelper:
         return media.id
     
     @staticmethod
-    def validate_dictionary(dictionary,required_keys, defaults = {}):
+    def validate_dictionary(dictionary,required_keys, optional_keys={}):
         for item in required_keys:
             if item not in dictionary:
                 raise ValueError('Required key '+item+' is missing!')
-        for key in defaults:
+        for key in optional_keys:
             if key not in dictionary:
-                dictionary[key] = defaults[key]
+                dictionary[key] = optional_keys[key]
         return dictionary
     
     @staticmethod
