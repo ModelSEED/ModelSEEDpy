@@ -185,7 +185,7 @@ class FBAHelper:
     
     @staticmethod
     def exchange_hash(model):  #!!! This function is pointless?
-        # exchange_hash = {}
+        exchange_hash = {}  # !!! this variable is never used
         for reaction in model.reactions:
             if len(reaction.metabolites) == 1:
                 for metabolite in reaction.metabolites:
@@ -237,15 +237,15 @@ class FBAHelper:
     @staticmethod
     def stoichiometry_to_string(stoichiometry):
         reactants, products = [], []
-        for met, stoich in stoichiometry.items():
-            met_id = met
+        for met in stoichiometry:
+            stoich = stoichiometry[met]
             if not isinstance(met, str):
-                if not FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067":
-                    met_id = met.id
-            if stoich < 0:
-                reactants.append(met_id)
-            else:
-                products.append(met_id)
+                met = met.id if not FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067" else None
+            if met:
+                if stoich < 0:
+                    reactants.append(met)
+                else:
+                    products.append(met)
         return ["+".join(sorted(reactants))+"="+"+".join(sorted(products)),"+".join(sorted(products))+"="+"+".join(sorted(reactants))]
     
     @staticmethod
