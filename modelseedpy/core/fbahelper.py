@@ -240,7 +240,7 @@ class FBAHelper:
         for met in stoichiometry:
             stoich = stoichiometry[met]
             if not isinstance(met, str):
-                met = met.id if not FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067" else None
+                met = None if FBAHelper.modelseed_id_from_cobra_metabolite(met) == "cpd00067" else met.id
             if met:
                 if stoich < 0:
                     reactants.append(met)
@@ -307,7 +307,6 @@ class FBAHelper:
     
     @staticmethod
     def parse_media(media):
-        # from pandas import DataFrame
         return [cpd.id for cpd in media.data['mediacompounds']]
     
     @staticmethod
