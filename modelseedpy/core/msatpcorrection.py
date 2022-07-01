@@ -54,35 +54,36 @@ class MSATPCorrection:
         self.noncore_reactions, self.other_compartments = [], []
         #Iterating through reactions and disabling
         for reaction in self.model.reactions:
-            if not any([reaction.id == self.atp_hydrolysis.id, FBAHelper.is_ex(reaction), FBAHelper.is_biomass(reaction)]):
-                msid = FBAHelper.modelseed_id_from_cobra_reaction(reaction)
-                if msid:
-                    msid += "_"+self.compartment[0:1]
-                if msid in self.coretemplate.reactions:
-                    self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
-                    logger.debug(reaction.id+" core")
-                    if reaction.lower_bound < 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).lower_bound >= 0:
-                        logger.debug(reaction.id+" core but reversible")
+            if any([reaction.id == self.atp_hydrolysis.id, FBAHelper.is_ex(reaction), FBAHelper.is_biomass(reaction)]):
+                continue
+            msid = FBAHelper.modelseed_id_from_cobra_reaction(reaction)
+            if msid:
+                msid += "_"+self.compartment[0:1]
+            if msid in self.coretemplate.reactions:
+                self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
+                logger.debug(reaction.id+" core")
+                if reaction.lower_bound < 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).lower_bound >= 0:
+                    logger.debug(reaction.id+" core but reversible")
+                    self.noncore_reactions.append([reaction, "<"])
+                    reaction.lower_bound = 0
+                if reaction.upper_bound > 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).upper_bound <= 0:
+                    logger.debug(reaction.id+" core but reversible")
+                    self.noncore_reactions.append([reaction, ">"])
+                    reaction.upper_bound = 0
+            else:
+                logger.debug(reaction.id+" noncore")
+                self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
+                if reaction.lower_bound < 0:
+                    if FBAHelper.rxn_compartment(reaction) != self.compartment:
+                        self.other_compartments.append([reaction, "<"])
+                    else:
                         self.noncore_reactions.append([reaction, "<"])
-                        reaction.lower_bound = 0
-                    if reaction.upper_bound > 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).upper_bound <= 0:
-                        logger.debug(reaction.id+" core but reversible")
+                if reaction.upper_bound > 0:
+                    if FBAHelper.rxn_compartment(reaction) != self.compartment:
+                        self.other_compartments.append([reaction, ">"])
+                    else:
                         self.noncore_reactions.append([reaction, ">"])
-                        reaction.upper_bound = 0
-                else:
-                    logger.debug(reaction.id+" noncore")
-                    self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
-                    if reaction.lower_bound < 0:
-                        if FBAHelper.rxn_compartment(reaction) != self.compartment:
-                            self.other_compartments.append([reaction, "<"])
-                        else:
-                            self.noncore_reactions.append([reaction, "<"])
-                    if reaction.upper_bound > 0:
-                        if FBAHelper.rxn_compartment(reaction) != self.compartment:
-                            self.other_compartments.append([reaction, ">"])
-                        else:
-                            self.noncore_reactions.append([reaction, ">"])
-                    reaction.lower_bound = reaction.upper_bound = 0
+                reaction.lower_bound = reaction.upper_bound = 0
 
     def evaluate_growth_media(self):
         """
