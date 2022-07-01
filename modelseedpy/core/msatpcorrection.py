@@ -1,16 +1,26 @@
 import logging
 logger = logging.getLogger(__name__)
-
+import itertools  # !!! import never used
+import cobra  # !!! import never used
+from optlang.symbolics import Zero, add  # !!! neither Zero nor Add are ever used
+from modelseedpy.core.rast_client import RastClient  # !!! import never used
+from modelseedpy.core.msgenome import normalize_role  # !!! import never used
+from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction  # !!! neither import is ever used
+from cobra.core import Gene, Metabolite, Model, Reaction  # !!! none of these imports used
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
-from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-
-
 
 class MSATPCorrection:
     def __init__(self, model, core_template, atp_medias, compartment="c0",
                  max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None):
         """
+        :param model:
+        :param core_template:
+        :param atp_medias:
+        :param atp_objective:
+        :param max_gapfilling:
+        :param gapfilling_delta:
         :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
         self.model = model
@@ -32,6 +42,10 @@ class MSATPCorrection:
         self.lp_filename = None
 
     def disable_noncore_reactions(self):
+        """
+        Disables all noncore reactions in the model
+        :return:
+        """
         #Must restore reactions before disabling to ensure bounds are not overwritten
         if len(self.noncore_reactions) > 0:
             self.restor_noncore_reactions(noncore = True,othercompartment = True)
@@ -71,13 +85,17 @@ class MSATPCorrection:
                     reaction.lower_bound = reaction.upper_bound = 0
 
     def evaluate_growth_media(self):
-        """Determines how much gap filling each input test media requires to make ATP"""
+        """
+        Determines how much gap filling each input test media requires to make ATP
+        
+        :return:
+        """
         self.disable_noncore_reactions()
         self.media_gapfill_stats = {}
         self.msgapfill.default_gapfill_templates = [self.coretemplate]
         if self.lp_filename:
             self.msgapfill.lp_filename = self.lp_filename
-        results = {}
+        output = {}
         with self.model:
             self.model.objective = self.atp_hydrolysis.id
             #self.model.objective = self.model.problem.Objective(Zero,direction="max")
@@ -91,16 +109,19 @@ class MSATPCorrection:
                 solution = self.model.optimize()
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
-                results[media.id] = solution.objective_value
+                output[media.id] = solution.objective_value
                 if solution.objective_value == 0 or solution.status != 'optimal':
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
                 elif solution.objective_value > 0 or solution.status == 'optimal':
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
-        return results
+        return output
 
     def determine_growth_media(self):
-        """Decides which of the test media to use as growth conditions for this model"""
+        """
+        Decides which of the test media to use as growth conditions for this model
+        :return:
+        """
         from math import inf 
         
         self.selected_media = []
@@ -118,30 +139,39 @@ class MSATPCorrection:
             if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
                 self.selected_media.append(media)
 
-    # def determine_growth_media2(self, max_gapfilling=None):  #!!! unused function
-    #     """Decides which of the test media to use as growth conditions for this model"""
-    #     def scoring_function(media):
-    #         return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * \
-    #                len(self.media_gapfill_stats[media]["reversed"].keys())
+    def determine_growth_media2(self, max_gapfilling=None):  #!!! unused function
+        """
+        Decides which of the test media to use as growth conditions for this model
+        :return:
+        """
+        def scoring_function(media):
+            return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * \
+                    len(self.media_gapfill_stats[media]["reversed"].keys())
 
-    #     self.selected_media = []
-    #     media_scores = {media:scoring_function(media) for media in self.media_gapfill_stats if self.media_gapfill_stats[media]}
-    #     best_score = min(media_scores.values())
-    #     if max_gapfilling is None:
-    #         max_gapfilling = best_score
-    #     for media, score in media_scores.items():
-    #         logger.debug(score, best_score, max_gapfilling)
-    #         if score <= max_gapfilling and score <= (best_score + self.gapfilling_delta):
-    #             self.selected_media.append(media)
+        self.selected_media = []
+        media_scores = {media:scoring_function(media) for media in self.media_gapfill_stats if self.media_gapfill_stats[media]}
+        best_score = min(media_scores.values())
+        if max_gapfilling is None:
+            max_gapfilling = best_score
+        for media, score in media_scores.items():
+            logger.debug(score, best_score, max_gapfilling)
+            if score <= max_gapfilling and score <= (best_score + self.gapfilling_delta):
+                self.selected_media.append(media)
 
     def apply_growth_media_gapfilling(self):
-        """Applies the gapfilling to all selected growth media"""
+        """
+        Applies the gapfilling to all selected growth media
+        :return:
+        """
         for media in self.selected_media:
             if media in self.media_gapfill_stats and self.media_gapfill_stats[media]:
                 self.model = self.msgapfill.integrate_gapfill_solution(self.model, self.media_gapfill_stats[media])
 
     def expand_model_to_genome_scale(self):
-        """Expands the model to genome-scale while preventing ATP overproduction"""
+        """
+        Expands the model to genome-scale while preventing ATP overproduction
+        :return:
+        """
         self.gapfilling_tests, self.filtered_noncore = [], []
         self.model.objective = self.atp_hydrolysis.id
         pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
@@ -168,7 +198,10 @@ class MSATPCorrection:
         self.restore_noncore_reactions(noncore = False,othercompartment = True)
 
     def restore_noncore_reactions(self,noncore = True,othercompartment = True):
-        """Restores the bounds on all noncore reactions"""
+        """
+        Restores the bounds on all noncore reactions
+        :return:
+        """
         # Restoring original reaction bounds
         if noncore:
             for item in self.noncore_reactions:
@@ -184,7 +217,10 @@ class MSATPCorrection:
                     reaction.upper_bound = self.original_bounds[reaction.id][1]
 
     def run_atp_correction(self):
-        """Runs the entire ATP method"""
+        """
+        Runs the entire ATP method
+        :return:
+        """
         #Ensure all specified media work
         self.evaluate_growth_media()
         self.determine_growth_media()
