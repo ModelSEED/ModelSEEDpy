@@ -12,3 +12,7 @@ class PackageError(Exception):
 class GapfillingError(Exception):
     """Error in model gapfilling"""
     pass
+
+class SubOptimalError(Exception):
+    'Error in Optlang model optimization'
+    pass
