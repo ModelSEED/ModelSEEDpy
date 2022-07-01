@@ -99,7 +99,7 @@ class MSGrowthPhenotypes:
         return growthpheno
         
     @staticmethod
-    def from_kbase_file(filename, base_media, kbase_api):   # The base_media was called in line 105 but was never defined
+    def from_kbase_file(filename, kbase_api, base_media):
         #TSV file with the following headers:media    mediaws    growth    geneko    addtlCpd
         from pandas import read_table
         table_df = read_table(filename)
