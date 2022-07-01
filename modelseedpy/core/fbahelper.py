@@ -226,13 +226,13 @@ class FBAHelper:
         compartments = list(reaction.compartments)
         if len(compartments) == 1:
             return compartments[0]
-        cytosol = None
+        cytosol = othercomp = None
         for comp in compartments:
             if comp[0:1] == "c":
                 cytosol = comp
             elif comp[0:1] != "e":
-                return comp
-        return cytosol
+                othercomp = comp
+        return othercomp or cytosol
     
     @staticmethod
     def stoichiometry_to_string(stoichiometry):
