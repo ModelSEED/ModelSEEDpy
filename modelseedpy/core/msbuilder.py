@@ -249,13 +249,8 @@ def build_biomass(rxn_id, cobra_model, template, biomass_compounds, index='0'):
     bio_rxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
     return bio_rxn
 
-
+# A search function
 def _aaaa(genome, ontology_term):
-    """
-    A search function
-
-    """
-    
     search_name_to_genes, search_name_to_orginal = {}, {}
     for feature in genome.features:
         if ontology_term in feature.ontology_terms:
@@ -284,10 +279,9 @@ def aux_template(template):
 
 def build_gpr2(cpx_sets):
     list_of_ors = []
-    for cpx in cpx_sets:
+    for cpx, role_ids in cpx_sets.items():
         list_of_ands = []
-        for role_id in cpx_sets[cpx]:
-            gene_ors = cpx_sets[cpx][role_id]
+        for role_id, gene_ors in role_ids.items():
             if len(gene_ors) > 1:
                 list_of_ands.append('(' + ' or '.join(gene_ors) + ')')
             else:
@@ -311,13 +305,13 @@ def _reaction_sinks(self,model):
 def build_gpr(cpx_gene_role):   #!!! Unused and redundant function
     """
     example input:
-      {'sdh': [{'b0721': 'sdhC', 'b0722': 'sdhD', 'b0723': 'sdhA', 'b0724': 'sdhB'}]}
+     {'sdh': [{'b0721': 'sdhC', 'b0722': 'sdhD', 'b0723': 'sdhA', 'b0724': 'sdhB'}]}
 
-      (b0721 and b0722 and b0724 and b0723)
+     (b0721 and b0722 and b0724 and b0723)
 
-      {'cpx1': [{'g1': 'role1', 'g3': 'role2'}, {'g2': 'role1', 'g3': 'role2'}]}
+     {'cpx1': [{'g1': 'role1', 'g3': 'role2'}, {'g2': 'role1', 'g3': 'role2'}]}
 
-      (g1 and g3) or (g2 and g3)
+     (g1 and g3) or (g2 and g3)
 
     :param cpx_gene_role:
     :return:
@@ -334,6 +328,7 @@ def build_gpr(cpx_gene_role):   #!!! Unused and redundant function
 
 
 class MSBuilder:
+    
     def __init__(self, genome, template=None):
         """
         for future methods with better customization
@@ -418,7 +413,7 @@ class MSBuilder:
         return gpr_set
 
     @staticmethod
-    def _build_reaction(reaction_id, template, gpr_set = [], index='0', sbo=None):
+    def _build_reaction(reaction_id, gpr_set, template, index='0', sbo=None):
         template_reaction = template.reactions.get_by_id(reaction_id)
         reaction_compartment = template_reaction.compartment
         metabolites = {}
@@ -430,13 +425,12 @@ class MSBuilder:
 
         reaction = Reaction(template_reaction.id+index,
             f'{template_reaction.name}_{reaction_compartment}{index}', '',
-            template_reaction.lower_bound, template_reaction.upper_bound
-        )
+            template_reaction.lower_bound, template_reaction.upper_bound)
 
-        gpr_str = build_gpr2(gpr_set)
+        gpr_str = build_gpr2(gpr_set) if gpr_set else ''
         reaction.add_metabolites(metabolites)
         reaction.annotation["seed.reaction"] = template_reaction.reference_id
-        if len(gpr_str) > 0:
+        if gpr_str and len(gpr_str) > 0:
             reaction.gene_reaction_rule = gpr_str  # get_gpr_string(gpr_ll)
         if sbo:
             reaction.annotation[SBO_ANNOTATION] = sbo
@@ -509,7 +503,7 @@ class MSBuilder:
                 metabolic_reactions[template_reaction.id] = gpr_set
                 logger.debug("[%s] gpr set: %s", template_reaction.id, gpr_set)
 
-        return [self._build_reaction(key, self.template, val, index, "SBO:0000176")
+        return [self._build_reaction(key, val, self.template, index, "SBO:0000176")
                      for key, val in metabolic_reactions.items()]
 
     def build_non_metabolite_reactions(self, cobra_model, index='0', allow_all_non_grp_reactions=False): #!!! allow_all_non_grp_reactions in not used
@@ -518,7 +512,7 @@ class MSBuilder:
         model_mets = set(x.id for x in cobra_model.metabolites)
         for rxn in self.template.reactions:
             if rxn.type in ['universal', 'spontaneous']:
-                reaction = self._build_reaction(rxn.id, self.template, [], index, "SBO:0000176")
+                reaction = self._build_reaction(rxn.id, {}, self.template, index, "SBO:0000176")
                 if len(model_mets.intersection(x.id for x in set(reaction.metabolites))) > 0:
                     if reaction.id not in model_rxns:
                         reaction.annotation["seed.reaction"] = rxn.id
@@ -558,7 +552,7 @@ class MSBuilder:
         model = Model(model_id or template.id)
         all_reactions = []
         for rxn in template.reactions:
-            reaction = MSBuilder._build_reaction(rxn.id, template, [], index, "SBO:0000176")
+            reaction = MSBuilder._build_reaction(rxn.id, {}, template, index, "SBO:0000176")
             reaction.annotation["seed.reaction"] = rxn.id
             all_reactions.append(reaction)
         model.add_reactions(all_reactions)
