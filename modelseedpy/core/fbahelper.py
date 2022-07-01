@@ -306,10 +306,6 @@ class FBAHelper:
         return reframed_model
     
     @staticmethod
-    def parse_media(media):
-        return [cpd.id for cpd in media.data['mediacompounds']]
-    
-    @staticmethod
     def parse_df(df):
         from numpy import array
         return array(dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()])
