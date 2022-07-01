@@ -32,9 +32,9 @@ class MSGrowthPhenotype:
         if not isinstance(modelutl,MSModelUtil):
             modelutl = MSModelUtil(modelutl)
         media = self.build_media()
-        results = {"growth":None, "class":None, "missing_transports":[]}
+        output = {"growth":None, "class":None, "missing_transports":[]}
         if add_missing_exchanges:
-            results["missing_transports"] = modelutl.add_missing_exchanges(media)
+            output["missing_transports"] = modelutl.add_missing_exchanges(media)
         pkgmgr = MSPackageManager.get_pkg_mgr(modelutl.model)
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media, self.parent.base_uptake, self.parent.base_excretion)        
         for gene in self.gene_ko:
@@ -42,20 +42,20 @@ class MSGrowthPhenotype:
                 geneobj = modelutl.model.genes.get_by_id(gene)
                 geneobj.knock_out()
         solution = modelutl.model.optimize()
-        results["growth"] = solution.objective_value
+        output["growth"] = solution.objective_value
         if solution.objective_value > 0 and pfba:
             solution = cobra.flux_analysis.pfba(modelutl.model)
         if save_fluxes:
-            results["fluxes"] = solution.fluxes
-        if results["growth"] >= growth_threshold:
-            results["class"] = "FP"
+            output["fluxes"] = solution.fluxes
+        if output["growth"] >= growth_threshold:
+            output["class"] = "FP"
             if self.growth > 0:
-                results["class"] = "CP"
+                output["class"] = "CP"
         else:    
-            results["class"] = "CN"
+            output["class"] = "CN"
             if self.growth > 0:
-                results["class"] = "FN"
-        return results        
+                output["class"] = "FN"
+        return output        
     
     def gapfill_model_for_phenotype(self, modelutl, default_gapfill_templates, test_conditions, default_gapfill_models=[], blacklist=[], growth_threshold=0.001, add_missing_exchanges=False):
         if not isinstance(modelutl,MSModelUtil):
