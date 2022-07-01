@@ -88,7 +88,7 @@ class MSATPCorrection:
     def evaluate_growth_media(self):
         """
         Determines how much gap filling each input test media requires to make ATP
-        
+
         :return:
         """
         self.disable_noncore_reactions()
