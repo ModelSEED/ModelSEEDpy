@@ -13,6 +13,10 @@ class GapfillingError(Exception):
     """Error in model gapfilling"""
     pass
 
+class ObjectError(Exception):
+    """Error in the construction of a base KBase object"""
+    pass 
+
 class SubOptimalError(Exception):
     'Error in Optlang model optimization'
     pass
