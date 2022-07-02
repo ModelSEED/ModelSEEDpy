@@ -373,8 +373,8 @@ class MSBuilder:
                     #print(role_id, role_genes[role_id])
         return complexes
 
-    @staticmethod  #!!! Unused and redundant function
-    def _build_reaction_complex_gpr_sets(match_complex, allow_incomplete_complexes=True):
+    @staticmethod
+    def _build_reaction_complex_gpr_sets(match_complex, allow_incomplete_complexes=True):  #!!! Unused and redundant function
         complexes = {}
         for cpx_id in match_complex:
             complete = True
@@ -522,6 +522,8 @@ class MSBuilder:
 
     def build(self, model_id, index='0', allow_all_non_grp_reactions=False, annotate_with_rast=True):
         if annotate_with_rast:
+            rast = RastClient()
+            res = rast.annotate_genome(self.genome)  # !!! res is never used
             self.search_name_to_genes, self.search_name_to_original = _aaaa(self.genome, 'RAST')
         # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
         if not self.template:
@@ -530,8 +532,7 @@ class MSBuilder:
         # construct the model
         cobra_model = Model(model_id)
         cobra_model.add_reactions(self.build_metabolic_reactions(index=index))
-        if allow_all_non_grp_reactions:
-            cobra_model.add_reactions(self.build_non_metabolite_reactions(cobra_model, index))
+        cobra_model.add_reactions(self.build_non_metabolite_reactions(cobra_model, index, allow_all_non_grp_reactions))
         self.build_exchanges(cobra_model)
 
         if any([self.template.name.startswith(x) for x in ('GramPos', 'CoreModel', 'GramNeg')]):
@@ -597,6 +598,7 @@ class MSBuilder:
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         #with open('Gapfilling.lp', 'w') as out:
         #    out.write(str(model.solver))
+        sol = model.optimize()  # !!! sol is never used
         gfresults = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         for rxnid in gfresults["reversed"]:
             rxn = original_mdl.reactions.get_by_id(rxnid)
