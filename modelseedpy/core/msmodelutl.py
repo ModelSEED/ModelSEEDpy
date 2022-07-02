@@ -23,12 +23,12 @@ class MSModelUtil:
         for met in self.model.metabolites:
             self.add_name_to_metabolite_hash(met.id,met)
             self.add_name_to_metabolite_hash(met.name,met)
-            for item in met.annotation.values():
-                if isinstance(item, list):
-                    for entry in item:
-                        self.add_name_to_metabolite_hash(entry,met)
+            for entry in met.annotation.values():
+                if isinstance(entry, list):
+                    for item in entry:
+                        self.add_name_to_metabolite_hash(item,met)
                 else:
-                    self.add_name_to_metabolite_hash(item,met)
+                    self.add_name_to_metabolite_hash(entry,met)
     
     def add_name_to_metabolite_hash(self,name,met):
         if name not in self.metabolite_hash:
