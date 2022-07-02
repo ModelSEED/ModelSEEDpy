@@ -3,10 +3,10 @@ logger = logging.getLogger(__name__)
 import copy
 import math
 from enum import Enum
-from modelseedpy.core.msmodel import get_direction_from_constraints, get_reaction_constraints_from_direction, get_cmp_token
 from cobra.core import Metabolite, Reaction
 from cobra.core.dictlist import DictList
 from cobra.util import format_long_string
+from modelseedpy.core.msmodel import get_direction_from_constraints, get_reaction_constraints_from_direction, get_cmp_token
 #from cobrakbase.kbase_object_info import KBaseObjectInfo
 
 class AttrDict(dict):
@@ -25,7 +25,8 @@ class TemplateReactionType(Enum):
 
 class MSTemplateMetabolite:
 
-    def __init__(self, cpd_id, formula=None, name='', default_charge=None, mass=None, delta_g=None, delta_g_error=None, is_cofactor=False, abbreviation='', aliases=[]):
+    def __init__(self, cpd_id, formula=None, name='', default_charge=None, mass=None, delta_g=None, 
+                 delta_g_error=None, is_cofactor=False, abbreviation='', aliases=[]):
         self.id = cpd_id; self.formula = formula; self.name = name; self.abbreviation = abbreviation
         self.default_charge = default_charge; self.mass = mass; self.delta_g = delta_g
         self.delta_g_error = delta_g_error; self.is_cofactor = is_cofactor; self.aliases = aliases
@@ -88,9 +89,9 @@ class MSTemplateMetabolite:
 
 class MSTemplateSpecies(Metabolite):
 
-    def __init__(self, cobra_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
+    def __init__(self, comp_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
-        super().__init__(cobra_cpd_id, '', '', charge, compartment)
+        super().__init__(comp_cpd_id, '', '', charge, compartment)
         self._template = template; self.cpd_id = cpd_id; self.max_uptake = max_uptake
         if self._template:
             if self.cpd_id in self._template.compounds:
@@ -195,7 +196,7 @@ class MSTemplateReaction(Reaction):
 
     @property
     def gene_reaction_rule(self):
-        return ' or '.join(map(lambda x: x.id, self.complexes))
+        return ' or '.join([x.id for x in self.complexes])
 
     @gene_reaction_rule.setter
     def gene_reaction_rule(self, gpr):  # !!! can this function be deleted?
@@ -258,7 +259,7 @@ class MSTemplateReaction(Reaction):
 
     @property
     def cstoichiometry(self):
-        return {(met.id, met.compartment): coefficient for (met, coefficient) in self.metabolites.items()}
+        return {(met.id, met.compartment):coefficient for (met, coefficient) in self.metabolites.items()}
 
     def remove_role(self, role_id):  # !!! can this function be deleted?
         pass
@@ -415,9 +416,9 @@ class NewModelTemplateComplex:
     def from_dict(d, template):
         protein_complex = NewModelTemplateComplex(
             d['id'], d['name'], d['source'], d['reference'], d['confidence'], template)
-        for role in d['complexroles']:
-            role = template.roles.get_by_id(role['templaterole_ref'].split('/')[-1])
-            protein_complex.add_role(role, role['triggering'], role['optional_role'])
+        for cplx_role in d['complexroles']:
+            role = template.roles.get_by_id(cplx_role['templaterole_ref'].split('/')[-1])
+            protein_complex.add_role(role, cplx_role['triggering'], cplx_role['optional_role'])
         return protein_complex
 
     def add_role(self, role: NewModelTemplateRole, triggering=True, optional=False):
@@ -456,7 +457,7 @@ class NewModelTemplateComplex:
         return "<%s %s at 0x%x>" % (self.__class__.__name__, self.id, id(self))
 
     def _repr_html_(self):
-        
+
         return """
         <table>
             <tr>
@@ -476,6 +477,7 @@ class NewModelTemplateComplex:
                                r[0].id, r[0].name, r[1][0], r[1][1]) for r in self.roles.items()), 200))
 
 class MSTemplateCompartment:
+
     def __init__(self, compartment_id: str, name: str, ph: float, hierarchy=0, aliases:list = []):
         self.id = compartment_id; self.name = name; self.ph = ph
         self.hierarchy = hierarchy; self.aliases = aliases
@@ -490,7 +492,8 @@ class MSTemplateCompartment:
 
 
 class MSTemplate:
-    def __init__(self, template_id, name='', domain='', template_type='', version=1):
+
+    def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None, args=None):  # !!! info and args are never used
         self.id = template_id; self.name = name; self.domain = domain
         self.template_type = template_type; self.__VERSION__ = version
         self.biochemistry_ref = ''
@@ -742,7 +745,8 @@ class MSTemplate:
 
 class MSTemplateBuilder:
 
-    def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None):
+    def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None,
+                 biochemistry=None, biomasses=None, pathways=None, subsystems=None):  # !!! biochemistry, biomasses, pathways, and subsystems are nevery used
         self.id = template_id; self.version = version; self.name = name; self.domain = domain
         self.template_type = template_type; self.info = info
         self.biochemistry_ref = None
