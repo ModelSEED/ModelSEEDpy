@@ -328,7 +328,7 @@ def build_gpr(cpx_gene_role):   #!!! Unused and redundant function
 
 
 class MSBuilder:
-    
+
     def __init__(self, genome, template=None):
         """
         for future methods with better customization
