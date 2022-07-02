@@ -56,7 +56,7 @@ class MSModelUtil:
     def exchange_hash(self):
         exchange_reactions = {}
         exlist = self.exchange_list()
-        for ex_rxn in self.exchange_list():
+        for ex_rxn in exlist:
             for met in ex_rxn.metabolites:
                 if ex_rxn.metabolites[met] == -1:
                     exchange_reactions[met] = ex_rxn
