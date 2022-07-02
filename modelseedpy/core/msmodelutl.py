@@ -1,9 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
-
-from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-from cobra import Reaction
 import re
+from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are not used
+from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 def search_name(name):
     name = name.lower()
@@ -56,6 +55,7 @@ class MSModelUtil:
     
     def exchange_hash(self):
         exchange_reactions = {}
+        exlist = self.exchange_list()
         for ex_rxn in self.exchange_list():
             for met in ex_rxn.metabolites:
                 if ex_rxn.metabolites[met] == -1:
@@ -100,11 +100,11 @@ class MSModelUtil:
         self.model.add_reactions(drains)
         return drains
         
-    # def reaction_scores(self):  #!!! Can this be deleted?
-    #     return {}
+    def reaction_scores(self):  #!!! Can this be deleted?
+        return {}
     
     #adding gapfilling compounds to a KBase model saves gapfilled models 
-    def convert_cobra_compound_to_kbcompound(self, cpd, kbmodel, add_to_model = True):
+    def convert_cobra_compound_to_kbcompound(self, cpd, kbmodel, add_to_model=1):
         refid = "cpd00000"
         if re.search('cpd\d+_[a-z]+',cpd.id):
             refid = re.sub("_[a-z]\d+$","",cpd.id)
@@ -120,12 +120,12 @@ class MSModelUtil:
             "numerical_attributes": {},
             "string_attributes": {}
         }
-        if add_to_model:
+        if add_to_model == 1:
             kbmodel["modelcompounds"].append(cpd_data)
         return cpd_data
 
     #adding gapfilling reactions to a KBase model saves gapfilled models   
-    def convert_cobra_reaction_to_kbreaction(self,rxn,kbmodel = None,cpd_hash = {},direction = "=",reaction_genes = {}, add_to_model = True):
+    def convert_cobra_reaction_to_kbreaction(self, rxn, kbmodel=None, cpd_hash={}, direction="=", add_to_model=1, reaction_genes=None):
         rxnref = "~/template/reactions/id/rxn00000_c"
         if re.search('rxn\d+_[a-z]+',rxn.id):
             rxnref = re.sub("\d+$","",f"~/template/reactions/id/{rxn.id}")
