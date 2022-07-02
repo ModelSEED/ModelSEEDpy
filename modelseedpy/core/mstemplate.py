@@ -762,7 +762,7 @@ class MSTemplateBuilder:
         :param args:
         :return:
         """
-        builder = MSTemplateBuilder(d['id'], d['name'], d['domain'], d['type'], d['__VERSION__'], info)
+        builder = MSTemplateBuilder(d['id'], d['name'], d['domain'], d['type'], d['__VERSION__'], None)  # !!! None here should probably be info, which is why info is a function argument
         builder.compartments = d['compartments']
         builder.roles = d['roles']
         builder.complexes = d['complexes']
