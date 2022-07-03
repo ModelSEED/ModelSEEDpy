@@ -3,14 +3,18 @@
 from __future__ import absolute_import
 
 import logging
-from optlang.symbolics import Zero
-from modelseedpy.core.msmodelutl import MSModelUtil
-from modelseedpy.core.exceptions import FeasibilityError  # moved excpetion classes to a designated exceptions file for broader use
+logger = logging.getLogger(__name__)
+import re  # !!! import is never used
+from optlang.symbolics import Zero, add  # !!! add is never used
+from cobra.core import Gene, Metabolite, Model, Reaction  # !!! none of these imports are used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-
+from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.exceptions import FeasibilityError
 
 class BaseFBAPkg:
-    """Base class for FBA packages"""
+    """
+    Base class for FBA packages
+    """
     def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
         self.model = model; self.name = name
         self.modelutl = MSModelUtil(model)
