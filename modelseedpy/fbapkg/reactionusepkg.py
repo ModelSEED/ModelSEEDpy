@@ -2,17 +2,17 @@
 
 from __future__ import absolute_import
 import logging
-
+logger = logging.getLogger(__name__)
+from optlang.symbolics import Zero, add  # !!! add is never used
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
-from optlang.symbolics import Zero
 
 #Base class for FBA packages
 class ReactionUsePkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"reaction use",{"fu":"reaction","ru":"reaction"},{"fu":"reaction","ru":"reaction","exclusion":"none","urev":"reaction"})
 
-    def build_package(self, rxn_filter = None, reversibility = False):
+    def build_package(self, rxn_filter=None, reversibility=False):
         for rxn in self.model.reactions:
             #Checking that reaction passes input filter if one is provided
             if rxn_filter == None:
@@ -33,17 +33,14 @@ class ReactionUsePkg(BaseFBAPkg):
     def build_constraint(self,cobra_obj,reversibility):
         constraint = None
         if cobra_obj.id not in self.constraints["fu"] and cobra_obj.id in self.variables["fu"]:
-            constraint = BaseFBAPkg.build_constraint(self,"fu",0,None,{
-                self.variables["fu"][cobra_obj.id]:1000, cobra_obj.forward_variable:-1
-                },cobra_obj)
+            constraint = BaseFBAPkg.build_constraint(self, "fu" ,0 ,None ,{
+                self.variables["fu"][cobra_obj.id]:1000, cobra_obj.forward_variable:-1}, cobra_obj)
         if cobra_obj.id not in self.constraints["ru"] and cobra_obj.id in self.variables["ru"]:
-            constraint = BaseFBAPkg.build_constraint(self,"ru",0,None,{
-                self.variables["ru"][cobra_obj.id]:1000, cobra_obj.reverse_variable:-1
-                },cobra_obj)
+            constraint = BaseFBAPkg.build_constraint(self, "ru", 0, None,{
+                self.variables["ru"][cobra_obj.id]:1000, cobra_obj.reverse_variable:-1}, cobra_obj)
         if all([reversibility, cobra_obj.id in self.variables["ru"], cobra_obj.id in self.variables["fu"]]):
             constraint = BaseFBAPkg.build_constraint(self,"urev",None,1,{
-                self.variables["ru"][cobra_obj.id]:1, self.variables["fu"][cobra_obj.id]:1
-                },cobra_obj)
+                self.variables["ru"][cobra_obj.id]:1, self.variables["fu"][cobra_obj.id]:1}, cobra_obj)
         return constraint
     
     def build_exclusion_constraint(self, flux_values=None):

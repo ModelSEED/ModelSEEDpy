@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 
 import logging
-from optlang.symbolics import add
+logger = logging.getLogger(__name__)
+from optlang.symbolics import Zero, add  # !!! Zero is never used
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
 #Base class for FBA packages
@@ -27,11 +28,14 @@ class FluxFittingPkg(BaseFBAPkg):
         for rxnid in self.parameters["target_flux"]:
             if rxnid in self.model.reactions:
                 rxnobj = self.model.reactions.get_by_id(rxnid)
-                var = BaseFBAPkg.build_variable(self,"vfit",-1000,1000,"continuous",rxnobj)
+                var = self.build_variable(self,"vfit",-1000,1000,"continuous",rxnobj)
                 objvars.append(var**2)  
                 self.build_constraint(rxnobj)
         if self.parameters["set_objective"] == 1:
             self.model.objective = self.model.problem.Objective(add(objvars), direction="min", sloppy=True)
+            
+    def build_variable(self,object):
+        return BaseFBAPkg.build_variable(self,"vfit",-1000,1000,"continuous",object)
                  
     def build_constraint(self,cobra_obj):
         #vfit(i) = flux(i) - v(i)
