@@ -100,7 +100,7 @@ class BilevelPkg(BaseFBAPkg):
         if obj_type == "flxcmp" and self.parameters["binary_variable_count"] > 0:
             denominator = 2**self.parameters["binary_variable_count"]-1
             coefs = [{},{}]
-            for i in range(self.parameters["binary_variable_count"]):
+            for i in range(0,self.parameters["binary_variable_count"]):
                 value = 2**i
                 if cobra_obj.lower_bound < 0:
                     self.add_variable_type("rflxcmp"+str(i),"reaction")
