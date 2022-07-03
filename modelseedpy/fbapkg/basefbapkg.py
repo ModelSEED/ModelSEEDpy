@@ -27,19 +27,20 @@ class BaseFBAPkg:
         
         self.constraints, self.variables, self.parameters, self.new_reactions = {}, {}, {}, {}
         self.variable_types = variable_types
-        self.constraint_types = constraint_types
         
-        for obj_type in self.variable_types:
+        self.constraint_types = constraint_types
+        for obj_type in variable_types:
             self.variables[obj_type] = dict()
-        for obj_type in self.constraint_types:
+        for obj_type in constraint_types:
             self.constraints[obj_type] = dict()
     
     def validate_parameters(self, params, required, defaults):
         for item in required:
             if item not in params:
                 raise ValueError(f'Required argument {item} is missing!')
+        # defaults are assigned and then replaced with custom params
         self.parameters.update(defaults)  
-        self.parameters.update(params)    # defaults are assigned and then replaced manual params
+        self.parameters.update(params)
     
     def clear(self):
         cobra_objs = []
