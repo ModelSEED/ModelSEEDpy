@@ -25,7 +25,7 @@ class BaseFBAPkg:
             self.pkgmgr = MSPackageManager.get_pkg_mgr(model,1)
         self.pkgmgr.addpkgobj(self)
         
-        self.constraints, self.variables, self.parameters = dict(), dict(), dict()
+        self.constraints, self.variables, self.parameters, self.new_reactions = {}, {}, {}, {}
         self.variable_types = variable_types
         self.constraint_types = constraint_types
         
