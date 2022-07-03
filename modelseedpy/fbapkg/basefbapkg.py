@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 import re  # !!! import is never used
 from optlang.symbolics import Zero, add  # !!! add is never used
+import json as _json # !!! import is never used
 from cobra.core import Gene, Metabolite, Model, Reaction  # !!! none of these imports are used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
@@ -25,9 +26,9 @@ class BaseFBAPkg:
         self.pkgmgr.addpkgobj(self)
         
         self.constraints, self.variables, self.parameters = dict(), dict(), dict()
-        
         self.variable_types = variable_types
         self.constraint_types = constraint_types
+        
         for obj_type in self.variable_types:
             self.variables[obj_type] = dict()
         for obj_type in self.constraint_types:
@@ -52,7 +53,7 @@ class BaseFBAPkg:
         self.variables = {}
         self.constraints = {}
         
-    def build_variable(self,obj_type,lower_bound,upper_bound,vartype,cobra_obj = None):
+    def build_variable(self, obj_type, lower_bound, upper_bound, vartype, cobra_obj=None):
         name = None
         if self.variable_types[obj_type] == "none":
             count = len(self.variables[obj_type])
