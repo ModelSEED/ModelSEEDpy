@@ -3,17 +3,16 @@
 from __future__ import absolute_import
 
 import logging
-from cobra import Reaction
+logger = logging.getLogger(__name__)
+from optlang.symbolics import Zero, add  # !!! Neither import is ever used
+from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are never used
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 classes = {
     "rna":{"cpd00052":-1,"cpd00038":-1,"cpd00002":-1,"cpd00062":-1},
     "dna":{"cpd00115":-1,"cpd00356":-1,"cpd00241":-1,"cpd00357":-1},
-    "protein":{
-        "cpd00132":-1,"cpd00023":-1,"cpd00053":-1,"cpd00054":-1,"cpd00033":-1,"cpd00039":-1,"cpd00119":-1,"cpd00051":-1,"cpd00041":-1,"cpd00107":-1,
-        "cpd00129":-1,"cpd00322":-1,"cpd00069":-1,"cpd00065":-1,"cpd00060":-1,"cpd00084":-1,"cpd00035":-1,"cpd00161":-1,"cpd00156":-1,"cpd00066":-1
-        },
+    "protein":{"cpd00132":-1, "cpd00023":-1, "cpd00053":-1, "cpd00054":-1, "cpd00033":-1, "cpd00039":-1, "cpd00119":-1, "cpd00051":-1, "cpd00041":-1, "cpd00107":-1, "cpd00129":-1, "cpd00322":-1, "cpd00069":-1, "cpd00065":-1, "cpd00060":-1, "cpd00084":-1, "cpd00035":-1, "cpd00161":-1, "cpd00156":-1, "cpd00066":-1},
     "energy":{"cpd00008":1}
 }
 
@@ -21,7 +20,7 @@ classes = {
 class FlexibleBiomassPkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"flexible biomass",{},{
-            "flxbio":"reaction","fflxcpd":"metabolite","rflxcpd":"metabolite","fflxcls":"reaction","rflxcls":"reaction"})
+            "flxbio":"reaction", "fflxcpd":"metabolite", "rflxcpd":"metabolite", "fflxcls":"reaction", "rflxcls":"reaction"})
         
     def build_package(self,parameters):
         self.validate_parameters(parameters,["bio_rxn_id"],{
@@ -34,27 +33,28 @@ class FlexibleBiomassPkg(BaseFBAPkg):
         if self.parameters["bio_rxn_id"] not in self.model.reactions:
             raise ValueError(self.parameters["bio_rxn_id"]+" not found in model!")
         self.parameters["bio_rxn"] = self.model.reactions.get_by_id(self.parameters["bio_rxn_id"])
+        newrxns = []  # !!! newrxns is never used
         class_coef = {"rna":{},"dna":{},"protein":{},"energy":{}}
         refcpd = {"cpd00001":None,"cpd00009":None,"cpd00012":None,"cpd00067":None,"cpd00002":None}
         for met in self.model.metabolites:
             for msid in refcpd:
                 if FBAHelper.modelseed_id_from_cobra_metabolite(met) == msid:
                     refcpd[msid] = met
-        for met in self.parameters["bio_rxn"].metabolites:
-            msid = FBAHelper.modelseed_id_from_cobra_metabolite(met)
+        for metabolite in self.parameters["bio_rxn"].metabolites:
+            msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
             if msid != "cpd11416":
                 met_class = "none"
                 if msid != None:
                     for curr_class, contents in classes.items():
                         if msid in contents:
                             met_class = dict(curr_class)
-                            contents[msid] = met
-                if any([met_class == "none", self.class_complete(class_coef,met_class), self.parameters["use_"+met_class+"_class"] == None]) and msid not in refcpd:
-                    drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model,met.id,1000,1000,"FLEX_")
+                            contents[msid] = metabolite
+                if any([met_class == "none", self.class_complete(class_coef,met_class), not self.parameters["use_"+met_class+"_class"]]) and msid not in refcpd:
+                    drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, metabolite.id, 1000, 1000, "FLEX_")
                     if drain_reaction.id not in self.new_reactions:
                         self.new_reactions[drain_reaction.id] = drain_reaction
                         self.model.add_reactions([drain_reaction])
-                    self.build_constraint(met,"flxcpd")
+                    self.build_constraint(metabolite,"flxcpd")
         for met_class, content in class_coef.items():
             add = False
             total_coef = 0
@@ -88,21 +88,22 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 self.build_constraint(self.new_reactions[met_class+"_flex"],"flxcls")
         self.build_constraint(self.parameters["bio_rxn"],"flxbio")
         
-    # def build_variable(self,object,type):
-        # pass
+    def build_variable(self,object,type):  # !!! can the function be removed?
+        pass
                    
     def build_constraint(self,cobra_obj,obj_type):
+        element_mass = FBAHelper.elemental_mass()  # !!! element_mass is never used
         if obj_type == "flxbio":
             #Sum(MW*(vdrn,for-vdrn,ref)) + Sum(massdiff*(vrxn,for-vrxn,ref)) = 0
             coef = {}
-            for met in self.parameters["bio_rxn"].metabolites:
-                if "FLEX_"+met.id in self.model.reactions:
-                    mw = FBAHelper.metabolite_mw(met)
+            for metabolite in self.parameters["bio_rxn"].metabolites:
+                if "FLEX_"+metabolite.id in self.model.reactions:
+                    mw = FBAHelper.metabolite_mw(metabolite)
                     sign = -1
-                    if self.parameters["bio_rxn"].metabolites[met] > 0:
+                    if self.parameters["bio_rxn"].metabolites[metabolite] > 0:
                         sign = 1
-                    coef[self.model.reactions.get_by_id("FLEX_"+met.id).forward_variable] = sign*mw
-                    coef[self.model.reactions.get_by_id("FLEX_"+met.id).reverse_variable] = -sign*mw
+                    coef[self.model.reactions.get_by_id("FLEX_"+metabolite.id).forward_variable] = sign*mw
+                    coef[self.model.reactions.get_by_id("FLEX_"+metabolite.id).reverse_variable] = -sign*mw
             for met_class in classes:
                 if met_class+"_flex" in self.model.reactions:
                     massdiff = 0
