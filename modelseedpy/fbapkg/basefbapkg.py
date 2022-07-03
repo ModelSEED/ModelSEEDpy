@@ -27,8 +27,8 @@ class BaseFBAPkg:
         
         self.constraints, self.variables, self.parameters, self.new_reactions = {}, {}, {}, {}
         self.variable_types = variable_types
-        
         self.constraint_types = constraint_types
+        
         for obj_type in variable_types:
             self.variables[obj_type] = dict()
         for obj_type in constraint_types:
