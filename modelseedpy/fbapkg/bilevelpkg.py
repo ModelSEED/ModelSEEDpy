@@ -27,26 +27,25 @@ class BilevelPkg(BaseFBAPkg):
             for reaction in self.model.reactions: 
                 var = self.build_variable("flxcmp",reaction,None)
         #Retrieving model data with componenent flux variables
-        #Using the JSON calls because get_linear_coefficients is REALLY slow
+        #Using the JSON calls because get_linear_coefficients is REALLY slow  #!!! get_linear_coefficients is still used?
         mdldata = self.model.solver.to_json()
         consthash = {}
         for const in mdldata["constraints"]:
             consthash[const["name"]] = const
         variables = list(self.model.solver.variables)
-        objterms = objective.get_linear_coefficients(variables)  #!!! get_linear_coefficients is still eventually used?
+        objterms = objective.get_linear_coefficients(variables)
         
         #Adding binary variables and constraints which should not be included in dual formulation
         if self.parameters["binary_variable_count"] > 0:
             for reaction in self.model.reactions: 
                 self.build_variable("bflxcmp",reaction,None)
-                self.build_constraint("bflxcmp",reaction,None,None,None)    
                 
         #Now implementing dual variables and constraints
         for var in variables:
             varhash[var.name] = var
         for const in list(self.model.solver.constraints):
             var = self.build_variable("dualconst",const,obj_coef)
-            if all([var != None, const.name in consthash, "expression" in consthash[const.name], "args" in consthash[const.name]["expression"]]):
+            if all([var, const.name in consthash, "expression" in consthash[const.name], "args" in consthash[const.name]["expression"]]):
                 for item in consthash[const.name]["expression"]["args"]:
                     if all(["args" in item, len(item["args"]) >= 2, item["args"][1]["name"] in varhash]):
                         var_name = varhash[item["args"][1]["name"]]
