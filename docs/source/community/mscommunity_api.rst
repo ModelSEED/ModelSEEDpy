@@ -1,9 +1,9 @@
 MScommunity 
 --------------------------
 
-+++++++++++++++++++++
++++++++++++++++++++++++++
 CommunityModelSpecies()
-+++++++++++++++++++++
++++++++++++++++++++++++++
 
 This class parses species in a community model based upon the composition of the model biomass reaction:
 
