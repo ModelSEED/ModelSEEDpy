@@ -1,26 +1,20 @@
 import logging
-import copy
-import math
-from enum import Enum
+logger = logging.getLogger(__name__)
+
+from modelseedpy.core.msmodel import get_direction_from_constraints, get_reaction_constraints_from_direction, get_cmp_token
 from cobra.core import Metabolite, Reaction
 from cobra.core.dictlist import DictList
 from cobra.util import format_long_string
-from modelseedpy.core.msmodel import get_direction_from_constraints, \
-    get_reaction_constraints_from_direction, get_cmp_token
-from cobra.core.dictlist import DictList
+from enum import Enum
+import copy
+import math
 #from cobrakbase.kbase_object_info import KBaseObjectInfo
 
-logger = logging.getLogger(__name__)
-
-
 class AttrDict(dict):
-    """
-    Base object to use for subobjects in KBase objects
-    """
+    """Base object to use for subobjects in KBase objects"""
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
-
 
 class TemplateReactionType(Enum):
     CONDITIONAL = 'conditional'
@@ -28,37 +22,19 @@ class TemplateReactionType(Enum):
     SPONTANEOUS = 'spontaneous'
     GAPFILLING = 'gapfilling'
 
-
 class MSTemplateMetabolite:
-
-    def __init__(self, cpd_id, formula=None, name='', default_charge=None,
-                 mass=None, delta_g=None, delta_g_error=None, is_cofactor=False,
-                 abbreviation='', aliases=None):
-        self.id = cpd_id
-        self.formula = formula
-        self.name = name
-        self.abbreviation = abbreviation
-        self.default_charge = default_charge
-        self.mass = mass
-        self.delta_g = delta_g
-        self.delta_g_error = delta_g_error
-        self.is_cofactor = is_cofactor
-        self.aliases = []
-        if aliases:
-            self.aliases = aliases
+    def __init__(self, cpd_id, formula=None, name='', default_charge=None, mass=None, delta_g=None, delta_g_error=None, is_cofactor=False, abbreviation='', aliases=[]):
+        self.id = cpd_id; self.formula = formula; self.name = name; self.abbreviation = abbreviation
+        self.default_charge = default_charge; self.mass = mass; self.delta_g = delta_g
+        self.delta_g_error = delta_g_error; self.is_cofactor = is_cofactor; self.aliases = aliases
         self.species = set()
         self._template = None
 
     @staticmethod
     def from_dict(d):
         return MSTemplateMetabolite(
-            d['id'], d['formula'], d['name'],
-            d['defaultCharge'], d['mass'],
-            d['deltaG'], d['deltaGErr'],
-            d['isCofactor'] == 1,
-            d['abbreviation'],
-            d['aliases']
-        )
+            d['id'], d['formula'], d['name'], d['defaultCharge'], d['mass'],
+            d['deltaG'], d['deltaGErr'], d['isCofactor'] == 1, d['abbreviation'],d['aliases'])
 
     def get_data(self):
         return {
@@ -84,32 +60,27 @@ class MSTemplateMetabolite:
         return """
         <table>
             <tr>
-                <td><strong>Compound identifier</strong></td><td>{id}</td>
+                <td><strong>Compound identifier</strong></td><td>{self.id}</td>
             </tr><tr>
-                <td><strong>Name</strong></td><td>{name}</td>
+                <td><strong>Name</strong></td><td>{format_long_string(self.name)}</td>
             </tr><tr>
                 <td><strong>Memory address</strong></td>
-                <td>{address}</td>
+                <td>{'0x0%x' % id(self)}</td>
             </tr><tr>
-                <td><strong>Formula</strong></td><td>{formula}</td>
+                <td><strong>Formula</strong></td><td>{self.formula}</td>
             </tr><tr>
-                <td><strong>In {n_species} species</strong></td><td>
-                    {species}</td>
+                <td><strong>In {len(self.species)} species</strong></td><td>
+                    {format_long_string(', '.join(r.id for r in self.species), 200)}</td>
             </tr>
-        </table>""".format(id=self.id, name=format_long_string(self.name),
-                           formula=self.formula,
-                           address='0x0%x' % id(self),
-                           n_species=len(self.species),
-                           species=format_long_string(
-                               ', '.join(r.id for r in self.species), 200))
+        </table>"""
 
 
 class MSTemplateSpecies(Metabolite):
 
-    def __init__(self, comp_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
+    def __init__(self, cobra_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
-        super().__init__(comp_cpd_id, '', '', charge, compartment)
-        self._template = template
+        super().__init__(cobra_cpd_id, '', '', charge, compartment)
+        self._template = template; 
         self.cpd_id = cpd_id
         self.max_uptake = max_uptake
         if self._template:
@@ -122,7 +93,7 @@ class MSTemplateSpecies(Metabolite):
         :param index: compartment index
         :return: cobra.core.Metabolite
         """
-        if index is None:
+        if not index:
             index = ''
         cpd_id = f'{self.id}{index}'
         compartment = f'{self.compartment}{index}'
@@ -143,9 +114,9 @@ class MSTemplateSpecies(Metabolite):
         return ''
 
     @name.setter
-    def name(self, value):
+    def name(self, name):
         if self._template_compound:
-            self._template_compound.name = value
+            self._template_compound.name = name
 
     @property
     def formula(self):
@@ -154,9 +125,9 @@ class MSTemplateSpecies(Metabolite):
         return ''
 
     @formula.setter
-    def formula(self, value):
+    def formula(self, formula):
         if self._template_compound:
-            self._template_compound.formula = value
+            self._template_compound.formula = formula
 
     @staticmethod
     def from_dict(d, template=None):
@@ -183,25 +154,7 @@ class MSTemplateReaction(Reaction):
 
     def __init__(self, rxn_id: str, reference_id: str, name='', subsystem='', lower_bound=0.0, upper_bound=None,
                  reaction_type=TemplateReactionType.CONDITIONAL, gapfill_direction='=',
-                 base_cost=1000, reverse_penalty=1000, forward_penalty=1000,
-                 status='OK', reference_reaction_id=None):
-        """
-
-        :param rxn_id:
-        :param reference_id:
-        :param name:
-        :param subsystem:
-        :param lower_bound:
-        :param upper_bound:
-        :param reaction_type:
-        :param gapfill_direction:
-        :param base_cost:
-        :param reverse_penalty:
-        :param forward_penalty:
-        :param status:
-        :param reference_reaction_id: DO NOT USE THIS duplicate of reference_id
-        :param template:
-        """
+                 base_cost=1000, reverse_penalty=1000, forward_penalty=1000, status='OK'):
         super().__init__(rxn_id, name, subsystem, lower_bound, upper_bound)
         self.reference_id = reference_id
         self.GapfillDirection = gapfill_direction
@@ -209,8 +162,7 @@ class MSTemplateReaction(Reaction):
         self.reverse_penalty = reverse_penalty
         self.forward_penalty = forward_penalty
         self.status = status
-        self.type = reaction_type.value if type(reaction_type) == TemplateReactionType else reaction_type
-        self.reference_reaction_id = reference_reaction_id  # TODO: to be removed
+        self.type = reaction_type.value if isinstance(reaction_type, TemplateReactionType) else reaction_type
         self.complexes = DictList()
         self.templateReactionReagents = {}
         self._template = None
@@ -219,16 +171,12 @@ class MSTemplateReaction(Reaction):
     def gene_reaction_rule(self):
         return ' or '.join(map(lambda x: x.id, self.complexes))
 
-    @gene_reaction_rule.setter
-    def gene_reaction_rule(self, gpr):
-        pass
+    # @gene_reaction_rule.setter
+    # def gene_reaction_rule(self, gpr):
+    #     pass
 
     @property
     def compartment(self):
-        """
-
-        :return:
-        """
         return get_cmp_token(self.compartments)
 
     def to_reaction(self, model=None, index='0'):
@@ -265,9 +213,9 @@ class MSTemplateReaction(Reaction):
             lower_bound = d['lower_bound']
             upper_bound = d['upper_bound']
         reaction = MSTemplateReaction(
-            d['id'], d['reaction_ref'].split('/')[-1], d['name'], '', lower_bound, upper_bound,
-            d['type'], d['GapfillDirection'],
-            d['base_cost'], d['reverse_penalty'], d['forward_penalty'],
+            d['id'], d['reaction_ref'].split('/')[-1], d['name'], 
+            '', lower_bound, upper_bound,
+            d['type'], d['GapfillDirection'], d['base_cost'], d['reverse_penalty'], d['forward_penalty'],
             d['status'] if 'status' in d else None,
             d['reaction_ref'].split('/')[-1]
         )
@@ -280,49 +228,42 @@ class MSTemplateReaction(Reaction):
 
     @property
     def cstoichiometry(self):
-        return dict(((met.id, met.compartment), coefficient) for (met, coefficient) in self.metabolites.items())
+        return {(met.id, met.compartment): coefficient for (met, coefficient) in self.metabolites.items()}
 
-    def remove_role(self, role_id):
-        pass
+    # def remove_role(self, role_id):
+    #     pass
 
-    def remove_complex(self, complex_id):
-        pass
+    # def remove_complex(self, complex_id):
+    #     pass
 
     def get_roles(self):
-        """
-
-        :return:
-        """
         roles = set()
         for cpx in self.complexes:
-            for role in cpx.roles:
-                roles.add(role)
+            roles.update(cpx.roles)
         return roles
 
     def get_complexes(self):
         return self.complexes
 
     def get_complex_roles(self):
-        res = {}
+        roles = {}
         for complexes in self.data['templatecomplex_refs']:
             complex_id = complexes.split('/')[-1]
-            res[complex_id] = set()
+            roles[complex_id] = set()
             if self._template:
                 cpx = self._template.get_complex(complex_id)
-
                 if cpx:
                     for complex_role in cpx['complexroles']:
                         role_id = complex_role['templaterole_ref'].split('/')[-1]
-                        res[complex_id].add(role_id)
+                        roles[complex_id].add(role_id)
                 else:
-                    print('!!')
-        return res
+                    print(f'The complex for ID {complex_id} does not exist.')
+        return roles
 
     def get_data(self):
-        template_reaction_reagents = list(map(lambda x: {
-            'coefficient': x[1],
-            'templatecompcompound_ref': '~/compcompounds/id/' + x[0].id
-        }, self.metabolites.items()))
+        template_reaction_reagents = [
+            {'coefficient': coef, 'templatecompcompound_ref': '~/compcompounds/id/'+met.id} 
+            for met, coef in self.metabolites.items()]
         return {
             'id': self.id,
             'name': self.name,
@@ -365,21 +306,8 @@ class MSTemplateReaction(Reaction):
 
 class NewModelTemplateRole:
 
-    def __init__(self, role_id, name,
-                 features=None, source='', aliases=None):
-        """
-
-        :param role_id:
-        :param name:
-        :param features:
-        :param source:
-        :param aliases:
-        """
-        self.id = role_id
-        self.name = name
-        self.source = source
-        self.features = [] if features is None else features
-        self.aliases = [] if aliases is None else aliases
+    def __init__(self, role_id, name, features=[], source='', aliases=[]):
+        self.id = role_id; self.name = name; self.source = source; self.features = features; self.aliases = aliases
         self._complexes = set()
         self._template = None
 
@@ -426,43 +354,21 @@ class NewModelTemplateRole:
 class NewModelTemplateComplex:
 
     def __init__(self, complex_id, name, source='', reference='', confidence=0, template=None):
-        """
-
-        :param complex_id:
-        :param name:
-        :param source:
-        :param reference:
-        :param confidence:
-        :param template:
-        """
-        self.id = complex_id
-        self.name = name
-        self.source = source
-        self.reference = reference
-        self.confidence = confidence
+        self.id = complex_id; self.name = name; self.source = source; self.reference = reference
+        self.confidence = confidence; self._template = template
         self.roles = {}
-        self._template = template
 
     @staticmethod
     def from_dict(d, template):
         protein_complex = NewModelTemplateComplex(
-            d['id'], d['name'],
-            d['source'], d['reference'], d['confidence'],
-            template
-        )
-        for o in d['complexroles']:
-            role = template.roles.get_by_id(o['templaterole_ref'].split('/')[-1])
-            protein_complex.add_role(role, o['triggering'] == 1, o['optional_role'] == 1)
+            d['id'], d['name'], d['source'], d['reference'], d['confidence'], template)
+        for role in d['complexroles']:
+            role = template.roles.get_by_id(role['templaterole_ref'].split('/')[-1])
+            protein_complex.add_role(role, role['triggering'], role['optional_role'])
         return protein_complex
 
     def add_role(self, role: NewModelTemplateRole, triggering=True, optional=False):
-        """
-        Add role (function) to the complex
-        :param role:
-        :param triggering:
-        :param optional:
-        :return:
-        """
+        """Add role (function) to the complex"""
         self.roles[role] = (triggering, optional)
 
     def get_data(self):
@@ -470,9 +376,9 @@ class NewModelTemplateComplex:
         for role in self.roles:
             triggering, optional = self.roles[role]
             complex_roles.append({
-                'triggering': 1 if triggering else 0,
-                'optional_role': 1 if optional else 0,
-                'templaterole_ref': '~/roles/id/' + role.id
+                'triggering': triggering,
+                'optional_role': optional,
+                'templaterole_ref': '~/roles/id/'+role.id
             })
         return {
             'id': self.id,
@@ -484,45 +390,34 @@ class NewModelTemplateComplex:
         }
 
     def __str__(self):
-        return " and ".join(map(lambda x: "{}{}{}".format(
-            x[0].id,
-            ":trig" if x[1][0] else "",
-            ":optional" if x[1][1] else ""), self.roles.items()))
+        return " and ".join(
+            ["{}{}{}".format(role[0].id, ":trig" if role[1][0] else "", ":optional" if role[1][1] else "") for role in self.roles.items()])
 
     def __repr__(self):
         return "<%s %s at 0x%x>" % (self.__class__.__name__, self.id, id(self))
 
     def _repr_html_(self):
-
-        return """
+        complexes=format_long_string(', '.join("{}:{}:{}:{}".format(r[0].id, r[0].name, r[1][0], r[1][1]) for r in self.roles.items()), 200)
+        return f"""
         <table>
             <tr>
-                <td><strong>Complex identifier</strong></td><td>{id}</td>
+                <td><strong>Complex identifier</strong></td><td>{self.id}</td>
             </tr><tr>
-                <td><strong>Name</strong></td><td>{name}</td>
+                <td><strong>Name</strong></td><td>{format_long_string(self.name)}</td>
             </tr><tr>
                 <td><strong>Memory address</strong></td>
-                <td>{address}</td>
+                <td>{'0x0%x' % id(self)}</td>
             </tr><tr>
-                <td><strong>Contains {n_complexes} role(s)</strong></td><td>
+                <td><strong>Contains {len(self.roles)} role(s)</strong></td><td>
                     {complexes}</td>
             </tr>
-        </table>""".format(id=self.id, name=format_long_string(self.name),
-                           address='0x0%x' % id(self),
-                           n_complexes=len(self.roles),
-                           complexes=format_long_string(
-                               ', '.join("{}:{}:{}:{}".format(r[0].id, r[0].name, r[1][0], r[1][1]) for r in
-                                         self.roles.items()), 200))
-
+        </table>"""
+        
 
 class MSTemplateCompartment:
-
-    def __init__(self, compartment_id: str, name: str, ph: float, hierarchy=0, aliases=None):
-        self.id = compartment_id
-        self.name = name
-        self.ph = ph
-        self.hierarchy = hierarchy
-        self.aliases = [] if aliases is None else list(aliases)
+    def __init__(self, compartment_id: str, name: str, ph: float, hierarchy=0, aliases=[]):
+        self.id = compartment_id; self.name = name; self.ph = ph
+        self.hierarchy = hierarchy; self.aliases = aliases
         self._template = None
 
     @staticmethod
@@ -530,158 +425,111 @@ class MSTemplateCompartment:
         return MSTemplateCompartment(d['id'], d['name'], d['pH'], d['hierarchy'], d['aliases'])
 
     def get_data(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'pH': self.ph,
-            'aliases': self.aliases,
-            'hierarchy': self.hierarchy
-        }
+        return {'id': self.id, 'name': self.name, 'pH': self.ph, 'aliases': self.aliases, 'hierarchy': self.hierarchy}
 
 
 class MSTemplate:
-
-    def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None, args=None):
-        self.id = template_id
-        self.name = name
-        self.domain = domain
-        self.template_type = template_type
-        self.__VERSION__ = version
+    def __init__(self, template_id, name='', domain='', template_type='', version=1):
+        self.id = template_id; self.name = name; self.domain = domain
+        self.template_type = template_type; self.__VERSION__ = version
         self.biochemistry_ref = ''
-        self.compartments = DictList()
-        self.biomasses = DictList()
-        self.reactions = DictList()
-        self.compounds = DictList()
-        self.compcompounds = DictList()
-        self.roles = DictList()
-        self.complexes = DictList()
-        self.pathways = DictList()
-        self.subsystems = DictList()
+        self.compartments, self.biomasses, self.reactions = DictList(), DictList(), DictList()
+        self.compounds, self.pathways, self.subsystems = DictList(), DictList(), DictList()
+        self.roles, self.complexes, self.compcompounds = DictList(), DictList(), DictList()
 
     def add_compartments(self, compartments: list):
-        """
-
-        :param compartments:
-        :return:
-        """
-        duplicates = list(filter(lambda x: x.id in self.compartments, compartments))
+        duplicates = list(set(self.compartments).intersection(compartments))
         if len(duplicates) > 0:
-            logger.error("unable to add compartments [%s] already present in the template", duplicates)
-            return None
+            logger.error(f"The duplicate compartments {duplicates} cannot be added to the template")
+            return None  #!!! Should the non-duplicate compartments still be added?
 
         for x in compartments:
             x._template = self
         self.compartments += compartments
 
     def add_roles(self, roles: list):
-        """
-
-        :param roles:
-        :return:
-        """
-        duplicates = list(filter(lambda x: x.id in self.roles, roles))
+        duplicates = list(set(self.roles).intersection(roles))
         if len(duplicates) > 0:
-            logger.error("unable to add roles [%s] already present in the template", duplicates)
-            return None
+            logger.error(f"The duplicate roles {duplicates} cannot be added to the template")
+            return None  # !!! Should the non-duplicate compartments still be added?
 
         for x in roles:
             x._template = self
         self.roles += roles
 
     def add_complexes(self, complexes: list):
-        """
-
-        :param complexes:
-        :return:
-        """
-        duplicates = list(filter(lambda x: x.id in self.complexes, complexes))
+        duplicates = list(set(self.complexes).intersection(complexes))
         if len(duplicates) > 0:
-            logger.error("unable to add comp compounds [%s] already present in the template", duplicates)
-            return None
+            logger.error(f"The duplicate complexes {duplicates} cannot be added to the template")
+            return None  #!!! Should the non-duplicate compartments still be added?
 
         roles_to_add = []
-        for x in complexes:
-            x._template = self
+        for complex in complexes:
+            complex._template = self
             roles_rep = {}
-            for role in x.roles:
+            for role in complex.roles:
                 r = role
                 if role.id not in self.roles:
                     roles_to_add.append(role)
                 else:
                     r = self.roles.get_by_id(role.id)
-                roles_rep[r] = x.roles[role]
-                r._complexes.add(x)
-            x.roles = roles_rep
+                roles_rep[r] = complex.roles[role]
+                r._complexes.add(complex)
+            complex.roles = roles_rep
 
         self.roles += roles_to_add
         self.complexes += complexes
 
     def add_compounds(self, compounds: list):
-        """
-
-        :param compounds:
-        :return:
-        """
-        duplicates = list(filter(lambda x: x.id in self.compounds, compounds))
+        duplicates = list(set(self.compounds).intersection(compounds))
         if len(duplicates) > 0:
-            logger.error("unable to add compounds [%s] already present in the template", duplicates)
-            return None
+            logger.error(f"The duplicate compounds {duplicates} cannot be added to the template")
+            return None  #!!! Should the non-duplicate compartments still be added?
 
-        for x in compounds:
-            x._template = self
+        for cpd in compounds:
+            cpd._template = self
         self.compounds += compounds
 
     def add_comp_compounds(self, comp_compounds: list):
-        """
-        Add a compartment compounds (i.e., species) to the template
-        :param comp_compounds:
-        :return:
-        """
-        duplicates = list(filter(lambda x: x.id in self.compcompounds, comp_compounds))
+        duplicates = list(set(self.compcompounds).intersection(comp_compounds))
         if len(duplicates) > 0:
-            logger.error("unable to add comp compounds [%s] already present in the template", duplicates)
-            return None
+            logger.error(f"The duplicate comp compounds {duplicates} cannot be added to the template")
+            return None  #!!! Should the non-duplicate compartments still be added?
 
-        for x in comp_compounds:
-            x._template = self
-            if x.cpd_id in self.compounds:
-                x._template_compound = self.compounds.get_by_id(x.cpd_id)
-                x._template_compound.species.add(x)
+        for comp_cpd in comp_compounds:
+            comp_cpd._template = self
+            if comp_cpd.cpd_id in self.compounds:
+                comp_cpd._template_compound = self.compounds.get_by_id(comp_cpd.cpd_id)
+                comp_cpd._template_compound.species.add(comp_cpd)
         self.compcompounds += comp_compounds
 
     def add_reactions(self, reaction_list: list):
-        """
-
-        :param reaction_list:
-        :return:
-        """
-        duplicates = list(filter(lambda x: x.id in self.reactions, reaction_list))
+        duplicates = list(set(self.reactions).intersection(reaction_list))
         if len(duplicates) > 0:
             logger.error("unable to add reactions [%s] already present in the template", duplicates)
-            return None
+            return None  # !!! Should the non-duplicate compartments still be added?
 
-        for x in reaction_list:
+        for rxn in reaction_list:
             metabolites_replace = {}
             complex_replace = set()
-            x._template = self
-            for comp_cpd, coefficient in x.metabolites.items():
+            rxn._template = self
+            for comp_cpd, coefficient in rxn.metabolites.items():
                 if comp_cpd.id not in self.compcompounds:
                     self.add_comp_compounds([comp_cpd])
                 metabolites_replace[self.compcompounds.get_by_id(comp_cpd.id)] = coefficient
-            for cpx in x.complexes:
+            for cpx in rxn.complexes:
                 if cpx.id not in self.complexes:
                     self.add_complexes([cpx])
                 complex_replace.add(self.complexes.get_by_id(cpx.id))
-            x._metabolites = metabolites_replace
-            x.complexes = complex_replace
-
+            rxn._metabolites = metabolites_replace
+            rxn.complexes = complex_replace
         self.reactions += reaction_list
 
-    def get_role_sources(self):
-        pass
+    # def get_role_sources(self):
+    #     pass
 
-    def get_complex_sources(self):
-        pass
+    # def get_complex_sources(self):
+    #     pass
 
     def get_complex_from_role(self, roles):
         cpx_role_str = ';'.join(sorted(roles))
@@ -690,24 +538,23 @@ class MSTemplate:
         return None
 
     @staticmethod
-    def get_last_id_value(object_list, s):
+    def get_last_id_value(object_list, prefix):
         last_id = 0
-        for o in object_list:
-            if o.id.startswith(s):
-                number_part = id[len(s):]
+        for obj in object_list:
+            if obj.id.startswith(prefix):
+                number_part = id[len(prefix):]
                 if len(number_part) == 5:
-                    if int(number_part) > last_id:
-                        last_id = int(number_part)
+                    last_id = max(last_id, int(number_part))  
         return last_id
 
-    def get_complex(self, id):
-        return self.complexes.get_by_id(id)
+    def get_complex(self, obj_id):
+        return self.complexes.get_by_id(obj_id)
 
-    def get_reaction(self, id):
-        return self.reactions.get_by_id(id)
+    def get_reaction(self, obj_id):
+        return self.reactions.get_by_id(obj_id)
 
-    def get_role(self, id):
-        return self.roles.get_by_id(id)
+    def get_role(self, obj_id):
+        return self.roles.get_by_id(obj_id)
 
     # def _to_object(self, key, data):
     #    if key == 'compounds':
@@ -748,12 +595,12 @@ class MSTemplate:
             'domain': self.domain,
             'biochemistry_ref': self.biochemistry_ref,
             'type': 'Test',
-            'compartments': list(map(lambda x: x.get_data(), self.compartments)),
-            'compcompounds': list(map(lambda x: x.get_data(), self.compcompounds)),
-            'compounds': list(map(lambda x: x.get_data(), self.compounds)),
-            'roles': list(map(lambda x: x.get_data(), self.roles)),
-            'complexes': list(map(lambda x: x.get_data(), self.complexes)),
-            'reactions': list(map(lambda x: x.get_data(), self.reactions)),
+            'compartments': list(x.get_data() for x in self.compartments),
+            'compcompounds': list(x.get_data() for x in self.compcompounds),
+            'compounds': list(x.get_data() for x in self.compounds),
+            'roles': list(x.get_data() for x in self.roles),
+            'complexes': list(x.get_data() for x in self.complexes),
+            'reactions': list(x.get_data() for x in self.reactions),
             'biomasses': list(self.biomasses),
             'pathways': [],
             'subsystems': [],
@@ -762,7 +609,6 @@ class MSTemplate:
     def _repr_html_(self):
         """
         taken from cobra.core.Model :)
-        :return:
         """
         return """
         <table>
@@ -804,33 +650,16 @@ class MSTemplate:
 
 class MSTemplateBuilder:
 
-    def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None,
-                 biochemistry=None, biomasses=None, pathways=None, subsystems=None):
-        self.id = template_id
-        self.version = version
-        self.name = name
-        self.domain = domain
-        self.template_type = template_type
-        self.compartments = []
-        self.biomasses = []
-        self.roles = []
-        self.complexes = []
-        self.compounds = []
-        self.compartment_compounds = []
-        self.reactions = []
-        self.info = info
+    def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None):
+        self.id = template_id; self.version = version; self.name = name; self.domain = domain
+        self.template_type = template_type; self.info = info
         self.biochemistry_ref = None
+        self.compartments, self.biomasses, self.roles, self.complexes = [], [], [], []
+        self.compounds, self.compartment_compounds, self.reactions = [], [], []
 
     @staticmethod
     def from_dict(d, info=None, args=None):
-        """
-
-        :param d:
-        :param info:
-        :param args:
-        :return:
-        """
-        builder = MSTemplateBuilder(d['id'], d['name'], d['domain'], d['type'], d['__VERSION__'], None)
+        builder = MSTemplateBuilder(d['id'], d['name'], d['domain'], d['type'], d['__VERSION__'], info)
         builder.compartments = d['compartments']
         builder.roles = d['roles']
         builder.complexes = d['complexes']
@@ -843,60 +672,54 @@ class MSTemplateBuilder:
 
     @staticmethod
     def from_template(template):
-        b = MSTemplateBuilder()
-        for o in template.compartments:
-            b.compartments.append(copy.deepcopy(o))
+        builder = MSTemplateBuilder()
+        for compartment in template.compartments:
+            builder.compartments.append(copy.deepcopy(compartment))
 
-        return b
+        return builder
 
-    def with_compound_modelseed(self, seed_id, modelseed):
-        pass
+    # def with_compound_modelseed(self, seed_id, modelseed):
+    #     pass
 
     def with_role(self, template_rxn, role_ids, auto_complex=False):
         # TODO: copy from template curation
         complex_roles = template_rxn.get_complex_roles()
-        role_match = {}
-        for o in role_ids:
-            role_match[o] = False
+        role_match = {role_id:False for role_id in role_ids}
         for complex_id in complex_roles:
-            for o in role_match:
-                if o in complex_roles[complex_id]:
-                    role_match[o] = True
+            for role in role_match:
+                if role in complex_roles[complex_id]:
+                    role_match[role] = True
         all_roles_present = True
-        for o in role_match:
-            all_roles_present &= role_match[o]
+        for role in role_match:
+            all_roles_present &= role_match[role]
         if all_roles_present:
-            logger.debug('ignore %s all present in atleast 1 complex', role_ids)
+            logger.debug(f'At least one complex does not express all one role of {role_ids}.')
             return None
-        complex_id = self.template.get_complex_from_role(role_ids)
+        complex_id = self.template.get_complex_from_roles(role_ids)
         if complex_id is None:
-            logger.warning('unable to find complex for %s', role_ids)
+            logger.warning(f'A corresponding complex for the roles {role_ids} cannot be found.')
             if auto_complex:
-                role_names = set()
-                for role_id in role_ids:
-                    role = self.template.get_role(role_id)
-                    role_names.add(role['name'])
-                logger.warning('build complex for %s', role_names)
+                role_names = set([self.template.get_role(role_id)['name'] for role_id in role_ids])
+                logger.warning(f'The complex {role_names} will be added to the template.')
                 complex_id = self.template.add_complex_from_role_names(role_names)
             else:
                 return None
         complex_ref = '~/complexes/id/' + complex_id
         if complex_ref in template_rxn.data['templatecomplex_refs']:
-            logger.debug('already contains complex %s, role %s', role_ids, complex_ref)
+            logger.debug(f'The template already contains a complex reference {complex_ref} for complex {complex_id}.')
             return None
         return complex_ref
 
-    def with_compound(self):
-        pass
+    # def with_compound(self):
+    #     pass
 
-    def with_compound_compartment(self):
-        pass
+    # def with_compound_compartment(self):
+    #     pass
 
     def with_compartment(self, cmp_id, name, ph=7, index='0'):
-        res = list(filter(lambda x: x['id'] == cmp_id, self.compartments))
+        res = list(x for x in self.compartments if x['id'] == cmp_id)
         if len(res) > 0:
             return res[0]
-
         self.compartments.append({
             'id': cmp_id,
             'name': name,
@@ -905,20 +728,15 @@ class MSTemplateBuilder:
             'index': index,
             'pH': ph
         })
-
         return self
 
     def build(self):
         template = MSTemplate(self.id, self.name, self.domain, self.template_type, self.version)
-        template.add_compartments(list(map(lambda x: MSTemplateCompartment.from_dict(x), self.compartments)))
-        template.add_compounds(list(map(lambda x: MSTemplateMetabolite.from_dict(x), self.compounds)))
-        template.add_comp_compounds(
-            list(map(lambda x: MSTemplateSpecies.from_dict(x), self.compartment_compounds)))
-        template.add_roles(list(map(lambda x: NewModelTemplateRole.from_dict(x), self.roles)))
-        template.add_complexes(
-            list(map(lambda x: NewModelTemplateComplex.from_dict(x, template), self.complexes)))
-        template.add_reactions(
-            list(map(lambda x: MSTemplateReaction.from_dict(x, template), self.reactions)))
-        template.biomasses += list(map(lambda x: AttrDict(x), self.biomasses))  # TODO: biomass object
-
+        template.add_compartments([MSTemplateCompartment.from_dict(x) for x in self.compartments])
+        template.add_compounds([MSTemplateMetabolite.from_dict(x) for x in self.compounds])
+        template.add_comp_compounds([MSTemplateSpecies.from_dict(x) for x in self.compartment_compounds])
+        template.add_roles([NewModelTemplateRole.from_dict(x) for x in self.roles])
+        template.add_complexes([NewModelTemplateComplex.from_dict(x, template) for x in self.complexes])
+        template.add_reactions([MSTemplateReaction.from_dict(x, template) for x in self.reactions])
+        template.biomasses += [AttrDict(x) for x in self.biomasses]  # TODO: biomass object
         return template

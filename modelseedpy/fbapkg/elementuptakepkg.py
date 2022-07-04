@@ -11,9 +11,9 @@ class ElementUptakePkg(BaseFBAPkg):
         BaseFBAPkg.__init__(self,model,"element uptake",{"elements":"string"},{"elements":"string"})
         
     def build_package(self,element_limits):
-        for element in element_limits:
+        for element, limit in element_limits.items():
             if element not in self.variables["elements"]:
-                self.build_variable(element,element_limits[element])
+                self.build_variable(element, limit)
                 self.build_constraint(element)
                    
     def build_variable(self,element,limit):

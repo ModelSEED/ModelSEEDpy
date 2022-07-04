@@ -45,6 +45,7 @@ and then locally installed with ``pip``::
 
  cd path/to/modelseedpy
  pip install .
+
    
 The associated ModelSEED Database, which is required for a few packages, is simply downloaded by cloning the GitHub repository::
 

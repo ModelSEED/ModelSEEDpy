@@ -3,11 +3,12 @@
 from __future__ import absolute_import
 
 import logging
-import math
-from optlang.symbolics import Zero, add
+logger = logging.getLogger(__name__)
+
+from optlang.symbolics import add
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
-from modelseedpy.multiomics.msexpression import MSExpression, GENOME, MODEL, COLUMN_NORM
+from modelseedpy.multiomics.msexpression import GENOME, COLUMN_NORM
 
 #Options for default behavior
 LOWEST = 10
@@ -60,15 +61,15 @@ class ProteomeFittingPkg(BaseFBAPkg):
                 self.build_variable(rxnobj,"kapp")
                 var = self.build_variable(rxnobj,"kvfit")
                 objvars.append(self.parameters["obj_kvfit"] * var ** 2)
-                const = self.build_constraint(rxnobj,"vkapp")            
+                self.build_constraint(rxnobj,"vkapp")            
         #Adding kcat fitting variables and constraints
-        for rxnid in self.parameters["kcat_values"]:
+        for rxnid in self.parameters["kcat_values"]:  #!!! what does this loop contribute?
             for rxnobj in self.model.reactions:
                 if rxnid == FBAHelper.modelseed_id_from_cobra_reaction(rxnobj):
                     if rxnobj.id not in self.variables["kapp"]:
                         self.build_variable(rxnobj,"kapp")
                     var = self.build_variable(rxnobj,"kfit")
-                    const = self.build_constraint(rxnobj,"kfitc")
+                    self.build_constraint(rxnobj,"kfitc")
                     objvars.append(self.parameters["obj_kfit"] * var ** 2)
         #Creating objective function
         if self.parameters["set_objective"] == 1:

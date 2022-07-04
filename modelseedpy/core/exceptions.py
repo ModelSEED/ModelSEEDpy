@@ -8,3 +8,11 @@ class FeasibilityError(Exception):
 class PackageError(Exception):
     """Error in package manager"""
     pass
+
+class GapfillingError(Exception):
+    """Error in model gapfilling"""
+    pass
+
+class ObjectError(Exception):
+    """Error in the construction of a base KBase object"""
+    pass 
