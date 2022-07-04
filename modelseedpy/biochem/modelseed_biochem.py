@@ -409,7 +409,7 @@ def load_database(compounds_url, reactions_url,
         df_reactions, dict(map(lambda x: (x.id, x), compounds)), reaction_names,
         reaction_aliases, reaction_ecs)
 
-    database = ModelSEEDDatabase(compounds, reactions)
+    database = ModelSEEDDatabase(compounds, reactions, metabolites_indexed)
     return database
 
 
