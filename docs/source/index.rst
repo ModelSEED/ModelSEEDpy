@@ -58,9 +58,13 @@ and the path to this repository is passed as an argument to the corresponding pa
    
    model_reconstruction/index
    simulate
+   
    escher/index
+   
    kbase/index
+   
    others/index
+   
    api
    
    
