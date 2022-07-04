@@ -55,6 +55,7 @@ and the path to this repository is passed as an argument to the corresponding pa
    
 .. toctree::
    :hidden:
+   
    model_reconstruction/index
    simulate
    escher/index
