@@ -56,14 +56,14 @@ and the path to this repository is passed as an argument to the corresponding pa
 .. toctree::
    :hidden:
    
-   model_reconstruction/index
+   model_reconstruction/Index
    simulate
    
-   escher/index
+   escher/Index
    
-   kbase/index
+   kbase/Index
    
-   others/index
+   others/Index
    
    api
    
