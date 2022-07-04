@@ -1,5 +1,6 @@
 anyio
 appdirs
+autoapi
 certifi
 charset-normalizer
 chemicals
@@ -22,6 +23,7 @@ joblib
 kiwisolver
 matplotlib
 mpmath
+nbsphinx
 networkx
 numpy
 openpyxl
