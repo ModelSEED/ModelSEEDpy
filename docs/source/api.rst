@@ -6,21 +6,7 @@ The detailed documentation of all user-operable classes and functions in the Mod
 The ``core`` sub-library permits parsing and manipulating metabolic models::
 
  from modelseedpy.core import *   
-   
-The ``community`` sub-library compatibilizes transport reactions of individual models for a community model and simulates interactions amongst community members::
-
- from modelseedpy.community import *   
-   
-
-The ``fbapkg`` sub-library constrains and investigates metabolic models through Flux Balance Analysis methods::
-
- from modelseedpy.fbapkg import *   
-   
-   
-The ``ml`` sub-library supports parsing features from genomes, with accessibility to KBase::
-
- from modelseedpy.ml import *   
-   
+ 
 
 .. toctree::
    :includehidden:
@@ -42,6 +28,12 @@ The ``ml`` sub-library supports parsing features from genomes, with accessibilit
    core/rpcclient_api
    core/template_api
    
+   
+The ``community`` sub-library compatibilizes transport reactions of individual models for a community model and simulates interactions amongst community members::
+
+ from modelseedpy.community import *   
+
+
 .. toctree::
    :includehidden:
 
@@ -49,6 +41,10 @@ The ``ml`` sub-library supports parsing features from genomes, with accessibilit
    community/dfbapkg_api
    community/mscommunity_api
    community/mscompatibility_api
+
+The ``fbapkg`` sub-library constrains and investigates metabolic models through Flux Balance Analysis methods::
+
+ from modelseedpy.fbapkg import *   
 
 .. toctree::
    :includehidden:
@@ -66,6 +62,12 @@ The ``ml`` sub-library supports parsing features from genomes, with accessibilit
    fbapkg/reactionuse_api
    fbapkg/tfa_api
    
+   
+The ``ml`` sub-library supports parsing features from genomes, with accessibility to KBase::
+
+ from modelseedpy.ml import *   
+   
+
 .. toctree::
    :includehidden:
    
