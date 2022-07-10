@@ -50,23 +50,23 @@ The ``ml`` sub-library supports parsing features from genomes, with accessibilit
    community/mscommunity_api
    community/mscompatibility_api
 
-..toctree::
-  :includehidden:
+.. toctree::
+   :includehidden:
 
-  fbapkg/bilevel_api
-  fbapkg/changeoptpkg_api
-  fbapkg/drainfluxes_api
-  fbapkg/elementuptakepkg_api
-  fbapkg/flexiblebiomass_api
-  fbapkg/fluxfitting_api
-  fbapkg/gapfillingpkg_api
-  fbapkg/kbasemedia_api
-  fbapkg/metabofba_api
-  fbapkg/proteomefitting_api
-  fbapkg/reactionuse_api
-  fbapkg/tfa_api
+   fbapkg/bilevel_api
+   fbapkg/changeoptpkg_api
+   fbapkg/drainfluxes_api
+   fbapkg/elementuptakepkg_api
+   fbapkg/flexiblebiomass_api
+   fbapkg/fluxfitting_api
+   fbapkg/gapfillingpkg_api
+   fbapkg/kbasemedia_api
+   fbapkg/metabofba_api
+   fbapkg/proteomefitting_api
+   fbapkg/reactionuse_api
+   fbapkg/tfa_api
    
-..toctree::
-  :includehidden:
+.. toctree::
+   :includehidden:
    
-  ml/predict_phenotypes_api
+   ml/predict_phenotypes_api
