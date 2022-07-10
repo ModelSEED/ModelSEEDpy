@@ -3,6 +3,10 @@ ________________________________________________________________________
 
 The detailed documentation of all user-operable classes and functions in the ModelSEEDpy library are provided.
 
+
+core
+---------
+
 The ``core`` sub-library permits parsing and manipulating metabolic models::
 
  from modelseedpy.core import *   
@@ -29,6 +33,9 @@ The ``core`` sub-library permits parsing and manipulating metabolic models::
    core/template_api
    
    
+community
+------------
+   
 The ``community`` sub-library compatibilizes transport reactions of individual models for a community model and simulates interactions amongst community members::
 
  from modelseedpy.community import *   
@@ -42,6 +49,10 @@ The ``community`` sub-library compatibilizes transport reactions of individual m
    community/mscommunity_api
    community/mscompatibility_api
 
+   
+fbapkg
+------------
+   
 The ``fbapkg`` sub-library constrains and investigates metabolic models through Flux Balance Analysis methods::
 
  from modelseedpy.fbapkg import *   
@@ -61,8 +72,11 @@ The ``fbapkg`` sub-library constrains and investigates metabolic models through 
    fbapkg/proteomefitting_api
    fbapkg/reactionuse_api
    fbapkg/tfa_api
+
    
-   
+ml
+------------
+      
 The ``ml`` sub-library supports parsing features from genomes, with accessibility to KBase::
 
  from modelseedpy.ml import *   
