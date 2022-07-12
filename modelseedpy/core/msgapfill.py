@@ -4,6 +4,7 @@ import cobra
 import re
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 
 logger = logging.getLogger(__name__)
@@ -19,8 +20,13 @@ class MSGapfill:
 
     def __init__(self, model, default_gapfill_templates=[], default_gapfill_models=[],
                  test_conditions=[], reaction_scores={}, blacklist=[]):
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.modelutl = model
+        else:
+            self.model = model
+            self.modelutl = MSModelUtil(model)
         self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]
-        self.model = model
         self.gfmodel = None
         self.model_penalty = 1
         self.default_gapfill_models = default_gapfill_models
@@ -39,7 +45,7 @@ class MSGapfill:
         self.reaction_scores = reaction_scores
         self.last_solution = None
         
-    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False):
+    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, prefilter=True):
         if target != None:
             self.model.objective = self.model.problem.Objective(
                 self.model.reactions.get_by_id(target).flux_expression, 
@@ -65,6 +71,11 @@ class MSGapfill:
             "set_objective": 1
         })
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        
+        #Filtering breaking reactions out of the database
+        if prefilter and self.test_conditions:
+            pkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(self.test_conditions)
+        
         if self.lp_filename:
             with open(self.lp_filename, 'w') as out:
                 out.write(str(self.gfmodel.solver))
