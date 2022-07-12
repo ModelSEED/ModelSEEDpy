@@ -1,7 +1,7 @@
 import logging
 import re
 from cobra.core import Model
-# from pyeda.inter import expr
+from pyeda.inter import expr  # wheels must be specially downloaded and installed for Windows https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyeda
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 def get_reaction_constraints_from_direction(direction: str) -> (float, float):
     """
     Converts direction symbols ( > or <) to lower and upper bound, any other value is returned as reversible bounds
-
     :param direction:
     :return:
     """
@@ -28,8 +27,8 @@ def get_direction_from_constraints(lower, upper):
         return '>'
     elif lower < 0:
         return '<'
+    logger.error(f'The [{lower}, {upper}] bounds are not amenable with a direction string.')
     return '?'
-
 
 def get_gpr_string(gpr):
     ors = []
@@ -62,8 +61,8 @@ def split_compartment_from_index(cmp_str: str):
     elif len(cmp_str) == 1:
         cmp_val = s[0]
     if cmp_val is None:
-        raise ValueError(f"Bad value {cmp_str} Value of compartment string must start with letter(s) \
-         and ending (optional) with digits")
+        raise ValueError(f"""Bad value {cmp_str} Value of compartment string must start with letter(s)
+         and ending (optional) with digits""")
     return cmp_val, index_val
 
 
@@ -74,7 +73,7 @@ def get_cmp_token(compartments):
     :return:
     """
     if len(compartments) == 0:
-        logger.warning('compartments empty assume z')
+        logger.warning('The compartments parameter is empty. The "c" parameter is assumed.')
         return 'c'
     if len(compartments) == 1:
         return list(compartments)[0]
@@ -92,13 +91,11 @@ def get_cmp_token(compartments):
     return None
 
 
-def get_set_set(expr_str):
-    if ' or ' in expr_str:
-        expr_str = expr_str.replace(' or ', ' | ')
-    if ' and ' in expr_str:
-        expr_str = expr_str.replace(' and ', ' & ')
+def get_set_set(expr_str):   # !!! this currently returns dictionaries, not sets??
     if len(expr_str.strip()) == 0:
         return {}
+    expr_str = expr_str.replace(' or ', ' | ')
+    expr_str = expr_str.replace(' and ', ' & ')
     dnf = expr(expr_str).to_dnf()
     if len(dnf.inputs) == 1 or dnf.NAME == 'And':
         return {frozenset({str(x) for x in dnf.inputs})}

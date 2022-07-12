@@ -1,5 +1,8 @@
+import logging
 import numpy as np
-from pandas.DataFrame import from_dict
+import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 def get_functional_roles(genome, ontology_term):
@@ -42,6 +45,7 @@ def get_list_functional_roles_from_kbase(genome_ref, ws_client):
             else:
                 list_functional_roles.append(role_to_insert)
         except KeyError as e:
+            logger.error(e)
             # print("this is funcitonal role")
             # print(functional_role)
             # print("this is list_functional_roles")
@@ -90,7 +94,7 @@ def create_indicator_matrix(ref_to_role, master_role_list=None):
                 resubmit the RAST annotated genome/genomeSets into the Predict Phenotype app. (')
         ref_to_indication[genome_id] = indicators.astype(int)
 
-    indicator_df = from_dict(
-        data=ref_to_indication, orient='index', 
-        columns=master_role_list).reset_index().rename(columns={"index": "Genome Reference"})
-    return indicator_df, master_role_list
+    indicator_matrix = pd.DataFrame.from_dict(data=ref_to_indication, orient='index',
+                                              columns=master_role_list).reset_index() \
+        .rename(columns={"index": "Genome Reference"})
+    return indicator_matrix, master_role_list

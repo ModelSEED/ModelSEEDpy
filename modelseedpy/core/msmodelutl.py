@@ -5,11 +5,13 @@ from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 logger = logging.getLogger(__name__)
 
+
 def search_name(name):
     name = name.lower()
     name = re.sub(r'_[a-z]\d*$', '', name)
     name = re.sub(r'\W+', '', name)
     return name
+
 
 class MSModelUtil:
 
@@ -179,6 +181,9 @@ class MSModelUtil:
         return rxn_data
     
     def add_gapfilling_solution_to_kbase_model(self,newmodel,gapfilled_reactions,gfid=None,media_ref = None,reaction_genes = None):
+        """
+        NOTE: to be moved to cobrakbase
+        """
         rxn_table = []
         gapfilling_obj = None
         if gfid == None:
