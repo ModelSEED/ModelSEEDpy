@@ -1,14 +1,14 @@
 import logging
+logger = logging.getLogger(__name__)
 
 import re
-import copy
+import copy  # !!! the import is never used
 from cobra.core.dictlist import DictList
 
-logger = logging.getLogger(__name__)
 
 
 def normalize_role(s):
-    #print(s)
+    # print(s)
     s = s.strip().lower()
     s = re.sub('[\W_]+', '', s)
     return s
@@ -22,12 +22,10 @@ def read_fasta(f, split='|', h_func=None):
     with open(f, 'r') as fh:
         return parse_fasta_str(fh.read(), split, h_func)
 
-
 def parse_fasta_str(faa_str, split='|', h_func=None):
-    lines = faa_str.split('\n')
     features = []
     seq = None
-    for line in lines:
+    for line in faa_str.split('\n'):
         if line.startswith('>'):
             if seq:
                 features.append(seq)
@@ -38,7 +36,7 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                #desc = header_data[1]
+                desc = header_data[1]  # The unit test throws an error when this is commented
 
             seq = MSFeature(seq_id, "", desc)
         else:
@@ -50,28 +48,25 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
 
 
 class MSFeature:
-
     def __init__(self, feature_id, sequence, description=None):
-        self.id = feature_id
-        self.seq = sequence
+        self.id = feature_id; self.seq = sequence
         self.description = description  # temporary replace with proper parsing
         self.ontology_terms = {}
         self.aliases = []
 
-    def add_ontology_term(self, ontology, value):
-        if ontology not in self.ontology_terms:
-            self.ontology_terms[ontology] = []
-        if value not in self.ontology_terms[ontology]:
-            self.ontology_terms[ontology].append(value)
+    def add_ontology_term(self, ontology_term, value):
+        if ontology_term not in self.ontology_terms:
+            self.ontology_terms[ontology_term] = []
+        if value not in self.ontology_terms[ontology_term]:
+            self.ontology_terms[ontology_term].append(value)
 
 
 class MSGenome:
-
     def __init__(self):
         self.features = DictList()
 
     @staticmethod
-    def from_fasta(filename, contigs=0, split='|', h_func=None):
+    def from_fasta(filename, contigs=0, split='|', h_func=None):  # !!! the contigs argument is never used
         genome = MSGenome()
         genome.features += read_fasta(filename, split, h_func)
         return genome
@@ -82,27 +77,16 @@ class MSGenome:
 
     @staticmethod
     def from_protein_sequences_hash(sequences):
-        """
-
-        """
-        features = []
-        for seq_id in sequences:
-            features.append(MSFeature(seq_id, sequences[seq_id]))
+        features = [MSFeature(seq_id, sequences[seq_id]) for seq_id in sequences]
         genome = MSGenome()
         genome.features += features
         return genome
     
     def alias_hash(self):
-        alias_hash = {}
-        for gene in self.features:
-            for alias in gene.aliases:
-                alias_hash[alias] = gene
-        return alias_hash
+        return {alias:gene for gene in self.features for alias in gene.aliases}
     
     def search_for_gene(self,query):
         if query in self.features:
             return self.features.get_by_id(query)
         aliases = self.alias_hash()
-        if query in aliases:
-            return aliases[query]
-        return None
+        return aliases[query] if query in aliases else None

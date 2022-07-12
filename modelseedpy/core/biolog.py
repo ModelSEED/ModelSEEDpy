@@ -118,8 +118,7 @@ class BiologPlate:
             for compound in well['compounds']:
                 media[compound] = well['value']
             return media
-        else:
-            return None
+        return None
 
     def _repr_html_(self):
         html = "<h3>" + self.id + "</h3>"
@@ -149,18 +148,16 @@ class Biolog:
             print('replace existing plate')
         self.plates[plate.id] = plate
 
-    def run_plates(self, model, biomass=None, cmp='e'):
-        # model.objective = biomass
+    def run_plates(self, model, biomass=None, cmp='e'):  # !!! biomass is never used
         prev_medium = model.medium
         compound_exchange = {}
-        for o in model.exchanges:
-            m = list(o.metabolites)[0]
-            if m.id not in compound_exchange:
-                compound_exchange[m.id] = o
+        for ex_rxn in model.exchanges:
+            ex_met = list(ex_rxn.metabolites)[0]
+            if ex_met.id not in compound_exchange:
+                compound_exchange[ex_met.id] = ex_rxn
             else:
-                print(o, list(o.metabolites)[0])
-        for plate_id in self.plates:
-            plate = self.plates[plate_id]
+                print(ex_rxn, list(ex_rxn.metabolites)[0])
+        for plate_id, plate in self.plates.items():
             for well_id in plate.wells:
                 media = plate.get_media(well_id)
                 model_medium = {}

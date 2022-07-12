@@ -61,6 +61,7 @@ def search_name(name):
     name = re.sub(r'\W+', '', name)
     return name
 
+
 class MSModelUtil:
 
     def __init__(self,model):
@@ -286,6 +287,9 @@ class MSModelUtil:
         return rxn_data
     
     def add_gapfilling_solution_to_kbase_model(self,newmodel,gapfilled_reactions,gfid=None,media_ref = None,reaction_genes = None):
+        """
+        NOTE: to be moved to cobrakbase
+        """
         rxn_table = []
         gapfilling_obj = None
         if gfid == None:

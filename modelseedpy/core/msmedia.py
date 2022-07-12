@@ -14,22 +14,21 @@ class MediaCompound:
     @property
     def maxFlux(self):
         # TODO: will be removed later just for old methods
-        return -1 * self.lower_bound
+        return -self.lower_bound
 
     @property
     def minFlux(self):
         # TODO: will be removed later just for old methods
-        return -1 * self.upper_bound
+        return -self.upper_bound
 
 
 class MSMedia:
-
     def __init__(self, media_id):
         self.id = media_id
         self.mediacompounds = DictList()
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(media_dict):
         """
         Either dict with exchange bounds (example: {'cpd00027': (-10, 1000)}) or
         just absolute value of uptake (example: {''cpd00027': 10})
@@ -38,13 +37,11 @@ class MSMedia:
         """
         media = MSMedia('media')
         media_compounds = []
-        for cpd_id in d:
-            v = d[cpd_id]
-            if type(v) is tuple:
+        for cpd_id, v in media_dict.items():
+            if isinstance(v, tuple):
                 media_compounds.append(MediaCompound(cpd_id, v[0], v[1]))
             else:
-                media_compounds.append(MediaCompound(cpd_id, -1 * v, 1000))
-
+                media_compounds.append(MediaCompound(cpd_id, -v, 1000))
         media.mediacompounds += media_compounds
         return media
 
@@ -61,13 +58,12 @@ class MSMedia:
             if cmp is not None:
                 met_id += '_' + cmp
             media[met_id] = (compound.lower_bound, compound.upper_bound)
-
         return media
     
     def merge(self,media,overwrite_overlap=False):
         new_cpds = []
         for cpd in media.mediacompounds:
-            newcpd = MediaCompound(cpd.id,-1*cpd.maxFlux,-1*cpd.minFlux,cpd.concentration)
+            newcpd = MediaCompound(cpd.id, -cpd.maxFlux, -cpd.minFlux, cpd.concentration)
             if newcpd.id in self.mediacompounds:
                 if overwrite_overlap:
                     self.mediacompounds[newcpd.id] = newcpd

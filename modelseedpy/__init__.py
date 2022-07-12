@@ -34,7 +34,7 @@ if config.get("logging","log_file") == "yes":
     logger.addHandler(f_handler)
 
 if sys.version_info[0] == 2:
-    logger.warn("Python 2 is reaching end of life (see "
+    logger.warning("Python 2 is reaching end of life (see "
         "https://www.python.org/dev/peps/pep-0373/) and many cobra "
         "dependencies have already dropped support. At the moment it *should* "
         "still work but we will no longer actively maintain Python 2 support.")
@@ -42,17 +42,18 @@ if sys.version_info[0] == 2:
 import modelseedpy
 from modelseedpy.core import (
     RastClient, MSGenome, MSBuilder, MSMedia, MSGrowthPhenotypes,MSModelUtil,
-    FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill,MSEquation,MSCommunity
+    FBAHelper, MSEditorAPI, MSATPCorrection, MSGapfill, MSEquation
 )
+from modelseedpy.core.exceptions import *
+
+from modelseedpy.community import (MSCommunity, MSCompatibility, CommKineticPkg)
 
 from modelseedpy.fbapkg import (
-    BaseFBAPkg,RevBinPkg,ReactionUsePkg,SimpleThermoPkg,TotalFluxPkg,ElementUptakePkg,BilevelPkg,
-    CommKineticPkg,KBaseMediaPkg,FluxFittingPkg,ProteomeFittingPkg,GapfillingPkg,MetaboFBAPkg,FlexibleBiomassPkg,
-    ProblemReplicationPkg,FullThermoPkg,MSPackageManager,ObjConstPkg,ChangeOptPkg
+    BaseFBAPkg, RevBinPkg, ReactionUsePkg, SimpleThermoPkg, TotalFluxPkg, BilevelPkg,
+    KBaseMediaPkg, FluxFittingPkg, ProteomeFittingPkg, GapfillingPkg, MetaboFBAPkg, FlexibleBiomassPkg,
+    ProblemReplicationPkg, FullThermoPkg, MSPackageManager, ObjConstPkg, ChangeOptPkg, ElementUptakePkg
 )
 
-from modelseedpy.multiomics import (
-    MSExpression
-)
+from modelseedpy.multiomics import MSExpression
 
 __version__ = "0.2.2"
