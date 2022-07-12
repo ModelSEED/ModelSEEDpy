@@ -21,9 +21,10 @@ class MSGenomeClassifier:
                 features |= set(f.ontology_terms[ontology_term])
         return {'genome': list(features)}
 
-    def classify(self, genome, ontology_term='RAST'):
-        roles = self.extract_features_from_genome(genome, ontology_term)
-        indicator_matrix, master_role_list = create_indicator_matrix(roles, self.features)
+    def classify(self, genome_or_roles, ontology_term='RAST'):
+        if isinstance(genome_or_roles,"MSGenome"):
+            genome_or_roles = self.extract_features_from_genome(genome_or_roles, ontology_term)
+        indicator_matrix, master_role_list = create_indicator_matrix(genome_or_roles, self.features)
         predictions_numerical = self.model.predict(indicator_matrix[master_role_list].values)
         return predictions_numerical[0]
 
