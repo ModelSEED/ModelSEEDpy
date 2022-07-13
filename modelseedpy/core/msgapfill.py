@@ -6,6 +6,7 @@ import cobra
 import re
 from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 from modelseedpy.core.exceptions import GapfillingError
 
@@ -13,9 +14,14 @@ class MSGapfill:
 
     def __init__(self, model, default_gapfill_templates=[], default_gapfill_models=[],
                  test_conditions=[], reaction_scores={}, blacklist=[]):
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.modelutl = model
+        else:
+            self.model = model
+            self.modelutl = MSModelUtil(model)
         self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]  # the cpd11416 compound is filtered during model extension with templates
         self.gfmodel = self.lp_filename = self.last_solution = None
-        self.model = model
         self.model_penalty = 1
         self.default_gapfill_models = default_gapfill_models
         self.default_gapfill_templates = default_gapfill_templates
@@ -27,13 +33,11 @@ class MSGapfill:
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
         
-        
-    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, solver = 'optland-cplex'):
+    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, prefilter=True):
         if target:
             self.model.objective = self.model.problem.Objective(
                 self.model.reactions.get_by_id(target).flux_expression, direction='max')
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
-        self.gfmodel.solver = solver
         pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
         pkgmgr.getpkg("GapfillingPkg").build_package({
             "auto_sink": self.auto_sink,
@@ -52,6 +56,11 @@ class MSGapfill:
             "set_objective": 1
         })
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        
+        #Filtering breaking reactions out of the database
+        if prefilter and self.test_conditions:
+            pkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(self.test_conditions)
+        
         if self.lp_filename:
             with open(self.lp_filename, 'w') as out:
                 out.write(str(self.gfmodel.solver))
