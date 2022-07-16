@@ -9,7 +9,7 @@ This class determines the compatibility of individual models for the constructio
 
 .. code-block:: python
 
- from modelseedpy.core import MSCompatibility
+ from modelseedpy.community import MSCompatibility
  ms_compat = MSCompatibility(modelseed_db_path, printing = True)
 
 - *modelseed_db_path* ``str``: the path to the ModelSEED Database, which is only required for the FullThermo, where ``None`` does not apply these constraints. 
