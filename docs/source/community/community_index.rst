@@ -29,5 +29,6 @@ and include the following:
 
     commkineticpkg_api
     dfbapkg_api
+    mscommfitting_api
     mscommunity_api
     mscompatibility_api
