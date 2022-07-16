@@ -1,11 +1,14 @@
 import logging
 import itertools
 import cobra
+import json
+import time
 from optlang.symbolics import Zero, add
 from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
 from cobra.core import Gene, Metabolite, Model, Reaction
+from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core import FBAHelper, MSGapfill
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
@@ -26,26 +29,31 @@ class MSATPCorrection:
         :param gapfilling_delta:
         :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
-        self.model = model
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.modelutl = model
+        else:
+            self.model = model
+            self.modelutl = MSModelUtil(model)
         self.compartment = compartment
         if atp_hydrolysis_id and atp_hydrolysis_id in self.model.reactions:
             self.atp_hydrolysis = self.model.reactions.get_by_id(atp_hydrolysis_id)
         else:
-            output = FBAHelper.add_atp_hydrolysis(self.model, compartment)
+            output = self.modelutl.add_atp_hydrolysis(compartment)
             self.atp_hydrolysis = output["reaction"]
         self.atp_medias = atp_medias
         self.max_gapfilling = max_gapfilling
         self.gapfilling_delta = gapfilling_delta
         self.coretemplate = core_template
-        self.msgapfill = MSGapfill(model, default_gapfill_templates=core_template)
+        self.msgapfill = MSGapfill(self.modelutl, default_gapfill_templates=core_template)
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
         self.media_gapfill_stats = {}
-        self.gapfilling_tests = []
         self.selected_media = []
         self.filtered_noncore = []
         self.lp_filename = None
+        self.multiplier = 1.2
 
     def disable_noncore_reactions(self):
         """
@@ -54,7 +62,7 @@ class MSATPCorrection:
         """
         #Must restore reactions before disabling to ensure bounds are not overwritten
         if len(self.noncore_reactions) > 0:
-            self.restor_noncore_reactions(noncore = True,othercompartment = True)
+            self.restore_noncore_reactions(noncore = True,othercompartment = True)
         #Now clearing the existing noncore datastructures
         self.original_bounds = {}
         self.noncore_reactions = []
@@ -131,6 +139,8 @@ class MSATPCorrection:
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
                 elif solution.objective_value > 0 or solution.status == 'optimal':
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
+        with open('debug.json', 'w') as outfile:
+            json.dump(self.media_gapfill_stats[media], outfile)
         return output
 
     def determine_growth_media(self):
@@ -183,26 +193,23 @@ class MSATPCorrection:
         """
         for media in self.selected_media:
             if media in self.media_gapfill_stats and self.media_gapfill_stats[media]:
-                self.model = self.msgapfill.integrate_gapfill_solution(self.model, self.media_gapfill_stats[media])
+                self.model = self.msgapfill.integrate_gapfill_solution(self.media_gapfill_stats[media])
 
     def expand_model_to_genome_scale(self):
+        """Restores noncore reactions to model while filtering out reactions that break ATP
+        Parameters
+        ----------
+        Returns
+        -------
+        Raises
+        ------
         """
-        Expands the model to genome-scale while preventing ATP overproduction
-        :return:
-        """
-        self.gapfilling_tests = []
         self.filtered_noncore = []
-        self.model.objective = self.atp_hydrolysis.id
-        pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
-        for media in self.selected_media:
-            pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-            solution = self.model.optimize()
-            logger.debug(media.name+" = "+str(solution.objective_value))
-            self.gapfilling_tests.append({"media":media,"is_max_threshold": True,"threshold":1.2*solution.objective_value,"objective":self.atp_hydrolysis.id})
+        tests = self.build_tests()
         #Must restore noncore reactions and NOT other compartment reactions before running this function - it is not detrimental to run this twice
         self.restore_noncore_reactions(noncore = True,othercompartment = False)
         # Extending model with noncore reactions while retaining ATP accuracy
-        self.filtered_noncore = FBAHelper.reaction_expansion_test(self.model,self.noncore_reactions,self.gapfilling_tests,pkgmgr)
+        self.filtered_noncore = self.modelutl.reaction_expansion_test(self.noncore_reactions,tests)        
         # Removing filtered reactions
         for item in self.filtered_noncore:
             print("Removing "+item[0].id+" "+item[1])
@@ -235,6 +242,34 @@ class MSATPCorrection:
                     reaction.lower_bound = self.original_bounds[reaction.id][0]
                     reaction.upper_bound = self.original_bounds[reaction.id][1]
 
+    
+    def build_tests(self,multiplier=None):
+        """Build tests based on ATP media evaluations
+        
+        Parameters
+        ----------
+        multiplier : float
+            Override for multiplier to ATP threshold dictating when tests will pass and fail
+                    
+        Returns
+        -------
+        list<{"media":obj media,"is_max_threshold":bool,"threshold":float,"objective":string}>
+            List of test specifications
+            
+        Raises
+        ------
+        """
+        if multiplier == None:
+            multiplier = self.multiplier
+        tests = []
+        self.model.objective = self.atp_hydrolysis.id
+        for media in self.selected_media:
+            self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+            obj_value = model.slim_optimize()
+            logger.debug(media.name," = ",obj_value)
+            tests.append({"media":media,"is_max_threshold": True,"threshold":multiplier*obj_value,"objective":self.atp_hydrolysis.id})
+        return tests
+
     def run_atp_correction(self):
         """
         Runs the entire ATP method
@@ -245,7 +280,7 @@ class MSATPCorrection:
         self.determine_growth_media()
         self.apply_growth_media_gapfilling()
         self.expand_model_to_genome_scale()
-
+    
     @staticmethod
     def atp_correction(model,coretemplate,atp_medias = None,atp_objective = "bio2",max_gapfilling = None,gapfilling_delta = 0):
         msatpobj = MSATPCorrection(model,coretemplate,atp_medias,atp_objective,max_gapfilling,gapfilling_delta)

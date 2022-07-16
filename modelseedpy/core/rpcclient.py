@@ -15,21 +15,18 @@ class _JSONObjectEncoder(_json.JSONEncoder):
         return _json.JSONEncoder.default(self, obj)
 
 class ServerError(Exception):
-
-    def __init__(self, name, code, message, data=None, error=None):
+    def __init__(self, name, code, message = None, data=None, error=None):
         super(Exception, self).__init__(message)
         self.name = name
         self.code = code
-        self.message = '' if message is None else message
+        self.message = message or '' 
         self.data = data or error or ''
         # data = JSON RPC 2.0, error = 1.1
-
     def __str__(self):
-        return self.name + ': ' + str(self.code) + '. ' + self.message + \
-            '\n' + self.data
+        return self.name + ': ' + str(self.code) + '. ' + self.message + '\n' + self.data
 
 class RPCClient:
-    def __init__(self,url,token=None,version="1.0",timeout=30 * 60,trust_all_ssl_certificates=False):
+    def __init__(self, url, token=None, version="1.0", timeout=30*60, trust_all_ssl_certificates=False):
         self.url = url
         self.token = token
         self.version = version
@@ -38,10 +35,10 @@ class RPCClient:
     
     def call(self,method,params,token=None):
         headers = {}
-        if token != None:
+        if token:
             headers['AUTHORIZATION'] = token
-        elif self.token != None:
-            headers['AUTHORIZATION'] = token
+        elif self.token:
+            headers['AUTHORIZATION'] = self.token
         arg_hash = {'method': method,
             'params': params,
             'version': self.version,

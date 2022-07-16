@@ -1,10 +1,11 @@
 import logging
+logger = logging.getLogger(__name__)
 
 import re
-import copy
+import copy  # !!! the import is never used
 from cobra.core.dictlist import DictList
 
-logger = logging.getLogger(__name__)
+
 
 def normalize_role(s):
     # print(s)
@@ -22,10 +23,9 @@ def read_fasta(f, split='|', h_func=None):
         return parse_fasta_str(fh.read(), split, h_func)
 
 def parse_fasta_str(faa_str, split='|', h_func=None):
-    lines = faa_str.split('\n')
     features = []
     seq = None
-    for line in lines:
+    for line in faa_str.split('\n'):
         if line.startswith('>'):
             if seq:
                 features.append(seq)
@@ -66,7 +66,7 @@ class MSGenome:
         self.features = DictList()
 
     @staticmethod
-    def from_fasta(filename, contigs=0, split='|', h_func=None):
+    def from_fasta(filename, contigs=0, split='|', h_func=None):  # !!! the contigs argument is never used
         genome = MSGenome()
         genome.features += read_fasta(filename, split, h_func)
         return genome

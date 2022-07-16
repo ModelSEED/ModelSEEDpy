@@ -5,6 +5,7 @@ from chemicals import periodic_table
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene, Metabolite, and Model are never used
 from cobra.util import solver as sutil  # !!! sutil is never used
+import time
 from modelseedpy.biochem import from_local
 from scipy.odr.odrpack import Output  # !!! Output is never used
 from chemw import ChemMW
@@ -54,57 +55,6 @@ class FBAHelper:
             #model.add_reactions([drain_reaction])
             return drain_reaction
         return None
-    
-    @staticmethod
-    def test_condition_list(model, condition_list, pkgmgr):
-        for condition in condition_list:
-            pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
-            model.objective = condition["objective"]
-            if condition["is_max_threshold"]:
-                model.objective.direction = "max"
-            else:
-                model.objective.direction = "min"
-            objective = model.slim_optimize()
-            if model.solver.status != 'optimal':
-                with open("debug.lp", 'w') as out:
-                    out.write(str(model.solver))
-                    out.close()
-                logger.critical("Infeasible problem - LP file printed to debug!")
-                return False
-            if objective >= condition["threshold"] and condition["is_max_threshold"]:
-                logger.info("FAILED")
-                return False
-            elif objective <= condition["threshold"] and not condition["is_max_threshold"]:
-                logger.info("FAILED")
-                return False
-        return True
-        
-    @staticmethod
-    def reaction_expansion_test(model, reaction_list, condition_list, pkgmgr):
-        # First knockout all reactions in the input list and save original bounds
-        original_bound = []
-        for item in reaction_list:
-            if item[1] == ">":
-                original_bound.append(item[0].upper_bound)
-                item[0].upper_bound = 0
-            else:
-                original_bound.append(item[0].lower_bound)
-                item[0].lower_bound = 0
-        # Now restore reactions one at a time
-        filtered_list = []
-        for index, item in enumerate(reaction_list):
-            logger.info("Testing "+item[0].id)
-            if item[1] == ">":
-                item[0].upper_bound = original_bound[index]
-                if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
-                    item[0].upper_bound = 0
-                    filtered_list.append(item)
-            else:
-                item[0].lower_bound = original_bound[index]
-                if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
-                    item[0].lower_bound = 0
-                    filtered_list.append(item)
-        return filtered_list
 
     @staticmethod
     def set_reaction_bounds_from_direction(reaction, direction, add=False):
@@ -126,16 +76,6 @@ class FBAHelper:
             sense = "min"
         model.objective = model.problem.Objective(target_reaction.flux_expression, direction=sense)
         return target_reaction
-
-    @staticmethod
-    def compute_flux_values_from_variables(model):
-        flux_values = {}
-        for rxn in model.reactions:
-            flux_values[rxn.id] = {
-                'reverse': rxn.reverse_variable.primal,
-                'forward': rxn.forward_variable.primal
-            }
-        return flux_values
     
     @staticmethod
     def modelseed_id_from_cobra_metabolite(metabolite):

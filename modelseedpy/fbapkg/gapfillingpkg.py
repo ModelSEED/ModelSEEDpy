@@ -117,7 +117,19 @@ class GapfillingPkg(BaseFBAPkg):
             "set_objective":1,
             "blacklist":default_blacklist
         })
+        # Adding model reactions to original reaction list
+        self.parameters["original_reactions"] = []
+        for rxn in self.model.reactions:
+            if FBAHelper.is_ex(rxn):
+                continue
+            if FBAHelper.is_biomass(rxn):
+                continue
+            if rxn.lower_bound < 0:
+                self.parameters["original_reactions"].append([rxn, "<"])
+            if rxn.upper_bound > 0:
+                self.parameters["original_reactions"].append([rxn, ">"])
         # Adding constraint for target reaction
+        self.parameters["origobj"] = self.model.objective
         self.pkgmgr.getpkg("ObjConstPkg").build_package(self.parameters["minimum_obj"],None)
                 
         # Determine all indecies that should be gapfilled
@@ -253,21 +265,9 @@ class GapfillingPkg(BaseFBAPkg):
                         new_penalties[cobra_reaction.id]["reversed"] = 1
 
                         # Only run this on new exchanges so we don't readd for all exchanges
-        for cpd in new_exchange:
-            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, cpd.id,
-                                                                    self.parameters["default_uptake"],
-                                                                    self.parameters["default_excretion"])
-            if drain_reaction.id not in self.cobramodel.reactions and drain_reaction.id not in new_reactions:
-                new_reactions[drain_reaction.id] = drain_reaction
-
+        self.modelutl.add_exchanges_for_metabolites(new_exchange,self.parameters["default_uptake"],self.parameters["default_excretion"])
         # Only run this on new demands so we don't readd for all exchanges
-        for cpd_id in new_demand:
-            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, cpd.id,
-                                                                    self.parameters["default_uptake"],
-                                                                    self.parameters["default_excretion"])
-            if drain_reaction.id not in self.cobramodel.reactions and drain_reaction.id not in new_reactions:
-                new_reactions[drain_reaction.id] = drain_reaction
-
+        self.modelutl.add_exchanges_for_metabolites(new_demand,self.parameters["default_uptake"],self.parameters["default_excretion"],"DM_")
         # Adding all new reactions to the model at once (much faster than one at a time)
         self.model.add_reactions(new_reactions.values())
         return new_penalties
@@ -292,9 +292,9 @@ class GapfillingPkg(BaseFBAPkg):
                 msid = FBAHelper.modelseed_id_from_cobra_metabolite(cobra_metabolite)
                 if msid in self.parameters["auto_sink"]:
                     if msid != "cpd11416" or cobra_metabolite.compartment == "c0":
-                        new_demand.append(cobra_metabolite.id)
+                        new_demand.append(cobra_metabolite)
                 if compartment == "e":
-                    new_exchange.append(cobra_metabolite.id)
+                    new_exchange.append(cobra_metabolite)
         # Adding all metabolites to model prior to adding reactions
         self.model.add_metabolites(new_metabolites.values())
 
@@ -338,31 +338,22 @@ class GapfillingPkg(BaseFBAPkg):
                     new_penalties[cobra_reaction.id][
                         "forward"] = template_reaction.base_cost + template_reaction.forward_penalty
         # Only run this on new exchanges so we don't read for all exchanges
-        for cpd_id in new_exchange:
-            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, cpd_id,
-                                                                    self.parameters["default_uptake"],
-                                                                    self.parameters["default_excretion"])
-            if drain_reaction is not None and drain_reaction.id not in new_reactions:
-                new_penalties[drain_reaction.id] = {
-                    'added': 1,
-                    'reverse': 1,
-                    'forward': 1
-                }
-                new_reactions[drain_reaction.id] = drain_reaction
+        exchanges = self.modelutl.add_exchanges_for_metabolites(new_exchange,self.parameters["default_uptake"],self.parameters["default_excretion"])
+        for ex in exchanges:
+            new_penalties[ex.id] = {
+                'added': 1,
+                'reverse': 1,
+                'forward': 1
+            }
+            
         # Only run this on new demands so we don't readd for all exchanges
-        for cpd_id in new_demand:
-            drain_reaction = FBAHelper.add_drain_from_metabolite_id(self.model, cpd_id,
-                                                                    self.parameters["default_uptake"],
-                                                                    self.parameters["default_excretion"],
-                                                                    "DM_")
-
-            if drain_reaction is not None and drain_reaction.id not in new_reactions:
-                new_penalties[drain_reaction.id] = {
-                    'added': 1,
-                    'reverse': 1,
-                    'forward': 1
-                }
-                new_reactions[drain_reaction.id] = drain_reaction
+        exchanges = self.modelutl.add_exchanges_for_metabolites(new_demand,self.parameters["default_uptake"],self.parameters["default_excretion"],"DM_")
+        for ex in exchanges:
+            new_penalties[ex.id] = {
+                'added': 1,
+                'reverse': 1,
+                'forward': 1
+            }
 
         # Adding all new reactions to the model at once (much faster than one at a time)
         self.model.add_reactions(new_reactions.values())
@@ -432,7 +423,7 @@ class GapfillingPkg(BaseFBAPkg):
         if solution is None:
             solution = self.compute_gapfilled_solution()
         if flux_values is None:
-            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
+            flux_values = self.modelutl.compute_flux_values_from_variables()
         filter = {}
         for rxn_id in solution["reversed"]:
             filter[rxn_id] = solution["reversed"][rxn_id]
@@ -462,7 +453,7 @@ class GapfillingPkg(BaseFBAPkg):
         if solution == None:
             solution = self.compute_gapfilled_solution()
         if flux_values == None:
-            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
+            flux_values = self.modelutl.compute_flux_values_from_variables()
         for rxnobj in self.model.reactions:
             if rxnobj.id in self.gapfilling_penalties:
                 if "reverse" in self.gapfilling_penalties[rxnobj.id] and flux_values[rxnobj.id]["reverse"] <= Zero:
@@ -484,7 +475,11 @@ class GapfillingPkg(BaseFBAPkg):
             #Setting all gapfilled reactions not in the solution to zero
             self.knockout_gf_reactions_outside_solution(solution)
             self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
-            filtered_list = FBAHelper.reaction_expansion_test(self.model,reaction_list,condition_list,self.pkgmgr)
+            for condition in condition_list:
+                condition["change"] = True
+            filtered_list = self.modelutl.reaction_expansion_test(reaction_list,condition_list)
+            for condition in condition_list:
+                condition["change"] = False
         if len(filtered_list) > 0:
             if max_iterations > 0:
                 print("Gapfilling test failed "+str(11-max_iterations))
@@ -509,25 +504,77 @@ class GapfillingPkg(BaseFBAPkg):
             for reaction in self.model.reactions:
                 if reaction.id in self.gapfilling_penalties:
                     if "reverse" in self.gapfilling_penalties[reaction.id]:
-                        reaction.lower_bound = 0
                         rxnlist.append([reaction,"<"])
                     if "forward" in self.gapfilling_penalties[reaction.id]:
-                        reaction.upper_bound = 0
                         rxnlist.append([reaction,">"])
-                    reaction.update_variable_bounds()
             self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
-            filtered_list = FBAHelper.reaction_expansion_test(self.model,rxnlist,test_conditions,self.pkgmgr)
+            filtered_list = self.modelutl.reaction_expansion_test(rxnlist,test_conditions)
         #Now constraining filtered reactions to zero
         for item in filtered_list:
-            print("Filtering:",item[0].id,item[1])
+            logger.debug("Filtering:",item[0].id,item[1])
             if item[1] == ">":
                 self.model.reactions.get_by_id(item[0].id).upper_bound = 0
             else:
                 self.model.reactions.get_by_id(item[0].id).lower_bound = 0
+        #Now testing if the gapfilling minimum objective can still be achieved
+        gfobj = self.model.objective
+        self.model.objective = self.parameters["origobj"]
+        solution = self.model.optimize()
+        #Restoring the minimum objective constraint
+        self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = self.parameters["minimum_obj"]
+        print("Objective after filtering:",solution.objective_value,"; min objective:",self.parameters["minimum_obj"])
+        if solution.objective_value < self.parameters["minimum_obj"]:
+            #Now we need to restore a minimal set of filtered reactions such that we permit the minimum objective to be reached
+            new_objective = self.model.problem.Objective(
+                Zero,
+                direction="min")
+            filterobjcoef = dict()
+            for item in filtered_list:
+                rxn = self.model.reactions.get_by_id(item[0].id)
+                if item[1] == ">":
+                    filterobjcoef[rxn.forward_variable] = item[3]
+                    rxn.upper_bound = item[2]
+                else:
+                    filterobjcoef[rxn.reverse_variable] = item[3]
+                    rxn.lower_bound = item[2]
+            
+            self.model.objective = new_objective
+            new_objective.set_linear_coefficients(filterobjcoef)
+            solution = self.model.optimize()
+            count = len(filtered_list)
+            for item in filtered_list:
+                rxn = self.model.reactions.get_by_id(item[0].id)
+                if solution.fluxes[rxn.id] > 0.0000001:
+                    if item[1] == "<":
+                        count += -1
+                        rxn.lower_bound = 0
+                elif solution.fluxes[rxn.id] < -0.0000001:
+                    if item[1] == ">":
+                        count += -1
+                        rxn.upper_bound = 0
+                else:
+                    if item[1] == ">":
+                        count += -1
+                        rxn.upper_bound = 0
+                    else:
+                        count += -1
+                        rxn.lower_bound = 0
+            print("Reactions unfiltered:",count)
+            #Checking for model reactions that can be removed to enable all tests to pass
+            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+            filtered_list = self.modelutl.reaction_expansion_test(self.parameters["original_reactions"],test_conditions)
+            for item in filtered_list:
+                logger.debug("Filtering:",item[0].id,item[1])
+                if item[1] == ">":
+                    self.model.reactions.get_by_id(item[0].id).upper_bound = 0
+                else:
+                    self.model.reactions.get_by_id(item[0].id).lower_bound = 0
+            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = self.parameters["minimum_obj"]
+        self.model.objective = gfobj
     
     def compute_gapfilled_solution(self, flux_values=None):
         if flux_values is None:
-            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
+            flux_values = self.modelutl.compute_flux_values_from_variables()
         output = {"reversed": {}, "new": {}}
         for reaction in self.model.reactions:
             if reaction.id in self.gapfilling_penalties:
