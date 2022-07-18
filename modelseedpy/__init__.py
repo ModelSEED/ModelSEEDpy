@@ -27,7 +27,7 @@ c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 c_handler.setFormatter(c_format)
 logger.addHandler(c_handler)
 if config.get("logging","log_file") == "yes":
-    f_handler = logging.FileHandler(config.get("logging","filename"),mode="w")
+    f_handler = logging.FileHandler(config.get("logging","filename"), mode="a")
     f_handler.setLevel(logging_hash[config.get("logging","file_level")])
     f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     f_handler.setFormatter(f_format)
