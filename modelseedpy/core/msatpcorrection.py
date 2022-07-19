@@ -9,7 +9,7 @@ from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.core.msmodelutl import MSModelUtil
-from modelseedpy.core import FBAHelper, MSGapfill
+from modelseedpy.core import FBAHelper, MSGapfill, MSMedia
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,12 @@ class MSATPCorrection:
         else:
             output = self.modelutl.add_atp_hydrolysis(compartment)
             self.atp_hydrolysis = output["reaction"]
-        self.atp_medias = atp_medias
+        self.atp_medias = []
+        for media in atp_medias:
+            if isinstance(media,MSMedia):
+                self.atp_medias.append([media,0.01])
+            else:
+                self.atp_medias.append(media)        
         self.max_gapfilling = max_gapfilling
         self.gapfilling_delta = gapfilling_delta
         self.coretemplate = core_template
@@ -162,7 +167,8 @@ class MSATPCorrection:
             logger.debug(f'ATP bounds: ({self.atp_hydrolysis.lower_bound}, {self.atp_hydrolysis.upper_bound})')
             #self.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
             pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
-            for media in self.atp_medias:
+            for media_tuple in self.atp_medias:
+                media = media_tuple[0]
                 logger.debug('evaluate media %s', media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
                 logger.debug('model.medium %s', self.model.medium)
@@ -170,11 +176,12 @@ class MSATPCorrection:
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
-                if solution.objective_value == 0 or solution.status != 'optimal':
-                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
+                if solution.objective_value < media_tuple[1] or solution.status != 'optimal':
+                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id,media_tuple[1])
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
-                elif solution.objective_value > 0 or solution.status == 'optimal':
+                elif solution.objective_value >= media_tuple[1]:
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
+                logger.debug('gapfilling stats:',json.dumps(self.media_gapfill_stats[media],indent=2))
 
         if MSATPCorrection.DEBUG:
             with open('debug.json', 'w') as outfile:
