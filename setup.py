@@ -31,6 +31,9 @@ setup(
         "matplotlib >= 3.0.0",
         "pyeda"
     ],
+    tests_require=[
+        "pytest",
+    ],
     project_urls={
         'Documentation': 'https://modelseedpy.readthedocs.io/en/stable/',
         'Issues': 'https://github.com/ModelSEED/ModelSEEDpy/issues',

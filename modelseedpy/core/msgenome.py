@@ -1,10 +1,9 @@
 import logging
-logger = logging.getLogger(__name__)
-
 import re
 import copy  # !!! the import is never used
 from cobra.core.dictlist import DictList
 
+logger = logging.getLogger(__name__)
 
 
 def normalize_role(s):
@@ -13,14 +12,11 @@ def normalize_role(s):
     s = re.sub('[\W_]+', '', s)
     return s
 
-#Static factory functions:
-            
-#def build_from_kbase_gto:
-
 
 def read_fasta(f, split='|', h_func=None):
     with open(f, 'r') as fh:
         return parse_fasta_str(fh.read(), split, h_func)
+
 
 def parse_fasta_str(faa_str, split='|', h_func=None):
     features = []
@@ -48,13 +44,28 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
 
 
 class MSFeature:
+
     def __init__(self, feature_id, sequence, description=None):
-        self.id = feature_id; self.seq = sequence
+        """
+
+        @param feature_id: identifier for the protein coding feature
+        @param sequence: protein sequence
+        @param description: description of the feature
+        """
+
+        self.id = feature_id
+        self.seq = sequence
         self.description = description  # temporary replace with proper parsing
         self.ontology_terms = {}
         self.aliases = []
 
     def add_ontology_term(self, ontology_term, value):
+        """
+        Add functional term to the feature
+
+        @param ontology_term: type of the ontology (e.g., RAST, EC)
+        @param value: value for the ontology (e.g., pyruvate kinase)
+        """
         if ontology_term not in self.ontology_terms:
             self.ontology_terms[ontology_term] = []
         if value not in self.ontology_terms[ontology_term]:
@@ -62,8 +73,24 @@ class MSFeature:
 
 
 class MSGenome:
+
     def __init__(self):
         self.features = DictList()
+
+    def add_features(self, feature_list: list):
+        """
+
+        :param feature_list:
+        :return:
+        """
+        duplicates = list(filter(lambda o: o.id in self.features, feature_list))
+        if len(duplicates) > 0:
+            raise ValueError(f"unable to add features {duplicates} already present in the genome")
+
+        for f in feature_list:
+            f._genome = self
+
+        self.features += feature_list
 
     @staticmethod
     def from_fasta(filename, contigs=0, split='|', h_func=None):  # !!! the contigs argument is never used
@@ -83,9 +110,9 @@ class MSGenome:
         return genome
     
     def alias_hash(self):
-        return {alias:gene for gene in self.features for alias in gene.aliases}
+        return {alias: gene for gene in self.features for alias in gene.aliases}
     
-    def search_for_gene(self,query):
+    def search_for_gene(self, query):
         if query in self.features:
             return self.features.get_by_id(query)
         aliases = self.alias_hash()

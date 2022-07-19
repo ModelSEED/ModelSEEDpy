@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 class MSATPCorrection:
 
-    def __init__(self, model, core_template, atp_medias,compartment="c0",
+    DEBUG = False
+
+    def __init__(self, model, core_template, atp_medias, compartment="c0",
                  max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None):
         """
 
@@ -60,19 +62,53 @@ class MSATPCorrection:
         self.lp_filename = None
         self.multiplier = 1.2
 
+    @staticmethod
+    def find_reaction_in_template(model_reaction, template, compartment):
+        template_reaction = None  # we save lookup result here
+        if model_reaction.id in template.reactions:
+            template_reaction = template.reactions.get_by_id(model_reaction.id)
+        else:
+            msid = FBAHelper.modelseed_id_from_cobra_reaction(model_reaction)
+            if msid is not None:
+                msid += "_" + compartment
+            if msid in template.reactions:
+                template_reaction = template.reactions.get_by_id(model_reaction.id[0:-1])
+            else:
+                # will leave this here for now
+                def split_id_from_index(s):
+                    """
+                    Extracts the last digits of a string example: rxn12345, returns rxn 12345
+
+                    @param s: any string
+                    @return: string split into head (remaining) + tail (digits)
+                    """
+                    str_pos = len(s) - 1
+                    while str_pos >= 0:
+                        if not s[str_pos].isdigit():
+                            break
+                        str_pos -= 1
+
+                    return s[:str_pos + 1], s[str_pos + 1:]
+
+                rxn_id, index = split_id_from_index(model_reaction.id)
+                if rxn_id in template.reactions:
+                    template_reaction = template.reactions.get_by_id(rxn_id)
+
+        return template_reaction
+
     def disable_noncore_reactions(self):
         """
-        Disables all noncore reactions in the model
+        Disables all non core reactions in the model
         :return:
         """
-        #Must restore reactions before disabling to ensure bounds are not overwritten
+        # Must restore reactions before disabling to ensure bounds are not overwritten
         if len(self.noncore_reactions) > 0:
-            self.restore_noncore_reactions(noncore = True,othercompartment = True)
-        #Now clearing the existing noncore datastructures
+            self.restore_noncore_reactions(noncore=True, othercompartment=True)
+        # Now clearing the existing noncore data structures
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
-        #Iterating through reactions and disabling
+        # Iterating through reactions and disabling
         for reaction in self.model.reactions:
             if reaction.id == self.atp_hydrolysis.id:
                 continue
@@ -80,36 +116,35 @@ class MSATPCorrection:
                 continue
             if FBAHelper.is_biomass(reaction):
                 continue
-            msid = FBAHelper.modelseed_id_from_cobra_reaction(reaction)
-            if msid != None:
-                msid += "_"+self.compartment[0:1]
-            if FBAHelper.rxn_compartment(reaction) != self.compartment:
-                logger.debug(reaction.id+" noncore")
-                self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
-                if reaction.lower_bound < 0:
-                    self.other_compartments.append([reaction, "<"])
-                if reaction.upper_bound > 0:
-                    self.other_compartments.append([reaction, ">"])
-                reaction.lower_bound = 0
-                reaction.upper_bound = 0
-            elif msid in self.coretemplate.reactions:
-                self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
-                logger.debug(reaction.id+" core")
-                if reaction.lower_bound < 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).lower_bound >= 0:
-                    logger.debug(reaction.id+" core but reversible")
+
+            self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
+
+            # check if reaction is in core template
+            template_reaction = self.find_reaction_in_template(reaction, self.coretemplate, self.compartment[0:1])
+
+            # update bounds to reaction
+            if template_reaction is not None:
+                logger.debug(f"{reaction.id} core")
+                if reaction.lower_bound < 0 and template_reaction.lower_bound >= 0:
+                    logger.debug(reaction.id + " core but reversible")
                     self.noncore_reactions.append([reaction, "<"])
                     reaction.lower_bound = 0
-                if reaction.upper_bound > 0 and self.coretemplate.reactions.get_by_id(reaction.id[0:-1]).upper_bound <= 0:
-                    logger.debug(reaction.id+" core but reversible")
+                if reaction.upper_bound > 0 and template_reaction.upper_bound <= 0:
+                    logger.debug(reaction.id + " core but reversible")
                     self.noncore_reactions.append([reaction, ">"])
                     reaction.upper_bound = 0
             else:
-                logger.debug(reaction.id+" noncore")
-                self.original_bounds[reaction.id] = (reaction.lower_bound, reaction.upper_bound)
-                if reaction.lower_bound < 0:
-                    self.noncore_reactions.append([reaction, "<"])
-                if reaction.upper_bound > 0:
-                    self.noncore_reactions.append([reaction, ">"])
+                logger.debug(f"{reaction.id} non core")
+                if FBAHelper.rxn_compartment(reaction) != self.compartment:
+                    if reaction.lower_bound < 0:
+                        self.other_compartments.append([reaction, "<"])
+                    if reaction.upper_bound > 0:
+                        self.other_compartments.append([reaction, ">"])
+                else:
+                    if reaction.lower_bound < 0:
+                        self.noncore_reactions.append([reaction, "<"])
+                    if reaction.upper_bound > 0:
+                        self.noncore_reactions.append([reaction, ">"])
                 reaction.lower_bound = 0
                 reaction.upper_bound = 0
 
@@ -129,13 +164,14 @@ class MSATPCorrection:
             self.model.objective = self.atp_hydrolysis.id
             #self.model.objective = self.model.problem.Objective(Zero,direction="max")
             #self.atp_hydrolysis.update_variable_bounds()
-            logger.debug("ATP bounds:"+str(self.atp_hydrolysis.lower_bound)+":"+str(self.atp_hydrolysis.upper_bound))
+            logger.debug(f'ATP bounds: ({self.atp_hydrolysis.lower_bound}, {self.atp_hydrolysis.upper_bound})')
             #self.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
             pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
             for media_tuple in self.atp_medias:
                 media = media_tuple[0]
                 logger.debug('evaluate media %s', media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+                logger.debug('model.medium %s', self.model.medium)
                 solution = self.model.optimize()
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
@@ -146,6 +182,11 @@ class MSATPCorrection:
                 elif solution.objective_value >= media_tuple[1]:
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
                 logger.debug('gapfilling stats:',json.dumps(self.media_gapfill_stats[media],indent=2))
+
+        if MSATPCorrection.DEBUG:
+            with open('debug.json', 'w') as outfile:
+                json.dump(self.media_gapfill_stats[media], outfile)
+
         return output
 
     def determine_growth_media(self):
@@ -163,10 +204,15 @@ class MSATPCorrection:
                 best_score = gfscore
         if self.max_gapfilling is None:
             self.max_gapfilling = best_score
+
+        logger.debug(f'max_gapfilling: {self.max_gapfilling}, best_score: {best_score}')
+
         for media in self.media_gapfill_stats:
             gfscore = 0
             if self.media_gapfill_stats[media]:
                 gfscore = len(self.media_gapfill_stats[media]["new"].keys()) + 0.5*len(self.media_gapfill_stats[media]["reversed"].keys())
+
+            logger.debug(f'media gapfilling score: {media.id}: {gfscore}')
             if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
                 self.selected_media.append(media)
 
@@ -211,9 +257,10 @@ class MSATPCorrection:
         """
         self.filtered_noncore = []
         tests = self.build_tests()
-        #Must restore noncore reactions and NOT other compartment reactions before running this function - it is not detrimental to run this twice
-        self.restore_noncore_reactions(noncore = True,othercompartment = False)
-        # Extending model with noncore reactions while retaining ATP accuracy
+        # Must restore non core reactions and NOT other compartment reactions before running this function
+        # it is not detrimental to run this twice
+        self.restore_noncore_reactions(noncore=True, othercompartment=False)
+        # Extending model with non core reactions while retaining ATP accuracy
         self.filtered_noncore = self.modelutl.reaction_expansion_test(self.noncore_reactions,tests)        
         # Removing filtered reactions
         for item in self.filtered_noncore:
@@ -225,8 +272,8 @@ class MSATPCorrection:
             # reaction.update_variable_bounds()
             if item[0].lower_bound == 0 and item[0].upper_bound == 0:
                 self.model.remove_reactions([item[0]])
-        #Restoring other compartment reactions but not the core because this would undo reaction filtering
-        self.restore_noncore_reactions(noncore = False,othercompartment = True)
+        # Restoring other compartment reactions but not the core because this would undo reaction filtering
+        self.restore_noncore_reactions(noncore=False, othercompartment=True)
 
     def restore_noncore_reactions(self,noncore = True,othercompartment = True):
         """
@@ -247,8 +294,7 @@ class MSATPCorrection:
                     reaction.lower_bound = self.original_bounds[reaction.id][0]
                     reaction.upper_bound = self.original_bounds[reaction.id][1]
 
-    
-    def build_tests(self,multiplier=None):
+    def build_tests(self, multiplier=None):
         """Build tests based on ATP media evaluations
         
         Parameters
@@ -264,15 +310,20 @@ class MSATPCorrection:
         Raises
         ------
         """
-        if multiplier == None:
+        if multiplier is None:
             multiplier = self.multiplier
         tests = []
         self.model.objective = self.atp_hydrolysis.id
         for media in self.selected_media:
             self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-            obj_value = model.slim_optimize()
-            logger.debug(media.name," = ",obj_value)
-            tests.append({"media":media,"is_max_threshold": True,"threshold":multiplier*obj_value,"objective":self.atp_hydrolysis.id})
+            obj_value = self.model.slim_optimize()
+            logger.debug(f'{media.name} = {obj_value}')
+            tests.append({
+                "media": media,
+                "is_max_threshold": True,
+                "threshold": multiplier*obj_value,
+                "objective": self.atp_hydrolysis.id
+            })
         return tests
 
     def run_atp_correction(self):
@@ -280,7 +331,7 @@ class MSATPCorrection:
         Runs the entire ATP method
         :return:
         """
-        #Ensure all specified media work
+        # Ensure all specified media work
         self.evaluate_growth_media()
         self.determine_growth_media()
         self.apply_growth_media_gapfilling()
