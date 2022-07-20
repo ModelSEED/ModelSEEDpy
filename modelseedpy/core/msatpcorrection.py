@@ -19,7 +19,7 @@ class MSATPCorrection:
 
     DEBUG = False
 
-    def __init__(self, model, core_template, atp_medias, compartment="c0",
+    def __init__(self, model, core_template, atp_medias: list, compartment="c0",
                  max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None):
         """
 
@@ -45,8 +45,8 @@ class MSATPCorrection:
             self.atp_hydrolysis = output["reaction"]
         self.atp_medias = []
         for media in atp_medias:
-            if isinstance(media,MSMedia):
-                self.atp_medias.append([media,0.01])
+            if isinstance(media, MSMedia):
+                self.atp_medias.append([media, 0.01])
             else:
                 self.atp_medias.append(media)        
         self.max_gapfilling = max_gapfilling
@@ -163,12 +163,11 @@ class MSATPCorrection:
         with self.model:
             self.model.objective = self.atp_hydrolysis.id
             #self.model.objective = self.model.problem.Objective(Zero,direction="max")
-            #self.atp_hydrolysis.update_variable_bounds()
+
             logger.debug(f'ATP bounds: ({self.atp_hydrolysis.lower_bound}, {self.atp_hydrolysis.upper_bound})')
             #self.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
             pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
-            for media_tuple in self.atp_medias:
-                media = media_tuple[0]
+            for media, minimum_obj in self.atp_medias:
                 logger.debug('evaluate media %s', media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
                 logger.debug('model.medium %s', self.model.medium)
@@ -176,12 +175,14 @@ class MSATPCorrection:
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
-                if solution.objective_value < media_tuple[1] or solution.status != 'optimal':
-                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id,media_tuple[1])
+                if solution.objective_value < minimum_obj or solution.status != 'optimal':
+                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media,
+                                                                                    self.atp_hydrolysis.id,
+                                                                                    minimum_obj)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
-                elif solution.objective_value >= media_tuple[1]:
+                elif solution.objective_value >= minimum_obj:
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
-                logger.debug('gapfilling stats:',json.dumps(self.media_gapfill_stats[media],indent=2))
+                logger.debug('gapfilling stats: %s', json.dumps(self.media_gapfill_stats[media], indent=2))
 
         if MSATPCorrection.DEBUG:
             with open('debug.json', 'w') as outfile:
@@ -335,10 +336,13 @@ class MSATPCorrection:
         self.evaluate_growth_media()
         self.determine_growth_media()
         self.apply_growth_media_gapfilling()
+        self.evaluate_growth_media()
         self.expand_model_to_genome_scale()
+        return self.build_tests()
     
     @staticmethod
-    def atp_correction(model,coretemplate,atp_medias = None,atp_objective = "bio2",max_gapfilling = None,gapfilling_delta = 0):
-        msatpobj = MSATPCorrection(model,coretemplate,atp_medias,atp_objective,max_gapfilling,gapfilling_delta)
-        msatpobj.run_atp_correction()
-        return msatpobj
+    def atp_correction(model, core_template, atp_medias=None, atp_objective="bio2",
+                       max_gapfilling=None, gapfilling_delta=0):
+        atp_correction = MSATPCorrection(model, core_template, atp_medias, atp_hydrolysis_id=atp_objective,
+                                         max_gapfilling=max_gapfilling, gapfilling_delta=gapfilling_delta)
+        return atp_correction.run_atp_correction()

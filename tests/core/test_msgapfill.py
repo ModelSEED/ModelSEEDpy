@@ -70,7 +70,7 @@ def test_ms_gap_fill1(template, get_model, media_glucose_aerobic):
     """
     Test gap filling with glucose aerobic requesting minimal growth value
     """
-    model = get_model(["GLCpts_c0", "NADH16_c0", "GLCpts_c0", "O2t_c0"])
+    model = get_model(["CYTBD_c0", "NADH16_c0", "GLCpts_c0", "O2t_c0"])
     gap_fill = MSGapfill(model, [template])
     result = gap_fill.run_gapfilling(media_glucose_aerobic, 'BIOMASS_Ecoli_core_w_GAM_c0', minimum_obj=0.1)
     assert result
