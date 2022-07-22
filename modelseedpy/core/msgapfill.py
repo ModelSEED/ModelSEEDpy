@@ -57,7 +57,7 @@ class MSGapfill:
         })
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         
-        #Filtering breaking reactions out of the database
+        # Filtering breaking reactions out of the database
         if prefilter and self.test_conditions:
             pkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(self.test_conditions)
         
@@ -68,14 +68,16 @@ class MSGapfill:
         logger.debug('gapfill solution objective value %f (%s) for media %s', sol.objective_value, sol.status, media)
 
         if sol.status != 'optimal':
-            logger.warning("No solution found for %s", media)
+            logger.debug("No solution found for %s", media)
             return None
 
         self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() 
         if self.test_conditions:
-            self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions, self.last_solution, self.test_condition_iteration_limit)
+            self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(
+                self.test_conditions, self.last_solution, self.test_condition_iteration_limit)
             if self.last_solution is None:
-                logger.warning("no solution could be found that satisfied all specified test conditions in specified iterations!")
+                logger.debug("No solution could be found that satisfied all \
+                              specified test conditions in specified iterations!")
                 return None
         if binary_check:
             return pkgmgr.getpkg("GapfillingPkg").binary_check_gapfilling_solution()

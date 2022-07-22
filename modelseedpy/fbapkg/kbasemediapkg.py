@@ -60,4 +60,4 @@ class KBaseMediaPkg(BaseFBAPkg):
                                         self.variables["logconc"][met.id].lb = ln(mediacpd.concentration)
                                         self.variables["logconc"][met.id].ub = ln(mediacpd.concentration)
                 else:
-                    logger.warn('Media compound: ', mediacpd.id,' not found in model.')
+                    logger.info(f'Media compound: {mediacpd.id} not found in model.')
