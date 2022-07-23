@@ -13,18 +13,23 @@ logger = logging.getLogger(__name__)
 class MSGrowthPhenotype:
     def __init__(self, obj_id, media=None, growth=None, gene_ko=[], additional_compounds=[], parent=None, name=None):
         
-        self.id = obj_id; self.name = name; self.media = media; self.growth = growth; self.gene_ko = gene_ko
-        self.gapfilling = None; self.additional_compounds = additional_compounds; self.parent = parent
+        self.id = obj_id
         self.name = name or obj_id
+        self.growth = growth
+        self.media = media
+        self.gene_ko = gene_ko
+        self.gapfilling = None
+        self.additional_compounds = additional_compounds
+        self.parent = parent
 
     def build_media(self):
         cpd_hash = {}
         for cpd in self.additional_compounds:
             cpd_hash[cpd] = 100
         full_media = MSMedia.from_dict(cpd_hash)
-        if self.media:
+        if self.media is not None:
             full_media.merge(self.media, overwrite_overlap = False)
-        if self.parent and self.parent.base_media:
+        if self.parent is not None and self.parent.base_media is not None:
                 full_media.merge(self.parent.base_media, overwrite_overlap = False)
         return full_media
     
@@ -75,9 +80,10 @@ class MSGrowthPhenotype:
     
 class MSGrowthPhenotypes:
     def __init__(self, base_media=None, base_uptake=0, base_excretion=1000): 
-        
-        self.base_media = base_media; self.base_uptake = base_uptake; self.base_excretion = base_excretion
+        self.base_media = base_media
         self.phenotypes = DictList()
+        self.base_uptake = base_uptake
+        self.base_excretion = base_excretion
 
     @staticmethod
     def from_compound_hash(compounds,base_media,base_uptake=0,base_excretion=1000):
@@ -164,7 +170,7 @@ class MSGrowthPhenotypes:
                 gfl = None
                 if result["class"] == "FN" and correct_false_negatives:
                     pheno.gapfill_model_for_phenotype(modelutl,[template],None)
-                    if pheno.gapfilling.last_solution:
+                    if pheno.gapfilling.last_solution is not None:
                         gpfl_rxns = []
                         for rxn_id in pheno.gapfilling.last_solution["reversed"]:
                             gpfl_rxns.append(pheno.gapfilling.last_solution["reversed"][rxn_id]+rxn_id)
