@@ -1,8 +1,9 @@
 import logging
-logger = logging.getLogger(__name__)
 from cobra.core import Reaction
 import cobra
 import re
+
+logger = logging.getLogger(__name__)
 
 class MSEditorAPI:
 
