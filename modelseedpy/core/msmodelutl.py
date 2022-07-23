@@ -1,8 +1,9 @@
 import logging
-logger = logging.getLogger(__name__)
 import re
 from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are not used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+
+logger = logging.getLogger(__name__)
 
 def search_name(name):
     name = name.lower()
@@ -155,10 +156,10 @@ class MSModelUtil:
                 "coefficient" : rxn.metabolites[met],
                 "modelcompound_ref" : "~/modelcompounds/id/"+met.id
             })
-        if reaction_genes and rxn.id in reaction_genes:
+        if reaction_genes is not None and rxn.id in reaction_genes:
             best_gene = None
             for gene, val in reaction_genes[rxn.id].items():
-                if not best_gene or val > reaction_genes[rxn.id][best_gene]:
+                if best_gene is None or val > reaction_genes[rxn.id][best_gene]:
                     best_gene = gene
             rxn_data["modelReactionProteins"] = [{"note":"Added from gapfilling","modelReactionProteinSubunits":[],"source":"Unknown"}]
             rxn_data["modelReactionProteins"][0]["modelReactionProteinSubunits"] = [
@@ -177,7 +178,7 @@ class MSModelUtil:
             for gapfilling in newmodel["gapfillings"]:
                 if gapfilling["id"] == gfid:
                     gapfilling_obj = gapfilling
-        if not gapfilling_obj:    
+        if gapfilling_obj is None:    
             gapfilling_obj = {
                 "gapfill_id": newmodel["id"]+"."+gfid,
                 "id": gfid,
