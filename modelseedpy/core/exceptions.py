@@ -16,3 +16,7 @@ class GapfillingError(Exception):
 class ObjectError(Exception):
     """Error in the construction of a base KBase object"""
     pass 
+
+class ParameterError(Exception):
+    """Error in a parameterization"""
+    pass 
