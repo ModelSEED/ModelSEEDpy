@@ -772,9 +772,10 @@ class MSTemplateBuilder:
         self.name = name
         self.domain = domain
         self.template_type = template_type
-        self.biochemistry_ref = None
         self.compartments, self.biomasses, self.roles, self.complexes = [], [], [], []
         self.compounds, self.compartment_compounds, self.reactions = [], [], []
+        self.info = info
+        self.biochemistry_ref = None
 
     @staticmethod
     def from_dict(d, info=None, args=None):
