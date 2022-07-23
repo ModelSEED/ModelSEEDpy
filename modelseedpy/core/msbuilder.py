@@ -1,6 +1,5 @@
 import logging
 import itertools  # !!! this import is not used
-logger = logging.getLogger(__name__)
 
 import cobra
 from modelseedpy.core.rast_client import RastClient  # !!! this import is not used
@@ -11,6 +10,8 @@ from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 SBO_ANNOTATION = "sbo"
+
+logger = logging.getLogger(__name__)
 
 ### temp stuff ###
 core_biomass = {
@@ -526,7 +527,7 @@ class MSBuilder:
             res = rast.annotate_genome(self.genome)  # !!! res is never used
             self.search_name_to_genes, self.search_name_to_original = _aaaa(self.genome, 'RAST')
         # rxn_roles = aux_template(self.template)  # needs to be fixed to actually reflect template GPR rules
-        if not self.template:
+        if self.template is None:
             self.auto_select_template()
 
         # construct the model
