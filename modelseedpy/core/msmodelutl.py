@@ -1,9 +1,59 @@
 import logging
 import re
+import time
 from cobra import Model, Reaction, Metabolite
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 logger = logging.getLogger(__name__)
+
+def metabolite_msid(metabolite):
+    if re.search('^(cpd\d+)', metabolite.id):
+        m = re.search('^(cpd\d+)', metabolite.id)
+        return m[1]
+    for anno in metabolite.annotation:
+        if isinstance(metabolite.annotation[anno], list):
+            for item in metabolite.annotation[anno]:
+                if re.search('^(cpd\d+)', item):
+                    m = re.search('^(cpd\d+)', item)
+                    return m[1]
+        elif re.search('^(cpd\d+)', metabolite.annotation[anno]):
+            m = re.search('^(cpd\d+)', metabolite.annotation[anno])
+            return m[1]
+    return None
+    
+def reaction_msid(reaction):
+    if re.search('^(rxn\d+)', reaction.id):
+        m = re.search('^(rxn\d+)', reaction.id)
+        return m[1]
+    for anno in reaction.annotation:
+        if isinstance(reaction.annotation[anno], list):
+            for item in reaction.annotation[anno]:
+                if re.search('^(rxn\d+)', item):
+                    m = re.search('^(rxn\d+)', item)
+                    return m[1]
+        elif re.search('^(rxn\d+)', reaction.annotation[anno]):
+            m = re.search('^(rxn\d+)', reaction.annotation[anno])
+            return m[1]
+    return None
+
+def stoichiometry_to_string(stoichiometry):
+    reactants = []
+    products = []
+    for met in stoichiometry:
+        coef = stoichiometry[met]
+        if not isinstance(met, str):
+            if metabolite_msid(met) == "cpd00067":
+                met = None
+            else:
+                met = met.id
+        if met != None:
+            if coef < 0:
+                reactants.append(met)
+            else:
+                products.append(met)
+    reactants.sort()
+    products.sort()
+    return ["+".join(reactants)+"="+"+".join(products),"+".join(products)+"="+"+".join(reactants)]
 
 def search_name(name):
     name = name.lower()
@@ -11,13 +61,22 @@ def search_name(name):
     name = re.sub(r'\W+', '', name)
     return name
 
+
 class MSModelUtil:
 
     def __init__(self,model):
         self.model = model
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        self.atputl = None
+        self.gfutl = None
         self.metabolite_hash = None
         self.search_metabolite_hash = None
+        self.test_objective = None
+        self.score = None
+    
+    def printlp(self,lpfilename="debug.lp"):
+        with open(lpfilename, 'w') as out:
+                out.write(str(self.model.solver))
     
     def build_metabolite_hash(self):
         self.metabolite_hash = {}
@@ -51,6 +110,32 @@ class MSModelUtil:
             return self.search_metabolite_hash[sname]
         logger.info(name," not found in model!")
         return []
+    
+    def rxn_hash(self): 
+        output = {}
+        for rxn in self.model.reactions:
+            strings = stoichiometry_to_string(rxn.metabolites)
+            output[strings[0]] = [rxn,1]
+            output[strings[1]] = [rxn,-1]
+        return output
+    
+    def find_reaction(self,stoichiometry):
+        output = stoichiometry_to_string(stoichiometry)
+        atpstring = output[0]
+        rxn_hash = self.rxn_hash()
+        if atpstring in rxn_hash:
+            return rxn_hash[atpstring]
+        return None
+    
+    def msid_hash(self): 
+        output = {}
+        for cpd in self.model.metabolites:
+            msid = metabolite_msid(cpd)
+            if msid != None:
+                if msid not in output:
+                    output[msid] = []
+                output[msid].append(cpd)
+        return output
     
     def exchange_list(self):
         exchange_reactions = []
@@ -106,7 +191,8 @@ class MSModelUtil:
                                       upper_bound=excretion)
             drain_reaction.add_metabolites({cpd : -1})
             drain_reaction.annotation["sbo"] = 'SBO:0000627'    
-            drains.append(drain_reaction)
+            if drain_reaction.id not in self.model.reactions:
+                drains.append(drain_reaction)
         self.model.add_reactions(drains)
         return drains
         
@@ -134,6 +220,28 @@ class MSModelUtil:
         if add_to_model == 1:
             kbmodel["modelcompounds"].append(cpd_data)
         return cpd_data
+
+    def compute_flux_values_from_variables(self):
+        """Returns a hash of reaction fluxes from model object
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        dict<string reaction ID,{'reverse':float flux,'forward':float flux}>
+            Hash of reactions and their associated flux values
+            
+        Raises
+        ------
+        """
+        flux_values = {}
+        for rxn in self.model.reactions:
+            flux_values[rxn.id] = {
+                'reverse': rxn.reverse_variable.primal,
+                'forward': rxn.forward_variable.primal
+            }
+        return flux_values
 
     #Required this function to add gapfilled reactions to a KBase model for saving gapfilled model    
     def convert_cobra_reaction_to_kbreaction(self,rxn,kbmodel,cpd_hash,direction = "=",add_to_model = 1,reaction_genes = None):
@@ -179,6 +287,9 @@ class MSModelUtil:
         return rxn_data
     
     def add_gapfilling_solution_to_kbase_model(self,newmodel,gapfilled_reactions,gfid=None,media_ref = None,reaction_genes = None):
+        """
+        NOTE: to be moved to cobrakbase
+        """
         rxn_table = []
         gapfilling_obj = None
         if gfid == None:
@@ -210,26 +321,217 @@ class MSModelUtil:
             kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,newmodel,cpd_hash,gapfilled_reactions["new"][rxn],1,reaction_genes)
             kbrxn["gapfill_data"][gfid] = dict()
             kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["new"][rxn],1,[]]
-            rxn_table.append({
-                'id':kbrxn["id"],
-                'name':kbrxn["name"],
-                'direction':format_direction(kbrxn["direction"]),
-                'gene':format_gpr(kbrxn),
-                'equation':format_equation(kbrxn,cpd_hash),
-                'newrxn':1
-            })
+            #rxn_table.append({
+            #    'id':kbrxn["id"],
+            #    'name':kbrxn["name"],
+            #    'direction':format_direction(kbrxn["direction"]),
+            #    'gene':format_gpr(kbrxn),
+            #    'equation':format_equation(kbrxn,cpd_hash),
+            #    'newrxn':1
+            #})
         for rxn in gapfilled_reactions["reversed"]:
             for kbrxn in newmodel["modelreactions"]:
                 if kbrxn["id"] == rxn:
                     kbrxn["direction"] = "="
-                    rxn_table.append({
-                        'id':kbrxn["id"],
-                        'name':kbrxn["name"],
-                        'direction':format_direction(kbrxn["direction"]),
-                        'gene':format_gpr(kbrxn),
-                        'equation':format_equation(kbrxn,cpd_hash),
-                        'newrxn':0
-                    })
+                    #rxn_table.append({
+                    #    'id':kbrxn["id"],
+                    #    'name':kbrxn["name"],
+                    #    'direction':format_direction(kbrxn["direction"]),
+                    #    'gene':format_gpr(kbrxn),
+                    #    'equation':format_equation(kbrxn,cpd_hash),
+                    #    'newrxn':0
+                    #})
                     kbrxn["gapfill_data"][gfid] = dict()
                     kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["reversed"][rxn],1,[]]
         return rxn_table
+    
+    def apply_test_condition(self,condition,model = None):
+        """Applies constraints and objective of specified condition to model
+        
+        Parameters
+        ----------
+        condition : dict
+            Specifies condition to be tested with media, objective, is_max_threshold, threshold.
+        model : cobra.Model, optional
+            Specific instance of model to apply conditions to (useful if using "with model")
+        
+        Returns
+        -------
+        boolean
+            True if threshold is NOT exceeded, False if threshold is exceeded
+            
+        Raises
+        ------
+        """
+        if model == None:
+            model = self.model
+            pkgmgr = self.pkgmgr
+        else:
+            pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        model.objective = condition["objective"]
+        if condition["is_max_threshold"]:
+            model.objective.direction = "max"
+        else:
+            model.objective.direction = "min"
+        pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
+    
+    def test_single_condition(self,condition,apply_condition=True,model=None):
+        """Runs a single test condition to determine if objective value on set media exceeds threshold
+        
+        Parameters
+        ----------
+        condition : dict
+            Specifies condition to be tested with media, objective, is_max_threshold, threshold.
+        apply_condition : bool,optional
+            Indicates if condition constraints and objective should be applied.
+        model : cobra.Model, optional
+            Specific instance of model to apply tests to (useful if using "with model")
+        
+        Returns
+        -------
+        boolean
+            True if threshold is NOT exceeded, False if threshold is exceeded
+            
+        Raises
+        ------
+        """
+        if model == None:
+            model = self.model
+        if apply_condition:
+            self.apply_test_condition(condition,model)
+        new_objective = model.slim_optimize()
+        value = new_objective
+        if "change" in condition and condition["change"]:
+            if self.test_objective != None:
+                value = new_objective - self.test_objective
+        self.score = value
+        if model.solver.status != 'optimal':
+            self.printlp("Infeasible.lp")
+            logger.critical("Infeasible problem - LP file printed to debug!")
+            return False
+        if value >= condition["threshold"] and condition["is_max_threshold"]:
+            logger.debug("Failed high:"+str(self.test_objective)+";"+str(condition["threshold"]))
+            return False
+        elif value <= condition["threshold"] and not condition["is_max_threshold"]:
+            logger.debug("Failed low:"+str(self.test_objective)+";"+str(condition["threshold"]))
+            return False
+        self.test_objective = new_objective
+        return True
+    
+    def test_condition_list(self,condition_list,model=None):
+        """Runs a set of test conditions to determine if objective values on set medias exceed thresholds
+        
+        Parameters
+        ----------
+        condition_list : list<dict>
+            Specifies set of conditions to be tested with media, objective, is_max_threshold, threshold.
+        model : cobra.Model, optional
+            Specific instance of model to apply tests to (useful if using "with model")
+        
+        Returns
+        -------
+        boolean
+            True if ALL tests pass, False if any test returns false
+            
+        Raises
+        ------
+        """
+        if model == None:
+            model = self.model
+        for condition in condition_list:
+            if not self.test_single_condition(condition,True,model):
+                return False
+        return True
+    
+    def reaction_expansion_test(self,reaction_list,condition_list):
+        """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
+        
+        Parameters
+        ----------
+        reaction_list : list<[obj reaction,{>|>}]>
+            List of reactions and directions to test for addition in the model (should already be in model)
+        condition_list : list<dict>
+            Specifies set of conditions to be tested with media, objective, is_max_threshold, threshold.
+        
+        Returns
+        -------
+        list<[obj reaction,{>|>}]>
+            List of reactions and directions filtered because they fail tests when in the model
+            
+        Raises
+        ------
+        """
+        print("Expansion started!")
+        tic = time.perf_counter()
+        filtered_list = []
+        for condition in condition_list:
+            currmodel = self.model
+            with currmodel:
+                self.apply_test_condition(condition)
+                # First knockout all reactions in the input list and save original bounds
+                original_bound = []
+                for item in reaction_list:
+                    if item[1] == ">":
+                        original_bound.append(item[0].upper_bound)
+                        item[0].upper_bound = 0
+                    else:
+                        original_bound.append(item[0].lower_bound)
+                        item[0].lower_bound = 0
+                # Now restore reactions one at a time
+                count = 0
+                for item in reaction_list:
+                    if item[1] == ">":
+                        item[0].upper_bound = original_bound[count]
+                        if not self.test_single_condition(condition,False,currmodel):
+                            item[0].upper_bound = 0
+                            if item not in filtered_list:
+                                item.append(original_bound[count])
+                                item.append(self.score)
+                                filtered_list.append(item)
+                    else:
+                        item[0].lower_bound = original_bound[count]
+                        if not self.test_single_condition(condition,False,currmodel):
+                            item[0].lower_bound = 0
+                            if item not in filtered_list:
+                                item.append(original_bound[count])
+                                item.append(self.score)
+                                filtered_list.append(item)
+                    count += 1
+        toc = time.perf_counter()
+        print("Expansion time:",(toc-tic))
+        print("Filtered count:",len(filtered_list)," out of ",len(reaction_list))
+        return filtered_list
+
+    def add_atp_hydrolysis(self,compartment):
+        #Searching for ATP hydrolysis compounds
+        coefs = {"cpd00002":[-1,compartment],"cpd00001":[-1,compartment],"cpd00008":[1,compartment],"cpd00009":[1,compartment],"cpd00067":[1,compartment]}
+        msids = ["cpd00002","cpd00001","cpd00008","cpd00009","cpd00067"]
+        stoichiometry = {}
+        id_hash = self.msid_hash()
+        for msid in msids:
+            if msid not in id_hash:
+                logger.warning("Compound "+msid+" not found in model!")
+                return None
+            else:
+                for cpd in id_hash[msid]:
+                    if cpd.compartment == coefs[msid][1]:
+                        stoichiometry[cpd] = coefs[msid][0]
+        output = self.find_reaction(stoichiometry)
+        if output != None and output[1] == ">":
+            return {"reaction":output[0],"direction":">","new":False}
+        cobra_reaction = Reaction("rxn00062_"+compartment, 
+                                  name="ATP hydrolysis", 
+                                  lower_bound=0, 
+                                  upper_bound=1000)
+        cobra_reaction.annotation["sbo"] = "SBO:0000176" #biochemical reaction
+        cobra_reaction.annotation["seed.reaction"] = "rxn00062"
+        cobra_reaction.add_metabolites(stoichiometry)
+        self.model.add_reactions([cobra_reaction])
+        return {"reaction":cobra_reaction,"direction":">","new":True}
+    
+    @staticmethod
+    def parse_id(object):
+        if re.search('(.+)_([a-z]+)(\d*)$', object.id) != None:
+            m = re.search('(.+)_([a-z]+)(\d*)$', object.id)
+            return (m[1],m[2],m[3])
+        return None
