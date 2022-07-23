@@ -13,8 +13,6 @@ from modelseedpy.core import FBAHelper, MSGapfill, MSMedia
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 logger = logging.getLogger(__name__)
-import itertools  # !!! import never used
-import cobra  # !!! import never used
 
 class MSATPCorrection:
 
@@ -105,8 +103,7 @@ class MSATPCorrection:
         self.original_bounds = {}
         self.noncore_reactions, self.other_compartments = [], []
         #Iterating through reactions and disabling
-        self.noncore_reactions = []
-        self.other_compartments = []
+        self.noncore_reactions, self.other_compartments = [], []
         # Iterating through reactions and disabling
         for reaction in self.model.reactions:
             if any([reaction.id == self.atp_hydrolysis.id, FBAHelper.is_ex(reaction), FBAHelper.is_biomass(reaction)]):
@@ -156,6 +153,7 @@ class MSATPCorrection:
         with self.model:
             self.model.objective = self.atp_hydrolysis.id
             #self.model.objective = self.model.problem.Objective(Zero,direction="max")
+
             logger.debug(f'ATP bounds: ({self.atp_hydrolysis.lower_bound}, {self.atp_hydrolysis.upper_bound})')
             #self.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
             pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
@@ -209,7 +207,7 @@ class MSATPCorrection:
             if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
                 self.selected_media.append(media)
 
-    def determine_growth_media2(self, max_gapfilling=None):  #!!! unused function
+    def determine_growth_media2(self, max_gapfilling=None):
         """
         Decides which of the test media to use as growth conditions for this model
         :return:
