@@ -49,7 +49,7 @@ class MSEditorAPI:
 
         # Specify GPR as a string with boolean conditions (e.g. "(b0001 and b0002) or b1010").
         try:
-            if gpr:
+            if gpr is not None:
                 model.reactions.get_by_id(rxn_id).gene_reaction_rule = gpr
         except:
             raise Exception(f'The gpr {gpr} is invalid. Perhaps check parentheses.')  # not working, unsure exactly why
