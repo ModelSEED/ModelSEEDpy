@@ -1,5 +1,4 @@
 import logging
-logger = logging.getLogger(__name__)
 import copy
 import math
 from enum import Enum
@@ -8,6 +7,8 @@ from cobra.core.dictlist import DictList
 from cobra.util import format_long_string
 from modelseedpy.core.msmodel import get_direction_from_constraints, get_reaction_constraints_from_direction, get_cmp_token
 #from cobrakbase.kbase_object_info import KBaseObjectInfo
+
+logger = logging.getLogger(__name__)
 
 class AttrDict(dict):
     """
@@ -26,10 +27,17 @@ class TemplateReactionType(Enum):
 class MSTemplateMetabolite:
 
     def __init__(self, cpd_id, formula=None, name='', default_charge=None, mass=None, delta_g=None, 
-                 delta_g_error=None, is_cofactor=False, abbreviation='', aliases=[]):
-        self.id = cpd_id; self.formula = formula; self.name = name; self.abbreviation = abbreviation
-        self.default_charge = default_charge; self.mass = mass; self.delta_g = delta_g
-        self.delta_g_error = delta_g_error; self.is_cofactor = is_cofactor; self.aliases = aliases
+                 delta_g_error=None, is_cofactor=False, abbreviation='', aliases=None):
+        self.id = cpd_id
+        self.formula = formula
+        self.name = name
+        self.abbreviation = abbreviation
+        self.default_charge = default_charge
+        self.mass = mass
+        self.delta_g = delta_g
+        self.delta_g_error = delta_g_error
+        self.is_cofactor = is_cofactor
+        self.aliases = aliases or []
         self.species = set()
         self._template = None
 
@@ -103,8 +111,7 @@ class MSTemplateSpecies(Metabolite):
         :param index: compartment index
         :return: cobra.core.Metabolite
         """
-        if not index:
-            index = ''
+        index = index or ''
         cpd_id = f'{self.id}{index}'
         compartment = f'{self.compartment}{index}'
         name = f'{self.name}'
@@ -342,7 +349,7 @@ class MSTemplateReaction(Reaction):
 
 class NewModelTemplateRole:
 
-    def __init__(self, role_id, name, features=[], source='', aliases=[]):
+    def __init__(self, role_id, name, features=None, source='', aliases=None):
         """
 
         :param role_id:
@@ -351,7 +358,11 @@ class NewModelTemplateRole:
         :param source:
         :param aliases:
         """
-        self.id = role_id; self.name = name; self.source = source; self.features = features; self.aliases = aliases
+        self.id = role_id
+        self.name = name
+        self.source = source
+        self.features = features or []
+        self.aliases = aliases or []
         self._complexes = set()
         self._template = None
 
@@ -407,10 +418,13 @@ class NewModelTemplateComplex:
         :param confidence:
         :param template:
         """
-        
-        self.id = complex_id; self.name = name; self.source = source; self.reference = reference
-        self.confidence = confidence; self._template = template
+        self.id = complex_id
+        self.name = name
+        self.source = source
+        self.reference = reference
+        self.confidence = confidence
         self.roles = {}
+        self._template = template
 
     @staticmethod
     def from_dict(d, template):
@@ -478,9 +492,12 @@ class NewModelTemplateComplex:
 
 class MSTemplateCompartment:
 
-    def __init__(self, compartment_id: str, name: str, ph: float, hierarchy=0, aliases:list = []):
-        self.id = compartment_id; self.name = name; self.ph = ph
-        self.hierarchy = hierarchy; self.aliases = aliases
+    def __init__(self, compartment_id: str, name: str, ph: float, hierarchy=0, aliases:list = None):
+        self.id = compartment_id
+        self.name = name
+        self.ph = ph
+        self.hierarchy = hierarchy
+        self.aliases = list(aliases) or []
         self._template = None
 
     @staticmethod
@@ -494,8 +511,11 @@ class MSTemplateCompartment:
 class MSTemplate:
 
     def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None, args=None):  # !!! info and args are never used
-        self.id = template_id; self.name = name; self.domain = domain
-        self.template_type = template_type; self.__VERSION__ = version
+        self.id = template_id
+        self.name = name
+        self.domain = domain
+        self.template_type = template_type
+        self.__VERSION__ = version
         self.biochemistry_ref = ''
         self.compartments, self.biomasses, self.reactions = DictList(), DictList(), DictList()
         self.compounds, self.pathways, self.subsystems = DictList(), DictList(), DictList()
@@ -747,8 +767,11 @@ class MSTemplateBuilder:
 
     def __init__(self, template_id, name='', domain='', template_type='', version=1, info=None,
                  biochemistry=None, biomasses=None, pathways=None, subsystems=None):  # !!! biochemistry, biomasses, pathways, and subsystems are nevery used
-        self.id = template_id; self.version = version; self.name = name; self.domain = domain
-        self.template_type = template_type; self.info = info
+        self.id = template_id
+        self.version = version
+        self.name = name
+        self.domain = domain
+        self.template_type = template_type
         self.biochemistry_ref = None
         self.compartments, self.biomasses, self.roles, self.complexes = [], [], [], []
         self.compounds, self.compartment_compounds, self.reactions = [], [], []
