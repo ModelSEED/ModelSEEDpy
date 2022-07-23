@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import logging
-logger = logging.getLogger(__name__)
 import re  # !!! import is never used
 from optlang.symbolics import Zero, add  # !!! add is never used
 import json as _json # !!! import is never used
@@ -12,13 +11,16 @@ from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.exceptions import FeasibilityError
 
+logger = logging.getLogger(__name__)
+
 class BaseFBAPkg:
     """
     Base class for FBA packages
     """
     def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
-        self.model = model; self.name = name
+        self.model = model
         self.modelutl = MSModelUtil(model)
+        self.name = name
         
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         if self.pkgmgr is None:
