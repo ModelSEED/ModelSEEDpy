@@ -450,9 +450,11 @@ class GapfillingPkg(BaseFBAPkg):
             self.model.optimize()
             new_solution = self.compute_gapfilled_solution()
         return new_solution
-    
-    #This function is designed to KO all gapfilled reactions not included in the solution
+
     def knockout_gf_reactions_outside_solution(self,solution = None,flux_values = None):
+        """
+        This function is designed to KO all gap filled reactions not included in the solution
+        """
         if solution == None:
             solution = self.compute_gapfilled_solution()
         if flux_values == None:
@@ -500,18 +502,18 @@ class GapfillingPkg(BaseFBAPkg):
             return None
         return solution
     
-    def filter_database_based_on_tests(self,test_conditions):
+    def filter_database_based_on_tests(self, test_conditions):
         filetered_list = []
         with self.model:
             rxnlist = []
             for reaction in self.model.reactions:
                 if reaction.id in self.gapfilling_penalties:
                     if "reverse" in self.gapfilling_penalties[reaction.id]:
-                        rxnlist.append([reaction,"<"])
+                        rxnlist.append([reaction, "<"])
                     if "forward" in self.gapfilling_penalties[reaction.id]:
-                        rxnlist.append([reaction,">"])
+                        rxnlist.append([reaction, ">"])
             self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
-            filtered_list = self.modelutl.reaction_expansion_test(rxnlist,test_conditions)
+            filtered_list = self.modelutl.reaction_expansion_test(rxnlist, test_conditions)
         #Now constraining filtered reactions to zero
         for item in filtered_list:
             logger.debug("Filtering:",item[0].id,item[1])

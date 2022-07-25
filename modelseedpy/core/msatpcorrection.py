@@ -334,7 +334,7 @@ class MSATPCorrection:
         """
         # Ensure all specified media work
         self.evaluate_growth_media()
-        self.determine_growth_media2()
+        self.determine_growth_media()
         self.apply_growth_media_gapfilling()
         self.evaluate_growth_media()
         self.expand_model_to_genome_scale()

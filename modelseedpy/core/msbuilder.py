@@ -651,3 +651,6 @@ class MSBuilder:
                 rxn.upper_bound = 0
                 rxn.lower_bound = -100
         return original_mdl
+
+def build_metabolic_model(genome, media=None, atp_test_medias=None, core_template=None, genome_scale_template=None):
+    pass

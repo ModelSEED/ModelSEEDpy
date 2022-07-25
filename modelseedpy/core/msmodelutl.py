@@ -74,9 +74,9 @@ class MSModelUtil:
         self.test_objective = None
         self.score = None
     
-    def printlp(self,lpfilename="debug.lp"):
+    def printlp(self, lpfilename="debug.lp"):
         with open(lpfilename, 'w') as out:
-                out.write(str(self.model.solver))
+            out.write(str(self.model.solver))
     
     def build_metabolite_hash(self):
         self.metabolite_hash = {}
@@ -345,7 +345,7 @@ class MSModelUtil:
                     kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["reversed"][rxn],1,[]]
         return rxn_table
     
-    def apply_test_condition(self,condition,model = None):
+    def apply_test_condition(self, condition, model=None):
         """Applies constraints and objective of specified condition to model
         
         Parameters
@@ -363,7 +363,7 @@ class MSModelUtil:
         Raises
         ------
         """
-        if model == None:
+        if model is None:
             model = self.model
             pkgmgr = self.pkgmgr
         else:
@@ -375,7 +375,7 @@ class MSModelUtil:
             model.objective.direction = "min"
         pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
     
-    def test_single_condition(self,condition,apply_condition=True,model=None):
+    def test_single_condition(self, condition, apply_condition=True, model=None):
         """Runs a single test condition to determine if objective value on set media exceeds threshold
         
         Parameters
@@ -395,14 +395,14 @@ class MSModelUtil:
         Raises
         ------
         """
-        if model == None:
+        if model is None:
             model = self.model
         if apply_condition:
-            self.apply_test_condition(condition,model)
+            self.apply_test_condition(condition, model)
         new_objective = model.slim_optimize()
         value = new_objective
         if "change" in condition and condition["change"]:
-            if self.test_objective != None:
+            if self.test_objective is not None:
                 value = new_objective - self.test_objective
         self.score = value
         if model.solver.status != 'optimal':
@@ -418,7 +418,7 @@ class MSModelUtil:
         self.test_objective = new_objective
         return True
     
-    def test_condition_list(self,condition_list,model=None):
+    def test_condition_list(self, condition_list: list, model=None):
         """Runs a set of test conditions to determine if objective values on set medias exceed thresholds
         
         Parameters
@@ -443,7 +443,7 @@ class MSModelUtil:
                 return False
         return True
     
-    def reaction_expansion_test(self,reaction_list,condition_list):
+    def reaction_expansion_test(self, reaction_list: list, condition_list: list):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
         
         Parameters
@@ -461,10 +461,15 @@ class MSModelUtil:
         Raises
         ------
         """
-        print("Expansion started!")
         tic = time.perf_counter()
+
+        logger.info(f"Expansion started! reaction list: {len(reaction_list)} conditions: {len(condition_list)}")
+
         filtered_list = []
         for condition in condition_list:
+
+            logger.debug(f'testing condition {condition}')
+
             currmodel = self.model
             with currmodel:
                 self.apply_test_condition(condition)
