@@ -197,7 +197,7 @@ class FBAHelper:
         output = {}
         for met in model.metabolites:
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(met)
-            if msid != None:
+            if msid is not None:
                 if msid not in output:
                     output[msid] = []
                 output[msid].append(met)
