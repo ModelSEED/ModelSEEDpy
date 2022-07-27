@@ -1,6 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import re  # !!! import never used
+import copy  # !!! import never used
 from cobra.core.dictlist import DictList
 from cobra.core.model import Metabolite, Reaction
 

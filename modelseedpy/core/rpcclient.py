@@ -39,9 +39,11 @@ class RPCClient:
             headers['AUTHORIZATION'] = token
         elif self.token:
             headers['AUTHORIZATION'] = self.token
-        arg_hash = {
-            'method': method, 'params': params, 'context': {},
-            'version': self.version, 'id': str(_random.random())[2:]
+        arg_hash = {'method': method,
+            'params': params,
+            'version': self.version,
+            'id': str(_random.random())[2:],
+            'context': {}
            }
         body = _json.dumps(arg_hash, cls=_JSONObjectEncoder)
         ret = _requests.post(

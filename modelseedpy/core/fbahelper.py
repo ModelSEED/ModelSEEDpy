@@ -5,6 +5,7 @@ from chemicals import periodic_table
 import re
 from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene, Metabolite, and Model are never used
 from cobra.util import solver as sutil  # !!! sutil is never used
+import time
 from modelseedpy.biochem import from_local
 from scipy.odr.odrpack import Output  # !!! Output is never used
 from chemw import ChemMW
@@ -126,16 +127,6 @@ class FBAHelper:
             sense = "min"
         model.objective = model.problem.Objective(target_reaction.flux_expression, direction=sense)
         return target_reaction
-
-    @staticmethod
-    def compute_flux_values_from_variables(model):
-        flux_values = {}
-        for rxn in model.reactions:
-            flux_values[rxn.id] = {
-                'reverse': rxn.reverse_variable.primal,
-                'forward': rxn.forward_variable.primal
-            }
-        return flux_values
     
     @staticmethod
     def modelseed_id_from_cobra_metabolite(metabolite):

@@ -1,34 +1,39 @@
 import logging
+import itertools  # !!! the import is never used
 logger = logging.getLogger(__name__)
 
 import cobra
 import re
 from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
-from modelseedpy.core.exceptions import GapfillingError
+from modelseedpy.core.exceptions import GapfillingError  # exception is never applied
 
 class MSGapfill:
 
     def __init__(self, model, default_gapfill_templates=[], default_gapfill_models=[],
                  test_conditions=[], reaction_scores={}, blacklist=[]):
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.modelutl = model
+        else:
+            self.model = model
+            self.modelutl = MSModelUtil(model)
+        self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]  # the cpd11416 compound is filtered during model extension with templates
+        self.gfmodel = self.lp_filename = self.last_solution = None
+        self.model_penalty = 1
+        self.default_gapfill_models = default_gapfill_models
+        self.default_gapfill_templates = default_gapfill_templates
         self.gapfill_templates_by_index, self.gapfill_models_by_index = {}, {}
-        self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]
-        
         self.gapfill_all_indecies_with_default_templates = True
         self.gapfill_all_indecies_with_default_models = True
-        self.gfmodel = self.lp_filename = self.last_solution = None
-        
-        self.default_gapfill_templates = default_gapfill_templates
         self.blacklist = list(set(default_blacklist+blacklist))
-        self.default_gapfill_models = default_gapfill_models
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
-        self.model = model
-        self.model_penalty = 1
         
-    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, solver = 'optland-cplex'):
+    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, prefilter=True, solver = 'optland-cplex'):
         if target:
             self.model.objective = self.model.problem.Objective(
                 self.model.reactions.get_by_id(target).flux_expression, direction='max')
@@ -52,6 +57,11 @@ class MSGapfill:
             "set_objective": 1
         })
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        
+        #Filtering breaking reactions out of the database
+        if prefilter and self.test_conditions:
+            pkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(self.test_conditions)
+        
         if self.lp_filename:
             with open(self.lp_filename, 'w') as out:
                 out.write(str(self.gfmodel.solver))
@@ -62,7 +72,7 @@ class MSGapfill:
             logger.warning("No solution found for %s", media)
             return None
 
-        # self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() #!!! this function does not exist
+        self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution() 
         if self.test_conditions:
             self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(self.test_conditions, self.last_solution, self.test_condition_iteration_limit)
             if self.last_solution is None:
