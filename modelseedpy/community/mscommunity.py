@@ -99,7 +99,6 @@ class MSCommunity:
                  lp_filename = None           # specify a filename to create an lp file 
                  ):
         self.lp_filename, self.pfba = lp_filename, pfba
-        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         self.gapfillings = {}
         
         #Define Data attributes as None
@@ -108,24 +107,24 @@ class MSCommunity:
         self.species = DictList()
         
         # defining the models
-        self.model = model
-        if models:
-            self.model = MSCommunity.build_from_species_models(models, names=names, abundances=abundances)
-        other_biomass_cpds = []
+        self.model = model if not models else MSCommunity.build_from_species_models(
+            models, names=names, abundances=abundances, cobra_model=True)
+        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         msid_cobraid_hash = FBAHelper.msid_hash(self.model)
         if "cpd11416" not in msid_cobraid_hash:
             logger.critical("Could not find biomass compound")
-        for biomass_cpd in msid_cobraid_hash["cpd11416"]:
-            if biomass_cpd.compartment == "c0":
-                self.biomass_cpd = biomass_cpd
+        other_biomass_cpds = []
+        for self.biomass_cpd in msid_cobraid_hash["cpd11416"]:
+            if self.biomass_cpd.compartment == "c0":
                 for reaction in model.reactions:
                     if self.biomass_cpd in reaction.metabolites:
                         if reaction.metabolites[self.biomass_cpd] == 1 and len(reaction.metabolites) > 1:
+                            print('primary_biomass defined')
                             self.primary_biomass = reaction
                         elif reaction.metabolites[self.biomass_cpd] < 0 and len(reaction.metabolites) == 1:
                             self.biomass_drain = reaction
             else:
-                other_biomass_cpds.append(biomass_cpd)
+                other_biomass_cpds.append(self.biomass_cpd)
         for biomass_cpd in other_biomass_cpds:
             species_obj = CommunityModelSpecies(self, biomass_cpd, names)
             self.species.append(species_obj)
@@ -134,7 +133,7 @@ class MSCommunity:
             
             
     @staticmethod
-    def build_from_species_models(models,mdlid=None,name=None,names=[],abundances=None):
+    def build_from_species_models(models,mdlid=None,name=None,names=[],abundances=None, cobra_model=False):
         """Merges the input list of single species metabolic models into a community metabolic model
         
         Parameters
@@ -149,6 +148,8 @@ class MSCommunity:
             List of human readable names for models being merged
         abundances : dict<string,float>
             Hash of relative abundances for input models in community model
+        cobra_model : bool
+            Specifies whether the raw COBRA model is returned
         
         Returns
         -------
@@ -162,8 +163,7 @@ class MSCommunity:
         newutl = MSModelUtil(newmodel)
         biomass_compounds = []
         index = 1
-        biomass_index = 2
-        for model in models:        
+        for biomass_index, model in enumerate(models):
             new_metabolites = []
             new_reactions = []
             #Rename metabolites
@@ -182,7 +182,7 @@ class MSCommunity:
                         met.compartment = m[1]+str(index)
                 #Processing metabolite ID
                 output = MSModelUtil.parse_id(met)
-                if output == None:
+                if output is None:
                     if met.compartment[0] != "e":
                         met.id += str(index)
                 elif output[1] != "e":
@@ -202,7 +202,7 @@ class MSCommunity:
                         biomass_index += 1
                     else:
                         output = MSModelUtil.parse_id(rxn)
-                        if output == None:
+                        if output is None:
                             if rxn.compartment.id[0] != "e":
                                 rxn.id += str(index)
                         elif output[1] != "e":
@@ -224,6 +224,8 @@ class MSCommunity:
         comm_biorxn.add_metabolites(metabolites)
         newmodel.add_reactions([comm_biorxn])
         newutl.add_exchanges_for_metabolites([comm_biomass],0,100,'SK_')
+        if cobra_model:
+            return newmodel
         return MSCommunity(newmodel,names,abundances)
     
     #Manipulation functions
@@ -236,7 +238,7 @@ class MSCommunity:
             if species in self.species:
                 self.species.get_by_id(species).abundance = abundances[species]
         #remake the primary biomass reaction based on abundances
-        if self.primary_biomass == None:
+        if self.primary_biomass is None:
             logger.critical("Primary biomass reaction not found in community model")
         all_metabolites = {self.biomass_cpd:1}
         for species in self.species:
@@ -244,7 +246,7 @@ class MSCommunity:
         self.primary_biomass.add_metabolites(all_metabolites,combine=False)
         
     def set_objective(self,target = None,minimize = False): #!!! Mustn't a multilevel objective be set for community models?
-        if target == None:
+        if target is None:
             target = self.primary_biomass.id
         sense = "max"
         if minimize:

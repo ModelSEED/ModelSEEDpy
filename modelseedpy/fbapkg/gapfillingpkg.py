@@ -312,10 +312,10 @@ class GapfillingPkg(BaseFBAPkg):
         exchanges = self.modelutl.add_exchanges_for_metabolites(new_demand,self.parameters["default_uptake"],self.parameters["default_excretion"],"DM_")
         for ex in exchanges:
             new_penalties[ex.id] = {
-                'added': 1,
-                'reverse': 1,
-                'forward': 1
-            }
+                'added': True,
+                'reverse': True,
+                'forward': True
+            } 
 
         # Adding all new reactions to the model at once (much faster than one at a time)
         self.model.add_reactions(self.new_reactions.values())
