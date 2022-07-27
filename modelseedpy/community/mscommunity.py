@@ -25,14 +25,17 @@ class CommunityModelSpecies:
     def __init__(self,
                  community,         # MSCommunity environment
                  biomass_cpd,       # metabolite in the biomass reaction
-                 names=[]           # names of the community species
+                 names=[],          # names of the community species
+                 name=None          # the name of a species
                  ):
         self.community, self.biomass_cpd = community, biomass_cpd
         self.index = int(self.biomass_cpd.compartment[1:])
         self.abundance = 0
         if self.biomass_cpd in self.community.primary_biomass.metabolites:
             self.abundance = abs(self.community.primary_biomass.metabolites[self.biomass_cpd])
-        if self.index <= len(names) and names[self.index-1]:
+        if name:
+            self.id = name
+        elif self.index < len(names):
             self.id = names[self.index-1]
         else:
             if "species_name" in self.biomass_cpd.annotation:
@@ -45,13 +48,15 @@ class CommunityModelSpecies:
         # FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)  # !!! FIXME This FBAHelper function is not defined.
         self.atp_hydrolysis = atp_rxn["reaction"]
         self.biomass_drain = None
-        self.biomasses = []
-        for reaction in self.community.model.reactions:
-            if self.biomass_cpd in reaction.metabolites:
-                if reaction.metabolites[self.biomass_cpd] == 1 and len(reaction.metabolites) > 1:
-                    self.biomasses.append(reaction)
-                elif len(reaction.metabolites) == 1 and reaction.metabolites[self.biomass_cpd] < 0:
-                    self.biomass_drain = reaction
+        self.biomasses, self.reactions = [], []
+        for rxn in self.community.model.reactions:
+            if int(FBAHelper.rxn_compartment(rxn)[1:]) == self.index and 'bio' not in rxn.name:
+                self.reactions.append(rxn)
+            if self.biomass_cpd in rxn.metabolites:
+                if rxn.metabolites[self.biomass_cpd] == 1 and len(rxn.metabolites) > 1:
+                    self.biomasses.append(rxn)
+                elif len(rxn.metabolites) == 1 and rxn.metabolites[self.biomass_cpd] < 0:
+                    self.biomass_drain = rxn
                     
         if len(self.biomasses) == 0:
             logger.critical("No biomass reaction found for species "+self.id)
@@ -88,23 +93,29 @@ class CommunityModelSpecies:
         return self.community.model.optimize()
 
 class MSCommunity:
-    def __init__(self, model, 
+    def __init__(self, model=None,            # the model that will be defined
+                 models:list=None,            # the list of models that will be assembled into a community
                  names=[], abundances=None,   # names and abundances of the community species
                  pfba = True,                 # specify whether parsimonious FBA will be simulated
                  lp_filename = None           # specify a filename to create an lp file 
                  ):
-        #Setting model and package manager
-        self.model, self.lp_filename, self.pfba = model, lp_filename, pfba
-        self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        self.lp_filename, self.pfba = lp_filename, pfba
+        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         self.gapfillings = {}
+        
         #Define Data attributes as None
-        self.solution = self.biomass_cpd = self.primary_biomass = self.biomass_drain = self.msgapfill = self.element_uptake_limit = self.kinetic_coeff = self.modelseed_db_path = None
+        self.solution = self.biomass_cpd = self.primary_biomass = self.biomass_drain = None
+        self.msgapfill = self.element_uptake_limit = self.kinetic_coeff = self.modelseed_db_path = None
         self.species = DictList()
-        #Computing data from model
-        msid_cobraid_hash = FBAHelper.msid_hash(model)
+        
+        # defining the models
+        self.model = model
+        if models:
+            self.model = MSCommunity.build_from_species_models(models, names=names, abundances=abundances)
+        other_biomass_cpds = []
+        msid_cobraid_hash = FBAHelper.msid_hash(self.model)
         if "cpd11416" not in msid_cobraid_hash:
             logger.critical("Could not find biomass compound")
-        other_biomass_cpds = []
         for biomass_cpd in msid_cobraid_hash["cpd11416"]:
             if biomass_cpd.compartment == "c0":
                 self.biomass_cpd = biomass_cpd
@@ -116,11 +127,12 @@ class MSCommunity:
                             self.biomass_drain = reaction
             else:
                 other_biomass_cpds.append(biomass_cpd)
-        for biomass_cpd in other_biomass_cpds:        
-            species_obj = CommunityModelSpecies(self,biomass_cpd,names)
+        for biomass_cpd in other_biomass_cpds:
+            species_obj = CommunityModelSpecies(self, biomass_cpd, names)
             self.species.append(species_obj)
         if abundances:
             self.set_abundance(abundances)
+            
             
     @staticmethod
     def build_from_species_models(models,mdlid=None,name=None,names=[],abundances=None):
@@ -208,10 +220,8 @@ class MSCommunity:
         #Create community biomass
         comm_biomass = Metabolite("cpd11416_c0", None, "Community biomass", 0, "c0")
         metabolites = {comm_biomass : 1}
+        metabolites.update({cpd:-1/len(biomass_compounds) for cpd in biomass_compounds})
         comm_biorxn = Reaction(id="bio1", name= "bio1", lower_bound=0, upper_bound=100)
-        count = len(biomass_compounds)
-        for cpd in biomass_compounds:
-            metabolites[cpd] = -1/count
         comm_biorxn.add_metabolites(metabolites)
         newmodel.add_reactions([comm_biorxn])
         newutl.add_exchanges_for_metabolites([comm_biomass],0,100,'SK_')

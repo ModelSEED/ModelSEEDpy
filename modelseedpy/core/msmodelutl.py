@@ -89,7 +89,7 @@ class MSModelUtil:
             self.add_exchanges_for_metabolites(exchange_list)
         return output
         
-    def add_exchanges_for_metabolites(self,cpds,uptake=0,excretion=0,prefix='EX_', prefix_name='Exchange for '):
+    def add_exchanges_for_metabolites(self,cpds,uptake=0,excretion=0,prefix='EX_', prefix_name='Exchange for '):  # !!! why not use the existing COBRApy infrastructure of add_boundary() ?
         drains = []
         for cpd in cpds:
             drain_reaction = Reaction(

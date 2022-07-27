@@ -302,7 +302,10 @@ class FBAHelper:
         reframed_model = from_cobrapy(kbase_model)
         if hasattr(kbase_model, 'id'):
             reframed_model.id = kbase_model.id
-        reframed_model.compartments.e0.external = True
+        for comp in reframed_model.compartments:
+            if 'e' in comp:
+                reframed_model.compartments[comp].external = True
+
         return reframed_model
     
     @staticmethod
