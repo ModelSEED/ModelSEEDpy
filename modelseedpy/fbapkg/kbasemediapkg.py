@@ -49,7 +49,7 @@ class KBaseMediaPkg(BaseFBAPkg):
                         if met in exchange_hash:
                             exchange_hash[met].lower_bound = -mediacpd.maxFlux
                             exchange_hash[met].upper_bound = -mediacpd.minFlux
-                            if self.pkgmgr != None and "FullThermoPkg" in self.pkgmgr.packages:
+                            if self.pkgmgr is not None and "FullThermoPkg" in self.pkgmgr.packages:
                                 logger.info('FullThermo constrained compound: ', met.id)
                                 if met.id in self.variables["logconc"] and met.compartment[0:1] == "e":
                                     if mediacpd.concentration != 0.001:

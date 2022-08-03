@@ -307,3 +307,9 @@ class FBAHelper:
     def parse_df(df):
         from numpy import array
         return array(dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()])
+    
+    @staticmethod
+    def _add_vars_cons(model, vars_cons):
+        model.add_cons_vars(vars_cons)
+        model.solver.update()
+        return model

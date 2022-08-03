@@ -68,4 +68,8 @@ class MSMedia:
             else:
                 new_cpds.append(newcpd)
         self.mediacompounds += new_cpds
-    
+        
+    @staticmethod
+    def add_compounds(media, media_dict):
+        media.merge(MSMedia.from_dict(media_dict))        
+        return media

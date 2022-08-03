@@ -177,7 +177,7 @@ class MSCommunity:
             # model_index+=1
             print([rxn.id for rxn in model.reactions if "bio" in rxn.id])
             print(model_index, model.id)
-            new_metabolites, new_reactions = [], []
+            new_metabolites, new_reactions = set(), set()
             #Rename metabolites
             for met in model.metabolites:
                 #Renaming compartments
@@ -202,8 +202,8 @@ class MSCommunity:
                         met.id = met.id+str(model_index)
                     else:
                         met.id = output[0]+"_"+output[1]+str(model_index)
-                if met.id not in newmodel.metabolites:
-                    new_metabolites.append(met)
+                if met.id not in newmodel.metabolites:  # !!! this seems to not be operational
+                    new_metabolites.add(met)
                     if "cpd11416_c" in met.id:
                         print(met.id, model.id)
                         biomass_compounds.append(met)
@@ -245,7 +245,7 @@ class MSCommunity:
                             else:
                                 rxn.id = output[0]+"_"+output[1]+str(model_index)
                 if rxn.id not in newmodel.reactions:
-                    new_reactions.append(rxn)
+                    new_reactions.add(rxn)
             #Adding new reactions and compounds to base model
             newmodel.add_reactions(new_reactions)
             newmodel.add_metabolites(new_metabolites)
