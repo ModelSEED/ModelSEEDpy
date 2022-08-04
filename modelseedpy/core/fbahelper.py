@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import logging
 from chemicals import periodic_table
 import re
-from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene, Metabolite, and Model are never used
+from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene and Model are never used
 from cobra.util import solver as sutil  # !!! sutil is never used
 import time
 from modelseedpy.biochem import from_local
@@ -309,7 +309,31 @@ class FBAHelper:
         return array(dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()])
     
     @staticmethod
-    def _add_vars_cons(model, vars_cons):
+    def add_vars_cons(model, vars_cons):
         model.add_cons_vars(vars_cons)
         model.solver.update()
         return model
+    
+    @staticmethod
+    def update_model_media(model, media):
+        medium = {}
+        model_reactions = [rxn.id for rxn in model.reactions]
+        for cpd in media.data["mediacompounds"]:
+            ex_rxn = f"EX_{cpd.id}"
+            if ex_rxn not in model_reactions:
+                model.add_boundary(metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"), 
+                    type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
+            medium[ex_rxn] = cpd.maxFlux
+        model.medium = medium
+        return model
+    
+    @staticmethod
+    def filter_cobra_set(cobra_set):
+        unique_ids = set(obj.id for obj in cobra_set)
+        unique_objs = set()
+        for obj in cobra_set:
+            if obj.id in unique_ids:
+                unique_objs.add(obj)
+                unique_ids.remove(obj.id)
+        return unique_objs
+        
