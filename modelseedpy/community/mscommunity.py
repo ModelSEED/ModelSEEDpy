@@ -172,12 +172,12 @@ class MSCommunity:
         biomass_index = 2
         biomass_indices = [1]
         biomass_indices_dict = {}
+        new_metabolites, new_reactions = set(), set()
         for model_index, model in enumerate(models):
             model_reaction_ids = [rxn.id for rxn in model.reactions]
             # model_index+=1
             print([rxn.id for rxn in model.reactions if "bio" in rxn.id])
             print(model_index, model.id)
-            new_metabolites, new_reactions = set(), set()
             #Rename metabolites
             for met in model.metabolites:
                 #Renaming compartments
@@ -202,11 +202,10 @@ class MSCommunity:
                         met.id = met.id+str(model_index)
                     else:
                         met.id = output[0]+"_"+output[1]+str(model_index)
-                if met.id not in newmodel.metabolites:  # !!! this seems to not be operational
-                    new_metabolites.add(met)
-                    if "cpd11416_c" in met.id:
-                        print(met.id, model.id)
-                        biomass_compounds.append(met)
+                new_metabolites.add(met)
+                if "cpd11416_c" in met.id:
+                    print(met.id, model.id)
+                    biomass_compounds.append(met)
             #Rename reactions
             for rxn in model.reactions:
                 if rxn.id[0:3] != "EX_":
@@ -244,11 +243,10 @@ class MSCommunity:
                                 rxn.id = rxn.id+str(model_index)
                             else:
                                 rxn.id = output[0]+"_"+output[1]+str(model_index)
-                if rxn.id not in newmodel.reactions:
-                    new_reactions.add(rxn)
-            #Adding new reactions and compounds to base model
-            newmodel.add_reactions(new_reactions)
-            newmodel.add_metabolites(new_metabolites)
+                new_reactions.add(rxn)
+        #Adding new reactions and compounds to base model
+        newmodel.add_reactions(FBAHelper.filter_cobra_set(new_reactions))
+        newmodel.add_metabolites(FBAHelper.filter_cobra_set(new_metabolites))
         #Create community biomass
         comm_biomass = Metabolite("cpd11416_c0", None, "Community biomass", 0, "c0")
         metabolites = {comm_biomass: 1}
