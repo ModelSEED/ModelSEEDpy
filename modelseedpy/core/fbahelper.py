@@ -335,5 +335,4 @@ class FBAHelper:
             if obj.id in unique_ids:
                 unique_objs.add(obj)
                 unique_ids.remove(obj.id)
-        return unique_objs
-        
+        return unique_objs        

@@ -167,7 +167,6 @@ class MSCommunity:
         ------
         """
         newmodel = Model(mdlid,name)
-        newutl = MSModelUtil(newmodel)
         biomass_compounds = []
         biomass_index = 2
         biomass_indices = [1]
@@ -181,26 +180,22 @@ class MSCommunity:
             #Rename metabolites
             for met in model.metabolites:
                 #Renaming compartments
-                if re.search('[a-z+](\d*)$', met.compartment):
-                    m = re.search('([a-z]+)(\d*)$', met.compartment)
-                    if len(m[2]) == 0:
-                        if m[1] == "e":
-                            met.compartment += "0"
-                        else:
-                            met.compartment += str(model_index)
-                    elif m[1] == "e":
-                        met.compartment = m[1]+"0"
-                    else:
-                        met.compartment = m[1]+str(model_index)
-                #Processing metabolite ID
                 output = MSModelUtil.parse_id(met)
                 if output is None:
                     if met.compartment[0] != "e":
                         met.id += str(model_index)
-                elif output[1] != "e":
-                    if len(output[2]) == 0:
-                        met.id = met.id+str(model_index)
+                        met.compartment = met.compartment[0]+str(model_index)
                     else:
+                        met.compartment = "e0"
+                else:
+                    if output[2] == "":
+                        if output[1] != "e":
+                            met.id += str(model_index)
+                            met.compartment += str(model_index)
+                    elif output[1] == "e":
+                        met.compartment = "e0"
+                    else:
+                        met.compartment = output[1]+str(model_index)
                         met.id = output[0]+"_"+output[1]+str(model_index)
                 new_metabolites.add(met)
                 if "cpd11416_c" in met.id:
@@ -236,17 +231,17 @@ class MSCommunity:
                     else:
                         output = MSModelUtil.parse_id(rxn)
                         if output is None:
-                            if rxn.compartment.id[0] != "e":
+                            if "e" not in rxn.compartment.id:
                                 rxn.id += str(model_index)
                         elif output[1] != "e":
-                            if len(output[2]) == 0:
+                            rxn.id = output[0]+"_"+output[1]+str(model_index)
+                            if output[2] == "":
                                 rxn.id = rxn.id+str(model_index)
-                            else:
-                                rxn.id = output[0]+"_"+output[1]+str(model_index)
                 new_reactions.add(rxn)
         #Adding new reactions and compounds to base model
         newmodel.add_reactions(FBAHelper.filter_cobra_set(new_reactions))
         newmodel.add_metabolites(FBAHelper.filter_cobra_set(new_metabolites))
+        
         #Create community biomass
         comm_biomass = Metabolite("cpd11416_c0", None, "Community biomass", 0, "c0")
         metabolites = {comm_biomass: 1}
@@ -254,6 +249,9 @@ class MSCommunity:
         comm_biorxn = Reaction(id="bio1", name= "bio1", lower_bound=0, upper_bound=100)
         comm_biorxn.add_metabolites(metabolites)
         newmodel.add_reactions([comm_biorxn])
+        
+        # create a biomass sink reaction
+        newutl = MSModelUtil(newmodel)
         newutl.add_exchanges_for_metabolites([comm_biomass],0,100,'SK_')
         if cobra_model:
             return newmodel, biomass_indices_dict
