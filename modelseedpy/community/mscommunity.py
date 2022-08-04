@@ -1,4 +1,5 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
@@ -140,14 +141,16 @@ class MSCommunity:
             
             
     @staticmethod
-    def build_from_species_models(models,mdlid=None,name=None,names=[],abundances=None, cobra_model=False):
+    def build_from_species_models(models, msdb_path, model_id=None, name=None, names=[], abundances=None, cobra_model=False):
         """Merges the input list of single species metabolic models into a community metabolic model
         
         Parameters
         ----------
         models : list<Cobra.Model>
             List of models to be merged into a community model
-        mdlid : string
+        msdb_path : string
+            The path to the local version of the ModelSEED Database
+        model_id : string
             String specifying community model ID
         name : string
             String specifying community model name
@@ -166,7 +169,13 @@ class MSCommunity:
         Raises
         ------
         """
-        newmodel = Model(mdlid,name)
+        # compatabilize the models
+        mscompat = MSCompatibility(modelseed_db_path = msdb_path)
+        models = mscompat.align_exchanges(models, conflicts_file_name='exchanges_conflicts.json', model_names = names)
+        models = mscompat.standardize(models, conflicts_file_name = 'standardized_exchange_metabolites.json', model_names = names)
+        
+        # construct the new model
+        newmodel = Model(model_id,name)
         biomass_compounds = []
         biomass_index = 2
         biomass_indices = [1]

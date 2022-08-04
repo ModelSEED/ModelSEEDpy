@@ -14,32 +14,42 @@ class MSCompatibility():
         self.printing = printing
         
         # import and parse ModelSEED Database reactions and compounds
-        with open(os.path.join(modelseed_db_path, 'Biochemistry', 'reactions.json'), 'r') as rxns:
-            self.reactions = json.load(rxns)
-            self.reaction_ids = OrderedDict()
-            for rxn in self.reactions:
-                self.reaction_ids[rxn['id']] = rxn['name']
+        self.reaction_ids = OrderedDict()
+        self.reactions = {}
+        for num in range(0,49):
+            with open(os.path.join(modelseed_db_path, 'Biochemistry', f'reaction_{num:0>2}.json'), 'r') as rxns:
+                reactions = json.load(rxns)
+                for rxn in reactions:
+                    self.reactions.update(rxn)
+                    self.reaction_ids[rxn['id']] = rxn['name']
                 
-        with open(os.path.join(modelseed_db_path, 'Biochemistry', 'compounds.json'), 'r') as rxns:
-            self.compounds = json.load(rxns)
-            self.compounds_cross_references, self.compound_names = OrderedDict(), OrderedDict()
-            for cpd in self.compounds:
-                self.compounds_cross_references[cpd['id']] = {}
-                if cpd['aliases'] is not None:
-                    for category in cpd['aliases']:
-                        content = category.split(';')
-                        if 'Name' in category:
-                            content[0] = content[0].split(':')[0].strip()
-                            names = [name.strip() for name in content]
-                            names.append(cpd['name'])
-                            for name in names:
-                                if name not in self.compound_names:
-                                    self.compound_names[name] = cpd['id']
-                        else:
-                            first = content[0].split(':')
-                            db = first[0].strip()
-                            content[0] = first[1]
-                            self.compounds_cross_references[cpd['id']][db] = [x.strip() for x in content]
+        self.compounds_cross_references, self.compound_names = OrderedDict(), OrderedDict()
+        self.compounds = {}
+        for num in range(0,38):
+            with open(os.path.join(modelseed_db_path, 'Biochemistry', f'compound_{num:0>2}.json'), 'r') as cpds:
+                try:
+                    compounds = json.load(cpds)
+                except:
+                    print(f'compound_{num:0>2}.json is probably empty.')
+                    continue
+                for cpd in compounds:
+                    self.compounds.update(cpd)
+                    self.compounds_cross_references[cpd['id']] = {}
+                    if cpd['aliases'] is not None:
+                        for category in cpd['aliases']:
+                            content = category.split(';')
+                            if 'Name' in category:
+                                content[0] = content[0].split(':')[0].strip()
+                                names = [name.strip() for name in content]
+                                names.append(cpd['name'])
+                                for name in names:
+                                    if name not in self.compound_names:
+                                        self.compound_names[name] = cpd['id']
+                            else:
+                                first = content[0].split(':')
+                                db = first[0].strip()
+                                content[0] = first[1]
+                                self.compounds_cross_references[cpd['id']][db] = [x.strip() for x in content]
                         
     
     # def _parse_modelReactionReagents(self, modelReactionReagents, model_metabolites):
