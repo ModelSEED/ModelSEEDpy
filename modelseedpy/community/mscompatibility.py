@@ -2,9 +2,11 @@ from collections import OrderedDict
 from cobra.core.metabolite import Metabolite
 from cobra.io.json import save_json_model
 from zipfile import ZipFile, ZIP_LZMA
-from warnings import warn
 from pprint import pprint
-import json, lzma, re, os
+import logging, json, re, os #, lzma
+
+logging.basicConfig(filename="mscompatability.log", format='%(asctime)s %(message)s', filemode='w')
+logger = logging.getLogger(__name__)
 
 class MSCompatibility():
     def __init__(self,
@@ -14,32 +16,42 @@ class MSCompatibility():
         self.printing = printing
         
         # import and parse ModelSEED Database reactions and compounds
-        with open(os.path.join(modelseed_db_path, 'Biochemistry', 'reactions.json'), 'r') as rxns:
-            self.reactions = json.load(rxns)
-            self.reaction_ids = OrderedDict()
-            for rxn in self.reactions:
-                self.reaction_ids[rxn['id']] = rxn['name']
+        self.reaction_ids = OrderedDict()
+        self.reactions = {}
+        for num in range(0,49):
+            with open(os.path.join(modelseed_db_path, 'Biochemistry', f'reaction_{num:0>2}.json'), 'r') as rxns:
+                reactions = json.load(rxns)
+                for rxn in reactions:
+                    self.reactions.update(rxn)
+                    self.reaction_ids[rxn['id']] = rxn['name']
                 
-        with open(os.path.join(modelseed_db_path, 'Biochemistry', 'compounds.json'), 'r') as rxns:
-            self.compounds = json.load(rxns)
-            self.compounds_cross_references, self.compound_names = OrderedDict(), OrderedDict()
-            for cpd in self.compounds:
-                self.compounds_cross_references[cpd['id']] = {}
-                if cpd['aliases'] is not None:
-                    for category in cpd['aliases']:
-                        content = category.split(';')
-                        if 'Name' in category:
-                            content[0] = content[0].split(':')[0].strip()
-                            names = [name.strip() for name in content]
-                            names.append(cpd['name'])
-                            for name in names:
-                                if name not in self.compound_names:
-                                    self.compound_names[name] = cpd['id']
-                        else:
-                            first = content[0].split(':')
-                            db = first[0].strip()
-                            content[0] = first[1]
-                            self.compounds_cross_references[cpd['id']][db] = [x.strip() for x in content]
+        self.compounds_cross_references, self.compound_names = OrderedDict(), OrderedDict()
+        self.compounds = {}
+        for num in range(0,38):
+            with open(os.path.join(modelseed_db_path, 'Biochemistry', f'compound_{num:0>2}.json'), 'r') as cpds:
+                try:
+                    compounds = json.load(cpds)
+                except:
+                    print(f'compound_{num:0>2}.json is probably empty.')
+                    continue
+                for cpd in compounds:
+                    self.compounds.update(cpd)
+                    self.compounds_cross_references[cpd['id']] = {}
+                    if cpd['aliases'] is not None:
+                        for category in cpd['aliases']:
+                            content = category.split(';')
+                            if 'Name' in category:
+                                content[0] = content[0].split(':')[0].strip()
+                                names = [name.strip() for name in content]
+                                names.append(cpd['name'])
+                                for name in names:
+                                    if name not in self.compound_names:
+                                        self.compound_names[name] = cpd['id']
+                            else:
+                                first = content[0].split(':')
+                                db = first[0].strip()
+                                content[0] = first[1]
+                                self.compounds_cross_references[cpd['id']][db] = [x.strip() for x in content]
                         
     
     # def _parse_modelReactionReagents(self, modelReactionReagents, model_metabolites):
@@ -69,7 +81,9 @@ class MSCompatibility():
         self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
         self.unknown_met_ids, self.changed_metabolites, self.changed_reactions= [], [], []
         self.changed_ids_count = self.changed_rxn_count = 0
-        for self.model_index, self.model in enumerate(self.models):
+        for self.model_index, model in enumerate(self.models):
+            with model:
+                self.model = model
             # standardize metabolites
             if metabolites:
                 if exchanges:
@@ -83,13 +97,13 @@ class MSCompatibility():
                                 ex_rxn.id = 'EX_'+new_met_id
                             if 'cpd' not in met.id and success and new_met_id not in model_metabolites: 
                                 self.unknown_met_ids.append(met.id)
-                                warn(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
+                                logger.warning(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
                 else:
                     for met in self.model.metabolites:
                         met, new_met_id, success = self._fix_met(met)
                         if 'cpd' not in met.id: 
                             self.unknown_met_ids.append(met.id)
-                            warn(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
+                            logger.warning(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
                 
                 if conflicts_file_name is not None:
                     self._export({'metabolite_changes':self.changed_metabolites, 'reaction_changes':self.changed_reactions}, 
@@ -118,7 +132,7 @@ class MSCompatibility():
             #                 modelreactions_ids[rxn.id]['modelReactionReagents'], model_metabolites
             #                 )
             #         else:
-            #             warn(f'ModelSEEDError: The reaction ID {rxn.id} is not captured by the modelreactions.')
+            #             logger.warning(f'ModelSEEDError: The reaction ID {rxn.id} is not captured by the modelreactions.')
                     
             #         try:
             #             rxn.add_metabolites(reaction_dict, combine = False)  
@@ -134,7 +148,7 @@ class MSCompatibility():
             #             reaction_dict = new_reaction_dict
             #         if rxn.id not in self.reaction_ids: 
             #             missed_reactions += 1
-            #             # warn(f'ModelSEEDError: The {rxn.id} | {rxn.name} reaction is not recognized by the ModelSEED Database')
+            #             # logger.warning(f'ModelSEEDError: The {rxn.id} | {rxn.name} reaction is not recognized by the ModelSEED Database')
             
             #         # describe the change
             #         if original_reaction != rxn.reaction:
@@ -157,7 +171,7 @@ class MSCompatibility():
             #     for model in models:
             #         total_reactions += len(model.reactions)
                     
-            #     warn(f'\nModelSEEDError: {missed_reactions}/{total_reactions} reactions were not captured by the ModelSEED modelreaction IDs.')
+            #     logger.warning(f'\nModelSEEDError: {missed_reactions}/{total_reactions} reactions were not captured by the ModelSEED modelreaction IDs.')
         
             self.models[self.model_index] = self.model
         print(f'\n\n{self.changed_rxn_count} reactions were substituted and {self.changed_ids_count} metabolite IDs were redefined.')
@@ -173,11 +187,13 @@ class MSCompatibility():
         self.models = models
         self.changed_ids_count = self.changed_rxn_count = 0
         if standardize:
-            self.standardize_MSD(self.models)
+            self.standardize(self.models, conflicts_file_name='standardized_exchange_metabolites.json', model_names=model_names)
             
         unique_names, established_mets, self.unknown_met_ids, self.changed_metabolites, self.changed_reactions = [], [], [], [], []
         self.unique_mets, self.met_conflicts = OrderedDict(), OrderedDict()
-        for self.model_index, self.model in enumerate(self.models):
+        for self.model_index, model in enumerate(self.models):
+            with model:
+                self.model = model
             model_metabolites = {met.id:met for met in self.model.metabolites}
             for ex_rxn in self.model.exchanges:
                 for met in ex_rxn.metabolites:
@@ -220,7 +236,7 @@ class MSCompatibility():
                             if met.id not in self.met_conflicts:
                                 self.met_conflicts[met.id] = {
                                         f'model{former_model_index}_name': former_name,
-                                        f'model{former_model_index}_met': self.unique_mets[former_id][f'model{former_model_index}_met'],
+                                        f'model{former_model_index}_met': self.unique_mets[met.id][f'model{former_model_index}_met'],
                                         f'model{self.model_index}_name': met.name,
                                         f'model{self.model_index}_met': met
                                     }
@@ -283,7 +299,7 @@ class MSCompatibility():
         else:
             self.unknown_met_ids.append(met.id)
             success = False
-            warn(f'ModelSEEDError: The metabolite ({" | ".join([x for x in [met.id, met.name, base_name, met_name] if x != ""])}) is not recognized by the ModelSEED Database')    
+            logger.warning(f'ModelSEEDError: The metabolite ({" | ".join([x for x in [met.id, met.name, base_name, met_name] if x != ""])}) is not recognized by the ModelSEED Database')    
         return met, new_met_id, success
     
     def _export(self, conflicts,             # the conflicts dictionary that will be exported
@@ -301,7 +317,7 @@ class MSCompatibility():
             file_paths.append(os.path.relpath(path, export_directory))
             with open(path, 'w') as out:
                 json.dump(conflicts, out, indent = 3)
-        if model_names is not None:
+        if model_names:
             for index, model in enumerate(self.models):
                 path = os.path.join(export_directory,f'{model_names[index]}.{model_format}')
                 file_paths.append(os.path.relpath(path, export_directory))
@@ -313,9 +329,11 @@ class MSCompatibility():
         
     def __correct_met(self, met, met_name, standardize = False):
         def check_cross_references(met, general_met):
+            met_refs = self.compounds_cross_references[self.compound_names[met_name]]
+            match = False
             for db in self.compounds_cross_references[general_met]:
                 for cross_ref in self.compounds_cross_references[general_met][db]:
-                    if cross_ref in self.compounds_cross_references[self.compound_names[met_name]][db]:
+                    if db in met_refs and cross_ref in met_refs[db]:
                         match = True
                         break
                 if match:
@@ -340,7 +358,7 @@ class MSCompatibility():
                         if rxn_met.id == met.id:
                             if new_met_id in [old_met.id for old_met in rxn.metabolites]:
                                 double_reagent = True
-                                warn(f'CodeError: The metabolite {new_met_id} replacement for {met.id} already exists in the reaction {rxn.id}, thus the reaction cannot be updated.')
+                                logger.warning(f'CodeError: The metabolite {new_met_id} replacement for {met.id} already exists in the reaction {rxn.id}, thus the reaction cannot be updated.')
                                 break
                             
                             # affirm the match with cross-references, where it is possible for ModelSEED compounds
@@ -348,7 +366,7 @@ class MSCompatibility():
                             if 'cpd' in met.id and self.compounds_cross_references[general_met] != {}:
                                 match, db = check_cross_references(met, general_met)
                                 if not match:
-                                    warn(f'ModelSEEDError: The old metabolite {met.id} cross-references ({self.compounds_cross_references[general_met]}) do not overlap with those ({self.compounds_cross_references[self.compound_names[met_name]]}) of the new metabolite {new_met_id}.')
+                                    logger.warning(f'ModelSEEDError: The old metabolite {met.id} cross-references ({self.compounds_cross_references[general_met]}) do not overlap with those ({self.compounds_cross_references[self.compound_names[met_name]]}) of the new metabolite {new_met_id}.')
                                     
                             # remove duplicate exchange reaction
                             if 'EX_' in rxn.id and 'EX_'+new_met_id in [ex_rxn.id for ex_rxn in self.model.exchanges]:
@@ -413,7 +431,7 @@ class MSCompatibility():
                             
                         self.changed_rxn_count += 1
                     else:
-                        warn(f'CodeError: The reaction {reaction_dict} | {new_reactants} {new_products} possesses a different number of reagents than the original reaction {original_reaction} | {num_reactants} {num_products}, and is skipped.')
+                        logger.warning(f'CodeError: The reaction {reaction_dict} | {new_reactants} {new_products} possesses a different number of reagents than the original reaction {original_reaction} | {num_reactants} {num_products}, and is skipped.')
             else:
                 # affirm the match with cross-references, where it is possible for ModelSEED compounds
                 match = False
@@ -421,7 +439,7 @@ class MSCompatibility():
                 if 'cpd' in met.id and self.compounds_cross_references[general_met] != {}:
                     match, db = check_cross_references(met, general_met)
                     if not match:
-                        warn(f'ModelSEEDError: The old metabolite {met.id} cross-references ({self.compounds_cross_references[general_met]}) do not overlap with those ({self.compounds_cross_references[self.compound_names[met_name]]}) of the new metabolite {new_met_id}.')
+                        logger.warning(f'ModelSEEDError: The old metabolite {met.id} cross-references ({self.compounds_cross_references[general_met]}) do not overlap with those ({self.compounds_cross_references[self.compound_names[met_name]]}) of the new metabolite {new_met_id}.')
                             
                 # rename the undesirable isomer
                 met.id = self.compound_names[met_name]+compartment

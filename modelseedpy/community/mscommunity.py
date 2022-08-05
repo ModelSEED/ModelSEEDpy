@@ -1,4 +1,5 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
@@ -140,14 +141,16 @@ class MSCommunity:
             
             
     @staticmethod
-    def build_from_species_models(models,mdlid=None,name=None,names=[],abundances=None, cobra_model=False):
+    def build_from_species_models(models, msdb_path, model_id=None, name=None, names=[], abundances=None, cobra_model=False):
         """Merges the input list of single species metabolic models into a community metabolic model
         
         Parameters
         ----------
         models : list<Cobra.Model>
             List of models to be merged into a community model
-        mdlid : string
+        msdb_path : string
+            The path to the local version of the ModelSEED Database
+        model_id : string
             String specifying community model ID
         name : string
             String specifying community model name
@@ -166,53 +169,53 @@ class MSCommunity:
         Raises
         ------
         """
-        newmodel = Model(mdlid,name)
-        newutl = MSModelUtil(newmodel)
+        # compatabilize the models
+        mscompat = MSCompatibility(modelseed_db_path = msdb_path)
+        standardized_models = mscompat.align_exchanges(
+            models, standardize=True, conflicts_file_name='exchanges_conflicts.json', model_names = names)
+        
+        # construct the new model
+        newmodel = Model(model_id,name)
         biomass_compounds = []
-        biomass_index = 2
-        biomass_indices = [1]
+        biomass_index = minimal_biomass_index = 2
+        biomass_indices = []
         biomass_indices_dict = {}
         new_metabolites, new_reactions = set(), set()
-        for model_index, model in enumerate(models):
+        for model_index, model in enumerate(standardized_models):
             model_reaction_ids = [rxn.id for rxn in model.reactions]
-            # model_index+=1
+            model_index+=1
             print([rxn.id for rxn in model.reactions if "bio" in rxn.id])
             print(model_index, model.id)
             #Rename metabolites
             for met in model.metabolites:
                 #Renaming compartments
-                if re.search('[a-z+](\d*)$', met.compartment):
-                    m = re.search('([a-z]+)(\d*)$', met.compartment)
-                    if len(m[2]) == 0:
-                        if m[1] == "e":
-                            met.compartment += "0"
-                        else:
-                            met.compartment += str(model_index)
-                    elif m[1] == "e":
-                        met.compartment = m[1]+"0"
-                    else:
-                        met.compartment = m[1]+str(model_index)
-                #Processing metabolite ID
                 output = MSModelUtil.parse_id(met)
                 if output is None:
                     if met.compartment[0] != "e":
-                        met.id += str(model_index)
-                elif output[1] != "e":
-                    if len(output[2]) == 0:
-                        met.id = met.id+str(model_index)
+                        met.compartment = met.compartment[0]+str(model_index)
+                        met.id = met.id.split("_")[0] + met.compartment
                     else:
+                        met.compartment = "e0"
+                else:
+                    if output[2] == "":
+                        if output[1] != "e":
+                            met.id += str(model_index)
+                            met.compartment += str(model_index)
+                    elif output[1] == "e":
+                        met.compartment = "e0"
+                    else:
+                        met.compartment = output[1]+str(model_index)
                         met.id = output[0]+"_"+output[1]+str(model_index)
                 new_metabolites.add(met)
                 if "cpd11416_c" in met.id:
                     print(met.id, model.id)
                     biomass_compounds.append(met)
             #Rename reactions
-            for rxn in model.reactions:
+            for rxn in model.reactions:  # !!! all reactions should have a non-zero compartment index
                 if rxn.id[0:3] != "EX_":
                     if re.search('^(bio)(\d+)$', rxn.id):
-                        print(biomass_indices)
                         index = int(rxn.id.removeprefix('bio'))
-                        if index not in biomass_indices:
+                        if index not in biomass_indices and index >= minimal_biomass_index:
                             biomass_indices.append(index)
                             biomass_indices_dict[model.id] = index
                             print(rxn.id, '2')
@@ -224,29 +227,30 @@ class MSCommunity:
                                 biomass_indices.append(biomass_index)
                                 biomass_indices_dict[model.id] = index
                             else:
-                                print(rxn_id, '3')
-                                for i in range(len(models)*2):
+                                for i in range(minimal_biomass_index, len(models)*2):
                                     rxn_id = "bio"+str(i)
                                     if rxn_id not in model_reaction_ids and i not in biomass_indices:
                                         rxn.id = rxn_id
                                         biomass_indices.append(i)
                                         biomass_indices_dict[model.id] = i
                                         break
+                                print(rxn_id, '3')
                         biomass_index += 1
+                        print(biomass_indices)
                     else:
                         output = MSModelUtil.parse_id(rxn)
                         if output is None:
-                            if rxn.compartment.id[0] != "e":
+                            if "e" not in rxn.compartment.id:
                                 rxn.id += str(model_index)
                         elif output[1] != "e":
-                            if len(output[2]) == 0:
+                            rxn.id = output[0]+"_"+output[1]+str(model_index)
+                            if output[2] == "":
                                 rxn.id = rxn.id+str(model_index)
-                            else:
-                                rxn.id = output[0]+"_"+output[1]+str(model_index)
                 new_reactions.add(rxn)
         #Adding new reactions and compounds to base model
         newmodel.add_reactions(FBAHelper.filter_cobra_set(new_reactions))
         newmodel.add_metabolites(FBAHelper.filter_cobra_set(new_metabolites))
+        
         #Create community biomass
         comm_biomass = Metabolite("cpd11416_c0", None, "Community biomass", 0, "c0")
         metabolites = {comm_biomass: 1}
@@ -254,6 +258,9 @@ class MSCommunity:
         comm_biorxn = Reaction(id="bio1", name= "bio1", lower_bound=0, upper_bound=100)
         comm_biorxn.add_metabolites(metabolites)
         newmodel.add_reactions([comm_biorxn])
+        
+        # create a biomass sink reaction
+        newutl = MSModelUtil(newmodel)
         newutl.add_exchanges_for_metabolites([comm_biomass],0,100,'SK_')
         if cobra_model:
             return newmodel, biomass_indices_dict

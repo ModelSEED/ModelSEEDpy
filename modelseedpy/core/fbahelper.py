@@ -336,4 +336,15 @@ class FBAHelper:
                 unique_objs.add(obj)
                 unique_ids.remove(obj.id)
         return unique_objs
-        
+    
+    @staticmethod
+    def exchange_reactions(model):
+        return [rxn for rxn in model.reactions if "EX_" in rxn.id]
+    
+    @staticmethod
+    def non_interacting_community(self, community):
+        # !!! divert all exchange reactions to a sink
+        for rxn in community.reactions:
+            if "EX_" in rxn.id:
+                community.add_boundary(list(rxn.metabolites.keys())[0], lb=0, type="sink")
+        return community

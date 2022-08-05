@@ -133,6 +133,7 @@ dmypy.json
 
 # Julia dev models
 *.mat
+*.zip
 
 # Pyre type checker
 .pyre/
