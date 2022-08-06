@@ -325,6 +325,7 @@ class FBAHelper:
                     type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
             medium[ex_rxn] = cpd.maxFlux
         model.medium = medium
+        
         return model
     
     @staticmethod
