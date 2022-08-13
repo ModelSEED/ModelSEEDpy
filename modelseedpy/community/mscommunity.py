@@ -592,8 +592,9 @@ class MSCommunity:
         if syntrophy:
             for model in models:
                 for rxnID, flux in media["members"][model.id]["solution"].fluxes.items():
-                    if "EX_" in rxnID and rxnID in media["community_media"]:
-                        media["community_media"][rxnID] -= flux
+                    if "EX_" in rxnID and rxnID in media["community_media"] and flux < 0:
+                        stoich = model.reactions[rxnID].metabolites[rxnID.removeprefix("EX_")]
+                        media["community_media"][rxnID] += flux*stoich
             media["community_media"] = {ID:flux for ID, flux in media["community_media"].items() if flux > 0}
         return media
 
