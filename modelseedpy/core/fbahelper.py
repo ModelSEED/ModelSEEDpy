@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import logging
 from chemicals import periodic_table
 import re
+from optlang import Objective
 from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene and Model are never used
 from cobra.util import solver as sutil  # !!! sutil is never used
 import time
@@ -204,6 +205,15 @@ class FBAHelper:
         return output
     
     @staticmethod
+    def sum_dict(d1,d2):
+        for key, value in d1.items():
+            if key in d2:
+                d2[key] += value
+            else:
+                d2[key] = value
+        return d2
+    
+    @staticmethod
     def rxn_hash(model): 
         output = {}
         for rxn in model.reactions:
@@ -315,14 +325,27 @@ class FBAHelper:
         return model
     
     @staticmethod
-    def update_model_media(model, media):
-        medium = {}
+    def add_objective(model, objective, direction="max"):
+        model.problem.objective = Objective(objective, direction=direction)
+        model.solver.update()
+        return model
+    
+    @staticmethod
+    def add_exchange_to_model(org_model, cpd, rxnID):
+        model = org_model  # abstraction prevents undesirable in-place edits
+        model.add_boundary(metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"), 
+            reaction_id=rxnID, type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
+        return model
+    
+    @staticmethod
+    def update_model_media(org_model, media):
+        model = org_model  # abstraction prevents undesirable in-place edits
+        medium = model.medium
         model_reactions = [rxn.id for rxn in model.reactions]
         for cpd in media.data["mediacompounds"]:
-            ex_rxn = f"EX_{cpd.id}"
+            ex_rxn = f"EX_{cpd.id}_e0"
             if ex_rxn not in model_reactions:
-                model.add_boundary(metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"), 
-                    type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
+                model = FBAHelper.add_exchange_to_model(model, cpd, ex_rxn)
             medium[ex_rxn] = cpd.maxFlux
         model.medium = medium
         
@@ -342,10 +365,11 @@ class FBAHelper:
     def exchange_reactions(model):
         return [rxn for rxn in model.reactions if "EX_" in rxn.id]
     
-    @staticmethod
-    def non_interacting_community(self, community):
-        # !!! divert all exchange reactions to a sink
-        for rxn in community.reactions:
-            if "EX_" in rxn.id:
-                community.add_boundary(list(rxn.metabolites.keys())[0], lb=0, type="sink")
-        return community
+    # @staticmethod
+    # def non_interacting_community(community):
+    #     # !!! divert all exchange reactions to a sink
+    #     for rxn in community.reactions:
+    #         if "EX_" in rxn.id:
+    #             community.add_boundary(list(rxn.metabolites.keys())[0], lb=0, type="sink")
+    #     return community
+            

@@ -16,21 +16,27 @@ This class determines the compatibility of individual models for the constructio
 - *printing* ``bool``: specifies whether results will be printed.
 
 ----------------------
-standardize_MSD()
+standardize()
 ----------------------
 
 The IDs and names of the metabolites and reactions of a model are standardized to those of the ModelSEED Database:
 
 .. code-block:: python
 
- ms_compat.standardize_MSD(model)
+ ms_compat.standardize(models, metabolites:bool=True, exchanges:bool=True, conflicts_file_name:str=None, 
+                       model_names: list = None, export_directory:str=None)
 
-- *model* ``cobra.core.model.Model``: the CobraKBase model that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *models* ``list o cobra.core.model.Model``: the collection of CobraKBase models that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *metabolites* ``bool``: specifies whether metabolites (``True``) or reactions (``False``) will be compared between the models.
+- *exchanges* ``bool``: specifies whether only the exchanges of the models will be standardized.
+- *conflicts_file_name* ``str``: the filename to where metabolite conflicts will be exported, where ``None`` does not export.
+- *model_names* ``list``: the collection of model names that correspond with the indices of the ``models`` parameter, which is used to distinguish the exported files of each model.
+- *export_directory* ``str``: specifies the directory to which all of the content will be exported.
 
 **returns** the standardized COBRA model
 
 -----------------------------
-compare_models()
+align_exchanges()
 -----------------------------
 
 Determines the consistency of reaction or metabolite IDs and names between two models:
@@ -39,31 +45,13 @@ Determines the consistency of reaction or metabolite IDs and names between two m
 
  ms_compat.compare_models(model_1, model_2, metabolites = True, standardize = False)
 
-- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-- *metabolites* ``bool``: specifies whether metabolites (``True``) or reactions (``False``) will be compared between the models.
-- *standardize* ``bool``: specifies whether the models will be standardized through the ``standardize_MSD`` function.
+- *models* ``list o cobra.core.model.Model``: the collection of CobraKBase models that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *standardize* ``bool``: specifies whether the models will be standardized through the ``standardize`` function.
+- *conflicts_file_name* ``str``: the filename to where metabolite conflicts will be exported, where ``None`` does not export.
+- *model_names* ``list``: the collection of model names that correspond with the indices of the ``models`` parameter, which is used to distinguish the exported files of each model.
+- *export_directory* ``str``: specifies the directory to which all of the content will be exported.
 
-**returns** misaligned, model_1, model_2
-
-- *misaligned* ``list``: the collection of the discrepancies between the two models, where the differing entries for each model are both provided.
-- *model_1* & *model_2* ``cobra.core.model.Model``: the models that were compared, which is relevant only if the models were also standardized via ``standardize = True``.
-
-----------------------
-exchanges()
-----------------------
-
-Model variabilities in the exchange fluxes -- such as non-standard metabolite IDs (e.g NH4) and different metabolite IDs for each isomer (e.g. L-alanine is cpd00035 while beta-alanine is cpd00085) -- are systematically corrected to facilitate a compatible community of these models.
-
-.. code-block:: python
-
- ms_compat.exchanges(model)
-
-- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-
-**returns** model, unknown_met_ids
-
-- *model* ``cobra.core.model.Model``: the corrected model that is now compatible with other models to assemble a community.
-- *unknown_met_ids* ``list``: the collection of non-standard metabolite IDs that were not able to be mapped with a standard ModelSEED Database ID.
+**returns** the standardized COBRA model
 
 
 ----------------------

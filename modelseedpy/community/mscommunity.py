@@ -76,7 +76,7 @@ class CommunityModelSpecies:
         for reaction in self.community.model.reactions:
             if int(FBAHelper.rxn_compartment(reaction)[1:]) == self.index:
                 reaction.upper_bound = reaction.lower_bound = 0
-    
+        
     def compute_max_biomass(self):
         if len(self.biomasses) == 0:
             logger.critical("No biomass reaction found for species "+self.id)
@@ -179,7 +179,6 @@ class MSCommunity:
         biomass_compounds = []
         biomass_index = minimal_biomass_index = 2
         biomass_indices = []
-        biomass_indices_dict = {}
         new_metabolites, new_reactions = set(), set()
         for model_index, model in enumerate(standardized_models):
             model_reaction_ids = [rxn.id for rxn in model.reactions]
@@ -217,7 +216,6 @@ class MSCommunity:
                         index = int(rxn.id.removeprefix('bio'))
                         if index not in biomass_indices and index >= minimal_biomass_index:
                             biomass_indices.append(index)
-                            biomass_indices_dict[model.id] = index
                             print(rxn.id, '2')
                         else:
                             rxn_id = "bio"+str(biomass_index)
@@ -225,14 +223,12 @@ class MSCommunity:
                                 print(rxn_id, '1')
                                 rxn.id = rxn_id
                                 biomass_indices.append(biomass_index)
-                                biomass_indices_dict[model.id] = index
                             else:
                                 for i in range(minimal_biomass_index, len(models)*2):
                                     rxn_id = "bio"+str(i)
                                     if rxn_id not in model_reaction_ids and i not in biomass_indices:
                                         rxn.id = rxn_id
                                         biomass_indices.append(i)
-                                        biomass_indices_dict[model.id] = i
                                         break
                                 print(rxn_id, '3')
                         biomass_index += 1
@@ -263,8 +259,8 @@ class MSCommunity:
         newutl = MSModelUtil(newmodel)
         newutl.add_exchanges_for_metabolites([comm_biomass],0,100,'SK_')
         if cobra_model:
-            return newmodel, biomass_indices_dict
-        return MSCommunity(model=newmodel,names=names,abundances=abundances), biomass_indices_dict
+            return newmodel
+        return MSCommunity(model=newmodel,names=names,abundances=abundances)
     
     #Manipulation functions
     def set_abundance(self,abundances):
@@ -497,13 +493,13 @@ class MSCommunity:
             return None
         return self.gapfillings[gfname].integrate_gapfill_solution(gfresults)
     
-    def test_individual_species(self,media = None,allow_cross_feeding=True,run_atp=True,run_biomass=True):
+    def test_individual_species(self, media=None, allow_cross_feeding=True, run_atp=True, run_biomass=True):
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         #Iterating over species and running tests
         data = {"Species":[],"Biomass":[],"ATP":[]}
         for individual in self.species:
             data["Species"].append(individual.id)
-            with self.model: # WITH, here, discards changes after each simulation
+            with self.model:
                 #If no interaction allowed, iterate over all other species and disable them
                 if not allow_cross_feeding:
                     for indtwo in self.species:
@@ -575,6 +571,31 @@ class MSCommunity:
             logger.warning("No solution found for the simulation.")
             return
         self.solution = solution
+        
+    
+    @staticmethod
+    def estimate_minimal_community_media(models, syntrophy=True, min_growth=0.1):
+        from cobra.medium import minimal_medium
+        
+        # determine the unique combination of all species minimal media   
+        media = {}
+        media["community_media"], media["members"] = {}, {}
+        for model in models:
+            media["members"][model.id] = {}
+            with model:
+                media["members"][model.id]["media"] = minimal_medium(model, min_growth, minimize_components=True)
+                model.medium = media["members"][model.id]["media"]
+                media["members"][model.id]["solution"] = model.optimize()
+                media["community_media"] = FBAHelper.sum_dict(model.medium, media["community_media"])
+
+        # subtract syntrophic interactions and remove satisfied fluxes
+        if syntrophy:
+            for model in models:
+                for rxnID, flux in media["members"][model.id]["solution"].fluxes.items():
+                    if "EX_" in rxnID and rxnID in media["community_media"]:
+                        media["community_media"][rxnID] -= flux
+            media["community_media"] = {ID:flux for ID, flux in media["community_media"].items() if flux > 0}
+        return media
 
     def steady_com(self,):
         from reframed.community import SteadyCom, SteadyComVA
