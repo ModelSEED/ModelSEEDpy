@@ -3,16 +3,17 @@ from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
+from itertools import combinations, permutations
 #from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 from modelseedpy.core import MSATPCorrection
 from cobra import Model, Reaction, Metabolite
 from cobra.core.dictlist import DictList
 from cobra.io import save_matlab_model
-from itertools import combinations
 from optlang.symbolics import Zero
 from matplotlib import pyplot
 from pandas import DataFrame
 from pprint import pprint
+from math import isclose
 import logging
 #import itertools
 import cobra
@@ -574,7 +575,7 @@ class MSCommunity:
         
     
     @staticmethod
-    def estimate_minimal_community_media(models, syntrophy=True, min_growth=0.1):
+    def estimate_minimal_community_media(models, com_model, syntrophy=True, min_growth=0.1):
         from cobra.medium import minimal_medium
         
         # determine the unique combination of all species minimal media   
@@ -596,6 +597,66 @@ class MSCommunity:
                         stoich = model.reactions[rxnID].metabolites[rxnID.removeprefix("EX_")]
                         media["community_media"][rxnID] += flux*stoich
             media["community_media"] = {ID:flux for ID, flux in media["community_media"].items() if flux > 0}
+        
+        # JANGA method of further reduction
+        ## identify additionally redundant compounds
+        # redundnant_cpds = set()
+        # original_obj_value = com_model.optimize().objective_value
+        # for cpd in media["community_media"]:
+        #     new_media = media["community_media"].copy()
+        #     new_media.pop(cpd)
+        #     community_model = com_model
+        #     community_model.medium = new_media
+        #     sol = community_model.optimize()
+        #     if isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
+        #         print("redundant cpd:", cpd)
+        #         redundnant_cpds.add(cpd)
+                
+        # ## vet the permutations
+        # permuts = permutations(redundnant_cpds)
+        # permutation_results = {}
+        # community_model = com_model
+        # for permut in permuts:
+        #     success = 0
+        #     new_media = media["community_media"].copy()
+        #     for cpd in permut:
+        #         ### parameterize and simulate the community
+        #         new_media.pop(cpd)
+        #         community_model.medium = new_media
+        #         sol = community_model.optimize()
+        #         if isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
+        #             success += 1
+        #             continue
+        #         print(f"objective value discrepancy:", sol.objective_value, original_obj_value)
+        #         break
+        #     permutation_results[permut] = success
+        
+        # ## filter to only the most minimal media
+        # max_redundancy = max(list(permutation_results.values()))
+        # top_redundancies = {k:v for k,v in permutation_results.items() if v==max_redundancy}
+        # solutions_paths = []
+        # new_combinations = []
+        # for permut in top_redundancies:
+        #     num_mets = len(permut)
+        #     start_removal_index =  max_redundancy - num_mets
+        #     removable_compounds = set(list(permut)[:start_removal_index])
+        #     solutions_paths.append(removable_compounds)
+        #     if removable_compounds not in new_combinations:
+        #         new_combinations.append(removable_compounds)
+                
+        # unique_combinations = []
+        # unique_paths = []
+        # for removal_path in solutions_paths:
+        #     path_permutations = permutations(removal_path)
+        #     if all([set(path) in solutions_paths for path in path_permutations]):
+        #         combination = combinations(removal_path, len(removal_path))
+        #         if not all([set(com) in unique_combinations for com in combination]):
+        #             for com in combinations(removal_path, len(removal_path)):
+        #                 unique_combinations.append((set(com)))
+        #     else:
+        #         if not set(removal_path) in unique_paths:
+        #             unique_paths.append((set(removal_path)))
+        
         return media
 
     def steady_com(self,):
