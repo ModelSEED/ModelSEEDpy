@@ -8,7 +8,7 @@ from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene and Model 
 from cobra.util import solver as sutil  # !!! sutil is never used
 import time
 from modelseedpy.biochem import from_local
-from scipy.odr.odrpack import Output  # !!! Output is never used
+from scipy.odr import Output  # !!! Output is never used
 from chemw import ChemMW
 from warnings import warn
 #from Carbon.Aliases import false
@@ -364,6 +364,16 @@ class FBAHelper:
     @staticmethod
     def exchange_reactions(model):
         return [rxn for rxn in model.reactions if "EX_" in rxn.id]
+    
+    @staticmethod
+    def solution_to_dict(solution):
+        return {key:flux for key, flux in solution.fluxes.items()}
+    
+    @staticmethod
+    def remove_media_compounds(media_dict, compounds):
+        for cpd in compounds:
+            media_dict.pop(cpd)
+        return media_dict
     
     # @staticmethod
     # def non_interacting_community(community):
