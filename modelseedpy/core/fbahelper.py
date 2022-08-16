@@ -368,8 +368,20 @@ class FBAHelper:
         return [rxn for rxn in model.reactions if "EX_" in rxn.id]
     
     @staticmethod
+    def bio_reactions(model):
+        return [rxn for rxn in model.reactions if "bio" in rxn.id]
+    
+    @staticmethod
     def solution_to_dict(solution):
         return {key:flux for key, flux in solution.fluxes.items()}
+    
+    @staticmethod
+    def solution_to_rxns_dict(solution, model):
+        return {model.reactions.get_by_id(key):flux for key, flux in solution.fluxes.items()}
+        
+    @staticmethod
+    def solution_to_variables_dict(solution, model):
+        return {model.variables.get(key):flux for key, flux in solution.fluxes.items()}
     
     @staticmethod
     def remove_media_compounds(media_dict, compounds):
