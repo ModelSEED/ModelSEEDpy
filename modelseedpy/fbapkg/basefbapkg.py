@@ -11,7 +11,7 @@ from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 class BaseFBAPkg:
     """Base class for FBA packages"""
-    def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
+    def __init__(self, model, name, variable_types={}, constraint_types={}):
         self.model = model; self.name = name
         self.modelutl = MSModelUtil(model)
         

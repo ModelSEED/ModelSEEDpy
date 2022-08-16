@@ -389,7 +389,7 @@ class FBAHelper:
 class OptlangHelper:
     
     @staticmethod
-    def add_variables(var_name:str, var_bounds:Iterable, var_type:str):
+    def add_variables(var_name:str, var_bounds:Iterable, var_type:str="continuous"):
         return {"name": var_name.replace(" ", "_"), "lb": var_bounds[0], "ub": var_bounds[1], "type": var_type}
     
     @staticmethod
