@@ -143,7 +143,7 @@ class MSCommunity:
             
             
     @staticmethod
-    def build_from_species_models(models, msdb_path, model_id=None, name=None, names=[], abundances=None, cobra_model=False):
+    def build_from_species_models(models, model_id=None, name=None, names=[], abundances=None, cobra_model=False):
         """Merges the input list of single species metabolic models into a community metabolic model
         
         Parameters
@@ -171,12 +171,8 @@ class MSCommunity:
         Raises
         ------
         """
-        # compatabilize the models
-        mscompat = MSCompatibility(modelseed_db_path = msdb_path)
-        standardized_models = mscompat.align_exchanges(
-            models, standardize=True, conflicts_file_name='exchanges_conflicts.json', model_names = names)
-        
         # construct the new model
+        standardized_models = MSCompatibility.align_exchanges(models, True, 'exchanges_conflicts.json', names)
         newmodel = Model(model_id,name)
         biomass_compounds = []
         biomass_index = minimal_biomass_index = 2
@@ -580,6 +576,8 @@ class MSCommunity:
         from cobra.medium import minimal_medium
         from deepdiff import DeepDiff
         
+        # TODO compatibilize the models to facilitate subsequent analaysis, in SMETANA and elsewhere
+        
         # determine the unique combination of all species minimal media   
         media = {}
         media["community_media"], media["members"] = {}, {}
@@ -595,6 +593,7 @@ class MSCommunity:
         org_media = media["community_media"]
         original_time = process_time()
         print(f"Initial media defined with {len(media['community_media'])} exchanges")
+        changed = 0
         if syntrophy:
             for model in models:
                 for rxnID, flux in media["members"][model.id]["solution"].items():
@@ -602,83 +601,98 @@ class MSCommunity:
                         print(rxnID, flux)
                         stoich = list(model.reactions.get_by_id(rxnID).metabolites.values())[0]
                         media["community_media"][rxnID] -= flux*stoich
+                        changed += 1
             media["community_media"] = {ID:flux for ID, flux in media["community_media"].items() if flux > 0}
         
         syntrophic_media = media["community_media"]
         syntrophic_time = process_time()
-        print(f"Syntrophic fluxes examined after {(syntrophic_time-original_time)/60} minutes")
+        print(f"Syntrophic fluxes examined after {(syntrophic_time-original_time)/60} minutes, with {changed} changes.")
         if DeepDiff(org_media, syntrophic_media):
             print("media after syntrophy", len(media["community_media"]))
             print(DeepDiff(org_media, syntrophic_media))
         # JANGA method of further reduction
+        changed = 0
         if com_model:
-            ## identify additionally redundant compounds
-            redundnant_cpds = set()
-            original_obj_value = com_model.optimize().objective_value
-            community_model = com_model
-            for cpd in media["community_media"]:
-                new_media = media["community_media"].copy()
-                new_media.pop(cpd)
-                community_model.medium = new_media
-                sol = community_model.optimize()
-                if isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
-                    print("redundant cpd:", cpd)
-                    redundnant_cpds.add(cpd)
-                    
-            ## vet the permutations
-            permuts = [p for p in permutations(redundnant_cpds)]
-            print(f"The {len(permuts)} permutations of the {redundnant_cpds} redundant compounds will be examined.")
-            permutation_results = {}
-            for index, permut in enumerate(permuts):
-                print(f"{index}/len(permuts)", end="\r")
-                successful_removal = 0
-                new_media = media["community_media"].copy()
-                for cpd in permut:
-                    ### parameterize and simulate the community
+            with com_model as community_model:
+                ## identify additionally redundant compounds
+                redundnant_cpds = set()
+                original_obj_value = com_model.optimize().objective_value
+                for cpd in media["community_media"]:
+                    new_media = media["community_media"].copy()
                     new_media.pop(cpd)
                     community_model.medium = new_media
                     sol = community_model.optimize()
-                    if isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
-                        successful_removal += 1
-                        continue
-                    # print("objective value discrepancy:", sol.objective_value, original_obj_value)
-                    break
-                permutation_results[permut] = successful_removal
-            
-            ## filter to only the most minimal media
-            max_redundancy = max(list(permutation_results.values()))
-            top_redundancies = {k:v for k,v in permutation_results.items() if v==max_redundancy}
-            solutions_paths, new_combinations = [], []
-            for permut in top_redundancies:
-                start_removal_index =  max_redundancy - len(permut) # the compound at which growth is lost
-                removable_compounds = set(list(permut)[:start_removal_index])
-                solutions_paths.append(removable_compounds)
-                if removable_compounds not in new_combinations:
-                    new_combinations.append(removable_compounds)
-                    
-            unique_combinations, unique_paths = [], []
-            for removal_path in solutions_paths:
-                path_permutations = permutations(removal_path)
-                if all([set(path) in solutions_paths for path in path_permutations]):
-                    combination = combinations(removal_path, len(removal_path))
-                    if not all([set(com) in unique_combinations for com in combination]):
-                        for com in combinations(removal_path, len(removal_path)):
-                            unique_combinations.append((set(com)))
-                else:
-                    if set(removal_path) not in unique_paths:
-                        unique_paths.append((set(removal_path)))
-            if unique_combinations[0]:
-                print("Unique combinations:")
-                print(len(unique_combinations), unique_combinations) 
-                if len(unique_combinations) == 1:
-                    media["community_media"] = FBAHelper.remove_media_compounds(media["community_media"], unique_combinations[0])
-            if unique_paths:
-                print("Unique paths:")
-                print(len(unique_paths), unique_paths)
+                    if isclose(sol.objective_value, original_obj_value, abs_tol=1e-4):
+                        print("redundant cpd:", cpd)
+                        redundnant_cpds.add(cpd)
+                    else:
+                        print(sol.objective_value, original_obj_value)
+                        
+                ## vet the permutations
+                permuts = [p for p in permutations(redundnant_cpds)]
+                print(f"The {len(permuts)} permutations of the {redundnant_cpds} redundant compounds will be examined.")
+                permutation_results = []
+                best = 0
+                failed_permutation_starts = []
+                for perm_index, permut in enumerate(permuts):
+                    print(f"{perm_index}/{len(permuts)}", end="\r")
+                    permutation_segments = [permut[:index] for index in range(len(permut), 2, -1)]
+                    ### block previously discovered failures and successes, respectively
+                    if not any([seg in failed_permutation_starts for seg in permutation_segments]) \
+                        and not any([set(permut[:removal_num-1]) == set(success[:removal_num-1]) for success, removal_num in permutation_results.items()]):
+                        successful_removal = 0
+                        new_media = media["community_media"].copy()
+                        for cpd in permut:
+                            ### parameterize and simulate the community
+                            new_media.pop(cpd)
+                            community_model.medium = new_media
+                            sol = community_model.optimize()
+                            if isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
+                                successful_removal += 1
+                                continue
+                            # print("objective value discrepancy:", sol.objective_value, original_obj_value)
+                            failed_permutation_starts.append(permut[:successful_removal+1])
+                            break
+                        if successful_removal >= best:
+                            if successful_removal > best:
+                                best = successful_removal
+                                permutation_results = []
+                            permut_set = set(permut[:best+1])  # slice only the elements that are removable
+                            if permut_set not in permutation_results:
+                                permutation_results.append(permut)
+                
+                ## filter to only the most minimal media
+                solutions_paths, new_combinations = [], []
+                for permut in permutation_results:
+                    start_removal_index =  best - len(permut) # the compound at which growth is lost
+                    removable_compounds = set(list(permut)[:start_removal_index])
+                    solutions_paths.append(removable_compounds)
+                    if removable_compounds not in new_combinations:
+                        new_combinations.append(removable_compounds)
+                        
+                unique_combinations, unique_paths = [], []
+                for removal_path in solutions_paths:
+                    path_permutations = permutations(removal_path)
+                    if all([set(path) in solutions_paths for path in path_permutations]):
+                        combination = combinations(removal_path, len(removal_path))
+                        if not all([set(com) in unique_combinations for com in combination]):
+                            for com in combinations(removal_path, len(removal_path)):
+                                unique_combinations.append((set(com)))
+                    else:
+                        if set(removal_path) not in unique_paths:
+                            unique_paths.append((set(removal_path)))
+                if unique_combinations[0]:
+                    print("Unique combinations:")
+                    print(len(unique_combinations), unique_combinations) 
+                    if len(unique_combinations) == 1:
+                        media["community_media"] = FBAHelper.remove_media_compounds(media["community_media"], unique_combinations[0])
+                if unique_paths:
+                    print("Unique paths:")
+                    print(len(unique_paths), unique_paths)
         
         jenga_media = media["community_media"]
         jenga_time = process_time()
-        print(f"Syntrophic fluxes examined after {(jenga_time-syntrophic_time-jenga_time)/60} minutes")
+        print(f"Jenga fluxes examined after {(jenga_time-syntrophic_time)/60} minutes, with {changed} changes.")
         if DeepDiff(syntrophic_media, jenga_media):
             print("media after syntrophy", len(media["community_media"]))
             print(DeepDiff(syntrophic_media, jenga_media))
