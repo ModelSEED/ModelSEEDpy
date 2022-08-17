@@ -288,8 +288,8 @@ class MSCompatibility():
                                     compartment = met.compartment
                                     )
                                 
-                            removal_dict[rxn_met] = 0
-                            reaction_dict[new_met] = stoich
+                            removal_dict[rxn_met.id] = 0
+                            reaction_dict[new_met.id] = stoich
                             
                         # reconstruct the reactions
                         if double_reagent:
@@ -298,7 +298,7 @@ class MSCompatibility():
                         new_products = len(reaction_dict) - new_reactants
                         num_reactants, num_products = len(rxn.reactants), len(rxn.products)
                         if num_reactants == new_reactants and num_products == new_products:
-                            print([met for met in rxn.metabolites])
+                            print([met.id for met in rxn.metabolites])
                             print(removal_dict, reaction_dict)
                             rxn.add_metabolites(removal_dict, combine = False)
                             rxn.add_metabolites(reaction_dict, combine = False)  
