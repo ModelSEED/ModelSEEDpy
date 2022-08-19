@@ -317,8 +317,9 @@ class FBAHelper:
     
     @staticmethod
     def parse_df(df):
-        from numpy import array
-        return array(dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()])
+        from collections import namedtuple
+        dataframe = namedtuple("DataFrame", ("index", "columns", "values"))
+        return dataframe(list(df.index), list(df.columns), df.to_numpy())
     
     @staticmethod
     def add_vars_cons(model, vars_cons):
@@ -396,56 +397,3 @@ class FBAHelper:
     #         if "EX_" in rxn.id:
     #             community.add_boundary(list(rxn.metabolites.keys())[0], lb=0, type="sink")
     #     return community
-    
-    
-class OptlangHelper:
-    
-    @staticmethod
-    def add_variables(var_name:str, var_bounds:Iterable, var_type:str="continuous"):
-        return {"name": var_name.replace(" ", "_"), "lb": var_bounds[0], "ub": var_bounds[1], "type": var_type}
-    
-    @staticmethod
-    def add_constraint(cons_name:str, cons_bounds:Iterable, cons_expr:list):
-        return {"name": cons_name.replace(" ", "_"),
-        "expression": OptlangHelper._define_expression(cons_expr),
-         "lb": cons_bounds[0], "ub": cons_bounds[1], "indicator_variable": None, "active_when": 1}
-    
-    @staticmethod
-    def add_objective(obj_name:str, obj_expr:list, direction:str):
-        return {"name": obj_name.replace(" ", "_"),
-        "expression": OptlangHelper._define_expression(obj_expr),
-        "direction": direction}
-    
-    @staticmethod
-    def define_model(model_name, variables, constraints, objective, optlang=False):
-        model = {'name':model_name, 'variables':[], 'constraints':[],
-            "objective": OptlangHelper.add_objective(objective[0], objective[1], objective[2])}
-        for var in variables:
-            model["variables"].append(OptlangHelper.add_variables(var[0], var[1], var[2]))
-        for cons in constraints:
-            model["constraints"].append(OptlangHelper.add_constraint(cons[0], cons[1], cons[2]))
-                                      
-        if optlang:
-            return Model.from_json(model)
-        return model
-    
-    @staticmethod
-    def _define_expression(expr:list):
-        def define_term(value):
-            if isinstance(value, str):
-                return {"type":"Symbol", "name": value}
-            elif isinstance(value, (float, int)):
-                return {"type":"Number", "value": value}
-        
-        if len(expr) > 1:
-            expression = {"type": "Add", "args": []}
-            for term in expr:
-                if isinstance(term, (tuple, list, set)):
-                    expression["args"].append({
-                        "type": "Mul", "args": [define_term(value) for value in term]})
-                else:
-                    expression["args"].append(define_term(term))
-        else:
-            expression = {"type": "Mul", "args": [define_term(value) for value in expr[0]]}
-                    
-        return expression        
