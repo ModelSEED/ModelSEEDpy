@@ -319,10 +319,10 @@ class FBAHelper:
         medium = {}
         model_reactions = [rxn.id for rxn in model.reactions]
         for cpd in media.data["mediacompounds"]:
-            ex_rxn = f"EX_{cpd.id}"
+            ex_rxn = f"EX_{cpd.id}_e0"
             if ex_rxn not in model_reactions:
                 model.add_boundary(metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"), 
-                    type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
+                    reaction_id=ex_rxn, type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
             medium[ex_rxn] = cpd.maxFlux
         model.medium = medium
         
