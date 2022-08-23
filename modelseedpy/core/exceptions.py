@@ -20,3 +20,10 @@ class ObjectError(Exception):
 class ParameterError(Exception):
     """Error in a parameterization"""
     pass 
+
+class ObjectAlreadyDefinedError(Exception):
+    pass
+
+class NoFluxError(Exception):
+    """Error for FBA solutions"""
+    pass

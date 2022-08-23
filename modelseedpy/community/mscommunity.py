@@ -3,16 +3,18 @@ from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
+from itertools import combinations, permutations
 #from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 from modelseedpy.core import MSATPCorrection
 from cobra import Model, Reaction, Metabolite
 from cobra.core.dictlist import DictList
 from cobra.io import save_matlab_model
-from itertools import combinations
 from optlang.symbolics import Zero
+from time import process_time
 from matplotlib import pyplot
 from pandas import DataFrame
 from pprint import pprint
+from math import isclose
 import logging
 #import itertools
 import cobra
@@ -76,7 +78,7 @@ class CommunityModelSpecies:
         for reaction in self.community.model.reactions:
             if int(FBAHelper.rxn_compartment(reaction)[1:]) == self.index:
                 reaction.upper_bound = reaction.lower_bound = 0
-    
+        
     def compute_max_biomass(self):
         if len(self.biomasses) == 0:
             logger.critical("No biomass reaction found for species "+self.id)
@@ -141,7 +143,7 @@ class MSCommunity:
             
             
     @staticmethod
-    def build_from_species_models(models, msdb_path, model_id=None, name=None, names=[], abundances=None, cobra_model=False):
+    def build_from_species_models(models, model_id=None, name=None, names=[], abundances=None, cobra_model=False):
         """Merges the input list of single species metabolic models into a community metabolic model
         
         Parameters
@@ -169,17 +171,12 @@ class MSCommunity:
         Raises
         ------
         """
-        # compatabilize the models
-        mscompat = MSCompatibility(modelseed_db_path = msdb_path)
-        standardized_models = mscompat.align_exchanges(
-            models, standardize=True, conflicts_file_name='exchanges_conflicts.json', model_names = names)
-        
         # construct the new model
+        standardized_models = MSCompatibility.align_exchanges(models, True, 'exchanges_conflicts.json', names)
         newmodel = Model(model_id,name)
         biomass_compounds = []
         biomass_index = minimal_biomass_index = 2
         biomass_indices = []
-        biomass_indices_dict = {}
         new_metabolites, new_reactions = set(), set()
         for model_index, model in enumerate(standardized_models):
             model_reaction_ids = [rxn.id for rxn in model.reactions]
@@ -217,7 +214,6 @@ class MSCommunity:
                         index = int(rxn.id.removeprefix('bio'))
                         if index not in biomass_indices and index >= minimal_biomass_index:
                             biomass_indices.append(index)
-                            biomass_indices_dict[model.id] = index
                             print(rxn.id, '2')
                         else:
                             rxn_id = "bio"+str(biomass_index)
@@ -225,14 +221,12 @@ class MSCommunity:
                                 print(rxn_id, '1')
                                 rxn.id = rxn_id
                                 biomass_indices.append(biomass_index)
-                                biomass_indices_dict[model.id] = index
                             else:
                                 for i in range(minimal_biomass_index, len(models)*2):
                                     rxn_id = "bio"+str(i)
                                     if rxn_id not in model_reaction_ids and i not in biomass_indices:
                                         rxn.id = rxn_id
                                         biomass_indices.append(i)
-                                        biomass_indices_dict[model.id] = i
                                         break
                                 print(rxn_id, '3')
                         biomass_index += 1
@@ -263,8 +257,8 @@ class MSCommunity:
         newutl = MSModelUtil(newmodel)
         newutl.add_exchanges_for_metabolites([comm_biomass],0,100,'SK_')
         if cobra_model:
-            return newmodel, biomass_indices_dict
-        return MSCommunity(model=newmodel,names=names,abundances=abundances), biomass_indices_dict
+            return newmodel
+        return MSCommunity(model=newmodel,names=names,abundances=abundances)
     
     #Manipulation functions
     def set_abundance(self,abundances):
@@ -497,13 +491,13 @@ class MSCommunity:
             return None
         return self.gapfillings[gfname].integrate_gapfill_solution(gfresults)
     
-    def test_individual_species(self,media = None,allow_cross_feeding=True,run_atp=True,run_biomass=True):
+    def test_individual_species(self, media=None, allow_cross_feeding=True, run_atp=True, run_biomass=True):
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         #Iterating over species and running tests
         data = {"Species":[],"Biomass":[],"ATP":[]}
         for individual in self.species:
             data["Species"].append(individual.id)
-            with self.model: # WITH, here, discards changes after each simulation
+            with self.model:
                 #If no interaction allowed, iterate over all other species and disable them
                 if not allow_cross_feeding:
                     for indtwo in self.species:
@@ -575,9 +569,138 @@ class MSCommunity:
             logger.warning("No solution found for the simulation.")
             return
         self.solution = solution
-
-    def steady_com(self,):
-        from reframed.community import SteadyCom, SteadyComVA
         
-        reframed_model = FBAHelper.get_reframed_model(self.model)
+    
+    @staticmethod
+    def estimate_minimal_community_media(models, com_model=None, syntrophy=True, min_growth=0.1):
+        from cobra.medium import minimal_medium
+        from deepdiff import DeepDiff
+        
+        # TODO compatibilize the models to facilitate subsequent analaysis, in SMETANA and elsewhere
+        
+        # determine the unique combination of all species minimal media   
+        media = {}
+        media["community_media"], media["members"] = {}, {}
+        for model in models:
+            media["members"][model.id] = {}
+            with model:
+                media["members"][model.id]["media"] = minimal_medium(model, min_growth, minimize_components=True).to_dict()
+                model.medium = media["members"][model.id]["media"]
+                media["members"][model.id]["solution"] = FBAHelper.solution_to_dict(model.optimize())
+                media["community_media"] = FBAHelper.sum_dict(model.medium, media["community_media"])
+
+        # subtract syntrophic interactions and remove satisfied fluxes
+        org_media = media["community_media"].copy()
+        original_time = process_time()
+        print(f"Initial media defined with {len(media['community_media'])} exchanges")
+        changed = 0
+        if syntrophy:
+            for model in models:
+                for rxnID, flux in media["members"][model.id]["solution"].items():
+                    if rxnID in media["community_media"] and flux > 0:
+                        print(rxnID, flux)
+                        stoich = list(model.reactions.get_by_id(rxnID).metabolites.values())[0]
+                        media["community_media"][rxnID] -= flux*stoich
+                        changed += 1
+            media["community_media"] = {ID:flux for ID, flux in media["community_media"].items() if flux > 0}
+        
+        syntrophic_media = media["community_media"].copy()
+        syntrophic_time = process_time()
+        print(f"Syntrophic fluxes examined after {(syntrophic_time-original_time)/60} minutes, with {changed} changes.")
+        if DeepDiff(org_media, syntrophic_media):
+            print("media after syntrophy", len(media["community_media"]))
+            print(DeepDiff(org_media, syntrophic_media))
+            
+        # JANGA method of further reduction
+        changed = 0
+        if com_model:
+            community_model = com_model 
+            ## identify additionally redundant compounds
+            redundnant_cpds = set()
+            original_obj_value = com_model.optimize().objective_value
+            for cpd in media["community_media"]:
+                new_media = media["community_media"].copy()
+                new_media.pop(cpd)
+                community_model.medium = new_media
+                sol = community_model.optimize()
+                if isclose(sol.objective_value, original_obj_value, abs_tol=1e-4):
+                    print("redundant cpd:", cpd)
+                    redundnant_cpds.add(cpd)
+                else:
+                    print(sol.objective_value, original_obj_value)
+                    
+            ## vet the permutations
+            permuts = [p for p in permutations(redundnant_cpds)]
+            print(f"The {len(permuts)} permutations of the {redundnant_cpds} redundant compounds will be examined.")
+            permutation_results = []
+            best = 0
+            failed_permutation_starts = []
+            for perm_index, permut in enumerate(permuts):
+                print(f"{perm_index}/{len(permuts)}", end="\r")
+                permutation_segments = [permut[:index] for index in range(len(permut), 2, -1)]
+                ### block previously discovered failures and successes, respectively
+                if not any([seg in failed_permutation_starts for seg in permutation_segments]):
+                    if best < 3 or not any([set(permut[:best-1]) == set(success[:best-1]) for success in permutation_results]):
+                        successful_removal = 0
+                        new_media = media["community_media"].copy()
+                        for cpd in permut:
+                            ### parameterize and simulate the community
+                            new_media.pop(cpd)
+                            community_model.medium = new_media
+                            sol = community_model.optimize()
+                            if isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
+                                successful_removal += 1
+                                continue
+                            # print("objective value discrepancy:", sol.objective_value, original_obj_value)
+                            failed_permutation_starts.append(permut[:successful_removal+1])
+                            break
+                        if successful_removal >= best:
+                            if successful_removal > best:
+                                best = successful_removal
+                                permutation_results = []
+                            permut_set = set(permut[:best+1])  # slice only the elements that are removable
+                            if permut_set not in permutation_results:
+                                permutation_results.append(permut)
+            
+            ## filter to only the most minimal media
+            solutions_paths, new_combinations = [], []
+            for permut in permutation_results:
+                start_removal_index =  best - len(permut) # the compound at which growth is lost
+                removable_compounds = set(list(permut)[:start_removal_index])
+                solutions_paths.append(removable_compounds)
+                if removable_compounds not in new_combinations:
+                    new_combinations.append(removable_compounds)
+                    
+            unique_combinations, unique_paths = [], []
+            for removal_path in solutions_paths:
+                path_permutations = permutations(removal_path)
+                if all([set(path) in solutions_paths for path in path_permutations]):
+                    combination = combinations(removal_path, len(removal_path))
+                    if not all([set(com) in unique_combinations for com in combination]):
+                        for com in combinations(removal_path, len(removal_path)):
+                            unique_combinations.append((set(com)))
+                else:
+                    if set(removal_path) not in unique_paths:
+                        unique_paths.append((set(removal_path)))
+            if unique_combinations[0]:
+                print("Unique combinations:")
+                print(len(unique_combinations), unique_combinations) 
+                if len(unique_combinations) == 1:
+                    media["community_media"] = FBAHelper.remove_media_compounds(media["community_media"], unique_combinations[0])
+            if unique_paths:
+                print("Unique paths:")
+                print(len(unique_paths), unique_paths)
+        
+        jenga_media = media["community_media"].copy()
+        jenga_time = process_time()
+        print(f"Jenga fluxes examined after {(jenga_time-syntrophic_time)/60} minutes, with {changed} changes.")
+        if DeepDiff(syntrophic_media, jenga_media):
+            print("media after syntrophy", len(media["community_media"]))
+            print(DeepDiff(syntrophic_media, jenga_media))
+        return media
+
+    # def steady_com(self,):
+    #     from reframed.community import SteadyCom, SteadyComVA
+        
+    #     reframed_model = FBAHelper.get_reframed_model(self.model)
         

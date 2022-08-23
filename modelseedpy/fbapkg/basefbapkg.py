@@ -11,7 +11,7 @@ from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 class BaseFBAPkg:
     """Base class for FBA packages"""
-    def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
+    def __init__(self, model, name, variable_types={}, constraint_types={}):
         self.model = model; self.name = name
         self.modelutl = MSModelUtil(model)
         
@@ -63,7 +63,6 @@ class BaseFBAPkg:
         return self.variables[obj_type][name]
         
     def build_constraint(self, obj_type, lower_bound, upper_bound, coef={}, cobra_obj=None):
-        name = None
         if self.constraint_types[obj_type] == "none":
             count = len(self.constraints[obj_type])
             name = str(count+1)
