@@ -5,7 +5,7 @@ from modelseedpy.core.fbahelper import FBAHelper
 from typing import Iterable
 from zipfile import ZipFile, ZIP_LZMA
 from pprint import pprint
-import logging, json, re, os #, lzma
+import platform, logging, json, sys, re, os #, lzma
 
 logging.basicConfig(filename="mscompatability.log", format='%(asctime)s %(message)s', filemode='w')
 logger = logging.getLogger(__name__)
@@ -17,6 +17,22 @@ with open(os.path.join(os.path.dirname(__file__), "../compound_Xrefs.json"), 'r'
 with open(os.path.join(os.path.dirname(__file__), "../compoundNames.json"), 'r') as cpdNames:
     compoundNames = json.load(cpdNames)
     
+def remove_prefix(string, prefix):
+    if string.startswith(prefix):
+        return string[len(prefix):]
+    return string
+    
+def remove_suffix(string, suffix):
+    if string.endswith(suffix):
+        return string[:-len(suffix)]
+    return string
+
+def print_changes(change):
+    if float(platform.python_version()[:3]) >= 3.8:
+        pprint(change, sort_dicts=False)
+    else:
+        pprint(change)
+
 def define_vars(variables):
     return [var or [] for var in variables]
         
@@ -103,7 +119,7 @@ class MSCompatibility():
                         else:
                             # describe the metabolite conflict between the ID and name
                             former_id = list(unique_mets.keys())[unique_names.index(met_name)]
-                            former_model_index = list(unique_mets[former_id].keys())[0].split('_')[0].removeprefix('model')
+                            former_model_index = remove_prefix(list(unique_mets[former_id].keys())[0].split('_')[0], 'model')
                             if met.name not in met_conflicts:
                                 met_conflicts[met_name] = {
                                         f'model{former_model_index}_id': former_id,
@@ -120,7 +136,7 @@ class MSCompatibility():
                                 model, met, unknown_met_ids, changed_metabolites, changed_reactions, standardize, printing)
                     else:
                         former_name = unique_names[list(unique_mets.keys()).index(met.id)]
-                        former_model_index = list(unique_mets[met.id].keys())[0].split('_')[0].removeprefix('model')
+                        former_model_index = remove_prefix(list(unique_mets[met.id].keys())[0].split('_')[0], 'model')
                         if met_name == former_name:
                             # remove the metabolite that is no longer unique
                             del unique_names[list(unique_mets.keys()).index(met.id)]
@@ -154,11 +170,11 @@ class MSCompatibility():
                                 model, met, unknown_met_ids, changed_metabolites, changed_reactions, standardize, printing)
                     
                 # correct the reaction ID
-                reaction = re.sub('(_\w\d$)', '', ex_rxn.id).removeprefix('EX_')
+                reaction = remove_prefix(re.sub('(_\w\d$)', '', ex_rxn.id), 'EX_')
                 if reaction in model_metabolites:
                     suffix = re.search('(_\w\d$)', reaction).group()
                     model, met, new_met_id, unknown_met_ids, changed_mets, changed_rxns = MSCompatibility._fix_met(
-                        model, reaction.removesuffix(suffix), unknown_met_ids,
+                        model, remove_suffix(reaction, suffix), unknown_met_ids,
                         changed_metabolites, changed_reactions, standardize, printing)
                     ex_rxn.id = 'EX_'+new_met_id+suffix
             new_models.append(model)
@@ -248,7 +264,7 @@ class MSCompatibility():
         # model = old_model.copy()
         model_exchanges = [ex_rxn.id for ex_rxn in FBAHelper.exchange_reactions(model)]
         compartment = re.search('(_\w\d+$)', met.id).group()
-        if met.id.removesuffix(compartment) != compoundNames[met_name]:  # If the ID associated with the name deviates from that in the ModelSEED Database
+        if remove_suffix(met.id, compartment) != compoundNames[met_name]:  # If the ID associated with the name deviates from that in the ModelSEED Database
             new_met_id = compoundNames[met_name]+compartment
             general_met = re.sub("(_\w\d+$)", "", new_met_id)
             # if new_met_id in model.metabolites:
@@ -268,7 +284,7 @@ class MSCompatibility():
                     changed_reactions.append(change)
                     if printing:
                         print('\n')
-                        pprint(change, sort_dicts=False)
+                        print_changes(change)
                 else:
                     if new_met_id in [old_met.id for old_met in rxn.metabolites]:
                         logger.warning(f"CodeError: The metabolite {new_met_id} replacement for {met.id}"
@@ -302,7 +318,7 @@ class MSCompatibility():
                         changed_reactions.append(change)
                         if printing:
                             print('\n')
-                            pprint(change, sort_dicts=False)
+                            print_changes(change)
                     else:
                         logger.warning(f"CodeError: The reaction {reaction_dict} | {new_reactants} {new_products} possesses"
                         " a different number of reagents than the original reaction"
@@ -323,6 +339,6 @@ class MSCompatibility():
                     changed_metabolites.append(change)
                     if printing:
                         print('\n')
-                        pprint(change, sort_dicts=False)
+                        print_changes(change)
 
         return model, met, new_met_id, changed_metabolites, changed_reactions
