@@ -576,9 +576,8 @@ class MSCommunity:
         from cobra.medium import minimal_medium
         from deepdiff import DeepDiff
         
-        # TODO compatibilize the models to facilitate subsequent analaysis, in SMETANA and elsewhere
-        
-        # determine the unique combination of all species minimal media   
+        # determine the unique combination of all species minimal media 
+        models = MSCompatibility.align_exchanges(models, True, "standardization_corrections.json")
         media = {}
         media["community_media"], media["members"] = {}, {}
         for model in models:
