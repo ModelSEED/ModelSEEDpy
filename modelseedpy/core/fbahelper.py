@@ -322,8 +322,14 @@ class FBAHelper:
         return dataframe(list(df.index), list(df.columns), df.to_numpy())
     
     @staticmethod
-    def add_vars_cons(model, vars_cons):
+    def add_cons_vars(model, vars_cons):
         model.add_cons_vars(vars_cons)
+        model.solver.update()
+        return model
+    
+    @staticmethod
+    def remove_cons_vars(model, vars_cons):
+        model.remove_cons_vars(vars_cons)
         model.solver.update()
         return model
     

@@ -106,6 +106,7 @@ class MSCompatibility():  # TODO convert to a collection of two static methods w
             with model:
                 self.model = model
             # standardize metabolites
+            print(f"{self.model.id} original optimization:", self.model.optimize())
             if metabolites:
                 if exchanges:
                     model_metabolites = [met.id for met in self.model.metabolites]
@@ -490,5 +491,6 @@ class MSCompatibility():  # TODO convert to a collection of two static methods w
                     print_changes(change)
                 self.changed_ids_count += 1
 
+        print(f"{self.model.id} optimization after _correct_met():", self.model.optimize())
         return met, new_met_id
             

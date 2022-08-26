@@ -572,12 +572,12 @@ class MSCommunity:
         
     
     @staticmethod
-    def estimate_minimal_community_media(models, com_model=None, syntrophy=True, min_growth=0.1):
+    def estimate_minimal_community_media(models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[]):
         from cobra.medium import minimal_medium
         from deepdiff import DeepDiff
         
         # determine the unique combination of all species minimal media 
-        models = MSCompatibility.align_exchanges(models, True, "standardization_corrections.json")
+        # models = MSCompatibility.align_exchanges(models, True, "standardization_corrections.json")
         media = {}
         media["community_media"], media["members"] = {}, {}
         for model in models:
@@ -597,7 +597,6 @@ class MSCommunity:
             for model in models:
                 for rxnID, flux in media["members"][model.id]["solution"].items():
                     if rxnID in media["community_media"] and flux > 0:
-                        print(rxnID, flux)
                         stoich = list(model.reactions.get_by_id(rxnID).metabolites.values())[0]
                         media["community_media"][rxnID] -= flux*stoich
                         changed += 1
@@ -605,17 +604,17 @@ class MSCommunity:
         
         syntrophic_media = media["community_media"].copy()
         syntrophic_time = process_time()
-        print(f"Syntrophic fluxes examined after {(syntrophic_time-original_time)/60} minutes, with {changed} changes.")
-        if DeepDiff(org_media, syntrophic_media):
-            print("media after syntrophy", len(media["community_media"]))
-            print(DeepDiff(org_media, syntrophic_media))
+        syntrophy_difference = DeepDiff(org_media, syntrophic_media)
+        changed_quantity = len(list(syntrophy_difference.values())[0].values())
+        print(f"Syntrophic fluxes examined after {(syntrophic_time-original_time)/60} minutes, with {changed_quantity} change(s):", syntrophy_difference)
             
         # JANGA method of further reduction
         changed = 0
         if com_model:
             community_model = com_model 
             ## identify additionally redundant compounds
-            redundnant_cpds = set()
+            redundant_cpds = set()
+            community_model.medium = syntrophic_media
             original_obj_value = com_model.optimize().objective_value
             for cpd in media["community_media"]:
                 new_media = media["community_media"].copy()
@@ -623,14 +622,11 @@ class MSCommunity:
                 community_model.medium = new_media
                 sol = community_model.optimize()
                 if isclose(sol.objective_value, original_obj_value, abs_tol=1e-4):
-                    print("redundant cpd:", cpd)
-                    redundnant_cpds.add(cpd)
-                else:
-                    print(sol.objective_value, original_obj_value)
+                    redundant_cpds.add(cpd)
                     
             ## vet the permutations
-            permuts = [p for p in permutations(redundnant_cpds)]
-            print(f"The {len(permuts)} permutations of the {redundnant_cpds} redundant compounds will be examined.")
+            permuts = [p for p in permutations(redundant_cpds)]
+            print(f"The {len(permuts)} permutations of the {redundant_cpds} redundant compounds, from absolute tolerance of 1e-4, will be examined.")
             permutation_results = []
             best = 0
             failed_permutation_starts = []
@@ -689,13 +685,31 @@ class MSCommunity:
             if unique_paths:
                 print("Unique paths:")
                 print(len(unique_paths), unique_paths)
+                
+            # further remove compounds from the media, while defaulting to the removal with the largest ID values
+            possible_removal_tracker = {}
+            possible_options = unique_combinations+unique_paths
+            if conserved_cpds:
+                possible_options = [opt for opt in possible_options if not any(cpd in conserved_cpds for cpd in opt)]
+            best = 0
+            for possible_removal in possible_options:
+                cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in possible_removal])
+                if cpdID_sum > best:
+                    best = cpdID_sum
+                    possible_removal_tracker = {best:[possible_removal]}
+                elif cpdID_sum == best:
+                    possible_removal_tracker[best].append(possible_removal) 
+            cpds_to_remove = list(possible_removal_tracker.values())[0][0]
+            pprint(media["community_media"])
+            for cpd in cpds_to_remove:
+                media["community_media"].pop(cpd)
         
         jenga_media = media["community_media"].copy()
         jenga_time = process_time()
-        print(f"Jenga fluxes examined after {(jenga_time-syntrophic_time)/60} minutes, with {changed} changes.")
-        if DeepDiff(syntrophic_media, jenga_media):
-            print("media after syntrophy", len(media["community_media"]))
-            print(DeepDiff(syntrophic_media, jenga_media))
+        jenga_difference = DeepDiff(syntrophic_media, jenga_media)
+        return media, jenga_difference
+        changed_quantity = sum(len(list(diff.values())[0]) for diff in jenga_difference.values)
+        print(f"Jenga fluxes examined after {(jenga_time-syntrophic_time)/60} minutes, with {changed_quantity} change(s):", jenga_difference)
         return media
 
     # def steady_com(self,):

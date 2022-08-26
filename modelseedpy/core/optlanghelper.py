@@ -33,8 +33,9 @@ def tuple_dot_product(baseTup, additions):
              f" The lengths will be homogenized to {minimum}.")
         baseTup = baseTup[:minimum] ; additions = additions[:minimum]
         
-    new_list = baseTup[:]
+    new_list = baseTup.copy()
     for index, base in enumerate(new_list):
+        print(base, additions[index])
         if isIterable(additions[index]):
             new_list[index] = base + additions[index]
         else:

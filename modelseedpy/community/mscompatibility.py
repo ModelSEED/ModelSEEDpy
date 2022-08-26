@@ -5,7 +5,7 @@ from modelseedpy.core.fbahelper import FBAHelper
 from typing import Iterable
 from zipfile import ZipFile, ZIP_LZMA
 from pprint import pprint
-import platform, logging, json, sys, re, os #, lzma
+import platform, logging, json, re, os #, lzma
 
 logging.basicConfig(filename="mscompatability.log", format='%(asctime)s %(message)s', filemode='w')
 logger = logging.getLogger(__name__)
@@ -46,6 +46,7 @@ class MSCompatibility():
         unknown_met_ids, changed_metabolites, changed_reactions = define_vars([unknown_met_ids, changed_metabolites, changed_reactions])
         new_models = []
         for org_model in models:
+            print(f"{org_model.id} original optimization:", org_model.optimize())
             model = org_model.copy()
             # standardize metabolites
             if metabolites:
@@ -64,7 +65,6 @@ class MSCompatibility():
                                 ex_rxn.id = 'EX_'+met.id
                             except:
                                 ex_rxn.id = 'EX_'+new_met_id
-                                    
                                 
                             changed_rxns = orig_changed_reactions-len(changed_reactions)
                             changed_mets = orig_changed_metabolites-len(changed_metabolites)
@@ -72,6 +72,7 @@ class MSCompatibility():
                                     new_met_id not in model_metabolites]): 
                                 unknown_met_ids.append(met.id)
                                 logger.warning(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
+                            return False, False  # !!! REMOVE ME WHEN FIXED
                 else:
                     for met in model.metabolites:
                         model, met, new_met_id, unknown_met_ids, changed_metabolites, changed_reactions = MSCompatibility._fix_met(
@@ -86,7 +87,7 @@ class MSCompatibility():
                         models, {'metabolite_changes':changed_metabolites, 'reaction_changes':changed_reactions},
                         conflicts_file_name, model_names, export_directory)
             new_models.append(model)
-        print(f'\n\n{len(changed_reactions)} reactions were substituted and {len(changed_metabolites)} metabolite IDs were redefined.')
+        print(f'\n\n{len(changed_reactions)} reactions were substituted and {len(changed_metabolites)} metabolite IDs were redefined by standardize().')
         if view_unknown_mets:
             return new_models, unknown_met_ids
         return new_models
@@ -97,7 +98,7 @@ class MSCompatibility():
         if standardize:
             models, unknown_met_ids = MSCompatibility.standardize(models, True, True, f'standardized_exchanges_{conflicts_file_name}.json', 
                 model_names, export_directory, True, printing, unknown_met_ids, changed_metabolites, changed_reactions)
-            
+        return False  # !!! RMEMOVE ME WHEN FIXED
         unique_mets, met_conflicts = OrderedDict(), OrderedDict()
         new_models = []
         for model_index, org_model in enumerate(models):
@@ -191,7 +192,7 @@ class MSCompatibility():
             model_names = model_names or [model.id for model in models]
             MSCompatibility._export(new_models, export_met_conflicts, conflicts_file_name, model_names, export_directory)
 
-        print(f'\n\n{len(changed_reactions)} exchange reactions were substituted and {len(changed_metabolites)} exchange metabolite IDs were redefined.')
+        print(f'\n\n{len(changed_reactions)} exchange reactions were substituted and {len(changed_metabolites)} exchange metabolite IDs were redefined by align_exchanges().')
         if extras:
             return models, (unique_mets, unknown_met_ids, changed_metabolites, changed_reactions)
         return models
@@ -249,9 +250,11 @@ class MSCompatibility():
                     break
             return match, db
         
+        print(f"{model.id} original optimization in _correct_met():", model.optimize())
         met = old_met #.copy()
         original_id = new_met_id = met.id
         original_name = met.name 
+        print(f"{model.id} optimization1 in _correct_met():", model.optimize())
         # affirm the match with cross-references, where it is possible for ModelSEED compounds
         general_met = re.sub("(_\w\d+$)", "", met.id)
         match = False
@@ -340,5 +343,7 @@ class MSCompatibility():
                     if printing:
                         print('\n')
                         print_changes(change)
+                    print(f"{model.id} optimization2 in _correct_met():", model.optimize())
 
+        print(f"{model.id} original optimization in _correct_met():", model.optimize())
         return model, met, new_met_id, changed_metabolites, changed_reactions
