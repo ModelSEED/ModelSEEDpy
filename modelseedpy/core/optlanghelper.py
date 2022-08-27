@@ -25,6 +25,13 @@ def isIterable(term):
     except:
         return False
     
+def isnumber(obj):
+    try:
+        float(obj)
+        return True
+    except:
+        return False
+    
 def tuple_dot_product(baseTup, additions):
     base_length = len(baseTup); addition_length = len(additions)
     if base_length != addition_length:
@@ -49,13 +56,13 @@ class OptlangHelper:
         return {"name": var_name.replace(" ", "_"), "lb": var_bounds[0], "ub": var_bounds[1], "type": var_type}
     
     @staticmethod
-    def add_constraint(cons_name:str, cons_bounds:Iterable, cons_expr:list):
+    def add_constraint(cons_name:str, cons_bounds:Iterable, cons_expr:dict):
         return {"name": cons_name.replace(" ", "_"),
         "expression": OptlangHelper._define_expression(cons_expr),
          "lb": cons_bounds[0], "ub": cons_bounds[1], "indicator_variable": None, "active_when": 1}
     
     @staticmethod
-    def add_objective(obj_name:str, obj_expr:list, direction:str):
+    def add_objective(obj_name:str, obj_expr:dict, direction:str):
         return {"name": obj_name.replace(" ", "_"),
         "expression": OptlangHelper._define_expression(obj_expr),
         "direction": direction}
@@ -76,28 +83,29 @@ class OptlangHelper:
         return model
     
     @staticmethod
-    def _define_expression(expr:list):
+    def _define_expression(expr:dict):
+        def get_expression_template(expr):
+            return {"type": expr["operation"], "args": []}
+        
         def define_term(value):
-            print(value)
             if isinstance(value, str):
                 return {"type":"Symbol", "name": value}
             elif isinstance(value, (float, int)):
                 return {"type":"Number", "value": value}
+            print(f"ERROR: The {value} is not known.")
         
-        if len(expr) > 1:
-            expression = {"type": "Add", "args": []}
-            for term in expr:
-                if isIterable(term):
-                    expression["args"].append({"type": "Mul", "args": []})
-                    if isIterable(term[0]):
-                        for added_terms in term:
-                            expression["args"][-1]["args"].append({
-                                    "type": "Add", "args": [define_term(add_val) for add_val in added_terms]})
+        expression = get_expression_template(expr)
+        for ele in expr["elements"]:
+            if not isnumber(ele) and not isinstance(ele, str):
+                arguments = []
+                for ele2 in ele["elements"]:
+                    if not isnumber(ele2) and not isinstance(ele2, str):
+                        print("recursive ele\t\t", type(ele2), ele2)
+                        arguments.append(OptlangHelper._define_expression(ele2))
                     else:
-                        expression["args"][-1]["args"] = [define_term(val) for val in term]
-                else:
-                    expression["args"].append(define_term(term))
-        else:
-            expression = {"type": "Mul", "args": [define_term(value) for value in expr[0]]}
-                    
-        return expression        
+                        arguments.append(define_term(ele2))
+                expression["args"].append(get_expression_template(ele))
+                expression["args"][-1]["args"] = arguments
+            else:
+                expression["args"].append(define_term(ele))
+        return expression      
