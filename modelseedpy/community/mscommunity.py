@@ -20,7 +20,7 @@ import logging
 import cobra
 import networkx
 import sigfig
-import re, os
+import json, re, os
 
 logger = logging.getLogger(__name__)
 
@@ -422,7 +422,9 @@ class MSCommunity:
             data[individual.id].append("; ".join(species_collection[individual.id]["Environment"]))
         for individual in self.species:
             data["Environment"].append("; ".join(species_collection["Environment"][individual.id]))
-        data["Environment"].append(0), data["IDs"].append("Environment list"), data["Metabolites/Donor"].append("Environment list")
+        data["Environment"].append(0)
+        data["IDs"].append("Environment list")
+        data["Metabolites/Donor"].append("Environment list")
         
         self.cross_feeding_df = DataFrame(data)
         logger.info(self.cross_feeding_df)
@@ -572,7 +574,7 @@ class MSCommunity:
         
     
     @staticmethod
-    def estimate_minimal_community_media(models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[]):
+    def estimate_minimal_community_media(models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[], export=True):
         from cobra.medium import minimal_medium
         from deepdiff import DeepDiff
         
@@ -603,10 +605,10 @@ class MSCommunity:
             media["community_media"] = {ID:flux for ID, flux in media["community_media"].items() if flux > 0}
         
         syntrophic_media = media["community_media"].copy()
+        syntrophy_diff = DeepDiff(org_media, syntrophic_media)
+        changed_quantity = 0 if not syntrophy_diff else len(list(syntrophy_diff.values())[0].values())
         syntrophic_time = process_time()
-        syntrophy_difference = DeepDiff(org_media, syntrophic_media)
-        changed_quantity = len(list(syntrophy_difference.values())[0].values())
-        print(f"Syntrophic fluxes examined after {(syntrophic_time-original_time)/60} minutes, with {changed_quantity} change(s):", syntrophy_difference)
+        print(f"Syntrophic fluxes examined after {(syntrophic_time-original_time)/60} minutes, with {changed_quantity} change(s):", syntrophy_diff)
             
         # JANGA method of further reduction
         changed = 0
@@ -694,6 +696,7 @@ class MSCommunity:
             best = 0
             for possible_removal in possible_options:
                 cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in possible_removal])
+                print(cpdID_sum)
                 if cpdID_sum > best:
                     best = cpdID_sum
                     possible_removal_tracker = {best:[possible_removal]}
@@ -707,9 +710,15 @@ class MSCommunity:
         jenga_media = media["community_media"].copy()
         jenga_time = process_time()
         jenga_difference = DeepDiff(syntrophic_media, jenga_media)
-        return media, jenga_difference
-        changed_quantity = sum(len(list(diff.values())[0]) for diff in jenga_difference.values)
+        changed_quantity = len(list(jenga_difference.values())[0])
         print(f"Jenga fluxes examined after {(jenga_time-syntrophic_time)/60} minutes, with {changed_quantity} change(s):", jenga_difference)
+        if export:
+            if not com_model:
+                export_name = "_".join([model.id for model in models])+"_media.json"
+            else:
+                export_name = com_model.id+"_media.json"
+            with open(export_name, 'w') as out:
+                json.dump(media, out, indent=3)
         return media
 
     # def steady_com(self,):

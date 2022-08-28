@@ -32,22 +32,17 @@ def isnumber(obj):
     except:
         return False
     
-def tuple_dot_product(baseTup, additions):
-    base_length = len(baseTup); addition_length = len(additions)
-    if base_length != addition_length:
-        minimum = min(base_length, addition_length)
-        logger.warning(f"InputError: The baseTuple of length {base_length} does not equate that of the additions {addition_length}."
-             f" The lengths will be homogenized to {minimum}.")
-        baseTup = baseTup[:minimum] ; additions = additions[:minimum]
-        
-    new_list = baseTup.copy()
-    for index, base in enumerate(new_list):
-        print(base, additions[index])
-        if isIterable(additions[index]):
-            new_list[index] = base + additions[index]
-        else:
-            new_list[index] = base + [additions[index]]
-    return new_list
+def define_term(value):
+    if isinstance(value, str):
+        return {"type":"Symbol", "name": value}
+    elif isinstance(value, (float, int)):
+        return {"type":"Number", "value": value}
+    print(f"ERROR: The {value} is not known.")
+    
+def get_expression_template(expr):
+    if isinstance(expr, list):
+        return {"type": "Add", "args": []}
+    return {"type": expr["operation"], "args": []}
     
 class OptlangHelper:
     
@@ -84,16 +79,6 @@ class OptlangHelper:
     
     @staticmethod
     def _define_expression(expr:dict):
-        def get_expression_template(expr):
-            return {"type": expr["operation"], "args": []}
-        
-        def define_term(value):
-            if isinstance(value, str):
-                return {"type":"Symbol", "name": value}
-            elif isinstance(value, (float, int)):
-                return {"type":"Number", "value": value}
-            print(f"ERROR: The {value} is not known.")
-        
         expression = get_expression_template(expr)
         for ele in expr["elements"]:
             if not isnumber(ele) and not isinstance(ele, str):
@@ -109,3 +94,22 @@ class OptlangHelper:
             else:
                 expression["args"].append(define_term(ele))
         return expression      
+    
+    @staticmethod
+    def heuns_dot_product(coefficients, zipped_to_sum):
+        expression = {"type": "Add", "args": []}
+        for index, (term1, term2) in enumerate(zipped_to_sum):
+            expression["args"].append({"type": "Mul", "args": [
+                {"type": "Add", "args": [define_term(term1), define_term(term2)]},
+                define_term(coefficients[index])
+            ]})
+        return expression
+    
+    @staticmethod
+    def dot_product(zipped_to_sum):
+        expression = {"type": "Add", "args": []}
+        for (term1, term2) in zipped_to_sum:
+            expression["args"].append({"type": "Mul", "args": [
+                {"type": "Add", "args": [define_term(term1), define_term(term2)]}
+            ]})
+        return expression
