@@ -33,13 +33,14 @@ def isnumber(obj):
         return False
     
 def define_term(value):
+    if isnumber(value):
+        return {"type":"Number", "value": value}
     if isinstance(value, str):
         return {"type":"Symbol", "name": value}
-    elif isinstance(value, (float, int)):
-        return {"type":"Number", "value": value}
-    print(f"ERROR: The {value} is not known.")
+    print(f"ERROR: The {value} of type {type(value)} is not known.")
     
 def get_expression_template(expr):
+    # print(expr)
     if isinstance(expr, list):
         return {"type": "Add", "args": []}
     return {"type": expr["operation"], "args": []}
@@ -52,27 +53,31 @@ class OptlangHelper:
     
     @staticmethod
     def add_constraint(cons_name:str, cons_bounds:Iterable, cons_expr:dict):
+        print(cons_expr, end="\r")
         return {"name": cons_name.replace(" ", "_"),
         "expression": OptlangHelper._define_expression(cons_expr),
          "lb": cons_bounds[0], "ub": cons_bounds[1], "indicator_variable": None, "active_when": 1}
     
     @staticmethod
-    def add_objective(obj_name:str, obj_expr:dict, direction:str):
+    def add_objective(obj_name:str, objective_expr:dict, direction:str):
+        obj_expr = get_expression_template(objective_expr)
+        obj_expr["args"] = [OptlangHelper._define_expression(expr) for expr in objective_expr]
         return {"name": obj_name.replace(" ", "_"),
-        "expression": OptlangHelper._define_expression(obj_expr),
+        "expression": obj_expr,
         "direction": direction}
     
     @staticmethod
     def define_model(model_name, variables, constraints, objective, optlang=False):
-        model = {'name':model_name, 'variables':[], 'constraints':[],
-            "objective": OptlangHelper.add_objective(objective[0], objective[1], objective[2])}
+        model = {'name':model_name, 'variables':[], 'constraints':[], "objective": []}
+        # print(objective)
         for var in variables:
             if len(var) == 2:
                 var.append("continuous")
             model["variables"].append(OptlangHelper.add_variables(var[0], var[1], var[2]))
         for cons in constraints:
             model["constraints"].append(OptlangHelper.add_constraint(cons[0], cons[1], cons[2]))
-                                      
+        # if not isinstance(obj, str): # catches a strange error of the objective name as the objective itself
+        model["objective"].append(OptlangHelper.add_objective(objective[0], objective[1], objective[2]))
         if optlang:
             return Model.from_json(model)
         return model
@@ -82,10 +87,11 @@ class OptlangHelper:
         expression = get_expression_template(expr)
         for ele in expr["elements"]:
             if not isnumber(ele) and not isinstance(ele, str):
+                # print(expr, ele, end="\r")
                 arguments = []
                 for ele2 in ele["elements"]:
                     if not isnumber(ele2) and not isinstance(ele2, str):
-                        print("recursive ele\t\t", type(ele2), ele2)
+                        # print("recursive ele\t\t", type(ele2), ele2)
                         arguments.append(OptlangHelper._define_expression(ele2))
                     else:
                         arguments.append(define_term(ele2))
@@ -96,20 +102,19 @@ class OptlangHelper:
         return expression      
     
     @staticmethod
-    def heuns_dot_product(coefficients, zipped_to_sum):
-        expression = {"type": "Add", "args": []}
+    def dot_product(zipped_to_sum, coefficients_for_heuns=None):
+        if coefficients_for_heuns is not None:
+            coefs = coefficients_for_heuns if isinstance(coefficients_for_heuns, (list, set)) else coefficients_for_heuns.tolist()
+            zipped_length = len(zipped_to_sum); coefs_length = len(coefs)
+            if zipped_length != coefs_length:
+                raise IndexError(f"ERROR: The length of zipped elements {zipped_length} is unequal to that of coefficients {coefs_length}")
+            
+        expression = {"operation": "Add", "elements": []}
         for index, (term1, term2) in enumerate(zipped_to_sum):
-            expression["args"].append({"type": "Mul", "args": [
-                {"type": "Add", "args": [define_term(term1), define_term(term2)]},
-                define_term(coefficients[index])
-            ]})
-        return expression
-    
-    @staticmethod
-    def dot_product(zipped_to_sum):
-        expression = {"type": "Add", "args": []}
-        for (term1, term2) in zipped_to_sum:
-            expression["args"].append({"type": "Mul", "args": [
-                {"type": "Add", "args": [define_term(term1), define_term(term2)]}
-            ]})
+            if coefficients_for_heuns is not None:
+                expression["elements"].append({"operation": "Mul", "elements": [
+                    {"operation": "Add", "elements": [term1, term2]}, coefs[index]
+                ]})
+            else:
+                expression["elements"].append({"operation": "Mul", "elements": [term1, term2]})
         return expression
