@@ -58,12 +58,13 @@ class MSCompatibility():
                     model_metabolites = [met.id for met in model.metabolites]
                     for ex_rxn in FBAHelper.exchange_reactions(model):
                         for met in ex_rxn.metabolites:
-                            ic(met.id, ex_rxn.id)
+                            og_id = met.id
                             orig_changed_reactions = len(changed_reactions)
                             orig_changed_metabolites = len(changed_metabolites)
                             model, met, new_met_id, unknown_met_ids, changed_metabolites, changed_reactions = MSCompatibility._fix_met(
                                 model, met, unknown_met_ids, changed_metabolites, changed_reactions, True, printing)
-                            ic(met.id, ex_rxn.id)
+                            if og_id != met.id:
+                                ic(og_id, met.id, ex_rxn.id)
                             try:  # catching errors of repeated exchange IDs
                                 ex_rxn.id = 'EX_'+met.id
                             except:
@@ -95,11 +96,8 @@ class MSCompatibility():
         return new_models
        
     @staticmethod
-    def align_exchanges(models, standardize:bool=False, conflicts_file_name:str=None, model_names:list=None, export_directory:str=None, printing:bool=True, extras=False): 
+    def align_exchanges(models, conflicts_file_name:str=None, model_names:list=None, export_directory:str=None, printing:bool=True, extras=False): 
         unknown_met_ids, changed_metabolites, changed_reactions, unique_names, established_mets = [], [], [], [], []
-        if standardize:
-            models, unknown_met_ids = MSCompatibility.standardize(models, True, True, f'standardized_exchanges_{conflicts_file_name}.json', 
-                model_names, export_directory, True, printing, unknown_met_ids, changed_metabolites, changed_reactions)
         unique_mets, met_conflicts = OrderedDict(), OrderedDict()
         new_models = []
         for model_index, org_model in enumerate(models):
@@ -135,7 +133,7 @@ class MSCompatibility():
                                         f'model{model_index}_met': met
                                     })
                             model, met, new_met_id, unknown_met_ids, changed_mets, changed_rxns = MSCompatibility._fix_met(
-                                model, met, unknown_met_ids, changed_metabolites, changed_reactions, standardize, printing)
+                                model, met, unknown_met_ids, changed_metabolites, changed_reactions, False, printing)
                     else:
                         former_name = unique_names[list(unique_mets.keys()).index(met.id)]
                         former_model_index = remove_prefix(list(unique_mets[met.id].keys())[0].split('_')[0], 'model')
@@ -169,7 +167,7 @@ class MSCompatibility():
                                             f'model{model_index}_{iteration}_met': met
                                         })
                             model, met, new_met_id, unknown_met_ids, changed_mets, changed_rxns = MSCompatibility._fix_met(
-                                model, met, unknown_met_ids, changed_metabolites, changed_reactions, standardize, printing)
+                                model, met, unknown_met_ids, changed_metabolites, changed_reactions, False, printing)
                     
                 # correct the reaction ID
                 reaction = remove_prefix(re.sub('(_\w\d$)', '', ex_rxn.id), 'EX_')
@@ -177,7 +175,7 @@ class MSCompatibility():
                     suffix = re.search('(_\w\d$)', reaction).group()
                     model, met, new_met_id, unknown_met_ids, changed_mets, changed_rxns = MSCompatibility._fix_met(
                         model, remove_suffix(reaction, suffix), unknown_met_ids,
-                        changed_metabolites, changed_reactions, standardize, printing)
+                        changed_metabolites, changed_reactions, False, printing)
                     ex_rxn.id = 'EX_'+new_met_id+suffix
             new_models.append(model)
             residual_nonstandard_mets = [met.id for ex_rxn in FBAHelper.exchange_reactions(model) for met in ex_rxn.metabolites if "cpd" not in met.id]
@@ -329,6 +327,7 @@ class MSCompatibility():
                             f" {original_reaction} | {len(rxn.reactants)} {len(rxn.products)}, and is skipped.")
             else:
                 # rename the undesirable isomer
+                ic(new_met_id, met.id)
                 met.name = met_name+compartment
                 met.id = new_met_id
                 change = {'original': {'id': original_id, 'name': original_name},
@@ -345,6 +344,4 @@ class MSCompatibility():
                     print('\n')
                     print_changes(change)
                     
-            ic(new_met_id, met.id)
-
         return model, met, new_met_id, changed_metabolites, changed_reactions
