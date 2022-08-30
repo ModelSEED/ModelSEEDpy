@@ -14,7 +14,7 @@ from time import process_time
 from matplotlib import pyplot
 from pandas import DataFrame
 from pprint import pprint
-from math import isclose
+from math import isclose, inf
 import logging
 #import itertools
 import cobra
@@ -574,7 +574,7 @@ class MSCommunity:
         
     
     @staticmethod
-    def estimate_minimal_community_media(models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[], export=True):
+    def minimal_community_media(models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[], export=True):
         from cobra.medium import minimal_medium
         from deepdiff import DeepDiff
         
@@ -693,10 +693,10 @@ class MSCommunity:
             possible_options = unique_combinations+unique_paths
             if conserved_cpds:
                 possible_options = [opt for opt in possible_options if not any(cpd in conserved_cpds for cpd in opt)]
-            best = 0
+            best = -inf
             for possible_removal in possible_options:
                 cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in possible_removal])
-                print(cpdID_sum)
+                print("\n\n", cpdID_sum)
                 if cpdID_sum > best:
                     best = cpdID_sum
                     possible_removal_tracker = {best:[possible_removal]}
@@ -710,6 +710,7 @@ class MSCommunity:
         jenga_media = media["community_media"].copy()
         jenga_time = process_time()
         jenga_difference = DeepDiff(syntrophic_media, jenga_media)
+        print(jenga_difference)
         changed_quantity = len(list(jenga_difference.values())[0])
         print(f"Jenga fluxes examined after {(jenga_time-syntrophic_time)/60} minutes, with {changed_quantity} change(s):", jenga_difference)
         if export:

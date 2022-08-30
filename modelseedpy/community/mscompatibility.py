@@ -1,11 +1,14 @@
 from collections import OrderedDict
-# from cobra import Metabolite, Reaction
+from cobra import Reaction
 from cobra.io.json import save_json_model
 from modelseedpy.core.fbahelper import FBAHelper
 from typing import Iterable
 from zipfile import ZipFile, ZIP_LZMA
+from icecream import ic
 from pprint import pprint
 import platform, logging, json, re, os #, lzma
+
+ic.configureOutput(includeContext=True, contextAbsPath=False)
 
 logging.basicConfig(filename="mscompatability.log", format='%(asctime)s %(message)s', filemode='w')
 logger = logging.getLogger(__name__)
@@ -55,11 +58,12 @@ class MSCompatibility():
                     model_metabolites = [met.id for met in model.metabolites]
                     for ex_rxn in FBAHelper.exchange_reactions(model):
                         for met in ex_rxn.metabolites:
-                            # print(met.id, ex_rxn.id)
+                            ic(met.id, ex_rxn.id)
                             orig_changed_reactions = len(changed_reactions)
                             orig_changed_metabolites = len(changed_metabolites)
                             model, met, new_met_id, unknown_met_ids, changed_metabolites, changed_reactions = MSCompatibility._fix_met(
                                 model, met, unknown_met_ids, changed_metabolites, changed_reactions, True, printing)
+                            ic(met.id, ex_rxn.id)
                             try:  # catching errors of repeated exchange IDs
                                 ex_rxn.id = 'EX_'+met.id
                             except:
@@ -103,7 +107,7 @@ class MSCompatibility():
             message = f"\n\n\nAlign exchange reactions in {model.id}"
             print(message, "\n", "="*len(message))
             model_metabolites = {met.id:met for met in model.metabolites}
-            for ex_rxn in model.exchanges:
+            for ex_rxn in FBAHelper.exchange_reactions(model):
                 for met in ex_rxn.metabolites:
                     met_name = re.sub('_\w\d$', '', met.name) 
                     if met.id not in unique_mets and met.id not in established_mets: 
@@ -176,6 +180,9 @@ class MSCompatibility():
                         changed_metabolites, changed_reactions, standardize, printing)
                     ex_rxn.id = 'EX_'+new_met_id+suffix
             new_models.append(model)
+            residual_nonstandard_mets = [met.id for ex_rxn in FBAHelper.exchange_reactions(model) for met in ex_rxn.metabolites if "cpd" not in met.id]
+            if len(residual_nonstandard_mets) != len(unknown_met_ids):
+                logger.error(f"ERROR: The {model.id} model has residual non-standard metabolites in its exchange reactions: {set(residual_nonstandard_mets)-set(unknown_met_ids)}")
         if conflicts_file_name:
             export_met_conflicts = {}
             for met_id, content in met_conflicts.items():
@@ -199,21 +206,24 @@ class MSCompatibility():
         base_name = ''.join(met.name.split('-')[1:]).capitalize()
         met_name = re.sub('_\w\d$', '', met.name)
         new_met_id = met.id
-        name = None
         for possible_name in [met.name, met.name.capitalize(), met_name, met_name.capitalize(), base_name]:
             if possible_name in compoundNames:
-                name = possible_name
-                break
-        if not name:
-            unknown_met_ids.append(met.id)
-            logger.warning(f'ModelSEEDError: The metabolite ({" | ".join([x for x in [met.id, met.name, base_name, met_name] if x != ""])})'
-                           " is not recognized by the ModelSEED Database")  
-            return model, met, new_met_id, unknown_met_ids, changed_metabolites, changed_reactions
-            
-        model, met, new_met_id, changed_metabolites, changed_reactions = MSCompatibility._correct_met(
-            model, met, name, changed_metabolites, changed_reactions, standardize, printing)
+                model, met, new_met_id, changed_metabolites, changed_reactions = MSCompatibility._correct_met(
+                    model, met, possible_name, changed_metabolites, changed_reactions, standardize, printing)
+                return model, met, new_met_id, unknown_met_ids, changed_metabolites, changed_reactions
+        
+        # TODO - add a search through cross-references to confirm that the metabolite is unknown, despite different names
+        # general_met = re.sub("(_\w\d+$)", "", met.id)
+        # matches = MSCompatibility._check_cross_references(met, general_met, None)
+        # if not matches:
+        #     logger.warning(f"ModelSEEDError: The old metabolite {met.id} cross-references"
+        #     f" ({compounds_cross_references[general_met]}) do not overlap with those"
+        #     f" ({compounds_cross_references[compoundNames[met_name]]}) of the new metabolite {new_met_id}.")
+        unknown_met_ids.append(met.id)
+        logger.warning(f'ModelSEEDError: The metabolite ({" | ".join([x for x in [met.id, met.name, base_name, met_name] if x != ""])})'
+                       " is not recognized by the ModelSEED Database")  
         return model, met, new_met_id, unknown_met_ids, changed_metabolites, changed_reactions
-    
+            
     def _export(models, conflicts, conflicts_file_name, model_names, export_directory):
         if export_directory is None:
             export_directory = os.getcwd()
@@ -233,108 +243,108 @@ class MSCompatibility():
             for file in file_paths:
                 zip.write(file)
                 os.remove(file)
+                
+    def _check_cross_references(met, general_met, met_name): 
+        met_refs = compounds_cross_references[compoundNames[met_name]]
+        matches = []
+        for db, content in compounds_cross_references[general_met].items():
+            for cross_ref in content:
+                if db in met_refs and cross_ref in met_refs[db]:
+                    matches.append(db)
+        return matches
         
     def _correct_met(model, met, met_name, changed_metabolites, changed_reactions, standardize, printing):
-        def check_cross_references(met, general_met):
-            met_refs = compounds_cross_references[compoundNames[met_name]]
-            match = False
-            for db in compounds_cross_references[general_met]:
-                for cross_ref in compounds_cross_references[general_met][db]:
-                    if db in met_refs and cross_ref in met_refs[db]:
-                        match = True
-                        break
-                if match:
-                    break
-            return match, db
-        
         original_id = new_met_id = met.id
         original_name = met.name 
         # affirm the match with cross-references, where it is possible for ModelSEED compounds
         general_met = re.sub("(_\w\d+$)", "", met.id)
-        match = False
+        matches = []
         if 'cpd' in met.id and compounds_cross_references[general_met] != {}:
-            match, db = check_cross_references(met, general_met)
-            if not match:
+            matches = MSCompatibility._check_cross_references(met, general_met, met_name)
+            if not matches:
                 logger.warning(f"ModelSEEDError: The old metabolite {met.id} cross-references"
                 f" ({compounds_cross_references[general_met]}) do not overlap with those"
                 f" ({compounds_cross_references[compoundNames[met_name]]}) of the new metabolite {new_met_id}.")
-        model_exchanges = [ex_rxn.id for ex_rxn in FBAHelper.exchange_reactions(model)]
         compartment = re.search('(_\w\d+$)', met.id).group()
-        if remove_suffix(met.id, compartment) != compoundNames[met_name]:  # If the ID associated with the name deviates from that in the ModelSEED Database
+        if remove_suffix(met.id, compartment) != compoundNames[met_name]:  # Assess whether the ID deviates from that associated with the name in the ModelSEED Database
+            model_exchange_ids = [ex_rxn.id for ex_rxn in FBAHelper.exchange_reactions(model)]
             new_met_id = compoundNames[met_name]+compartment
             general_met = re.sub("(_\w\d+$)", "", new_met_id)
-            # if new_met_id in model.metabolites:
-            # replace the undesirable isomer in every instance, since it cannot be renamed
-            for rxn in met.reactions:
-                original_reaction = rxn.reaction
-                reaction_dict = {} ; change = None
-                # remove duplicate exchange reaction
-                if 'EX_' in rxn.id and 'EX_'+new_met_id in model_exchanges:
-                    change = {'original': {'reaction': original_reaction},
-                            'new': {'reaction': None},
-                            'justification': f"A {new_met_id} exchange reaction already exists in model {model.id},"
-                            f" thus this duplicative exchange reaction ({rxn.id}) is deleted."}
-                    if match:
-                        change['justification'] += f' The ID match was verified with {db} cross-references.'
-                    model.remove_reactions([rxn])
-                    changed_reactions.append(change)
-                    if printing:
-                        print('\n')
-                        print_changes(change)
-                else:
-                    if new_met_id in [old_met.id for old_met in rxn.metabolites]:
-                        logger.warning(f"CodeError: The metabolite {new_met_id} replacement for {met.id}"
-                        f" already exists in the reaction {rxn.id}, thus the reaction cannot be updated.")
-                    for rxn_met in rxn.reactants+rxn.products:  # The REACTANTS+PRODUCTS may resolve metabolites that are both, more than the METABOLITES attribute
-                        stoich = float(rxn.metabolites[rxn_met])
-                        new_met = rxn_met.copy()
-                        if rxn_met.id == met.id:
-                            compartment = re.search('(_\w\d$)', rxn_met.id).group()
-                            new_met.id = new_met_id ; new_met.name = met_name
-                        reaction_dict[new_met] = stoich
-                    
-                    # reconstruct the reactions
-                    new_reactants = sum([1 for val in reaction_dict.values() if val < 0])
-                    new_products = len(reaction_dict) - new_reactants
-                    if len(rxn.reactants) == new_reactants and len(rxn.products) == new_products:
-                        for met in reaction_dict:
-                            if met not in model.metabolites:
-                                model.add_metabolites(met)
-                        # new_rxn = Reaction(id=rxn.id, name=rxn.name, subsystem=rxn.subsystem,
-                        #     lower_bound=rxn.lower_bound, upper_bound=rxn.upper_bound)
-                        # model.remove_reactions(rxn)
-                        rxn.add_metabolites({m:0 for m in rxn.metabolites}, combine = False)
-                        rxn.add_metabolites(reaction_dict)  
+            if new_met_id in model.metabolites:
+                ic(new_met_id, met.id)
+                # replace the undesirable isomer in every instance, since it cannot be renamed
+                for rxn in met.reactions:
+                    original_reaction = rxn.reaction
+                    reaction_dict = {} ; change = None
+                    # remove duplicate exchange reaction
+                    if 'EX_' in rxn.id and 'EX_'+new_met_id in model_exchange_ids:
                         change = {'original': {'reaction': original_reaction},
-                                'new': {'reaction': rxn.reaction},
-                                'justification': f"The {new_met_id} ID already exists in model {model.id},"
-                                f" so each reaction (here {rxn.id}) must be updated."}
-                        if match:
-                            change['justification'] += f' The ID match was verified with {db} cross-references.'
+                                'new': "-- Deleted --",
+                                'justification': f"A {new_met_id} exchange reaction already exists in model {model.id},"
+                                f" thus this duplicative exchange reaction ({rxn.id}) is deleted."}
+                        if matches:
+                            change['justification'] += f' The ID match was verified with the {matches} cross-reference(s).'
+                        model.remove_reactions([rxn])
                         changed_reactions.append(change)
                         if printing:
                             print('\n')
                             print_changes(change)
                     else:
-                        logger.warning(f"CodeError: The reaction {reaction_dict} | {new_reactants} {new_products} possesses"
-                        " a different number of reagents than the original reaction"
-                        f" {original_reaction} | {len(rxn.reactants)} {len(rxn.products)}, and is skipped.")
-                        
-                    # rename the undesirable isomer
-                    met.name = met_name+compartment
-                    met.id = new_met_id
-                    change = {'original': {'id': original_id, 'name': original_name},
-                            'new': {'id': met.id, 'name': met.name},
-                            'justification': f'The {original_id} and {met.id} distinction in {model.id} is incompatible.'}
-                    if 'cpd' not in original_id:
-                        change['justification'] += f' The {original_id} ID is not a ModelSEED Database ID.'
-                    if standardize:
-                        change['justification'] += f' The {original_id} and {met.id} metabolites were matched via their name.'
-                    if match:
-                        change['justification'] += f' The ID match was verified with {db} cross-references.'
-                    changed_metabolites.append(change)
-                    if printing:
-                        print('\n')
-                        print_changes(change)
+                        if new_met_id in [old_met.id for old_met in rxn.metabolites]:
+                            logger.warning(f"CodeError: The metabolite {new_met_id} replacement for {met.id}"
+                            f" already exists in the reaction {rxn.id} | {rxn.reaction}, which inhibits an update.")
+                        for rxn_met in rxn.metabolites:
+                            stoich = float(rxn.metabolites[rxn_met])
+                            new_met = rxn_met.copy()
+                            if rxn_met.id == met.id:
+                                compartment = re.search('(_\w\d$)', rxn_met.id).group()
+                                new_met.id = new_met_id ; new_met.name = met_name
+                                # add metabolites that are not currently in the model (according to IDs/names)
+                                if new_met not in model.metabolites:
+                                    model.add_metabolites(new_met)
+                            reaction_dict[new_met] = stoich
+                            
+                        # reconstruct the reactions
+                        new_reactants = sum([1 for val in reaction_dict.values() if val < 0])
+                        new_products = len(reaction_dict) - new_reactants
+                        if len(rxn.reactants) == new_reactants and len(rxn.products) == new_products:
+                            new_rxn = Reaction(id=rxn.id, name=rxn.name, subsystem=rxn.subsystem,
+                                lower_bound=rxn.lower_bound, upper_bound=rxn.upper_bound)
+                            model.remove_reactions([rxn])
+                            model.add_reaction(rxn)
+                            new_rxn.add_metabolites(reaction_dict)  
+                            change = {'original': {'reaction': original_reaction},
+                                    'new': {'reaction': new_rxn.reaction},
+                                    'justification': f"The {new_met_id} ID already exists in model {model.id},"
+                                    f" so each reaction (here {rxn.id}) must be updated."}
+                            if matches:
+                                change['justification'] += f' The ID match was verified with the {matches} cross-reference(s).'
+                            changed_reactions.append(change)
+                            if printing:
+                                print('\n')
+                                print_changes(change)
+                        else:
+                            logger.error(f"CodeError: The reaction {reaction_dict} | {new_reactants} {new_products} possesses"
+                            " a different number of reagents than the original reaction"
+                            f" {original_reaction} | {len(rxn.reactants)} {len(rxn.products)}, and is skipped.")
+            else:
+                # rename the undesirable isomer
+                met.name = met_name+compartment
+                met.id = new_met_id
+                change = {'original': {'id': original_id, 'name': original_name},
+                        'new': {'id': met.id, 'name': met.name},
+                        'justification': f'The {original_id} and {met.id} distinction in {model.id} is incompatible.'}
+                if 'cpd' not in original_id:
+                    change['justification'] += f' The {original_id} ID is not a ModelSEED Database ID.'
+                if standardize:
+                    change['justification'] += f' The {original_id} and {met.id} metabolites were matched via their name.'
+                if matches:
+                    change['justification'] += f' The ID match was verified with the {matches} cross-reference(s).'
+                changed_metabolites.append(change)
+                if printing:
+                    print('\n')
+                    print_changes(change)
+                    
+            ic(new_met_id, met.id)
 
         return model, met, new_met_id, changed_metabolites, changed_reactions
