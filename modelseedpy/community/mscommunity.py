@@ -696,21 +696,19 @@ class MSCommunity:
             best = -inf
             for possible_removal in possible_options:
                 cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in possible_removal])
-                print("\n\n", cpdID_sum)
                 if cpdID_sum > best:
                     best = cpdID_sum
                     possible_removal_tracker = {best:[possible_removal]}
                 elif cpdID_sum == best:
                     possible_removal_tracker[best].append(possible_removal) 
             cpds_to_remove = list(possible_removal_tracker.values())[0][0]
-            pprint(media["community_media"])
             for cpd in cpds_to_remove:
                 media["community_media"].pop(cpd)
+            pprint(media["community_media"])
         
         jenga_media = media["community_media"].copy()
         jenga_time = process_time()
         jenga_difference = DeepDiff(syntrophic_media, jenga_media)
-        print(jenga_difference)
         changed_quantity = len(list(jenga_difference.values())[0])
         print(f"Jenga fluxes examined after {(jenga_time-syntrophic_time)/60} minutes, with {changed_quantity} change(s):", jenga_difference)
         if export:
