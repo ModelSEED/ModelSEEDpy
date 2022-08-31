@@ -57,24 +57,19 @@ class MSCompatibility():
                 if exchanges:
                     message = f"\n\n\nStandardize exchange reactions in {model.id}"
                     print(message, "\n", "="*len(message))
-                    model_metabolites = [met.id for met in model.metabolites]
+                    ex_mets = [met.id for ex_rxn in FBAHelper.exchange_reactions(model) for met in ex_rxn.metabolites]
                     for ex_rxn in FBAHelper.exchange_reactions(model):
                         for met in ex_rxn.metabolites:
-                            og_id = met.id
                             model, met, results = MSCompatibility._fix_met(model, met, True, printing)
                             if results.unknown_met_id:
                                 unknown_met_ids.append(results.unknown_met_id)
-                            if og_id != met.id:
-                                ic(og_id, met.id, ex_rxn.id)
-                                
                             try:  # catching errors of repeated exchange IDs
                                 ex_rxn.id = 'EX_'+met.id
                             except:
                                 ex_rxn.id = 'EX_'+results.new_met_id
                                 
-                            if all(['cpd' not in met.id, results.changed_rxns+results.changed_mets != 0,
-                                    results.new_met_id not in model_metabolites]): 
-                                ic(met.id, model_metabolites[:4])
+                            if all(['cpd' not in met.id, results.new_met_id not in ex_mets,
+                                    not results.changed_rxns+results.changed_mets]):
                                 unknown_met_ids.append(met.id)
                                 logger.warning(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
                             changed_reactions.extend(results.changed_rxns)
@@ -199,8 +194,9 @@ class MSCompatibility():
     
     def _validate_results(model, unknown_met_ids):  # !!! This does not catch the errors, perhaps from faulty unknown_met_ids assignments
         residual_nonstandard_mets = [met.id for ex_rxn in FBAHelper.exchange_reactions(model) for met in ex_rxn.metabolites if "cpd" not in met.id]
-        if len(residual_nonstandard_mets) != len(unknown_met_ids):
-            logger.error(f"ERROR: The {model.id} model has residual non-standard metabolites in its exchange reactions: {set(residual_nonstandard_mets)-set(unknown_met_ids)}")
+        residuals = set(residual_nonstandard_mets)-set(unknown_met_ids)
+        if residuals:
+            logger.error(f"ERROR: The {model.id} model has residual non-standard metabolites in its exchange reactions: {residuals}")
     
     def _fix_met(model, met, standardize, printing):
         # correct the conflict
@@ -271,6 +267,9 @@ class MSCompatibility():
             model_exchange_ids = [ex_rxn.id for ex_rxn in FBAHelper.exchange_reactions(model)]
             new_met_id = compoundNames[met_name]+compartment
             general_met = re.sub("(_\w\d+$)", "", new_met_id)
+            if 'cpd' in met.id:
+                logger.warning(f"IDWarning: The original ID {met.id} is a ModelSEED ID, and "
+                               f"may not be desirably changed to {new_met_id}.")
             if new_met_id in model.metabolites:
                 # replace the undesirable isomer in every instance, since it cannot be renamed
                 for rxn in met.reactions:
@@ -286,13 +285,12 @@ class MSCompatibility():
                             change['justification'] += f' The ID match was verified with the {matches} cross-reference(s).'
                         model.remove_reactions([rxn])
                         changed_reactions.append(change)
-                        ic(new_met_id, met.id, changed_reactions)
                         if printing:
                             print('\n')
                             print_changes(change)
                     else:
                         if new_met_id in [old_met.id for old_met in rxn.metabolites]:
-                            logger.warning(f"CodeError: The metabolite {new_met_id} replacement for {met.id}"
+                            logger.warning(f"ReactionWarning: The metabolite {new_met_id} replacement for {met.id}"
                             f" already exists in the reaction {rxn.id} | {rxn.reaction}, which inhibits an update.")
                         for rxn_met in rxn.metabolites:
                             stoich = float(rxn.metabolites[rxn_met])
@@ -330,7 +328,6 @@ class MSCompatibility():
                             f" {original_reaction} | {len(rxn.reactants)} {len(rxn.products)}, and is skipped.")
             else:
                 # rename the undesirable isomer
-                ic(new_met_id, met.id)
                 met.name = met_name+compartment
                 met.id = new_met_id
                 change = {'original': {'id': original_id, 'name': original_name},
