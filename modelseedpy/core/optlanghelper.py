@@ -54,7 +54,6 @@ class OptlangHelper:
     
     @staticmethod
     def add_constraint(cons_name:str, cons_bounds:Iterable, cons_expr:dict):
-        print(cons_expr, end="\r")
         return {"name": cons_name.replace(" ", "_"),
         "expression": OptlangHelper._define_expression(cons_expr),
          "lb": cons_bounds[0], "ub": cons_bounds[1], "indicator_variable": None, "active_when": 1}
