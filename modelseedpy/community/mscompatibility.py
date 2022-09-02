@@ -46,7 +46,7 @@ class MSCompatibility():
         
     @staticmethod
     def standardize(models:Iterable, metabolites:bool=True, exchanges:bool=True, conflicts_file_name:str=None, 
-                    model_names:list=None, export_directory:str=None, view_unknown_mets:bool=True, printing:bool=True,
+                    model_names:list=None, export_directory:str=None, view_unknown_mets:bool=False, printing:bool=True,
                     unknown_met_ids:Iterable=None, changed_metabolites:Iterable=None, changed_reactions:Iterable=None):
         unknown_met_ids, changed_metabolites, changed_reactions = define_vars([unknown_met_ids, changed_metabolites, changed_reactions])
         new_models = []
