@@ -580,8 +580,7 @@ class MSCommunity:
         
         # determine the unique combination of all species minimal media 
         # models = MSCompatibility.align_exchanges(models, True, "standardization_corrections.json")
-        media = {}
-        media["community_media"], media["members"] = {}, {}
+        media = {"community_media": {}, "Members":{}}
         for model in models:
             media["members"][model.id] = {}
             with model:
@@ -696,13 +695,13 @@ class MSCommunity:
             best = -inf
             for possible_removal in possible_options:
                 cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in possible_removal])
+                print(cpdID_sum)
                 if cpdID_sum > best:
                     best = cpdID_sum
                     possible_removal_tracker = {best:[possible_removal]}
                 elif cpdID_sum == best:
                     possible_removal_tracker[best].append(possible_removal) 
-            cpds_to_remove = list(possible_removal_tracker.values())[0][0]
-            for cpd in cpds_to_remove:
+            for cpd in list(possible_removal_tracker.values())[0][0]:  # arbitrary selection
                 media["community_media"].pop(cpd)
             pprint(media["community_media"])
         

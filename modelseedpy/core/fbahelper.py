@@ -325,30 +325,24 @@ class FBAHelper:
     def add_cons_vars(model, vars_cons):
         model.add_cons_vars(vars_cons)
         model.solver.update()
-        return model
     
     @staticmethod
     def remove_cons_vars(model, vars_cons):
         model.remove_cons_vars(vars_cons)
         model.solver.update()
-        return model
     
     @staticmethod
     def add_objective(model, objective, direction="max"):
-        model.problem.objective = Objective(objective, direction=direction)
+        model.objective = Objective(objective, direction=direction)
         model.solver.update()
-        return model
     
     @staticmethod
-    def add_exchange_to_model(org_model, cpd, rxnID):
-        model = org_model  # abstraction prevents undesirable in-place edits
+    def add_exchange_to_model(model, cpd, rxnID):
         model.add_boundary(metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"), 
             reaction_id=rxnID, type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
-        return model
     
     @staticmethod
-    def update_model_media(org_model, media):
-        model = org_model  # abstraction prevents undesirable in-place edits
+    def update_model_media(model, media):
         medium = model.medium
         model_reactions = [rxn.id for rxn in model.reactions]
         for cpd in media.data["mediacompounds"]:
