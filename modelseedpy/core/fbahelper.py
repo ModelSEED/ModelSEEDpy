@@ -385,9 +385,11 @@ class FBAHelper:
         return {model.variables.get(key):flux for key, flux in solution.fluxes.items()}
     
     @staticmethod
-    def remove_media_compounds(media_dict, compounds):
+    def remove_media_compounds(media_dict, compounds, printing=True):
         for cpd in compounds:
             media_dict.pop(cpd)
+            if printing:
+                print(f"{cpd} removed")
         return media_dict
     
     # @staticmethod
