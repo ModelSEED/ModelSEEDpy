@@ -5,7 +5,7 @@ import logging
 
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
-from optlang import Objective, Constraint
+# from optlang import Objective, Constraint
 from optlang.symbolics import Zero
 from deepdiff import DeepDiff
 import re
@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 #Base class for FBA packages
 class ReactionUsePkg(BaseFBAPkg):
     def __init__(self,model):
-        BaseFBAPkg.__init__(
+        BaseFBAPkg.__init__(  # model, name, variables, constraints
             self,model,"reaction use",{"fu":"reaction","ru":"reaction"},
-            {"fu":"reaction","ru":"reaction","exclusion":"none","urev":"reaction"})
+            {"fu":"reaction","ru":"reaction","exclusion":"none","urev":"reaction"}) # minimize ru (influx) for exchanges
 
-    def build_package(self, rxn_filter = None, reversibility = False):
+    def build_package(self, rxn_filter = None, reversibility = False): # exchange reactions as filter
         for rxn in self.model.reactions:
             #Checking that reaction passes input filter if one is provided
             if rxn_filter == None:
@@ -75,6 +75,69 @@ class ReactionUsePkg(BaseFBAPkg):
             self.constraints["exclusion"][const_name].set_linear_coefficients(solution_coef)
             return self.constraints["exclusion"][const_name]
         return None
+
+class MinimalMediaPkg(ReactionUsePkg):
+    def __init__(self, model):
+        copied_model = model.copy()
+        ReactionUsePkg.__init__(self, copied_model)
+        self.constraints.update({"knockout": "reaction"})
+
+    def solve_media(self,):
+        # define variables and constraints for all 
+        for ex_rxn in FBAHelper.exchange_reactions(self.model):
+            ReactionUsePkg.build_variable(ex_rxn, '<')
+            ReactionUsePkg.build_constraint(ex_rxn, False)
+        FBAHelper.add_objective(self.model, sum([var for var in self.variables["ru"].values()]), "min")
+            
+        # identify the set of minimal media solutions
+        solution_dicts = []
+        sol = self.model.optimize()
+        while sol.status == "optimal":
+            sol_dict = FBAHelper.solution_to_variables_dict(sol, self.model)
+            solution_dicts.append(sol_dict)
+            ## omit the solution from the next search
+            BaseFBAPkg.build_constraint(self, "exclusion", len(sol_dict)-1, len(sol_dict)-1,
+                                        coef=sol_dict, cobra_obj=f"sol{len(solution_dicts)}")
+            sol = self.model.optimize()
+        if not solution_dicts:
+            logger.error("No simulations were feasible.")
+            
+        # search the permutation space by omitting previously investigated solution_dicts
+        self.interdependencies = {}
+        for sol_index, sol_dict in enumerate(solution_dicts):
+            sol_ex_cpds = {re.sub("(_[a-z]\d+)", "", rxn.id).replace("EX_", ""): flux 
+                           for rxn, flux in sol_dict.items() if "EX_" in rxn.id}
+            self.interdependencies[sol_index] = {}
+            for ex_cpd in sol_ex_cpds:
+                sol_dict_sans_cpd = FBAHelper.solution_to_dict(sol_dict)
+                sol_dict_sans_cpd.pop(ex_cpd)
+                self.interdependencies[sol_index][ex_cpd] = self._examine_permutations(
+                    ex_cpd, sol_dict, sol_index, sol_dict_sans_cpd)
+        
+    def _examine_permutations(self, ex_cpd, sol_dict, sol_index, sol_dict_sans_cpd):
+        interdependencies = {}
+        # knockout the selected variables
+        coef = {self.variables["ru"][ex_cpd]:0}
+        coef.update({self.variables["ru"][ex_cpd2]:1 for ex_cpd2 in sol_dict if ex_cpd != ex_cpd2})
+        BaseFBAPkg.build_constraint(self, "knockout", 0.1, None, coef, f"{ex_cpd}-sol{sol_index}")
+        new_sol = self.model.optimize()
+        
+        ## explore permutations after removing the selected variable
+        diff = DeepDiff(sol_dict_sans_cpd, FBAHelper.solution_to_dict(new_sol))
+        if diff: # either new exchanges or altered fluxes to accommodate the removed compound
+            for key, value in diff.items():
+                new_mets = {re.search("(?<=[\')(.+)(?=\'])", met):change for met, change in value.items()}
+                # this dictionary should be parsed into a list of substitute metabolites and a list of functionally coupled reactions
+                self.interdependencies[sol_index][ex_cpd].update(new_mets)
+            coef = {self.variables["met"][ex_cpd]:0 for cpd in new_mets.keys()}
+            coef.update({self.variables["met"][ex_cpd]:1 for ex_cpd in sol_dict if ex_cpd not in new_mets.keys()})
+            cpd_name = "_".join(new_mets.keys())
+            BaseFBAPkg.build_constraint(self, "met", 0.1, None, coef, f"{cpd_name}-sol{sol_index}")
+            new_sol = self.model.optimize()
+            if new_sol.status != "optimal":
+                return interdependencies
+            self._examine_permutations(ex_cpd, new_sol, sol_index, sol_dict_sans_cpd)
+        return interdependencies
 
 class MinimalMedia(BaseFBAPkg):
     """A class that determines the minimal media of a model"""  # investigate conversion to a staticmethod or single function for convenience and in-line utility

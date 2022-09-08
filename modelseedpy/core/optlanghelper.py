@@ -105,17 +105,6 @@ class OptlangHelper:
         return expression      
     
     @staticmethod
-    # def dot_product(zipped_to_sum, coefficients_for_heuns=None):
-            
-    #     expression = {"operation": "Add", "elements": []}
-    #     for index, (term1, term2) in enumerate(zipped_to_sum):
-    #         if coefficients_for_heuns is not None:
-    #             expression["elements"].extend(
-    #                 [{"operation": "Mul", "elements": [coefficients_for_heuns[index], term1]},
-    #                 {"operation": "Mul", "elements": [coefficients_for_heuns[index], term2]}])
-    #         else:
-    #             expression["elements"].append({"operation": "Mul", "elements": [term1, term2]})
-    #     return expression
     def dot_product(zipped_to_sum, coefficients_for_heuns=None):
         # ensure that the lengths are compatible for heun's dot-products
         if coefficients_for_heuns is not None:

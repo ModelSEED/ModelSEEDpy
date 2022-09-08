@@ -322,8 +322,8 @@ class FBAHelper:
         return dataframe(list(df.index), list(df.columns), df.to_numpy())
     
     @staticmethod
-    def add_cons_vars(model, vars_cons):
-        model.add_cons_vars(vars_cons)
+    def add_cons_vars(model, vars_cons, sloppy=False):
+        model.add_cons_vars(vars_cons, sloppy=sloppy)
         model.solver.update()
     
     @staticmethod
@@ -332,8 +332,10 @@ class FBAHelper:
         model.solver.update()
     
     @staticmethod
-    def add_objective(model, objective, direction="max"):
+    def add_objective(model, objective, direction="max", coef=None):
         model.objective = Objective(objective, direction=direction)
+        if coef:
+            model.objective.set_linear_coefficients(coef)
         model.solver.update()
     
     @staticmethod
