@@ -9,6 +9,7 @@ from optlang import Model
 from cobra.util import solver as sutil  # !!! sutil is never used
 import time
 from modelseedpy.biochem import from_local
+from optlang import Constraint
 from scipy.odr import Output  # !!! Output is never used
 from typing import Iterable
 from chemw import ChemMW
@@ -330,6 +331,14 @@ class FBAHelper:
     def remove_cons_vars(model, vars_cons):
         model.remove_cons_vars(vars_cons)
         model.solver.update()
+        
+    @staticmethod
+    def create_constraint(model, constraint, coef=None):
+        model.add_cons_vars(constraint)
+        model.solver.update()
+        if coef:
+            constraint.set_linear_coefficients(coef)
+            model.solver.update()
     
     @staticmethod
     def add_objective(model, objective, direction="max", coef=None):
@@ -337,6 +346,12 @@ class FBAHelper:
         if coef:
             model.objective.set_linear_coefficients(coef)
         model.solver.update()
+        
+    @staticmethod
+    def add_minimal_objective_cons(model, objective_expr=None, min_growth=0.1):
+        objective_expr = objective_expr or model.objective.expression
+        FBAHelper.create_constraint(model, Constraint(
+            objective_expr, lb=min_growth, ub=None, name="min_growth"))
     
     @staticmethod
     def add_exchange_to_model(model, cpd, rxnID):

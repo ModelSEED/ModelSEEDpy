@@ -17,22 +17,8 @@ logger = logging.getLogger(__name__)
 class MinimalMediaPkg:
     
     @staticmethod
-    def _load_model(org_model, var_types=[]):
-        model = org_model.copy()
-        variables = {var_type:{} for var_type in var_types}
-        return model, variables
-
-    @staticmethod
-    def _add_constraint(model, constraint, coef=None):
-        model.add_cons_vars(constraint)
-        model.solver.update()
-        if coef:
-            constraint.set_linear_coefficients(coef)
-            model.solver.update()
-
-    @staticmethod
     def _exchange_solution(sol_dict):
-        return {rxn:flux for rxn, flux in sol_dict.items() if "EX_" in rxn.id}
+        return {rxn:flux for rxn, flux in sol_dict.items() if "EX_" in rxn.id and flux > 0}
 
     @staticmethod
     def _varName_to_ID(var):
@@ -40,34 +26,30 @@ class MinimalMediaPkg:
         if "_ru" in var:
             rxnID = rxnID.replace("_ru", "")
         return rxnID
-
+    
     @staticmethod
-    def minimize_flux(org_model):
+    def minimize_flux(org_model, minimal_growth=None, printing=True):
         """minimize the total in-flux of exchange reactions in the model"""
         model = org_model.copy()
+        minimal_growth = minimal_growth or model.optimize().objective_value
+#         print([(cons.lb, cons.expression, cons.ub, cons.name) for cons in model.constraints if cons.name == "min_growth"])
         FBAHelper.add_objective(model, sum([ex_rxn.reverse_variable for ex_rxn in FBAHelper.exchange_reactions(model)]), "min")
+        FBAHelper.add_minimal_objective_cons(model, model.objective.expression, minimal_growth)
         sol = model.optimize()
         sol_dict = FBAHelper.solution_to_rxns_dict(sol, model)
-        return MinimalMediaPkg._exchange_solution(sol_dict)
+        min_flux_media = MinimalMediaPkg._exchange_solution(sol_dict)
+        if printing:
+            print(f"The minimal flux media consists of {len(min_flux_media)} compounds and a {sum([ex.flux for ex in min_flux_media])} total flux," 
+                  f" with a growth value of {model.optimize().objective_value}")
+        return min_flux_media
 
     @staticmethod
-    def _knockout(org_model, exVar, variables, sol_dict, sol_index):
-        # knockout the specified exchange
-        knocked_model = org_model.copy()
-        exID = MinimalMediaPkg._varName_to_ID(exVar.name)
-        coef = {variables["ru"][exID]: 0}
-        coef.update({variables["ru"][MinimalMediaPkg._varName_to_ID(exVar2.name)]: 1
-                     for exVar2 in sol_dict if exVar != exVar2 and "EX_" in exVar2.name})
-        MinimalMediaPkg._add_constraint(knocked_model, Constraint(Zero, lb=0.1, ub=None, name=f"{exVar.name}-sol{sol_index}"), coef)
-        return knocked_model.optimize()
-
-    @staticmethod
-    def minimize_components(org_model):
+    def minimize_components(org_model, minimal_growth=None, printing=True):
         """minimize the quantity of metabolites that are consumed by the model"""
-        model, variables = MinimalMediaPkg._load_model(org_model, ["ru"])
-        # add a constraint of minimal growth
-        MinimalMediaPkg._add_constraint(model, Constraint(
-            sum([rxn.flux_expression for rxn in model.reactions if "bio" in rxn.id]), lb=0.1, ub=None, name="min_growth"))
+        model = org_model.copy()
+        variables = {"ru":{}}
+        FBAHelper.add_minimal_objective_cons(
+            model, sum([rxn.flux_expression for rxn in model.reactions if "bio" in rxn.id]), minimal_growth)
 
         # define the binary variable and constraint
         for ex_rxn in FBAHelper.exchange_reactions(model):
@@ -75,7 +57,7 @@ class MinimalMediaPkg:
             variables["ru"][ex_rxn.id] = Variable(ex_rxn.id+"_ru", lb=0, ub=1, type="binary")
             model.add_cons_vars(variables["ru"][ex_rxn.id])
             # bin_flux: {rxn_bin}*1000 >= {rxn_rev_flux}
-            MinimalMediaPkg._add_constraint(model, Constraint(Zero, lb=0, ub=None, name=ex_rxn.id+"_bin"),
+            FBAHelper.create_constraint(model, Constraint(Zero, lb=0, ub=None, name=ex_rxn.id+"_bin"),
                                             coef={variables["ru"][ex_rxn.id]: 1000, ex_rxn.reverse_variable: -1})
         FBAHelper.add_objective(model, sum([var for var in variables["ru"].values()]), "min")
 
@@ -83,12 +65,13 @@ class MinimalMediaPkg:
         solution_dicts = []
         sol = model.optimize()
         while sol.status == "optimal":
+            print("sol_dicts length", len(solution_dicts), end="\r")
             sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
             solution_dicts.append(sol_dict)
             ## omit the solution from the next search
-            MinimalMediaPkg._add_constraint(
-                model, Constraint(Zero, lb=len(sol_dict)-1, ub=len(sol_dict)-1,
-                                  name=ex_rxn.id + f"_exclusion_sol{len(solution_dicts)}"), sol_dict)
+            FBAHelper.create_constraint(model, Constraint(
+                Zero, lb=len(sol_dict)-1, ub=len(sol_dict)-1,name=ex_rxn.id + f"_exclusion_sol{len(solution_dicts)}"), 
+                sol_dict)
             sol = model.optimize()
         if not solution_dicts:
             logger.error("No simulations were feasible.")
@@ -101,17 +84,28 @@ class MinimalMediaPkg:
             interdependencies[sol_index] = MinimalMediaPkg._examine_permutations(model, sol_exchanges, variables, sol_dict, sol_index)
 
     @staticmethod
+    def _knockout(org_model, exVar, variables, sol_dict, sol_index):
+        # knockout the specified exchange
+        knocked_model = org_model.copy()
+        exID = MinimalMediaPkg._varName_to_ID(exVar.name)
+        coef = {variables["ru"][exID]: 0}
+        coef.update({variables["ru"][MinimalMediaPkg._varName_to_ID(exVar2.name)]: 1
+                     for exVar2 in sol_dict if exVar != exVar2 and "EX_" in exVar2.name})
+        FBAHelper.create_constraint(knocked_model, Constraint(Zero, lb=0.1, ub=None, name=f"{exVar.name}-sol{sol_index}"), coef)
+        return knocked_model.optimize()
+
+    @staticmethod
     def _examine_permutations(model, exchange_ids_to_explore, variables, sol_dict, sol_index):
         for exID in exchange_ids_to_explore:
             sol_dict_sans_ex = sol_dict.copy()
             sol_dict_sans_ex.pop(exID)
             # interdependencies[sol_index][exID] = MinimalMediaPkg._examine_permutations(
             #     exID, sol_dict, sol_index, variables, sol_dict_sans_ex)
-
             interdependencies = {}
+            
             ## explore permutations after removing the selected variable
-            diff = DeepDiff(sol_dict_sans_ex,
-                            FBAHelper.solution_to_dict(MinimalMediaPkg._knockout(model, exID, variables, sol_dict, sol_index)))
+            diff = DeepDiff(sol_dict_sans_ex, FBAHelper.solution_to_dict(
+                MinimalMediaPkg._knockout(model, exID, variables, sol_dict, sol_index)))
             if diff:  # the addition of new exchanges or altered exchange fluxes are detected after the removed exchange
                 for key, value in diff.items():
                     print(key, value)
