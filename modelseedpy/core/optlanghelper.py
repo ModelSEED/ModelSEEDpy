@@ -6,7 +6,8 @@ Created on Thu Aug 18 10:26:32 2022
 """
 from collections import namedtuple
 from optlang import Model
-from typing import Iterable
+from typing import Iterable, Union
+from pprint import pprint
 import logging
 
 logger = logging.getLogger(__name__)
@@ -53,23 +54,25 @@ class OptlangHelper:
     
     @staticmethod
     def add_constraint(cons_name:str, cons_bounds:Iterable, cons_expr:dict):
-        print(cons_expr, end="\r")
         return {"name": cons_name.replace(" ", "_"),
         "expression": OptlangHelper._define_expression(cons_expr),
          "lb": cons_bounds[0], "ub": cons_bounds[1], "indicator_variable": None, "active_when": 1}
     
     @staticmethod
-    def add_objective(obj_name:str, objective_expr:dict, direction:str):
-        obj_expr = get_expression_template(objective_expr)
-        obj_expr["args"] = [OptlangHelper._define_expression(expr) for expr in objective_expr]
-        return {"name": obj_name.replace(" ", "_"),
-        "expression": obj_expr,
-        "direction": direction}
+    def add_objective(obj_name:str, objective_expr:Union[dict, list], direction:str):
+        if isinstance(objective_expr, list):
+            obj_expr = {"type": "Add", "args": [
+                OptlangHelper._define_expression(expr) for expr in objective_expr]}
+        elif isinstance(objective_expr, dict):
+            obj_expr = {"type": objective_expr["operation"], 
+                        "args": [define_term(term) for term in objective_expr["elements"]]}
+        
+        return {"name": obj_name.replace(" ", "_"), "expression": obj_expr, "direction": direction}
     
     @staticmethod
     def define_model(model_name, variables, constraints, objective, optlang=False):
-        model = {'name':model_name, 'variables':[], 'constraints':[], "objective": []}
-        # print(objective)
+        model = {'name':model_name, 'variables':[], 'constraints':[]}
+        # pprint(objective)
         for var in variables:
             if len(var) == 2:
                 var.append("continuous")
@@ -77,7 +80,7 @@ class OptlangHelper:
         for cons in constraints:
             model["constraints"].append(OptlangHelper.add_constraint(cons[0], cons[1], cons[2]))
         # if not isinstance(obj, str): # catches a strange error of the objective name as the objective itself
-        model["objective"].append(OptlangHelper.add_objective(objective[0], objective[1], objective[2]))
+        model["objective"] = OptlangHelper.add_objective(objective[0], objective[1], objective[2])
         if optlang:
             return Model.from_json(model)
         return model
@@ -103,18 +106,20 @@ class OptlangHelper:
     
     @staticmethod
     def dot_product(zipped_to_sum, coefficients_for_heuns=None):
+        # ensure that the lengths are compatible for heun's dot-products
         if coefficients_for_heuns is not None:
             coefs = coefficients_for_heuns if isinstance(coefficients_for_heuns, (list, set)) else coefficients_for_heuns.tolist()
             zipped_length = len(zipped_to_sum); coefs_length = len(coefs)
             if zipped_length != coefs_length:
                 raise IndexError(f"ERROR: The length of zipped elements {zipped_length} is unequal to that of coefficients {coefs_length}")
-            
-        expression = {"operation": "Add", "elements": []}
+                
+        elements = []
         for index, (term1, term2) in enumerate(zipped_to_sum):
             if coefficients_for_heuns is not None:
-                expression["elements"].append({"operation": "Mul", "elements": [
-                    {"operation": "Add", "elements": [term1, term2]}, coefs[index]
-                ]})
+                elements.extend([{"operation": "Mul", "elements": [coefficients_for_heuns[index], term1]},
+                                              {"operation": "Mul", "elements": [coefficients_for_heuns[index], term2]}])
             else:
-                expression["elements"].append({"operation": "Mul", "elements": [term1, term2]})
-        return expression
+                elements.append({"operation": "Mul", "elements": [term1, term2]})
+        return elements
+    
+    

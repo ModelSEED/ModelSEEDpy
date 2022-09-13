@@ -322,33 +322,29 @@ class FBAHelper:
         return dataframe(list(df.index), list(df.columns), df.to_numpy())
     
     @staticmethod
-    def add_cons_vars(model, vars_cons):
-        model.add_cons_vars(vars_cons)
+    def add_cons_vars(model, vars_cons, sloppy=False):
+        model.add_cons_vars(vars_cons, sloppy=sloppy)
         model.solver.update()
-        return model
     
     @staticmethod
     def remove_cons_vars(model, vars_cons):
         model.remove_cons_vars(vars_cons)
         model.solver.update()
-        return model
     
     @staticmethod
-    def add_objective(model, objective, direction="max"):
-        model.problem.objective = Objective(objective, direction=direction)
+    def add_objective(model, objective, direction="max", coef=None):
+        model.objective = Objective(objective, direction=direction)
+        if coef:
+            model.objective.set_linear_coefficients(coef)
         model.solver.update()
-        return model
     
     @staticmethod
-    def add_exchange_to_model(org_model, cpd, rxnID):
-        model = org_model  # abstraction prevents undesirable in-place edits
+    def add_exchange_to_model(model, cpd, rxnID):
         model.add_boundary(metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"), 
             reaction_id=rxnID, type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
-        return model
     
     @staticmethod
-    def update_model_media(org_model, media):
-        model = org_model  # abstraction prevents undesirable in-place edits
+    def update_model_media(model, media):
         medium = model.medium
         model_reactions = [rxn.id for rxn in model.reactions]
         for cpd in media.data["mediacompounds"]:
@@ -391,9 +387,11 @@ class FBAHelper:
         return {model.variables.get(key):flux for key, flux in solution.fluxes.items()}
     
     @staticmethod
-    def remove_media_compounds(media_dict, compounds):
+    def remove_media_compounds(media_dict, compounds, printing=True):
         for cpd in compounds:
             media_dict.pop(cpd)
+            if printing:
+                print(f"{cpd} removed")
         return media_dict
     
     # @staticmethod
