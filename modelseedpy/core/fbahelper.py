@@ -348,10 +348,10 @@ class FBAHelper:
         model.solver.update()
         
     @staticmethod
-    def add_minimal_objective_cons(model, objective_expr=None, min_growth=0.1):
+    def add_minimal_objective_cons(model, objective_expr=None, min_value=0.1):
         objective_expr = objective_expr or model.objective.expression
         FBAHelper.create_constraint(model, Constraint(
-            objective_expr, lb=min_growth, ub=None, name="min_growth"))
+            objective_expr, lb=min_value, ub=None, name="min_value"))
     
     @staticmethod
     def add_exchange_to_model(model, cpd, rxnID):

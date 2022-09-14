@@ -33,14 +33,16 @@ class MinimalMediaPkg:
         model = org_model.copy()
         minimal_growth = minimal_growth or model.optimize().objective_value
 #         print([(cons.lb, cons.expression, cons.ub, cons.name) for cons in model.constraints if cons.name == "min_growth"])
+        FBAHelper.add_minimal_objective_cons(model, min_value=minimal_growth)
         FBAHelper.add_objective(model, sum([ex_rxn.reverse_variable for ex_rxn in FBAHelper.exchange_reactions(model)]), "min")
-        FBAHelper.add_minimal_objective_cons(model, model.objective.expression, minimal_growth)
         sol = model.optimize()
-        sol_dict = FBAHelper.solution_to_rxns_dict(sol, model)
-        min_flux_media = MinimalMediaPkg._exchange_solution(sol_dict)
+        min_flux_media = MinimalMediaPkg._exchange_solution(FBAHelper.solution_to_rxns_dict(sol, model))
+        # verify the medium
+        model2 = org_model.copy()
+        model2.medium = {rxn.id: flux for rxn,flux in min_flux_media.items()}
         if printing:
             print(f"The minimal flux media consists of {len(min_flux_media)} compounds and a {sum([ex.flux for ex in min_flux_media])} total flux," 
-                  f" with a growth value of {model.optimize().objective_value}")
+                  f" with a growth value of {model2.optimize().objective_value}")
         return min_flux_media
 
     @staticmethod
