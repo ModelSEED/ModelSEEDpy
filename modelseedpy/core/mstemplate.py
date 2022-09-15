@@ -257,7 +257,6 @@ class MSTemplateReaction(Reaction):
             d['type'], d['GapfillDirection'],
             d['base_cost'], d['reverse_penalty'], d['forward_penalty'],
             d['status'] if 'status' in d else None,
-            d['reaction_ref'].split('/')[-1]
         )
         reaction.add_metabolites(metabolites)
         reaction.add_complexes(complexes)
