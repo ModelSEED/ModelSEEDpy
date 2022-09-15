@@ -2,6 +2,7 @@ import logging
 import re
 from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are not used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +52,9 @@ class MSModelUtil:
         logger.info(name," not found in model!")
         return []
     
-    def exchange_list(self): 
-        return [rxn for rxn in self.model.reactions if 'EX_' in rxn.id]
-    
     def exchange_hash(self):
         exchange_reactions = {}
-        exlist = self.exchange_list()
-        for ex_rxn in exlist:
+        for ex_rxn in FBAHelper.exchange_reactions(self.model):
             for met in ex_rxn.metabolites:
                 if ex_rxn.metabolites[met] == -1:
                     exchange_reactions[met] = ex_rxn
@@ -192,7 +189,7 @@ class MSModelUtil:
             cpd_hash[cpd["id"]] = cpd
         for rxn in gapfilled_reactions["new"]:
             reaction = self.model.reactions.get_by_id(rxn)
-            kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,newmodel,cpd_hash,gapfilled_reactions["new"][rxn],reaction_genes)
+            kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,newmodel,cpd_hash,gapfilled_reactions["new"][rxn],1,reaction_genes)
             kbrxn["gapfill_data"][gfid] = dict()
             kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["new"][rxn],1,[]]
             rxn_table.append({
