@@ -12,9 +12,8 @@ logger = logging.getLogger(__name__)
 
 class MSGrowthPhenotype:
     def __init__(self, obj_id, media=None, growth=None, gene_ko=[], additional_compounds=[], parent=None, name=None):
-        
         self.id = obj_id
-        self.name = name or obj_id
+        self.name = name or self.id
         self.growth = growth
         self.media = media
         self.gene_ko = gene_ko
