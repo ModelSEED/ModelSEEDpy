@@ -100,7 +100,9 @@ class MSTemplateSpecies(Metabolite):
     def __init__(self, comp_cpd_id: str, charge: int, compartment: str, cpd_id, max_uptake=0, template=None):
         self._template_compound = None
         super().__init__(comp_cpd_id, '', '', charge, compartment)
-        self._template = template; self.cpd_id = cpd_id; self.max_uptake = max_uptake
+        self._template = template
+        self.cpd_id = cpd_id
+        self.max_uptake = max_uptake
         if self._template:
             if self.cpd_id in self._template.compounds:
                 self._template_compound = self._template.compounds.get_by_id(self.cpd_id)
