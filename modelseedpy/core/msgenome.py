@@ -26,7 +26,7 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
             if seq:
                 features.append(seq)
             seq_id = line[1:]
-            desc = ''
+            desc = None
             if h_func:
                 seq_id, desc = h_func(seq_id)
             elif split:
