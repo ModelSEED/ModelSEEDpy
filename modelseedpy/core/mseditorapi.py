@@ -142,7 +142,8 @@ class MSEditorAPI:
 
 class MSEquation:
     def __init__(self, stoichiometry, direction = None):
-        self.equation = stoichiometry; self.direction = direction
+        self.equation = stoichiometry
+        self.direction = direction
 
     @staticmethod
     def build_from_palsson_string(equation_string, default_group='c'):  # add default group
