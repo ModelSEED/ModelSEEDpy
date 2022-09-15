@@ -3,33 +3,39 @@ import itertools
 import cobra
 import json
 import time
+from os.path import abspath as _abspath
+from os.path import dirname as _dirname
 from optlang.symbolics import Zero, add
 from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import get_gpr_string, get_reaction_constraints_from_direction
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core import FBAHelper, MSGapfill, MSMedia
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.helpers import get_template
 
 logger = logging.getLogger(__name__)
 
+_path = _dirname(_abspath(__file__))
 
 class MSATPCorrection:
 
     DEBUG = False
 
-    def __init__(self, model, core_template, atp_medias: list, compartment="c0",
-                 max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None):
+    def __init__(self,model,core_template=None,atp_medias=[],compartment="c0",max_gapfilling=None,
+        gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[]):
         """
-
         :param model:
-        :param core_template:
-        :param atp_medias:
-        :param atp_objective:
-        :param max_gapfilling:
-        :param gapfilling_delta:
-        :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
+        :param core_template: 
+        :param atp_medias: list<MSMedia> : list of additional medias to test
+        :param load_default_medias: Bool : load default media set
+        :param forced_media: list<string> : name of medias in which ATP production should be forced
+        :param compartment: string : ID of compartment to test ATP in
+        :param max_gapfilling: string : maximum gapfilling allowed in accepted media
+        :param gapfilling_delta: string : difference between lowest gapfilling and current gapfilling where media will be accepted
+        :param atp_hydrolysis_id: string : ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
         if isinstance(model, MSModelUtil):
             self.model = model.model
@@ -37,21 +43,39 @@ class MSATPCorrection:
         else:
             self.model = model
             self.modelutl = MSModelUtil(model)
+        
         self.compartment = compartment
+        
         if atp_hydrolysis_id and atp_hydrolysis_id in self.model.reactions:
             self.atp_hydrolysis = self.model.reactions.get_by_id(atp_hydrolysis_id)
         else:
             output = self.modelutl.add_atp_hydrolysis(compartment)
             self.atp_hydrolysis = output["reaction"]
+        
         self.atp_medias = []
+        if load_default_medias:
+            self.load_default_medias()
         for media in atp_medias:
             if isinstance(media, MSMedia):
                 self.atp_medias.append([media, 0.01])
             else:
-                self.atp_medias.append(media)        
+                self.atp_medias.append(media)
+        
+        self.forced_media = []
+        for media_id in forced_media:
+            for media in self.atp_medias:
+                if media.id == media_id:
+                    self.forced_media.append(media)
+                    break
+        
         self.max_gapfilling = max_gapfilling
         self.gapfilling_delta = gapfilling_delta
-        self.coretemplate = core_template
+        
+        if not core_template:
+            self.load_default_template()
+        else:
+            self.coretemplate = core_template
+        
         self.msgapfill = MSGapfill(self.modelutl, default_gapfill_templates=core_template)
         self.original_bounds = {}
         self.noncore_reactions = []
@@ -62,6 +86,25 @@ class MSATPCorrection:
         self.lp_filename = None
         self.multiplier = 1.2
 
+    def load_default_template(self):
+        self.coretemplate = MSTemplateBuilder.from_dict(get_template('template_core'), None).build() 
+        
+    def load_default_medias(self):
+        filename = _path+"/../data/media.csv"
+        medias = pd.read_csv(filename, sep='\t', index_col=0).to_dict()
+        for media_id in medias:
+            media_d = {}
+            for exchange, v in media_data[media_id].items():
+                if v > 0:
+                    k = exchange.split('_')[1]
+                    media_d[k] = v
+            media_d['cpd00001'] = 1000
+            media_d['cpd00067'] = 1000
+            media = MSMedia.from_dict(media_d)
+            media.id = media_id
+            media.name = media_id
+            self.atp_medias.append(media)
+    
     @staticmethod
     def find_reaction_in_template(model_reaction, template, compartment):
         template_reaction = None  # we save lookup result here
@@ -215,6 +258,10 @@ class MSATPCorrection:
 
             logger.debug(f'media gapfilling score: {media.id}: {gfscore}')
             if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
+                self.selected_media.append(media)
+
+        for media in self.forced_media:
+            if media not in self.selected_media:
                 self.selected_media.append(media)
 
     def determine_growth_media2(self, max_gapfilling=None):

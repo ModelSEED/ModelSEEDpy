@@ -72,7 +72,49 @@ class MSModelUtil:
         self.metabolite_hash = None
         self.search_metabolite_hash = None
         self.test_objective = None
+        self.reaction_scores = None
         self.score = None
+    
+    def compute_automated_reaction_scores(self):
+        """
+        Computes reaction scores automatically from model data
+        :return:
+        """
+        self.reaction_scores = {}
+    
+    def create_atputl(self,core_template=None,atp_medias=[],compartment="c0",max_gapfilling=None,
+        gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[]):
+        """
+        Automatically creating ATP correction utility from model data
+        :return:
+        """
+        self.atputl = MSATPCorrection(self,core_template,atp_medias,compartment,max_gapfilling,
+        gapfilling_delta,atp_hydrolysis_id,load_default_medias,forced_media)
+    
+    def create_gfutl(self,atp_safe = True,default_gapfill_templates=[], default_gapfill_models=[],
+        additional_tests=[],blacklist=[]):
+        """
+        Automatically creating gapfilling utility from model data
+        :return:
+        """
+        tests = []
+        if atp_safe:
+            if not self.atputl:
+                self.create_atputl()
+            mdlutl.atputl.evaluate_growth_media()
+            mdlutl.atputl.determine_growth_media()
+            mdlutl.atputl.apply_growth_media_gapfilling()
+            mdlutl.atputl.evaluate_growth_media()
+            mdlutl.atputl.expand_model_to_genome_scale()
+            tests = mdlutl.atputl.build_tests()
+        for test in additional_tests:
+            tests.append(test)
+        
+        if not self.reaction_scores:
+            self.compute_automated_reaction_scores()
+            
+        self.gfutl = MSGapfill(self,default_gapfill_templates, default_gapfill_models,
+                 tests,self.reaction_scores, blacklist)
     
     def printlp(self,lpfilename="debug.lp"):
         with open(lpfilename, 'w') as out:
@@ -443,7 +485,99 @@ class MSModelUtil:
                 return False
         return True
     
-    def reaction_expansion_test(self,reaction_list,condition_list):
+    def linear_expansion_test(self,reaction_list,condition,currmodel):
+        """Tests addition of reactions one at a time
+        
+        Parameters
+        ----------
+        reaction_list : list<[obj reaction,{>|>}]>
+            List of reactions and directions to test for addition in the model (should already be in model)
+        
+        Returns
+        -------
+        list<[obj reaction,{>|>}]>
+            List of reactions and directions filtered because they fail tests when in the model
+            
+        Raises
+        ------
+        """
+        #First run the full test
+        if self.test_single_condition(condition,False,currmodel):
+            return []
+        # First knockout all reactions in the input list and save original bounds
+        filtered_list = []
+        original_bound = []
+        for item in reaction_list:
+            if item[1] == ">":
+                original_bound.append(item[0].upper_bound)
+                item[0].upper_bound = 0
+            else:
+                original_bound.append(item[0].lower_bound)
+                item[0].lower_bound = 0
+        # Now restore reactions one at a time
+        count = 0
+        for item in reaction_list:
+            if item[1] == ">":
+                item[0].upper_bound = original_bound[count]
+                if not self.test_single_condition(condition,False,currmodel):
+                    item[0].upper_bound = 0
+                    if item not in filtered_list:
+                        item.append(original_bound[count])
+                        item.append(self.score)
+                        filtered_list.append(item)
+            else:
+                item[0].lower_bound = original_bound[count]
+                if not self.test_single_condition(condition,False,currmodel):
+                    item[0].lower_bound = 0
+                    if item not in filtered_list:
+                        item.append(original_bound[count])
+                        item.append(self.score)
+                        filtered_list.append(item)
+            count += 1
+        return filtered_list
+    
+    def binary_expansion_test(self,reaction_list,condition,currmodel,depth=0):
+        """Conducts a binary search for bad reaction combinations
+        
+        Parameters
+        ----------
+        reaction_list : list<[obj reaction,{>|>}]>
+            List of reactions and directions to test for addition in the model (should already be in model)
+        condition_list : list<dict>
+            Specifies set of conditions to be tested with media, objective, is_max_threshold, threshold.
+        
+        Returns
+        -------
+        list<[obj reaction,{>|>}]>
+            List of reactions and directions filtered because they fail tests when in the model
+            
+        Raises
+        ------
+        """
+        newdepth = depth + 1
+        filtered_list = []
+        #First run the full test
+        if self.test_single_condition(condition,False,currmodel):
+            return []
+        #Break reaction list into two 
+        sub_list = []
+        midway_point = int(len(reaction_list)/2)
+        #Testing first half
+        for i in range(midway_point):
+            sub_list.append(reaction_list[i])
+        new_filter = self.binary_expansion_test(reaction_list,condition,currmodel,newdepth)
+        for item in new_filter:
+            filtered_list.append(item)
+        #Testing second half
+        sub_list = []
+        for i in range(midway_point+1,len(reaction_list)):
+            sub_list.append(reaction_list[i])
+        new_filter = self.binary_expansion_test(reaction_list,condition,currmodel,newdepth)
+        for item in new_filter:
+            filtered_list.append(item)
+        return new_filter
+        
+    def reaction_expansion_test(self,reaction_list,condition_list,binary_search=False):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
         
         Parameters
@@ -468,35 +602,14 @@ class MSModelUtil:
             currmodel = self.model
             with currmodel:
                 self.apply_test_condition(condition)
-                # First knockout all reactions in the input list and save original bounds
-                original_bound = []
-                for item in reaction_list:
-                    if item[1] == ">":
-                        original_bound.append(item[0].upper_bound)
-                        item[0].upper_bound = 0
-                    else:
-                        original_bound.append(item[0].lower_bound)
-                        item[0].lower_bound = 0
-                # Now restore reactions one at a time
-                count = 0
-                for item in reaction_list:
-                    if item[1] == ">":
-                        item[0].upper_bound = original_bound[count]
-                        if not self.test_single_condition(condition,False,currmodel):
-                            item[0].upper_bound = 0
-                            if item not in filtered_list:
-                                item.append(original_bound[count])
-                                item.append(self.score)
-                                filtered_list.append(item)
-                    else:
-                        item[0].lower_bound = original_bound[count]
-                        if not self.test_single_condition(condition,False,currmodel):
-                            item[0].lower_bound = 0
-                            if item not in filtered_list:
-                                item.append(original_bound[count])
-                                item.append(self.score)
-                                filtered_list.append(item)
-                    count += 1
+                if binary_search:
+                    new_filtered = self.binary_expansion_test(reaction_list,condition,currmodel)
+                    for item in new_filtered:
+                        filtered_list.append(item)
+                else:
+                    new_filtered = self.linear_expansion_test(reaction_list,condition,currmodel)
+                    for item in new_filtered:
+                        filtered_list.append(item)
         toc = time.perf_counter()
         print("Expansion time:",(toc-tic))
         print("Filtered count:",len(filtered_list)," out of ",len(reaction_list))
@@ -528,6 +641,11 @@ class MSModelUtil:
         cobra_reaction.add_metabolites(stoichiometry)
         self.model.add_reactions([cobra_reaction])
         return {"reaction":cobra_reaction,"direction":">","new":True}
+    
+    def gapfilled_reaction_count(self):
+        count = 0
+        #TODO
+        return count
     
     @staticmethod
     def parse_id(object):
