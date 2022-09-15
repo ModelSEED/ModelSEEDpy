@@ -3,11 +3,15 @@ from __future__ import absolute_import
 import logging
 from chemicals import periodic_table
 import re
-from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene, Metabolite, and Model are never used
+from optlang import Objective
+from cobra.core import Gene, Metabolite, Model, Reaction   # !!! Gene and Model are never used
+from optlang import Model
 from cobra.util import solver as sutil  # !!! sutil is never used
 import time
 from modelseedpy.biochem import from_local
-from scipy.odr.odrpack import Output  # !!! Output is never used
+from optlang import Constraint
+from scipy.odr import Output  # !!! Output is never used
+from typing import Iterable
 from chemw import ChemMW
 from warnings import warn
 #from Carbon.Aliases import false
@@ -55,6 +59,57 @@ class FBAHelper:
             #model.add_reactions([drain_reaction])
             return drain_reaction
         return None
+    
+    @staticmethod
+    def test_condition_list(model, condition_list, pkgmgr):
+        for condition in condition_list:
+            pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
+            model.objective = condition["objective"]
+            if condition["is_max_threshold"]:
+                model.objective.direction = "max"
+            else:
+                model.objective.direction = "min"
+            objective = model.slim_optimize()
+            if model.solver.status != 'optimal':
+                with open("debug.lp", 'w') as out:
+                    out.write(str(model.solver))
+                    out.close()
+                logger.critical("Infeasible problem - LP file printed to debug!")
+                return False
+            if objective >= condition["threshold"] and condition["is_max_threshold"]:
+                logger.info("FAILED")
+                return False
+            elif objective <= condition["threshold"] and not condition["is_max_threshold"]:
+                logger.info("FAILED")
+                return False
+        return True
+        
+    @staticmethod
+    def reaction_expansion_test(model, reaction_list, condition_list, pkgmgr):
+        # First knockout all reactions in the input list and save original bounds
+        original_bound = []
+        for item in reaction_list:
+            if item[1] == ">":
+                original_bound.append(item[0].upper_bound)
+                item[0].upper_bound = 0
+            else:
+                original_bound.append(item[0].lower_bound)
+                item[0].lower_bound = 0
+        # Now restore reactions one at a time
+        filtered_list = []
+        for index, item in enumerate(reaction_list):
+            logger.info("Testing "+item[0].id)
+            if item[1] == ">":
+                item[0].upper_bound = original_bound[index]
+                if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
+                    item[0].upper_bound = 0
+                    filtered_list.append(item)
+            else:
+                item[0].lower_bound = original_bound[index]
+                if not FBAHelper.test_condition_list(model, condition_list, pkgmgr):
+                    item[0].lower_bound = 0
+                    filtered_list.append(item)
+        return filtered_list
 
     @staticmethod
     def set_reaction_bounds_from_direction(reaction, direction, add=False):
@@ -146,11 +201,20 @@ class FBAHelper:
         output = {}
         for met in model.metabolites:
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(met)
-            if msid != None:
+            if msid is not None:
                 if msid not in output:
                     output[msid] = []
                 output[msid].append(met)
         return output
+    
+    @staticmethod
+    def sum_dict(d1,d2):
+        for key, value in d1.items():
+            if key in d2:
+                d2[key] += value
+            else:
+                d2[key] = value
+        return d2
     
     @staticmethod
     def rxn_hash(model): 
@@ -166,13 +230,13 @@ class FBAHelper:
         compartments = list(reaction.compartments)
         if len(compartments) == 1:
             return compartments[0]
-        cytosol = othercomp = None
+        cytosol = None
         for comp in compartments:
             if comp[0:1] == "c":
                 cytosol = comp
             elif comp[0:1] != "e":
-                othercomp = comp
-        return othercomp or cytosol
+                return comp
+        return cytosol
     
     @staticmethod
     def stoichiometry_to_string(stoichiometry):
@@ -242,10 +306,116 @@ class FBAHelper:
         reframed_model = from_cobrapy(kbase_model)
         if hasattr(kbase_model, 'id'):
             reframed_model.id = kbase_model.id
-        reframed_model.compartments.e0.external = True
+        for comp in reframed_model.compartments:
+            if 'e' in comp:
+                reframed_model.compartments[comp].external = True
+
         return reframed_model
     
     @staticmethod
+    def parse_media(media):
+        return [cpd.id for cpd in media.data['mediacompounds']]
+    
+    @staticmethod
     def parse_df(df):
-        from numpy import array
-        return array(dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()])
+        from collections import namedtuple
+        dataframe = namedtuple("DataFrame", ("index", "columns", "values"))
+        return dataframe(list(df.index), list(df.columns), df.to_numpy())
+    
+    @staticmethod
+    def add_cons_vars(model, vars_cons, sloppy=False):
+        model.add_cons_vars(vars_cons, sloppy=sloppy)
+        model.solver.update()
+    
+    @staticmethod
+    def remove_cons_vars(model, vars_cons):
+        model.remove_cons_vars(vars_cons)
+        model.solver.update()
+        
+    @staticmethod
+    def create_constraint(model, constraint, coef=None):
+        model.add_cons_vars(constraint)
+        model.solver.update()
+        if coef:
+            constraint.set_linear_coefficients(coef)
+            model.solver.update()
+    
+    @staticmethod
+    def add_objective(model, objective, direction="max", coef=None):
+        model.objective = Objective(objective, direction=direction)
+        model.solver.update()
+        if coef:
+            model.objective.set_linear_coefficients(coef)
+            model.solver.update()
+
+    @staticmethod
+    def add_minimal_objective_cons(model, objective_expr=None, min_value=0.1):
+        objective_expr = objective_expr or model.objective.expression
+        FBAHelper.create_constraint(model, Constraint(objective_expr, lb=min_value, ub=None, name="min_value"))
+    
+    @staticmethod
+    def add_exchange_to_model(model, cpd, rxnID):
+        model.add_boundary(metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"), 
+            reaction_id=rxnID, type="exchange", lb=cpd.minFlux, ub=cpd.maxFlux)
+    
+    @staticmethod
+    def update_model_media(model, media):
+        medium = model.medium
+        model_reactions = [rxn.id for rxn in model.reactions]
+        for cpd in media.data["mediacompounds"]:
+            ex_rxn = f"EX_{cpd.id}_e0"
+            if ex_rxn not in model_reactions:
+                model = FBAHelper.add_exchange_to_model(model, cpd, ex_rxn)
+            medium[ex_rxn] = cpd.maxFlux
+        model.medium = medium
+        
+        return model
+    
+    @staticmethod
+    def filter_cobra_set(cobra_set):
+        unique_ids = set(obj.id for obj in cobra_set)
+        unique_objs = set()
+        for obj in cobra_set:
+            if obj.id in unique_ids:
+                unique_objs.add(obj)
+                unique_ids.remove(obj.id)
+        return unique_objs
+    
+    @staticmethod
+    def exchange_reactions(model):
+        return [rxn for rxn in model.reactions if "EX_" in rxn.id]
+    
+    @staticmethod
+    def bio_reactions(model):
+        return [rxn for rxn in model.reactions if "bio" in rxn.id]
+    
+    @staticmethod
+    def solution_to_dict(solution):
+        return {key:flux for key, flux in solution.fluxes.items()}
+    
+    @staticmethod
+    def solution_to_rxns_dict(solution, model):
+        return {model.reactions.get_by_id(key):flux for key, flux in solution.fluxes.items()}
+        
+    @staticmethod
+    def solution_to_variables_dict(solution, model):
+        return {model.variables.get(key):flux for key, flux in solution.fluxes.items()}
+    
+    @staticmethod
+    def remove_media_compounds(media_dict, compounds, printing=True):
+        for cpd in compounds:
+            if cpd in media_dict:
+                media_dict.pop(cpd)
+                if printing:
+                    print(f"{cpd} removed")
+            else:
+                print(f"ERROR: The {cpd} is not located in the media.")
+        return media_dict
+    
+    # @staticmethod
+    # def non_interacting_community(community):
+    #     # !!! divert all exchange reactions to a sink
+    #     for rxn in community.reactions:
+    #         if "EX_" in rxn.id:
+    #             community.add_boundary(list(rxn.metabolites.keys())[0], lb=0, type="sink")
+    #     return community
