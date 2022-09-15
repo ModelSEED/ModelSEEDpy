@@ -343,15 +343,15 @@ class FBAHelper:
     @staticmethod
     def add_objective(model, objective, direction="max", coef=None):
         model.objective = Objective(objective, direction=direction)
+        model.solver.update()
         if coef:
             model.objective.set_linear_coefficients(coef)
-        model.solver.update()
-        
+            model.solver.update()
+
     @staticmethod
     def add_minimal_objective_cons(model, objective_expr=None, min_value=0.1):
         objective_expr = objective_expr or model.objective.expression
-        FBAHelper.create_constraint(model, Constraint(
-            objective_expr, lb=min_value, ub=None, name="min_value"))
+        FBAHelper.create_constraint(model, Constraint(objective_expr, lb=min_value, ub=None, name="min_value"))
     
     @staticmethod
     def add_exchange_to_model(model, cpd, rxnID):
@@ -404,9 +404,12 @@ class FBAHelper:
     @staticmethod
     def remove_media_compounds(media_dict, compounds, printing=True):
         for cpd in compounds:
-            media_dict.pop(cpd)
-            if printing:
-                print(f"{cpd} removed")
+            if cpd in media_dict:
+                media_dict.pop(cpd)
+                if printing:
+                    print(f"{cpd} removed")
+            else:
+                print(f"ERROR: The {cpd} is not located in the media.")
         return media_dict
     
     # @staticmethod

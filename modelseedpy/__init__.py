@@ -46,10 +46,10 @@ from modelseedpy.core import (
 )
 from modelseedpy.core.exceptions import *
 
-from modelseedpy.community import (MSCommunity, MSCompatibility, CommKineticPkg)
+from modelseedpy.community import (MSCommunity, MSCompatibility, dFBAPkg)
 
 from modelseedpy.fbapkg import (
-    BaseFBAPkg, RevBinPkg, ReactionUsePkg, SimpleThermoPkg, TotalFluxPkg, BilevelPkg,
+    BaseFBAPkg, RevBinPkg, ReactionUsePkg, SimpleThermoPkg, TotalFluxPkg, BilevelPkg, CommKineticPkg,
     KBaseMediaPkg, FluxFittingPkg, ProteomeFittingPkg, GapfillingPkg, MetaboFBAPkg, FlexibleBiomassPkg,
     ProblemReplicationPkg, FullThermoPkg, MSPackageManager, ObjConstPkg, ChangeOptPkg, ElementUptakePkg
 )

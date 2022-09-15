@@ -27,3 +27,7 @@ class ObjectAlreadyDefinedError(Exception):
 class NoFluxError(Exception):
     """Error for FBA solutions"""
     pass
+
+class ObjectiveError(Exception):
+    """Erroneous assignment of a secondary objective via a constraint"""
+    pass

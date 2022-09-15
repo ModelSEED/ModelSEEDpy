@@ -55,8 +55,9 @@ class MSCompatibility():
             # standardize metabolites
             if metabolites:
                 if exchanges:
-                    message = f"\n\n\nStandardize exchange reactions in {model.id}"
-                    print(message, "\n", "="*len(message))
+                    if printing:
+                        message = f"\n\n\nStandardize exchange reactions in {model.id}"
+                        print(message, "\n", "="*len(message))
                     ex_mets = [met.id for ex_rxn in FBAHelper.exchange_reactions(model) for met in ex_rxn.metabolites]
                     for ex_rxn in FBAHelper.exchange_reactions(model):
                         for met in ex_rxn.metabolites:

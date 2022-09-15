@@ -1,12 +1,14 @@
+from modelseedpy.core.exceptions import ObjectiveError, FeasibilityError
 from modelseedpy.fbapkg.reactionusepkg import ReactionUsePkg
+from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from itertools import combinations, permutations
 from optlang import Variable, Constraint
 from optlang.symbolics import Zero
+from math import isclose, inf
 from deepdiff import DeepDiff
 from time import process_time
-from math import isclose, inf
 from pprint import pprint
 import logging
 import json, re
@@ -18,7 +20,17 @@ class MinimalMediaPkg:
     
     @staticmethod
     def _exchange_solution(sol_dict):
-        return {rxn:flux for rxn, flux in sol_dict.items() if "EX_" in rxn.id and flux > 0}
+        return {rxn:flux for rxn, flux in sol_dict.items() if "EX_" in rxn.id and flux < 0}
+
+    @staticmethod
+    def _influx_objective(model):
+        influxes = []
+        for ex_rxn in FBAHelper.exchange_reactions(model):
+            if len(ex_rxn.reactants) == 1:  # this is essentially 100% of exchanges
+                influxes.append(ex_rxn.reverse_variable)
+            else:  # this captures edge cases
+                influxes.append(ex_rxn.forward_variable)
+        return influxes
 
     @staticmethod
     def _varName_to_ID(var):
@@ -32,17 +44,23 @@ class MinimalMediaPkg:
         """minimize the total in-flux of exchange reactions in the model"""
         model = org_model.copy()
         minimal_growth = minimal_growth or model.optimize().objective_value
-#         print([(cons.lb, cons.expression, cons.ub, cons.name) for cons in model.constraints if cons.name == "min_growth"])
         FBAHelper.add_minimal_objective_cons(model, min_value=minimal_growth)
-        FBAHelper.add_objective(model, sum([ex_rxn.reverse_variable for ex_rxn in FBAHelper.exchange_reactions(model)]), "min")
+        FBAHelper.add_objective(model, sum(MinimalMediaPkg._influx_objective(model)), "min")
         sol = model.optimize()
         min_flux_media = MinimalMediaPkg._exchange_solution(FBAHelper.solution_to_rxns_dict(sol, model))
+        total_flux = sum([abs(ex.flux) for ex in min_flux_media])
         # verify the medium
         model2 = org_model.copy()
-        model2.medium = {rxn.id: flux for rxn,flux in min_flux_media.items()}
+        model2.medium = {rxn.id: abs(flux) for rxn, flux in min_flux_media.items()}
+        simulated_sol = model2.optimize()
+        if simulated_sol.status != "optimal":
+            raise FeasibilityError(f"The simulation was not optimal, with a status of {simulated_sol.status}")
+        if not isclose(simulated_sol.objective_value, minimal_growth):
+            raise ObjectiveError(f"The assigned minimal_growth of {minimal_growth} was not maintained during the simulation,"
+                                 f" where the observed growth value was {simulated_sol.objective_value}.")
         if printing:
-            print(f"The minimal flux media consists of {len(min_flux_media)} compounds and a {sum([ex.flux for ex in min_flux_media])} total flux," 
-                  f" with a growth value of {model2.optimize().objective_value}")
+            print(f"The minimal flux media consists of {len(min_flux_media)} compounds and a {total_flux} total influx,"
+                  f" with a growth value of {simulated_sol.objective_value}")
         return min_flux_media
 
     @staticmethod
@@ -66,13 +84,13 @@ class MinimalMediaPkg:
         # determine each solution
         solution_dicts = []
         sol = model.optimize()
-        while sol.status == "optimal":
+        while sol.status == "optimal":  # limit to 100
             print("sol_dicts length", len(solution_dicts), end="\r")
             sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
             solution_dicts.append(sol_dict)
             ## omit the solution from the next search
-            FBAHelper.create_constraint(model, Constraint(
-                Zero, lb=len(sol_dict)-1, ub=len(sol_dict)-1,name=ex_rxn.id + f"_exclusion_sol{len(solution_dicts)}"), 
+            FBAHelper.create_constraint(model, Constraint(  # build exclusion use can be emulated
+                Zero, lb=None, ub=len(sol_dict)-1,name=ex_rxn.id + f"_exclusion_sol{len(solution_dicts)}"),
                 sol_dict)
             sol = model.optimize()
         if not solution_dicts:
@@ -126,11 +144,14 @@ class MinimalMediaPkg:
             return interdependencies
 
     @staticmethod
-    def jenga_method(models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[], export=True, printing=True):
+    def jenga_method(org_models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[], export=True, printing=True,
+                     compatibilize=False):
         from cobra.medium import minimal_medium
 
         # determine the unique combination of all species minimal media
-        # models = MSCompatibility.align_exchanges(models, True, "standardization_corrections.json")
+        models = org_models
+        if compatibilize:
+            models = MSCompatibility.standardize(org_models, conflicts_file_name="standardization_corrections.json", printing=printing)
         media = {"community_media": {}, "members": {}}
         for org_model in models:
             model = org_model.copy()
@@ -212,34 +233,29 @@ class MinimalMediaPkg:
                             if successful_removal > best:
                                 best = successful_removal
                                 permutation_results = []
-                            permut_set = set(permut[:best + 1])  # slice only the elements that are removable
-                            if permut_set not in permutation_results:
-                                permutation_results.append(permut_set)
-                                print(permut_set)
+                            permut_removable = permut[:best]  # slice only the elements that are removable
+                            if permut_removable not in permutation_results:
+                                permutation_results.append(permut_removable)
+                                if printing:
+                                    print(permut_removable)
 
             ## filter to only the most minimal media
-            print(permutation_results)
-            solutions_paths, new_combinations = [], []
+            new_combinations = []
             for permut in permutation_results:
-                start_removal_index = best - len(permut)  # the compound at which growth is lost
-                removable_compounds = set(list(permut)[:start_removal_index])
-                solutions_paths.append(removable_compounds)
-                if removable_compounds not in new_combinations:
-                    new_combinations.append(removable_compounds)
-            print(solutions_paths, new_combinations)
+                if permut not in permutation_results:
+                    new_combinations.append(permut)
 
             unique_combinations, unique_paths = [], []
-            for removal_path in solutions_paths:
+            for removal_path in permutation_results:
                 path_permutations = permutations(removal_path)
-                if all([set(path) in solutions_paths for path in path_permutations]):
+                if all([set(path) in permutation_results for path in path_permutations]):
                     combination = combinations(removal_path, len(removal_path))
-                    if not all([set(com) in unique_combinations for com in combination]):
-                        for com in combinations(removal_path, len(removal_path)):
-                            unique_combinations.append((set(com)))
+                    for com in combination:
+                        if com not in unique_combinations:
+                            unique_combinations.append(com)
                 else:
-                    if set(removal_path) not in unique_paths:
-                        unique_paths.append((set(removal_path)))
-            if unique_combinations[0] and printing:
+                    unique_paths.append(removal_path)
+            if unique_combinations and printing:
                 print("Unique combinations:")
                 print(len(unique_combinations), unique_combinations)
             if unique_paths and printing:
@@ -259,10 +275,11 @@ class MinimalMediaPkg:
                     possible_removal_tracker = {best: [possible_removal]}
                 elif cpdID_sum == best:
                     possible_removal_tracker[best].append(possible_removal)
-                print(possible_removal_tracker)
             media["community_media"] = FBAHelper.remove_media_compounds(
                 media["community_media"], list(possible_removal_tracker.values())[0][0], printing)
-            pprint(media["community_media"])
+            if printing:
+                print(possible_removal_tracker)
+                pprint(media["community_media"])
 
         jenga_media = media["community_media"].copy()
         jenga_time = process_time()
