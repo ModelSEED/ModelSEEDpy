@@ -334,7 +334,8 @@ class MSBuilder:
         """
         for future methods with better customization
         """
-        self.genome = genome; self.template = template
+        self.genome = genome
+        self.template = template
         self.search_name_to_genes, self.search_name_to_original = _aaaa(genome, 'RAST')
 
     def _get_template_reaction_complexes(self, template_reaction):
