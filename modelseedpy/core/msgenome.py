@@ -26,13 +26,14 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
             if seq:
                 features.append(seq)
             seq_id = line[1:]
-            desc = None
+            desc = ''
             if h_func:
                 seq_id, desc = h_func(seq_id)
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                desc = header_data[1]  # The unit test throws an error when this is commented
+                if len(header_data) > 1:
+                    desc = header_data[1]  # The unit test throws an error when this is commented
 
             seq = MSFeature(seq_id, "", desc)
         else:
