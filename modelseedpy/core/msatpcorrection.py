@@ -1,4 +1,6 @@
 import logging
+from modelseedpy.core.msgapfill import MSGapfill  # !!! import never used
+from modelseedpy.core.fbahelper import FBAHelper  # !!! import never used
 import itertools  # !!! import never used
 import cobra  # !!! import never used
 import json
@@ -101,8 +103,6 @@ class MSATPCorrection:
             self.restore_noncore_reactions(noncore=True, othercompartment=True)
         # Now clearing the existing noncore data structures
         self.original_bounds = {}
-        self.noncore_reactions, self.other_compartments = [], []
-        #Iterating through reactions and disabling
         self.noncore_reactions, self.other_compartments = [], []
         # Iterating through reactions and disabling
         for reaction in self.model.reactions:
