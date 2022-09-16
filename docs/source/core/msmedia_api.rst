@@ -12,8 +12,8 @@ This class instantiates a media compound for potential manipulations:
  from modelseedpy.core import MediaCompound
  media_comp = MediaCompound(compound_id, lower_bound, upper_bound, concentration=None)
 
-- *compound_id* ``str`` & *concentration* ``float``: The ID and concentration of the media compound. 
-- *lower_bound* & *upper_bound* ``float``: The lower and upper bounds of the exchange reaction for the media compound, respectively. 
+- *compound_id* ``str`` & *concentration* ``float``: The ID and concentration of the media compound.
+- *lower_bound* & *upper_bound* ``float``: The lower and upper bounds of the exchange reaction for the media compound, respectively.
 
 +++++++++++++++++++++
 MSMedia()
@@ -26,7 +26,7 @@ This class instantiates a media for investigation:
  from modelseedpy.core import MSMedia
  msmedia = MSMedia(media_id)
 
-- *media_id* ``str``: The ID of the investigated media. 
+- *media_id* ``str``: The ID of the investigated media.
 
 -------------------------------------------
 from_dict()

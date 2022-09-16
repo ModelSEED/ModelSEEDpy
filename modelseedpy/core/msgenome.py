@@ -1,28 +1,29 @@
+# -*- coding: utf-8 -*-
 import logging
 import re
 from cobra.core.dictlist import DictList
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SPLIT = ' '
+DEFAULT_SPLIT = " "
 
 
 def normalize_role(s):
     s = s.strip().lower()
-    s = re.sub(r'[\W_]+', '', s)
+    s = re.sub(r"[\W_]+", "", s)
     return s
 
 
 def read_fasta(f, split=DEFAULT_SPLIT, h_func=None):
-    with open(f, 'r') as fh:
+    with open(f, "r") as fh:
         return parse_fasta_str(fh.read(), split, h_func)
 
 
 def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
     features = []
     seq = None
-    for line in faa_str.split('\n'):
-        if line.startswith('>'):
+    for line in faa_str.split("\n"):
+        if line.startswith(">"):
             if seq:
                 features.append(seq)
             seq_id = line[1:]
@@ -33,7 +34,9 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
                 if len(header_data) > 1:
-                    desc = header_data[1]  # The unit test throws an error when this is commented
+                    desc = header_data[
+                        1
+                    ]  # The unit test throws an error when this is commented
 
             seq = MSFeature(seq_id, "", desc)
         else:
@@ -45,7 +48,6 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
 
 
 class MSFeature:
-
     def __init__(self, feature_id, sequence, description=None):
         """
 
@@ -74,7 +76,6 @@ class MSFeature:
 
 
 class MSGenome:
-
     def __init__(self):
         self.features = DictList()
 
@@ -86,7 +87,9 @@ class MSGenome:
         """
         duplicates = list(filter(lambda o: o.id in self.features, feature_list))
         if len(duplicates) > 0:
-            raise ValueError(f"unable to add features {duplicates} already present in the genome")
+            raise ValueError(
+                f"unable to add features {duplicates} already present in the genome"
+            )
 
         for f in feature_list:
             f._genome = self
@@ -94,7 +97,9 @@ class MSGenome:
         self.features += feature_list
 
     @staticmethod
-    def from_fasta(filename, contigs=0, split='|', h_func=None):  # !!! the contigs argument is never used
+    def from_fasta(
+        filename, contigs=0, split="|", h_func=None
+    ):  # !!! the contigs argument is never used
         genome = MSGenome()
         genome.features += read_fasta(filename, split, h_func)
         return genome

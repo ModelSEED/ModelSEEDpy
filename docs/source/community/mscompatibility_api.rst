@@ -12,7 +12,7 @@ This class determines the compatibility of individual models for the constructio
  from modelseedpy.core import MSCompatibility
  ms_compat = MSCompatibility(modelseed_db_path, printing = True)
 
-- *modelseed_db_path* ``str``: the path to the ModelSEED Database, which is only required for the FullThermo, where ``None`` does not apply these constraints. 
+- *modelseed_db_path* ``str``: the path to the ModelSEED Database, which is only required for the FullThermo, where ``None`` does not apply these constraints.
 - *printing* ``bool``: specifies whether results will be printed.
 
 ----------------------
@@ -25,7 +25,7 @@ The IDs and names of the metabolites and reactions of a model are standardized t
 
  ms_compat.standardize_MSD(model)
 
-- *model* ``cobra.core.model.Model``: the CobraKBase model that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *model* ``cobra.core.model.Model``: the CobraKBase model that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
 
 **returns** the standardized COBRA model
 
@@ -39,7 +39,7 @@ Determines the consistency of reaction or metabolite IDs and names between two m
 
  ms_compat.compare_models(model_1, model_2, metabolites = True, standardize = False)
 
-- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
 - *metabolites* ``bool``: specifies whether metabolites (``True``) or reactions (``False``) will be compared between the models.
 - *standardize* ``bool``: specifies whether the models will be standardized through the ``standardize_MSD`` function.
 
@@ -58,7 +58,7 @@ Model variabilities in the exchange fluxes -- such as non-standard metabolite ID
 
  ms_compat.exchanges(model)
 
-- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
 
 **returns** model, unknown_met_ids
 

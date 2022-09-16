@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """
 def test_compound_data_h2o(cpd):
@@ -46,9 +47,9 @@ def test_compound_data_h2o(cpd):
     #  'hydroxyl ion',
     #  'oxonium',
     #  'water'}
-"""
 
-"""
+# The following was another doc string.
+
 rxn = reactions[0]
 assert rxn.id == 'rxn00001'
 assert rxn.abbr == 'R00004'
@@ -81,9 +82,9 @@ assert rxn.names == {
     'inorganicdiphosphatase',
     'pyrophosphate phosphohydrolase'
 }
-"""
 
-"""
+TODO: Fix to actually test something.
+
 rxn = reactions[0]
 assert rxn.code == '(1) cpd00001[0] + (1) cpd00012[0] <=> (2) cpd00009[0]'
 assert rxn.stoichiometry == '-1:cpd00001:0:0:"H2O";-1:cpd00012:0:0:"PPi";2:cpd00009:0:0:"Phosphate";1:cpd00067:0:0:"H+"'

@@ -27,7 +27,7 @@ This class classifies a model and its features:
  from modelseedpy.core import MSGenomeClassifier
  genclass = MSGenomeClassifier(model, model_features)
 
-- *model* ``cobra.core.model.Model``: The CobraKBase model whose genome will be classified. 
+- *model* ``cobra.core.model.Model``: The CobraKBase model whose genome will be classified.
 - *model_features* ``dict``: A descriptive dictionary of the investigated model.
 
 -------------------------------------------

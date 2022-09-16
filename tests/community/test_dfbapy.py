@@ -1,10 +1,10 @@
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # import matplotlib, pandas
 # import shutil
 # from modelseedpy.fbapkg import dfbapkg
 
-# # define the environment path 
+# # define the environment path
 # import os
 # local_cobrakbase_path = os.path.join('C:', 'Users', 'Andrew Freiburger','Documents','Argonne','cobrakbase')
 # os.environ["HOME"] = local_cobrakbase_path
@@ -50,12 +50,12 @@
 #     assert type(dfba.met_names) is list
 #     for bol in [dfba.verbose,dfba.printing, dfba.warnings, dfba.jupyter]:
 #         assert type(bol) is bool
-        
+
 # def test_lp():
 #     dfba.lp('test')
 #     assert os.path.exists('test.lp')
 #     shutil.rmtree('test.lp')
-        
+
 # def test_simulate():
 #     for dic in [dfba.kinetics_data,dfba.defined_reactions]:
 #         assert type(dic) is dict
@@ -81,6 +81,6 @@
 #         assert type(dfba.figure) is matplotlib.figure.Figure
 #     for st in [dfba.changed,dfba.unchanged]:
 #         assert type(st) is set
-        
+
 #     assert os.path.exists(os.path.join(os.getcwd(), 'test_dfba'))
 #     shutil.rmtree(dfba.simulation_path)

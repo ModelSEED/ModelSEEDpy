@@ -21,7 +21,7 @@ ________________________________________________________________________
 
 The ModelSEEDpy packages that compatibilize the transport reactions of individual models and simulate cross-feeding amongst community members are organized in the ``community`` directory of the ModelSEEDpy library. These packages are imported via::
 
- from modelseedpy.community import *   
+ from modelseedpy.community import *
 
 and include the following:
 

@@ -23,7 +23,7 @@ Drain reactions are added to a model:
 
 - *model* ``cobra.core.model.Model``: The COBRA model that contains the reactions which are to be reformatted for the template.
 - *auto_sink* ``list``: The collection of metabolites for which drain reactions will be created and added to the model.
-           
+
 --------------------------------
 add_drain_from_metabolite_id()
 --------------------------------
@@ -40,7 +40,7 @@ A drain reaction is constructed for a specified metabolite:
 - *prefix* & *prefix_name* ``str``: The prefixes for the drain reaction ID and name, respectively.
 
 **returns** *drain_reaction* ``cobra.core.model.Reaction``: The drain reaction of the respective metabolite.
-           
+
 --------------------------------
 test_condition_list()
 --------------------------------
@@ -52,11 +52,11 @@ A collection of simulation conditions are examined for the specified model:
  test_result = fbahelper.test_condition_list(model, condition_list, pkgmgr)
 
 - *model* ``cobra.core.model.Model``: The COBRA model that contains the reactions which are to be reformatted for the template.
-- *condition_list* ``list``: A list of simulation conditions that will be each examined during the simulation. 
+- *condition_list* ``list``: A list of simulation conditions that will be each examined during the simulation.
 - *pkgmgr* ``modelseedpy.fbapkg.mspackagemanager.MSPackageManager``: The collection of associated classes that are used in the FullThermo package.
 
 **returns** *test_result* ``bool``: specifies whether all of the conditions yielded feasible solutions and objective values that surpassed the provided threshold with each condition.
-           
+
 --------------------------------
 reaction_expansion_test()
 --------------------------------
@@ -69,11 +69,11 @@ The reactions that cause simulations to not pass all conditions is collected and
 
 - *model* ``cobra.core.model.Model``: The COBRA model that contains the reactions which are to be reformatted for the template.
 - *reaction_list* ``list``: The collections of COBRA reactions that will be knocked-out and then are iteratively restored while assessing whether all of the conditions pass the reaction.
-- *condition_list* ``list``: and simulation conditions that will be simulated. 
+- *condition_list* ``list``: and simulation conditions that will be simulated.
 - *pkgmgr* ``modelseedpy.fbapkg.mspackagemanager.MSPackageManager``: The collection of associated classes that are used in the FullThermo package.
 
 **returns** *filtered_list* ``list``: The collection of reactions from the ``reaction_list`` for which at least one of the simulation conditions failed.
-           
+
 -------------------------------------
 set_reaction_bounds_from_direction()
 -------------------------------------
@@ -254,8 +254,8 @@ Adds an ATP Hydrolysis reaction to the parameterized model in the specified comp
 
  reaction_dict = fbahelper.add_atp_hydrolysis(model,compartment)
 
-- *model* ``cobra.core.model.Model``: The COBRA model into which an ATP hydrolysis reaction will be added. 
-- *compartment* ``str``: The compartment of the ATP hydrolysis reaction, which is sensitive to community models where each species is represented with a unique compartment. 
+- *model* ``cobra.core.model.Model``: The COBRA model into which an ATP hydrolysis reaction will be added.
+- *compartment* ``str``: The compartment of the ATP hydrolysis reaction, which is sensitive to community models where each species is represented with a unique compartment.
 
 **returns** *reaction_dict* ``dict``: The reaction string, direction, and newness of the reaction (``values``) are specified for the constructed ATP hydrolysis reaction (``keys``).
 
@@ -269,7 +269,7 @@ Determines the non-extracellular compartment of the parameterized reaction:
 
  ID_components = fbahelper.parse_id(cobra_obj)
 
-- *cobra_obj* ``str``: The COBRA object ID that will be parsed. 
+- *cobra_obj* ``str``: The COBRA object ID that will be parsed.
 
 **returns** *ID_components* ``tuple``: The basename, compartment, and index of the COBRA object in a single tuple, respectively.
 
@@ -291,6 +291,6 @@ Validates a dictionary based upon the requirements and optional default values a
 
 - *dictionary* ``dict``: The dictionary that will be validated.
 - *required_keys* ``list``: The collection of keys that must be provided in the dictionary.
-- *defaults* ``dict``: The default entries that will be added to the dictionary. 
+- *defaults* ``dict``: The default entries that will be added to the dictionary.
 
-**returns** *validated_dictionary* ``dict``: The dictionary that has been validated through the function. 
+**returns** *validated_dictionary* ``dict``: The dictionary that has been validated through the function.

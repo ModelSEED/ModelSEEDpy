@@ -44,7 +44,7 @@ edit_biomass_compound()
 .. code-block:: python
 
  MSEditorAPI.edit_biomass_compound(model,biomass_id,cpd_id,new_coef)
- 
+
 - *model* ``core.core.model.Model``: The model whose biomass reaction will be edited.
 - *biomass_id* & *cpd_id* ``str``: The IDs of the biomass reaction and the compound that will be added to the biomass reaction.
 - *new_coef* ``float``: The stoichiometric coefficient of the added compound to the biomass reaction.
@@ -58,10 +58,10 @@ compute_molecular_weight()
 .. code-block:: python
 
  met_mw = MSEditorAPI.compute_molecular_weight(model, metabolite_id)
- 
+
 - *model* ``core.core.model.Model``: The model that contains the metabolite and thus the molecular formula.
 - *metabolite_id* ``str``: The ID of the metabolite whose MW will be calculated.
- 
+
 **Returns** *met_mw* ``float``: The MW of the metabolite.
 
 ------------------------
@@ -73,7 +73,7 @@ add_custom_reaction()
 .. code-block:: python
 
  MSEditorAPI.add_custom_reaction(model,rxn_id,MSEquation,gpr = None)
- 
+
 - *model* ``core.core.model.Model``: The model that will be expanded with the reaction.
 - *rxn_id* ``str``: The ID of the reaction that will be added to the model.
 - *MSEquation* ``modelseedpy.core.mseditorapi.msequation``: The ModelSEED reaction object that contains both the stoichiometry and direction.
@@ -88,7 +88,7 @@ add_ms_reaction()
 .. code-block:: python
 
  MSEditorAPI.add_ms_reaction(model, rxn_id, modelseed, compartment_equivalents = {'0':'c0', '1':'e0'}, direction = '>')
- 
+
 - *model* ``core.core.model.Model``: The model that will be expanded with the reaction.
 - *rxn_id* ``str``: The ID of the reaction that will be added to the model.
 - *modelseed* ``ModelSEED Database``: The ModelSEED Database object that will be used to acquire reaction information.
@@ -104,7 +104,7 @@ copy_model_reactions()
 .. code-block:: python
 
  MSEditorAPI.copy_model_reactions(model,source_model,rxn_id_list = [])
- 
+
 - *model* ``core.core.model.Model``: The model that will be expanded with additional reactions.
 - *source_model* ``core.core.model.Model``: The model whose reactions will be added to the ``model``.
 - *rxn_id_list* ``list``: The list of reactions that may be potentially added, provided that they are in the ``source_model``.
@@ -118,7 +118,7 @@ copy_all_model_reactions()
 .. code-block:: python
 
  MSEditorAPI.copy_model_reactions(model,source_model)
- 
+
 - *model* ``core.core.model.Model``: The model that will be expanded with all new reactions.
 - *source_model* ``core.core.model.Model``: The model whose reactions will be added to the ``model``.
 

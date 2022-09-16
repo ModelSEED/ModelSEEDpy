@@ -17,6 +17,9 @@ repos:
       - id: check-symlinks
       - id: mixed-line-ending
       - id: name-tests-test
+        exclude: tests/test_data
+        args:
+          - --pytest-test-first
       - id: check-json
       - id: pretty-format-json
         args:
@@ -35,4 +38,5 @@ repos:
     rev: v1.3.1
     hooks:
       - id: remove-tabs
+        exclude: '(\.tsv|Makefile)$'
       - id: remove-crlf
