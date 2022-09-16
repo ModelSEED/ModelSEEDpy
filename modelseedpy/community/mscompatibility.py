@@ -95,6 +95,7 @@ class MSCompatibility():
         return new_models
        
     @staticmethod
+    # TODO - verify that this method appropriately aligns the exchange reactions of the two models
     def align_exchanges(models, conflicts_file_name:str=None, model_names:list=None, export_directory:str=None, printing:bool=True, extras=False): 
         unknown_met_ids, changed_metabolites, changed_reactions, unique_names, established_mets = [], [], [], [], []
         unique_mets, met_conflicts = OrderedDict(), OrderedDict()
@@ -289,13 +290,14 @@ class MSCompatibility():
                         if printing:
                             print('\n')
                             print_changes(change)
-                    else:
+                    else:  # !!! This clause does not carry over between edits, which causes errors for reactions with multiple infractions
                         if new_met_id in [old_met.id for old_met in rxn.metabolites]:
                             logger.warning(f"ReactionWarning: The metabolite {new_met_id} replacement for {met.id}"
                             f" already exists in the reaction {rxn.id} | {rxn.reaction}, which inhibits an update.")
                         for rxn_met in rxn.metabolites:
                             stoich = float(rxn.metabolites[rxn_met])
                             new_met = rxn_met.copy()
+                            # create a new metabolite for the replacement reaction
                             if rxn_met.id == met.id:
                                 compartment = re.search('(_\w\d$)', rxn_met.id).group()
                                 new_met.id = new_met_id ; new_met.name = met_name
@@ -311,7 +313,7 @@ class MSCompatibility():
                             new_rxn = Reaction(id=rxn.id, name=rxn.name, subsystem=rxn.subsystem,
                                 lower_bound=rxn.lower_bound, upper_bound=rxn.upper_bound)
                             model.remove_reactions([rxn])
-                            model.add_reaction(rxn)
+                            model.add_reaction(new_rxn)
                             new_rxn.add_metabolites(reaction_dict)  
                             change = {'original': {'reaction': original_reaction},
                                     'new': {'reaction': new_rxn.reaction},

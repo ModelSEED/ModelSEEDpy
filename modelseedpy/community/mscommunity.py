@@ -143,10 +143,10 @@ class MSCommunity:
         
         Parameters
         ----------
-        models : list<Cobra.Model> to be merged into a community model
+        org_models : list<Cobra.Model> to be merged into a community model
         model_id : string specifying community model ID
         name : string specifying community model name
-        names : list<string>  human readable names for models being merged
+        names : list<string>  human-readable names for models being merged
         abundances : dict<string,float> relative abundances for input models in community model
         cobra_model : bool for whether the raw COBRA model is returned
         
@@ -159,9 +159,9 @@ class MSCommunity:
         """
         # construct the new model
         if standardize:
-            models = MSCompatibility.align_exchanges(org_models, 'exchanges_conflicts.json', names)
-        else:
             models = MSCompatibility.standardize(org_models, conflicts_file_name='exchanges_conflicts.json', model_names=names)
+        else:
+            models = MSCompatibility.align_exchanges(org_models, 'exchanges_conflicts.json', names)
         newmodel = Model(model_id,name)
         biomass_compounds, biomass_indices = [], []
         biomass_index = minimal_biomass_index = 2
@@ -170,8 +170,8 @@ class MSCommunity:
             model = org_model.copy()
             model_reaction_ids = [rxn.id for rxn in model.reactions]
             model_index+=1
-            print([rxn.id for rxn in model.reactions if "bio" in rxn.id])
-            print(model_index, model.id)
+            # print([rxn.id for rxn in model.reactions if "bio" in rxn.id])
+            # print(model_index, model.id)
             #Rename metabolites
             for met in model.metabolites:
                 #Renaming compartments

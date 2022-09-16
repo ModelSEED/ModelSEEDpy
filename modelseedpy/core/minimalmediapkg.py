@@ -183,8 +183,8 @@ class MinimalMediaPkg:
             syntrophic_time = process_time()
             if printing:
                 print(
-                    f"Syntrophic fluxes examined after {(syntrophic_time - original_time) / 60} minutes, with {changed_quantity} change(s):",
-                    syntrophy_diff)
+                    f"Syntrophic fluxes examined after {(syntrophic_time - original_time) / 60} minutes, "
+                    f"with {changed_quantity} change(s): {syntrophy_diff}")
 
         # JENGA method of further reduction
         changed = 0
