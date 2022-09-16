@@ -10,7 +10,7 @@ A class that corrects the ATP Hydrolysis reaction of a given model:
 .. code-block:: python
 
  msatp = MSATPCorrection(model, core_template, atp_medias, compartment="c0", max_gapfilling=None, gapfilling_delta=0, atp_hydrolysis_id=None)
- 
+
 - *model* ``cobra.core.model.Model``: The model whose ATP Hydrolysis reaction will be corrected.
 - *core_template* ``modelseedpy.core.mstemplate.MSTemplate``: The model template that is used to correct the model.
 - *atp_medias* ``modelseedpy.core.msmedia.MSMedia``: The media that is associated with the growth phenotype.
@@ -28,7 +28,7 @@ atp_correction()
 .. code-block:: python
 
  msatpobj = msatp.run_atp_correction(model, coretemplate, atp_medias = None, max_gapfilling = None, gapfilling_delta = 0)
- 
+
 - *model* ``cobra.core.model.Model``: The model whose ATP Hydrolysis reaction will be corrected.
 - *coretemplate* ``modelseedpy.core.mstemplate.MSTemplate``: The template that consists of the reactions that be used to assess which reactions in the model are categorized as core.
 - *atp_medias* ``list``: The collection of media whose gapfilling requirements to produce ATP will be examined.

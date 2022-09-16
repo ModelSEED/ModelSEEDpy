@@ -12,9 +12,9 @@ This class assembles media from lists of compounds and HTML representations of t
  from modelseedpy.core import BiologPlate
  bioplate = BiologPlate(plate_id, rows, cols)
 
-- *plate_id* ``str``: The ID of the plate that will be parsed to develop a simulation media. 
+- *plate_id* ``str``: The ID of the plate that will be parsed to develop a simulation media.
 - *rows* & *cols* ``list``: The rows and columns of the experimental system, respectively.
-           
+
 ----------------------
 add_base()
 ----------------------
@@ -27,7 +27,7 @@ A list of compounds are ascribed a value to construct a media:
 
 - *compounds* ``list``: The compounds that will constitute a media.
 - *value* ``float``: The value that will be assigned to each compound.
-           
+
 ----------------------
 get_media()
 ----------------------
@@ -38,10 +38,10 @@ The generate a media from a defined well ID in the set of all wells:
 
  bioplate.get_media(well_id)
 
-- *well_id* ``dict``: The collection of compounds and values that supplant default entries from the ``add_base`` function, where compounds and values are provided as the ``values`` of the "compounds" and value" ``keys``, respectively. 
+- *well_id* ``dict``: The collection of compounds and values that supplant default entries from the ``add_base`` function, where compounds and values are provided as the ``values`` of the "compounds" and value" ``keys``, respectively.
 
 **returns** *media* ``dict``: The media that is created from the parameterized list of compounds and the respective value.
-           
+
 ----------------------
 _repr_html_()
 ----------------------
@@ -73,7 +73,7 @@ This class applies plates to the model medium:
 
  from modelseedpy.fbapkg import Biolog
  biol = Biolog()
-           
+
 ----------------------
 add_plate()
 ----------------------
@@ -85,7 +85,7 @@ The parameterized plate is added to the collection of plates:
  biol.add_plate(plate)
 
 - *plate* ``Plate object``: A plate object of the experimental content.
-           
+
 ----------------------
 run_plates()
 ----------------------

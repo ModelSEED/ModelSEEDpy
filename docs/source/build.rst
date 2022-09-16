@@ -3,4 +3,4 @@ ________________________________________________________________________
 
 Models are constructed through the following sequence.
 
-1) 
+1)

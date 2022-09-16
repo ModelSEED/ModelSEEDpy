@@ -1,1 +1,3895 @@
-{"__VERSION__": 1, "id": "template_genome_scale", "name": "", "domain": "", "biochemistry_ref": "", "type": "Test", "compartments": [], "compcompounds": [{"charge": 0, "id": "glc__D_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/glc__D"}, {"charge": 0, "id": "gln__L_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/gln__L"}, {"charge": 0, "id": "gln__L_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/gln__L"}, {"charge": -1, "id": "glu__L_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/glu__L"}, {"charge": -1, "id": "glu__L_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/glu__L"}, {"charge": -1, "id": "glx_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/glx"}, {"charge": 0, "id": "h2o_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/h2o"}, {"charge": 0, "id": "h2o_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/h2o"}, {"charge": 1, "id": "h_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/h"}, {"charge": 1, "id": "h_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/h"}, {"charge": -3, "id": "icit_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/icit"}, {"charge": -1, "id": "lac__D_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/lac__D"}, {"charge": -1, "id": "lac__D_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/lac__D"}, {"charge": -2, "id": "mal__L_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/mal__L"}, {"charge": -2, "id": "mal__L_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/mal__L"}, {"charge": -1, "id": "nad_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/nad"}, {"charge": -2, "id": "nadh_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/nadh"}, {"charge": -3, "id": "nadp_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/nadp"}, {"charge": -4, "id": "nadph_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/nadph"}, {"charge": 1, "id": "nh4_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/nh4"}, {"charge": 1, "id": "nh4_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/nh4"}, {"charge": -4, "id": "13dpg_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/13dpg"}, {"charge": 0, "id": "o2_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/o2"}, {"charge": 0, "id": "o2_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/o2"}, {"charge": -3, "id": "2pg_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/2pg"}, {"charge": -3, "id": "3pg_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/3pg"}, {"charge": -2, "id": "oaa_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/oaa"}, {"charge": -3, "id": "pep_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/pep"}, {"charge": -3, "id": "6pgc_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/6pgc"}, {"charge": -2, "id": "pi_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/pi"}, {"charge": -2, "id": "pi_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/pi"}, {"charge": -2, "id": "6pgl_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/6pgl"}, {"charge": -1, "id": "ac_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/ac"}, {"charge": -1, "id": "ac_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/ac"}, {"charge": -1, "id": "pyr_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/pyr"}, {"charge": -1, "id": "pyr_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/pyr"}, {"charge": 0, "id": "q8_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/q8"}, {"charge": 0, "id": "q8h2_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/q8h2"}, {"charge": -2, "id": "r5p_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/r5p"}, {"charge": -2, "id": "ru5p__D_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/ru5p__D"}, {"charge": 0, "id": "acald_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/acald"}, {"charge": 0, "id": "acald_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/acald"}, {"charge": -2, "id": "s7p_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/s7p"}, {"charge": -4, "id": "accoa_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/accoa"}, {"charge": -2, "id": "succ_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/succ"}, {"charge": -2, "id": "succ_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/succ"}, {"charge": -5, "id": "succoa_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/succoa"}, {"charge": -3, "id": "acon_C_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/acon_C"}, {"charge": -2, "id": "xu5p__D_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/xu5p__D"}, {"charge": -2, "id": "actp_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/actp"}, {"charge": -3, "id": "adp_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/adp"}, {"charge": -2, "id": "akg_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/akg"}, {"charge": -2, "id": "akg_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/akg"}, {"charge": -2, "id": "amp_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/amp"}, {"charge": -4, "id": "atp_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/atp"}, {"charge": -3, "id": "cit_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/cit"}, {"charge": 0, "id": "co2_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/co2"}, {"charge": 0, "id": "co2_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/co2"}, {"charge": -4, "id": "coa_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/coa"}, {"charge": -2, "id": "dhap_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/dhap"}, {"charge": -2, "id": "e4p_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/e4p"}, {"charge": 0, "id": "etoh_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/etoh"}, {"charge": 0, "id": "etoh_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/etoh"}, {"charge": -2, "id": "f6p_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/f6p"}, {"charge": -4, "id": "fdp_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/fdp"}, {"charge": -1, "id": "for_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/for"}, {"charge": -1, "id": "for_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/for"}, {"charge": 0, "id": "fru_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/fru"}, {"charge": -2, "id": "fum_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/fum"}, {"charge": -2, "id": "fum_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/fum"}, {"charge": -2, "id": "g3p_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/g3p"}, {"charge": -2, "id": "g6p_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/g6p"}, {"charge": 1, "id": "k_e", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/e", "templatecompound_ref": "~/compounds/id/k"}, {"charge": 1, "id": "k_c", "maxuptake": 0, "templatecompartment_ref": "~/compartments/id/c", "templatecompound_ref": "~/compounds/id/k"}], "compounds": [{"id": "glc__D", "name": "D-Glucose", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H12O6", "isCofactor": 0, "mass": 0}, {"id": "gln__L", "name": "L-Glutamine", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C5H10N2O3", "isCofactor": 0, "mass": 0}, {"id": "glu__L", "name": "L-Glutamate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C5H8NO4", "isCofactor": 0, "mass": 0}, {"id": "glx", "name": "Glyoxylate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C2H1O3", "isCofactor": 0, "mass": 0}, {"id": "h2o", "name": "H2O H2O", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "H2O", "isCofactor": 0, "mass": 0}, {"id": "h", "name": "H+", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "H", "isCofactor": 0, "mass": 0}, {"id": "icit", "name": "Isocitrate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H5O7", "isCofactor": 0, "mass": 0}, {"id": "lac__D", "name": "D-Lactate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H5O3", "isCofactor": 0, "mass": 0}, {"id": "mal__L", "name": "L-Malate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C4H4O5", "isCofactor": 0, "mass": 0}, {"id": "nad", "name": "Nicotinamide adenine dinucleotide", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C21H26N7O14P2", "isCofactor": 0, "mass": 0}, {"id": "nadh", "name": "Nicotinamide adenine dinucleotide - reduced", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C21H27N7O14P2", "isCofactor": 0, "mass": 0}, {"id": "nadp", "name": "Nicotinamide adenine dinucleotide phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C21H25N7O17P3", "isCofactor": 0, "mass": 0}, {"id": "nadph", "name": "Nicotinamide adenine dinucleotide phosphate - reduced", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C21H26N7O17P3", "isCofactor": 0, "mass": 0}, {"id": "nh4", "name": "Ammonium", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "H4N", "isCofactor": 0, "mass": 0}, {"id": "13dpg", "name": "3-Phospho-D-glyceroyl phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H4O10P2", "isCofactor": 0, "mass": 0}, {"id": "o2", "name": "O2 O2", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "O2", "isCofactor": 0, "mass": 0}, {"id": "2pg", "name": "D-Glycerate 2-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H4O7P", "isCofactor": 0, "mass": 0}, {"id": "3pg", "name": "3-Phospho-D-glycerate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H4O7P", "isCofactor": 0, "mass": 0}, {"id": "oaa", "name": "Oxaloacetate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C4H2O5", "isCofactor": 0, "mass": 0}, {"id": "pep", "name": "Phosphoenolpyruvate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H2O6P", "isCofactor": 0, "mass": 0}, {"id": "6pgc", "name": "6-Phospho-D-gluconate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H10O10P", "isCofactor": 0, "mass": 0}, {"id": "pi", "name": "Phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "HO4P", "isCofactor": 0, "mass": 0}, {"id": "6pgl", "name": "6-phospho-D-glucono-1,5-lactone", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H9O9P", "isCofactor": 0, "mass": 0}, {"id": "ac", "name": "Acetate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C2H3O2", "isCofactor": 0, "mass": 0}, {"id": "pyr", "name": "Pyruvate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H3O3", "isCofactor": 0, "mass": 0}, {"id": "q8", "name": "Ubiquinone-8", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C49H74O4", "isCofactor": 0, "mass": 0}, {"id": "q8h2", "name": "Ubiquinol-8", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C49H76O4", "isCofactor": 0, "mass": 0}, {"id": "r5p", "name": "Alpha-D-Ribose 5-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C5H9O8P", "isCofactor": 0, "mass": 0}, {"id": "ru5p__D", "name": "D-Ribulose 5-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C5H9O8P", "isCofactor": 0, "mass": 0}, {"id": "acald", "name": "Acetaldehyde", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C2H4O", "isCofactor": 0, "mass": 0}, {"id": "s7p", "name": "Sedoheptulose 7-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C7H13O10P", "isCofactor": 0, "mass": 0}, {"id": "accoa", "name": "Acetyl-CoA", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C23H34N7O17P3S", "isCofactor": 0, "mass": 0}, {"id": "succ", "name": "Succinate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C4H4O4", "isCofactor": 0, "mass": 0}, {"id": "succoa", "name": "Succinyl-CoA", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C25H35N7O19P3S", "isCofactor": 0, "mass": 0}, {"id": "acon_C", "name": "Cis-Aconitate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H3O6", "isCofactor": 0, "mass": 0}, {"id": "xu5p__D", "name": "D-Xylulose 5-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C5H9O8P", "isCofactor": 0, "mass": 0}, {"id": "actp", "name": "Acetyl phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C2H3O5P", "isCofactor": 0, "mass": 0}, {"id": "adp", "name": "ADP C10H12N5O10P2", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C10H12N5O10P2", "isCofactor": 0, "mass": 0}, {"id": "akg", "name": "2-Oxoglutarate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C5H4O5", "isCofactor": 0, "mass": 0}, {"id": "amp", "name": "AMP C10H12N5O7P", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C10H12N5O7P", "isCofactor": 0, "mass": 0}, {"id": "atp", "name": "ATP C10H12N5O13P3", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C10H12N5O13P3", "isCofactor": 0, "mass": 0}, {"id": "cit", "name": "Citrate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H5O7", "isCofactor": 0, "mass": 0}, {"id": "co2", "name": "CO2 CO2", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "CO2", "isCofactor": 0, "mass": 0}, {"id": "coa", "name": "Coenzyme A", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C21H32N7O16P3S", "isCofactor": 0, "mass": 0}, {"id": "dhap", "name": "Dihydroxyacetone phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H5O6P", "isCofactor": 0, "mass": 0}, {"id": "e4p", "name": "D-Erythrose 4-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C4H7O7P", "isCofactor": 0, "mass": 0}, {"id": "etoh", "name": "Ethanol", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C2H6O", "isCofactor": 0, "mass": 0}, {"id": "f6p", "name": "D-Fructose 6-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H11O9P", "isCofactor": 0, "mass": 0}, {"id": "fdp", "name": "D-Fructose 1,6-bisphosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H10O12P2", "isCofactor": 0, "mass": 0}, {"id": "for", "name": "Formate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "CH1O2", "isCofactor": 0, "mass": 0}, {"id": "fru", "name": "D-Fructose", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H12O6", "isCofactor": 0, "mass": 0}, {"id": "fum", "name": "Fumarate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C4H2O4", "isCofactor": 0, "mass": 0}, {"id": "g3p", "name": "Glyceraldehyde 3-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C3H5O6P", "isCofactor": 0, "mass": 0}, {"id": "g6p", "name": "D-Glucose 6-phosphate", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "C6H11O9P", "isCofactor": 0, "mass": 0}, {"id": "k", "name": "Potassium", "abbreviation": "", "aliases": [], "defaultCharge": 0, "deltaG": 10000000, "deltaGErr": 10000000, "formula": "K", "isCofactor": 0, "mass": 0}], "roles": [], "complexes": [], "reactions": [{"id": "PFK_c", "name": "Phosphofructokinase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/f6p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/fdp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PFL_c", "name": "Pyruvate formate lyase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/accoa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/for_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PGI_c", "name": "Glucose-6-phosphate isomerase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/f6p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/g6p_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PGK_c", "name": "Phosphoglycerate kinase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/13dpg_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/3pg_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PGL_c", "name": "6-phosphogluconolactonase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/6pgc_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/6pgl_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ACALD_c", "name": "Acetaldehyde dehydrogenase (acetylating)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/acald_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/accoa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "AKGt2r_c", "name": "2 oxoglutarate reversible transport via symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/akg_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/akg_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PGM_c", "name": "Phosphoglycerate mutase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/2pg_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/3pg_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PIt2r_c", "name": "Phosphate reversible transport via symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ALCD2x_c", "name": "Alcohol dehydrogenase (ethanol)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/acald_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/etoh_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ACALDt_c", "name": "Acetaldehyde reversible transport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/acald_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/acald_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ACKr_c", "name": "Acetate kinase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/ac_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/actp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PPC_c", "name": "Phosphoenolpyruvate carboxylase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/oaa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pep_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ACONTa_c", "name": "Aconitase (half-reaction A, Citrate hydro-lyase)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/acon_C_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/cit_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ACONTb_c", "name": "Aconitase (half-reaction B, Isocitrate hydro-lyase)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/acon_C_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/icit_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PPCK_c", "name": "Phosphoenolpyruvate carboxykinase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/oaa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pep_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ACt2r_c", "name": "Acetate reversible transport via proton symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/ac_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/ac_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PPS_c", "name": "Phosphoenolpyruvate synthase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/amp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pep_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ADK1_c", "name": "Adenylate kinase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/amp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "AKGDH_c", "name": "2-Oxogluterate dehydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/akg_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/succoa_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ATPS4r_c", "name": "ATP synthase (four protons for one ATP)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 3.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -4.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PTAr_c", "name": "Phosphotransacetylase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/accoa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/actp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PYK_c", "name": "Pyruvate kinase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pep_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PYRt2_c", "name": "Pyruvate transport in via proton symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "CO2t_c", "name": "CO2 transporter via diffusion", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "RPE_c", "name": "Ribulose 5-phosphate 3-epimerase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/ru5p__D_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/xu5p__D_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "CS_c", "name": "Citrate synthase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/accoa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/cit_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/oaa_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "RPI_c", "name": "Ribose-5-phosphate isomerase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/r5p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/ru5p__D_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "SUCCt2_2_c", "name": "Succinate transport via proton symport (2 H)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -2.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "CYTBD_c", "name": "Cytochrome oxidase bd (ubiquinol-8: 2 protons)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": -2.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": -0.5, "templatecompcompound_ref": "~/compcompounds/id/o2_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/q8_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "D_LACt2_c", "name": "D lactate transport via proton symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/lac__D_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/lac__D_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ENO_c", "name": "Enolase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/2pg_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pep_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "SUCCt3_c", "name": "Succinate transport out via proton antiport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ETOHt2r_c", "name": "Ethanol reversible transport via proton symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/etoh_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/etoh_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "SUCDi_c", "name": "Succinate dehydrogenase (irreversible)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/fum_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/q8_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "SUCOAS_c", "name": "Succinyl-CoA synthetase (ADP-forming)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/succoa_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "TALA_c", "name": "Transaldolase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/e4p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/f6p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/g3p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/s7p_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "THD2_c", "name": "NAD(P) transhydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -2.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "TKT1_c", "name": "Transketolase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/g3p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/r5p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/s7p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/xu5p__D_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "TKT2_c", "name": "Transketolase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/e4p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/f6p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/g3p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/xu5p__D_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "TPI_c", "name": "Triose-phosphate isomerase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/dhap_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/g3p_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FBA_c", "name": "Fructose-bisphosphate aldolase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/dhap_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/fdp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/g3p_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FBP_c", "name": "Fructose-bisphosphatase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/f6p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/fdp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FORt2_c", "name": "Formate transport in via proton symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/for_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/for_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FORt_c", "name": "Formate transport via diffusion", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 0.0, "lower_bound": -1000.0, "direction": "<", "maxforflux": 0.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/for_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/for_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FRD7_c", "name": "Fumarate reductase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/fum_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/q8_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FRUpts2_c", "name": "Fructose transport via PEP:Pyr PTS (f6p generating)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/f6p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/fru_e"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pep_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FUM_c", "name": "Fumarase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/fum_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "FUMt2_2_c", "name": "Fumarate transport via proton symport (2 H)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/fum_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/fum_e"}, {"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -2.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "G6PDH2r_c", "name": "Glucose 6-phosphate dehydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/6pgl_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/g6p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GAPD_c", "name": "Glyceraldehyde-3-phosphate dehydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/13dpg_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/g3p_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GLCpts_c", "name": "D-glucose transport via PEP:Pyr PTS", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/g6p_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/glc__D_e"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pep_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GLNS_c", "name": "Glutamine synthetase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nh4_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GLNabc_c", "name": "L-glutamine transport via ABC system", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/adp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/atp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/gln__L_e"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pi_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GLUDy_c", "name": "Glutamate dehydrogenase (NADP)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/akg_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nh4_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GLUN_c", "name": "Glutaminase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nh4_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GLUSy_c", "name": "Glutamate synthase (NADPH)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/akg_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"}, {"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GLUt2r_c", "name": "L glutamate transport via proton symport  reversible", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/glu__L_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "GND_c", "name": "Phosphogluconate dehydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/6pgc_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/ru5p__D_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "H2Ot_c", "name": "H2O transport via diffusion", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ICDHyr_c", "name": "Isocitrate dehydrogenase (NADP)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/akg_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/icit_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ICL_c", "name": "Isocitrate lyase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/glx_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/icit_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/succ_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "LDH_D_c", "name": "D-lactate dehydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/lac__D_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "MALS_c", "name": "Malate synthase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/accoa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/glx_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/h2o_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "MALt2_2_c", "name": "Malate transport via proton symport (2 H)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 2.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -2.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/mal__L_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "MDH_c", "name": "Malate dehydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/oaa_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ME1_c", "name": "Malic enzyme (NAD)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "ME2_c", "name": "Malic enzyme (NADP)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "NADH16_c", "name": "NADH dehydrogenase (ubiquinone-8 & 3 protons)", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -4.0, "templatecompcompound_ref": "~/compcompounds/id/h_c"}, {"coefficient": 3.0, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/q8_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "NADTRHD_c", "name": "NAD transhydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadp_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nadph_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "NH4t_c", "name": "Ammonia reversible transport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nh4_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nh4_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "O2t_c", "name": "O2 transport  diffusion ", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": -1000.0, "direction": "=", "maxforflux": 1000.0, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/o2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/o2_e"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "PDH_c", "name": "Pyruvate dehydrogenase", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000.0, "lower_bound": 0.0, "direction": ">", "maxforflux": 1000.0, "maxrevflux": 0.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/accoa_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/co2_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/coa_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/nad_c"}, {"coefficient": 1.0, "templatecompcompound_ref": "~/compcompounds/id/nadh_c"}, {"coefficient": -1.0, "templatecompcompound_ref": "~/compcompounds/id/pyr_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "Kt2r_c", "name": "Potassium reversible transport via proton symport", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000, "lower_bound": -1000, "direction": "=", "maxforflux": 1000, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1, "templatecompcompound_ref": "~/compcompounds/id/h_e"}, {"coefficient": -1, "templatecompcompound_ref": "~/compcompounds/id/k_e"}, {"coefficient": 1, "templatecompcompound_ref": "~/compcompounds/id/k_c"}, {"coefficient": 1, "templatecompcompound_ref": "~/compcompounds/id/h_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}, {"id": "Ktex_c", "name": "Potassium transport via diffusion", "GapfillDirection": "=", "base_cost": 1000, "reverse_penalty": 1000, "forward_penalty": 1000, "upper_bound": 1000, "lower_bound": -1000, "direction": "=", "maxforflux": 1000, "maxrevflux": 1000.0, "reaction_ref": "kbase/default/reactions/id/rxn00000", "templateReactionReagents": [{"coefficient": -1, "templatecompcompound_ref": "~/compcompounds/id/k_e"}, {"coefficient": 1, "templatecompcompound_ref": "~/compcompounds/id/k_c"}], "templatecompartment_ref": "~/compartments/id/c", "templatecomplex_refs": [], "type": "conditional"}], "biomasses": [], "pathways": [], "subsystems": []}
+{
+  "__VERSION__": 1,
+  "biochemistry_ref": "",
+  "biomasses": [],
+  "compartments": [],
+  "compcompounds": [
+    {
+      "charge": 0,
+      "id": "glc__D_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/glc__D"
+    },
+    {
+      "charge": 0,
+      "id": "gln__L_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/gln__L"
+    },
+    {
+      "charge": 0,
+      "id": "gln__L_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/gln__L"
+    },
+    {
+      "charge": -1,
+      "id": "glu__L_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/glu__L"
+    },
+    {
+      "charge": -1,
+      "id": "glu__L_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/glu__L"
+    },
+    {
+      "charge": -1,
+      "id": "glx_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/glx"
+    },
+    {
+      "charge": 0,
+      "id": "h2o_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/h2o"
+    },
+    {
+      "charge": 0,
+      "id": "h2o_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/h2o"
+    },
+    {
+      "charge": 1,
+      "id": "h_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/h"
+    },
+    {
+      "charge": 1,
+      "id": "h_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/h"
+    },
+    {
+      "charge": -3,
+      "id": "icit_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/icit"
+    },
+    {
+      "charge": -1,
+      "id": "lac__D_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/lac__D"
+    },
+    {
+      "charge": -1,
+      "id": "lac__D_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/lac__D"
+    },
+    {
+      "charge": -2,
+      "id": "mal__L_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/mal__L"
+    },
+    {
+      "charge": -2,
+      "id": "mal__L_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/mal__L"
+    },
+    {
+      "charge": -1,
+      "id": "nad_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/nad"
+    },
+    {
+      "charge": -2,
+      "id": "nadh_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/nadh"
+    },
+    {
+      "charge": -3,
+      "id": "nadp_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/nadp"
+    },
+    {
+      "charge": -4,
+      "id": "nadph_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/nadph"
+    },
+    {
+      "charge": 1,
+      "id": "nh4_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/nh4"
+    },
+    {
+      "charge": 1,
+      "id": "nh4_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/nh4"
+    },
+    {
+      "charge": -4,
+      "id": "13dpg_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/13dpg"
+    },
+    {
+      "charge": 0,
+      "id": "o2_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/o2"
+    },
+    {
+      "charge": 0,
+      "id": "o2_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/o2"
+    },
+    {
+      "charge": -3,
+      "id": "2pg_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/2pg"
+    },
+    {
+      "charge": -3,
+      "id": "3pg_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/3pg"
+    },
+    {
+      "charge": -2,
+      "id": "oaa_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/oaa"
+    },
+    {
+      "charge": -3,
+      "id": "pep_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/pep"
+    },
+    {
+      "charge": -3,
+      "id": "6pgc_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/6pgc"
+    },
+    {
+      "charge": -2,
+      "id": "pi_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/pi"
+    },
+    {
+      "charge": -2,
+      "id": "pi_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/pi"
+    },
+    {
+      "charge": -2,
+      "id": "6pgl_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/6pgl"
+    },
+    {
+      "charge": -1,
+      "id": "ac_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/ac"
+    },
+    {
+      "charge": -1,
+      "id": "ac_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/ac"
+    },
+    {
+      "charge": -1,
+      "id": "pyr_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/pyr"
+    },
+    {
+      "charge": -1,
+      "id": "pyr_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/pyr"
+    },
+    {
+      "charge": 0,
+      "id": "q8_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/q8"
+    },
+    {
+      "charge": 0,
+      "id": "q8h2_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/q8h2"
+    },
+    {
+      "charge": -2,
+      "id": "r5p_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/r5p"
+    },
+    {
+      "charge": -2,
+      "id": "ru5p__D_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/ru5p__D"
+    },
+    {
+      "charge": 0,
+      "id": "acald_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/acald"
+    },
+    {
+      "charge": 0,
+      "id": "acald_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/acald"
+    },
+    {
+      "charge": -2,
+      "id": "s7p_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/s7p"
+    },
+    {
+      "charge": -4,
+      "id": "accoa_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/accoa"
+    },
+    {
+      "charge": -2,
+      "id": "succ_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/succ"
+    },
+    {
+      "charge": -2,
+      "id": "succ_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/succ"
+    },
+    {
+      "charge": -5,
+      "id": "succoa_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/succoa"
+    },
+    {
+      "charge": -3,
+      "id": "acon_C_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/acon_C"
+    },
+    {
+      "charge": -2,
+      "id": "xu5p__D_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/xu5p__D"
+    },
+    {
+      "charge": -2,
+      "id": "actp_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/actp"
+    },
+    {
+      "charge": -3,
+      "id": "adp_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/adp"
+    },
+    {
+      "charge": -2,
+      "id": "akg_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/akg"
+    },
+    {
+      "charge": -2,
+      "id": "akg_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/akg"
+    },
+    {
+      "charge": -2,
+      "id": "amp_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/amp"
+    },
+    {
+      "charge": -4,
+      "id": "atp_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/atp"
+    },
+    {
+      "charge": -3,
+      "id": "cit_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/cit"
+    },
+    {
+      "charge": 0,
+      "id": "co2_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/co2"
+    },
+    {
+      "charge": 0,
+      "id": "co2_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/co2"
+    },
+    {
+      "charge": -4,
+      "id": "coa_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/coa"
+    },
+    {
+      "charge": -2,
+      "id": "dhap_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/dhap"
+    },
+    {
+      "charge": -2,
+      "id": "e4p_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/e4p"
+    },
+    {
+      "charge": 0,
+      "id": "etoh_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/etoh"
+    },
+    {
+      "charge": 0,
+      "id": "etoh_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/etoh"
+    },
+    {
+      "charge": -2,
+      "id": "f6p_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/f6p"
+    },
+    {
+      "charge": -4,
+      "id": "fdp_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/fdp"
+    },
+    {
+      "charge": -1,
+      "id": "for_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/for"
+    },
+    {
+      "charge": -1,
+      "id": "for_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/for"
+    },
+    {
+      "charge": 0,
+      "id": "fru_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/fru"
+    },
+    {
+      "charge": -2,
+      "id": "fum_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/fum"
+    },
+    {
+      "charge": -2,
+      "id": "fum_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/fum"
+    },
+    {
+      "charge": -2,
+      "id": "g3p_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/g3p"
+    },
+    {
+      "charge": -2,
+      "id": "g6p_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/g6p"
+    },
+    {
+      "charge": 1,
+      "id": "k_e",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/e",
+      "templatecompound_ref": "~/compounds/id/k"
+    },
+    {
+      "charge": 1,
+      "id": "k_c",
+      "maxuptake": 0,
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecompound_ref": "~/compounds/id/k"
+    }
+  ],
+  "complexes": [],
+  "compounds": [
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H12O6",
+      "id": "glc__D",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Glucose"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C5H10N2O3",
+      "id": "gln__L",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "L-Glutamine"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C5H8NO4",
+      "id": "glu__L",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "L-Glutamate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C2H1O3",
+      "id": "glx",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Glyoxylate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "H2O",
+      "id": "h2o",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "H2O H2O"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "H",
+      "id": "h",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "H+"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H5O7",
+      "id": "icit",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Isocitrate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H5O3",
+      "id": "lac__D",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Lactate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C4H4O5",
+      "id": "mal__L",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "L-Malate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C21H26N7O14P2",
+      "id": "nad",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Nicotinamide adenine dinucleotide"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C21H27N7O14P2",
+      "id": "nadh",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Nicotinamide adenine dinucleotide - reduced"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C21H25N7O17P3",
+      "id": "nadp",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Nicotinamide adenine dinucleotide phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C21H26N7O17P3",
+      "id": "nadph",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Nicotinamide adenine dinucleotide phosphate - reduced"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "H4N",
+      "id": "nh4",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Ammonium"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H4O10P2",
+      "id": "13dpg",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "3-Phospho-D-glyceroyl phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "O2",
+      "id": "o2",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "O2 O2"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H4O7P",
+      "id": "2pg",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Glycerate 2-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H4O7P",
+      "id": "3pg",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "3-Phospho-D-glycerate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C4H2O5",
+      "id": "oaa",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Oxaloacetate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H2O6P",
+      "id": "pep",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Phosphoenolpyruvate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H10O10P",
+      "id": "6pgc",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "6-Phospho-D-gluconate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "HO4P",
+      "id": "pi",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H9O9P",
+      "id": "6pgl",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "6-phospho-D-glucono-1,5-lactone"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C2H3O2",
+      "id": "ac",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Acetate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H3O3",
+      "id": "pyr",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Pyruvate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C49H74O4",
+      "id": "q8",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Ubiquinone-8"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C49H76O4",
+      "id": "q8h2",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Ubiquinol-8"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C5H9O8P",
+      "id": "r5p",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Alpha-D-Ribose 5-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C5H9O8P",
+      "id": "ru5p__D",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Ribulose 5-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C2H4O",
+      "id": "acald",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Acetaldehyde"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C7H13O10P",
+      "id": "s7p",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Sedoheptulose 7-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C23H34N7O17P3S",
+      "id": "accoa",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Acetyl-CoA"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C4H4O4",
+      "id": "succ",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Succinate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C25H35N7O19P3S",
+      "id": "succoa",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Succinyl-CoA"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H3O6",
+      "id": "acon_C",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Cis-Aconitate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C5H9O8P",
+      "id": "xu5p__D",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Xylulose 5-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C2H3O5P",
+      "id": "actp",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Acetyl phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C10H12N5O10P2",
+      "id": "adp",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "ADP C10H12N5O10P2"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C5H4O5",
+      "id": "akg",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "2-Oxoglutarate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C10H12N5O7P",
+      "id": "amp",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "AMP C10H12N5O7P"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C10H12N5O13P3",
+      "id": "atp",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "ATP C10H12N5O13P3"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H5O7",
+      "id": "cit",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Citrate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "CO2",
+      "id": "co2",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "CO2 CO2"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C21H32N7O16P3S",
+      "id": "coa",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Coenzyme A"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H5O6P",
+      "id": "dhap",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Dihydroxyacetone phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C4H7O7P",
+      "id": "e4p",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Erythrose 4-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C2H6O",
+      "id": "etoh",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Ethanol"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H11O9P",
+      "id": "f6p",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Fructose 6-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H10O12P2",
+      "id": "fdp",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Fructose 1,6-bisphosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "CH1O2",
+      "id": "for",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Formate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H12O6",
+      "id": "fru",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Fructose"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C4H2O4",
+      "id": "fum",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Fumarate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C3H5O6P",
+      "id": "g3p",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Glyceraldehyde 3-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "C6H11O9P",
+      "id": "g6p",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "D-Glucose 6-phosphate"
+    },
+    {
+      "abbreviation": "",
+      "aliases": [],
+      "defaultCharge": 0,
+      "deltaG": 10000000,
+      "deltaGErr": 10000000,
+      "formula": "K",
+      "id": "k",
+      "isCofactor": 0,
+      "mass": 0,
+      "name": "Potassium"
+    }
+  ],
+  "domain": "",
+  "id": "template_genome_scale",
+  "name": "",
+  "pathways": [],
+  "reactions": [
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PFK_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Phosphofructokinase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/f6p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fdp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PFL_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Pyruvate formate lyase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/accoa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/for_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "PGI_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Glucose-6-phosphate isomerase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/f6p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g6p_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "PGK_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Phosphoglycerate kinase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/13dpg_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/3pg_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PGL_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "6-phosphogluconolactonase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/6pgc_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/6pgl_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ACALD_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Acetaldehyde dehydrogenase (acetylating)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/acald_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/accoa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "AKGt2r_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "2 oxoglutarate reversible transport via symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/akg_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/akg_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "PGM_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Phosphoglycerate mutase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/2pg_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/3pg_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "PIt2r_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Phosphate reversible transport via symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ALCD2x_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Alcohol dehydrogenase (ethanol)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/acald_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/etoh_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ACALDt_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Acetaldehyde reversible transport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/acald_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/acald_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ACKr_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Acetate kinase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/ac_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/actp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PPC_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Phosphoenolpyruvate carboxylase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/oaa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pep_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ACONTa_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Aconitase (half-reaction A, Citrate hydro-lyase)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/acon_C_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/cit_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ACONTb_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Aconitase (half-reaction B, Isocitrate hydro-lyase)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/acon_C_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/icit_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PPCK_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Phosphoenolpyruvate carboxykinase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/oaa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pep_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ACt2r_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Acetate reversible transport via proton symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/ac_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/ac_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PPS_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Phosphoenolpyruvate synthase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/amp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pep_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ADK1_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Adenylate kinase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/amp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "AKGDH_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "2-Oxogluterate dehydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/akg_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succoa_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ATPS4r_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "ATP synthase (four protons for one ATP)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 3.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -4.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "PTAr_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Phosphotransacetylase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/accoa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/actp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PYK_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Pyruvate kinase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pep_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "PYRt2_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Pyruvate transport in via proton symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "CO2t_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "CO2 transporter via diffusion",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "RPE_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Ribulose 5-phosphate 3-epimerase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/ru5p__D_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/xu5p__D_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "CS_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Citrate synthase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/accoa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/cit_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/oaa_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "RPI_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Ribose-5-phosphate isomerase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/r5p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/ru5p__D_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "SUCCt2_2_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Succinate transport via proton symport (2 H)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "CYTBD_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Cytochrome oxidase bd (ubiquinol-8: 2 protons)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": -2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": -0.5,
+          "templatecompcompound_ref": "~/compcompounds/id/o2_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "D_LACt2_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "D lactate transport via proton symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/lac__D_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/lac__D_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ENO_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Enolase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/2pg_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pep_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "SUCCt3_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Succinate transport out via proton antiport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ETOHt2r_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Ethanol reversible transport via proton symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/etoh_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/etoh_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "SUCDi_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Succinate dehydrogenase (irreversible)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fum_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "SUCOAS_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Succinyl-CoA synthetase (ADP-forming)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succoa_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "TALA_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Transaldolase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/e4p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/f6p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g3p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/s7p_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "THD2_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "NAD(P) transhydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "TKT1_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Transketolase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g3p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/r5p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/s7p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/xu5p__D_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "TKT2_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Transketolase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/e4p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/f6p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g3p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/xu5p__D_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "TPI_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Triose-phosphate isomerase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/dhap_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g3p_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "FBA_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Fructose-bisphosphate aldolase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/dhap_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fdp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g3p_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "FBP_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Fructose-bisphosphatase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/f6p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fdp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "FORt2_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Formate transport in via proton symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/for_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/for_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "<",
+      "forward_penalty": 1000,
+      "id": "FORt_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 0.0,
+      "maxrevflux": 1000.0,
+      "name": "Formate transport via diffusion",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/for_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/for_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 0.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "FRD7_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Fumarate reductase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fum_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "FRUpts2_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Fructose transport via PEP:Pyr PTS (f6p generating)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/f6p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fru_e"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pep_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "FUM_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Fumarase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fum_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "FUMt2_2_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Fumarate transport via proton symport (2 H)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fum_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/fum_e"
+        },
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "G6PDH2r_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Glucose 6-phosphate dehydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/6pgl_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g6p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "GAPD_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Glyceraldehyde-3-phosphate dehydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/13dpg_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g3p_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "GLCpts_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "D-glucose transport via PEP:Pyr PTS",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/g6p_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glc__D_e"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pep_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "GLNS_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Glutamine synthetase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nh4_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "GLNabc_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "L-glutamine transport via ABC system",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/adp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/atp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/gln__L_e"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pi_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "GLUDy_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Glutamate dehydrogenase (NADP)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/akg_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nh4_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "GLUN_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Glutaminase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nh4_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "GLUSy_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Glutamate synthase (NADPH)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/akg_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/gln__L_c"
+        },
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "GLUt2r_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "L glutamate transport via proton symport  reversible",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glu__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glu__L_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "GND_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Phosphogluconate dehydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/6pgc_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/ru5p__D_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "H2Ot_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "H2O transport via diffusion",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "ICDHyr_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Isocitrate dehydrogenase (NADP)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/akg_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/icit_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "ICL_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Isocitrate lyase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glx_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/icit_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/succ_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "LDH_D_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "D-lactate dehydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/lac__D_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "MALS_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Malate synthase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/accoa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/glx_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h2o_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "MALt2_2_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Malate transport via proton symport (2 H)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -2.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/mal__L_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "MDH_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Malate dehydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/oaa_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "ME1_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Malic enzyme (NAD)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "ME2_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Malic enzyme (NADP)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/mal__L_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "NADH16_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "NADH dehydrogenase (ubiquinone-8 & 3 protons)",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -4.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        },
+        {
+          "coefficient": 3.0,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/q8h2_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "NADTRHD_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "NAD transhydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadp_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadph_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "NH4t_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "Ammonia reversible transport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nh4_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nh4_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "O2t_c",
+      "lower_bound": -1000.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 1000.0,
+      "name": "O2 transport  diffusion ",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/o2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/o2_e"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": ">",
+      "forward_penalty": 1000,
+      "id": "PDH_c",
+      "lower_bound": 0.0,
+      "maxforflux": 1000.0,
+      "maxrevflux": 0.0,
+      "name": "Pyruvate dehydrogenase",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/accoa_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/co2_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/coa_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nad_c"
+        },
+        {
+          "coefficient": 1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/nadh_c"
+        },
+        {
+          "coefficient": -1.0,
+          "templatecompcompound_ref": "~/compcompounds/id/pyr_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000.0
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "Kt2r_c",
+      "lower_bound": -1000,
+      "maxforflux": 1000,
+      "maxrevflux": 1000.0,
+      "name": "Potassium reversible transport via proton symport",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1,
+          "templatecompcompound_ref": "~/compcompounds/id/h_e"
+        },
+        {
+          "coefficient": -1,
+          "templatecompcompound_ref": "~/compcompounds/id/k_e"
+        },
+        {
+          "coefficient": 1,
+          "templatecompcompound_ref": "~/compcompounds/id/k_c"
+        },
+        {
+          "coefficient": 1,
+          "templatecompcompound_ref": "~/compcompounds/id/h_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000
+    },
+    {
+      "GapfillDirection": "=",
+      "base_cost": 1000,
+      "direction": "=",
+      "forward_penalty": 1000,
+      "id": "Ktex_c",
+      "lower_bound": -1000,
+      "maxforflux": 1000,
+      "maxrevflux": 1000.0,
+      "name": "Potassium transport via diffusion",
+      "reaction_ref": "kbase/default/reactions/id/rxn00000",
+      "reverse_penalty": 1000,
+      "templateReactionReagents": [
+        {
+          "coefficient": -1,
+          "templatecompcompound_ref": "~/compcompounds/id/k_e"
+        },
+        {
+          "coefficient": 1,
+          "templatecompcompound_ref": "~/compcompounds/id/k_c"
+        }
+      ],
+      "templatecompartment_ref": "~/compartments/id/c",
+      "templatecomplex_refs": [],
+      "type": "conditional",
+      "upper_bound": 1000
+    }
+  ],
+  "roles": [],
+  "subsystems": [],
+  "type": "Test"
+}

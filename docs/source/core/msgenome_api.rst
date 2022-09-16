@@ -61,7 +61,7 @@ from_protein_sequences_hash()
 .. code-block:: python
 
  genome_class = msgen.from_protein_sequences_hash(sequences)
- 
+
 - *sequences* ``dict``: Protein sequences (``values``) for various sequence IDs (``keys``) that will be added to the genome features.
 
 **Returns** *genome* ``modelseedpy.core.msgenome.MSGenome``: The genome whose features have been parsed from a fasta file.
@@ -75,7 +75,7 @@ Returns the gene for each alias in each gene of the features:
 .. code-block:: python
 
  alias_hash = msgen.alias_hash()
- 
+
 **Returns** *alias_hash* ``dict``: The collection of all alias-gene (``key``:``value``) pairs for each gene in the genome features.
 
 -------------------
@@ -87,7 +87,7 @@ Returns the sought gene based upon a query term of features or aliases:
 .. code-block:: python
 
  gene = msgen.search_for_gene(query)
- 
+
 - *query* ``str``: The search term of a feature ID or gene alias.
 
 **Returns** *gene* ``modelseedpy.core.msgenome.MSGenome``: The gene that matches the search term, where ``None`` signifies that no match was discerned.
