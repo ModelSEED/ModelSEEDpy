@@ -3,38 +3,46 @@
 from __future__ import absolute_import
 
 import logging
-from optlang.symbolics import Zero
-from modelseedpy.core.msmodelutl import MSModelUtil
-from modelseedpy.core.exceptions import FeasibilityError  # moved excpetion classes to a designated exceptions file for broader use
+import re  # !!! import is never used
+from optlang.symbolics import Zero, add  # !!! add is never used
+import json as _json # !!! import is never used
+from cobra.core import Gene, Metabolite, Model, Reaction  # !!! none of these imports are used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.exceptions import FeasibilityError
 
+logger = logging.getLogger(__name__)
 
 class BaseFBAPkg:
-    """Base class for FBA packages"""
-    def __init__(self, model, name, variable_types={}, constraint_types={}):
-        self.model = model; self.name = name
+    """
+    Base class for FBA packages
+    """
+    def __init__(self, model, name, variable_types={}, constraint_types={}, reaction_types={}):
+        self.model = model
         self.modelutl = MSModelUtil(model)
+        self.name = name
         
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         if self.pkgmgr is None:
             self.pkgmgr = MSPackageManager.get_pkg_mgr(model,1)
         self.pkgmgr.addpkgobj(self)
         
-        self.constraints, self.variables, self.parameters = dict(), dict(), dict()
-        
+        self.constraints, self.variables, self.parameters, self.new_reactions = {}, {}, {}, {}
         self.variable_types = variable_types
         self.constraint_types = constraint_types
-        for obj_type in self.variable_types:
+        
+        for obj_type in variable_types:
             self.variables[obj_type] = dict()
-        for obj_type in self.constraint_types:
+        for obj_type in constraint_types:
             self.constraints[obj_type] = dict()
     
     def validate_parameters(self, params, required, defaults):
         for item in required:
             if item not in params:
                 raise ValueError(f'Required argument {item} is missing!')
+        # defaults are assigned and then replaced with custom params
         self.parameters.update(defaults)  
-        self.parameters.update(params)    # defaults are assigned and then replaced manual params
+        self.parameters.update(params)
     
     def clear(self):
         cobra_objs = []
@@ -48,7 +56,7 @@ class BaseFBAPkg:
         self.variables = {}
         self.constraints = {}
         
-    def build_variable(self,obj_type,lower_bound,upper_bound,vartype,cobra_obj = None):
+    def build_variable(self, obj_type, lower_bound, upper_bound, vartype, cobra_obj=None):
         name = None
         if self.variable_types[obj_type] == "none":
             count = len(self.variables[obj_type])
@@ -63,6 +71,7 @@ class BaseFBAPkg:
         return self.variables[obj_type][name]
         
     def build_constraint(self, obj_type, lower_bound, upper_bound, coef={}, cobra_obj=None):
+        name = None
         if self.constraint_types[obj_type] == "none":
             count = len(self.constraints[obj_type])
             name = str(count+1)
