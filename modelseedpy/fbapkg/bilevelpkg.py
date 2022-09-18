@@ -2,6 +2,9 @@
 
 from __future__ import absolute_import
 
+import re
+from optlang.symbolics import Zero, add  # !!! Neither import is used
+from cobra.core import Gene, Metabolite, Model, Reaction  # !!! None of these imports are used
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 import re
 
@@ -12,40 +15,36 @@ class BilevelPkg(BaseFBAPkg):
                             {"dualconst":"string","dualub":"string","duallb":"string"},
                             {"dualvar":"string","objective":"string","dualbin":"string"})
     
-    def build_package(self,binary_variable_count = 0):
+    def build_package(self, rxn_filter=None, binary_variable_count=0):  # !!! the filter parameter is never used
         self.validate_parameters({}, [], {
             "binary_variable_count":binary_variable_count
         });
         print("binary_variable_count:",binary_variable_count)
+        varhash, coefficients, obj_coef = {}, {}, {}
         objective = self.model.solver.objective
         
         #Creating new objective coefficient and bound variables
         if self.parameters["binary_variable_count"] > 0:
             for reaction in self.model.reactions: 
                 var = self.build_variable("flxcmp",reaction,None)
-                
         #Retrieving model data with componenent flux variables
-        #Using the JSON calls because get_linear_coefficients is REALLY slow
+        #Using the JSON calls because get_linear_coefficients is REALLY slow  #!!! get_linear_coefficients is still used?
         mdldata = self.model.solver.to_json()
         consthash = {}
         for const in mdldata["constraints"]:
             consthash[const["name"]] = const
         variables = list(self.model.solver.variables)
-        objterms = objective.get_linear_coefficients(variables)  #!!! get_linear_coefficients is still eventually used?
+        objterms = objective.get_linear_coefficients(variables)
         
         #Adding binary variables and constraints which should not be included in dual formulation
         if self.parameters["binary_variable_count"] > 0:
             for reaction in self.model.reactions: 
                 self.build_variable("bflxcmp",reaction,None)
-                self.build_constraint("bflxcmp",reaction,None,None,None)    
-                
-        #Now implementing dual variables and constraints
-        varhash, coefficients, obj_coef = {}, {}, {}
         for var in variables:
             varhash[var.name] = var
         for const in list(self.model.solver.constraints):
             var = self.build_variable("dualconst",const,obj_coef)
-            if all([var != None, const.name in consthash, "expression" in consthash[const.name], "args" in consthash[const.name]["expression"]]):
+            if all([var, const.name in consthash, "expression" in consthash[const.name], "args" in consthash[const.name]["expression"]]):
                 for item in consthash[const.name]["expression"]["args"]:
                     if all(["args" in item, len(item["args"]) >= 2, item["args"][1]["name"] in varhash]):
                         var_name = varhash[item["args"][1]["name"]]
@@ -67,7 +66,7 @@ class BilevelPkg(BaseFBAPkg):
                 self.build_constraint("dualvar",var,objective,objterms,coefficients)
         self.build_constraint("objective",None,objective,objterms,obj_coef)
     
-    def build_variable(self,obj_type,cobra_obj,obj_coef):
+    def build_variable(self, obj_type, cobra_obj, obj_coef):
         if obj_type == "dualconst":
             lb = -1000000
             ub = -lb
@@ -137,7 +136,7 @@ class BilevelPkg(BaseFBAPkg):
                     BaseFBAPkg.build_constraint(self,"bfflxcmpc"+str(i),None,0,{othervar:1,var:-1000},cobra_obj)
             return None
                     
-    def build_constraint(self,obj_type,cobra_obj,objective,objterms,coefficients):
+    def build_constraint(self, obj_type, cobra_obj, objective, objterms, coefficients):
         if obj_type == "dualvar":
             coef = {}
             lb = ub = 0
