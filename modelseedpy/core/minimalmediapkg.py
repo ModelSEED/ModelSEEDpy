@@ -154,7 +154,17 @@ class MinimalMediaPkg:
             models = MSCompatibility.standardize(org_models, conflicts_file_name="standardization_corrections.json", printing=printing)
         media = {"community_media": {}, "members": {}}
         for org_model in models:
+            reactions = [rxn.name for rxn in org_model.variables]
+            duplicate_reactions = DeepDiff(sorted(reactions), sorted(set(reactions)))
+            if duplicate_reactions:
+                logger.critical(f'CodeError: The model {org_model.id} contains {duplicate_reactions}'
+                                f' that compromise the model.')
             model = org_model.copy()
+            reactions = [rxn.name for rxn in model.variables]
+            duplicate_reactions = DeepDiff(sorted(reactions), sorted(set(reactions)))
+            if duplicate_reactions:
+                logger.critical(f'CodeError: The model {model.id} contains {duplicate_reactions}'
+                                f' that compromise the model.')
             print(model.id)
             media["members"][model.id] = {"media": minimal_medium(org_model, min_growth, minimize_components=True).to_dict()}
             model.medium = media["members"][model.id]["media"]

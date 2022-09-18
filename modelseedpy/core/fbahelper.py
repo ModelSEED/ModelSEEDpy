@@ -411,7 +411,14 @@ class FBAHelper:
             else:
                 print(f"ERROR: The {cpd} is not located in the media.")
         return media_dict
-    
+
+    @staticmethod
+    def IDRxnMets(rxn):
+        if not isinstance(rxn, dict):
+            return {met.id: stoich for met, stoich in rxn.metabolites.items()}
+        else:
+            return {met.id: stoich for met, stoich in rxn.items()}
+
     # @staticmethod
     # def non_interacting_community(community):
     #     # !!! divert all exchange reactions to a sink
