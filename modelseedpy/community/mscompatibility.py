@@ -183,7 +183,7 @@ class MSCompatibility:
                     model, met, reactions, results = MSCompatibility._fix_met(model, remove_suffix(reaction, suffix), reactions, False, printing)
                     ex_rxn.id = 'EX_'+results.new_met_id+suffix
             new_models.append(model)
-            MSCompatibility._validate_results(model, unknown_met_ids)
+            MSCompatibility._validate_results(model, org_model, unknown_met_ids)
 
         if conflicts_file_name:
             export_met_conflicts = {}
@@ -198,7 +198,8 @@ class MSCompatibility:
             model_names = model_names or [model.id for model in models]
             MSCompatibility._export(new_models, export_met_conflicts, conflicts_file_name, model_names, export_directory)
 
-        print(f'\n\n{len(changed_reactions)} exchange reactions were substituted and {len(changed_metabolites)} exchange metabolite IDs were redefined by align_exchanges().')
+        print(f'\n\n{len(changed_reactions)} exchange reactions were substituted and '
+              f'{len(changed_metabolites)} exchange metabolite IDs were redefined by align_exchanges().')
         if extras:
             return models, (unique_mets, unknown_met_ids, changed_metabolites, changed_reactions)
         return models
@@ -211,8 +212,9 @@ class MSCompatibility:
             residual_nonstandard_mets = [met.id for ex_rxn in FBAHelper.exchange_reactions(model) for met in ex_rxn.metabolites if "cpd" not in met.id]
             residuals = set(residual_nonstandard_mets)-set(unknown_met_ids)
             if residuals:
-                logger.error(f"ERROR: The {model.id} model has residual non-standard metabolites in its exchange reactions: {residuals}")
-        else:  # TODO develop a check for aligned_exchanges
+                logger.error(f"The {model.id} model has residual non-standard metabolites in its exchange reactions: {residuals}."
+                             " Specify a True `printing` parameter to view why these metabolites were not corrected.")
+        else:  # TODO develop a check for aligned_exchanges between models
             pass
 
         # verify that no duplicate reactions were added to the model

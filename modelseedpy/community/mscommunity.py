@@ -149,6 +149,7 @@ class MSCommunity:
         names : list<string>  human-readable names for models being merged
         abundances : dict<string,float> relative abundances for input models in community model
         cobra_model : bool for whether the raw COBRA model is returned
+        standardize: bool for whether the exchanges of each member model will be standardized (True) or just aligned.
         
         Returns
         -------
@@ -243,6 +244,9 @@ class MSCommunity:
         comm_biorxn = Reaction(id="bio1", name= "bio1", lower_bound=0, upper_bound=100)
         comm_biorxn.add_metabolites(metabolites)
         newmodel.add_reactions([comm_biorxn])
+
+        # define the model objective
+        FBAHelper.add_objective(newmodel, comm_biorxn.flux_expression)
 
         # create a biomass sink reaction
         newutl = MSModelUtil(newmodel)
