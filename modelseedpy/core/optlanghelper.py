@@ -105,19 +105,19 @@ class OptlangHelper:
         return expression      
     
     @staticmethod
-    def dot_product(zipped_to_sum, coefficients_for_heuns=None):
+    def dot_product(zipped_to_sum, heuns_coefs=None):
         # ensure that the lengths are compatible for heun's dot-products
-        if coefficients_for_heuns is not None:
-            coefs = coefficients_for_heuns if isinstance(coefficients_for_heuns, (list, set)) else coefficients_for_heuns.tolist()
+        if heuns_coefs is not None:
+            coefs = heuns_coefs if isinstance(heuns_coefs, (list, set)) else heuns_coefs.tolist()
             zipped_length = len(zipped_to_sum); coefs_length = len(coefs)
             if zipped_length != coefs_length:
                 raise IndexError(f"ERROR: The length of zipped elements {zipped_length} is unequal to that of coefficients {coefs_length}")
                 
         elements = []
         for index, (term1, term2) in enumerate(zipped_to_sum):
-            if coefficients_for_heuns is not None:
-                elements.extend([{"operation": "Mul", "elements": [coefficients_for_heuns[index], term1]},
-                                              {"operation": "Mul", "elements": [coefficients_for_heuns[index], term2]}])
+            if heuns_coefs is not None:
+                elements.extend([{"operation": "Mul", "elements": [heuns_coefs[index], term1]},
+                                              {"operation": "Mul", "elements": [heuns_coefs[index], term2]}])
             else:
                 elements.append({"operation": "Mul", "elements": [term1, term2]})
         return elements

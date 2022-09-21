@@ -1,10 +1,10 @@
 from modelseedpy.core.exceptions import ObjectiveError, FeasibilityError
 from modelseedpy.fbapkg.reactionusepkg import ReactionUsePkg
-from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from itertools import combinations, permutations
+from itertools import combinations, permutations, chain
 from optlang import Variable, Constraint
+from cobra.medium import minimal_medium
 from optlang.symbolics import Zero
 from math import isclose, inf
 from deepdiff import DeepDiff
@@ -38,7 +38,12 @@ class MinimalMediaPkg:
         if "_ru" in var:
             rxnID = rxnID.replace("_ru", "")
         return rxnID
-    
+
+    @staticmethod
+    def _compatibilize(org_models, printing=False):
+        from modelseedpy.community.mscompatibility import MSCompatibility
+        return MSCompatibility.standardize(org_models, conflicts_file_name="standardization_corrections.json", printing=printing)
+
     @staticmethod
     def minimize_flux(org_model, minimal_growth=None, printing=True):
         """minimize the total in-flux of exchange reactions in the model"""
@@ -144,168 +149,174 @@ class MinimalMediaPkg:
             return interdependencies
 
     @staticmethod
-    def jenga_method(org_models, com_model=None, syntrophy=True, min_growth=0.1, conserved_cpds=[], export=True, printing=True,
-                     compatibilize=False):
-        from cobra.medium import minimal_medium
-
-        # determine the unique combination of all species minimal media
-        models = org_models
-        if compatibilize:
-            models = MSCompatibility.standardize(org_models, conflicts_file_name="standardization_corrections.json", printing=printing)
+    def comm_media_est(models, min_growth=0.1):
         media = {"community_media": {}, "members": {}}
         for org_model in models:
-            reactions = [rxn.name for rxn in org_model.variables]
-            duplicate_reactions = DeepDiff(sorted(reactions), sorted(set(reactions)))
-            if duplicate_reactions:
-                logger.critical(f'CodeError: The model {org_model.id} contains {duplicate_reactions}'
-                                f' that compromise the model.')
             model = org_model.copy()
             reactions = [rxn.name for rxn in model.variables]
             duplicate_reactions = DeepDiff(sorted(reactions), sorted(set(reactions)))
             if duplicate_reactions:
                 logger.critical(f'CodeError: The model {model.id} contains {duplicate_reactions}'
                                 f' that compromise the model.')
-            print(model.id)
-            media["members"][model.id] = {"media": minimal_medium(org_model, min_growth, minimize_components=True).to_dict()}
+            # TODO - replace this COBRApy call with the JENGA or (ultimately) the minimal components method
+            media["members"][model.id] = {"media": minimal_medium(model, min_growth, minimize_components=True).to_dict()}
             model.medium = media["members"][model.id]["media"]
             media["members"][model.id]["solution"] = FBAHelper.solution_to_dict(model.optimize())
             media["community_media"] = FBAHelper.sum_dict(model.medium, media["community_media"])
+        return media
 
-        # subtract syntrophic interactions and remove satisfied fluxes
+    @staticmethod
+    def interacting_comm_media(models, media=None, printing=True):
+        media = media or MinimalMediaPkg.comm_media_est(models)
         org_media = media["community_media"].copy()
-        original_time = syntrophic_time = process_time()
-        if printing:
-            print(f"Initial media defined with {len(media['community_media'])} exchanges")
-        changed = 0
+        original_time = process_time()
+        for model in models:
+            for rxnID, flux in media["members"][model.id]["solution"].items():
+                if rxnID in media["community_media"] and flux > 0:  # outflux in solutions
+                    stoich = list(model.reactions.get_by_id(rxnID).metabolites.values())[0]
+                    media["community_media"][rxnID] += flux*stoich  # the cytoplasmic removal is captured by negative reactant stoich
+
+        media["community_media"] = {ID: flux for ID, flux in media["community_media"].items() if flux > 0}  # influx in media
         syntrophic_media = media["community_media"].copy()
-        if syntrophy:
-            for model in models:
-                for rxnID, flux in media["members"][model.id]["solution"].items():
-                    if rxnID in media["community_media"] and flux > 0:
-                        stoich = list(model.reactions.get_by_id(rxnID).metabolites.values())[0]
-                        media["community_media"][rxnID] -= flux * stoich
-                        changed += 1
-            media["community_media"] = {ID: flux for ID, flux in media["community_media"].items() if flux > 0}
+        syntrophy_diff = DeepDiff(org_media, syntrophic_media)
+        changed_quantity = 0 if not syntrophy_diff else len(list(chain(*[v for v in list(dict(syntrophy_diff).values())])))
+        if printing:
+            print(
+                f"Syntrophic fluxes examined after {(process_time() - original_time) / 60} minutes, "
+                f"with {changed_quantity} change(s): {syntrophy_diff}")
+        return media
 
-            syntrophic_media = media["community_media"].copy()
-            syntrophy_diff = DeepDiff(org_media, syntrophic_media)
-            changed_quantity = 0 if not syntrophy_diff else len(list(syntrophy_diff.values())[0].values())
-            syntrophic_time = process_time()
-            if printing:
-                print(
-                    f"Syntrophic fluxes examined after {(syntrophic_time - original_time) / 60} minutes, "
-                    f"with {changed_quantity} change(s): {syntrophy_diff}")
+    @staticmethod
+    def jenga_method(org_model, member_models=[], syntrophy=True, minimal_growth=0.1,
+                     conserved_cpds:list=None, export=True, printing=True, compatibilize=False):
+        # copy and compatibilize the parameter objects
+        copied_model = org_model.copy()
+        models = member_models[:]
+        if compatibilize:
+            copied_model = MinimalMediaPkg._compatibilize(copied_model)
+        original_media = MinimalMediaPkg.minimize_flux(copied_model, printing=False)
+        if models:
+            media = MinimalMediaPkg.comm_media_est(models, minimal_growth)
+            if compatibilize:
+                models = MinimalMediaPkg._compatibilize(member_models, printing)
+            # subtract syntrophic interactions from media requirements
+            if syntrophy:
+                media["community_media"] = MinimalMediaPkg.interacting_comm_media(
+                    models, media, printing)["community_media"]
+            original_media = media["community_media"].copy()
 
-        # JENGA method of further reduction
-        changed = 0
-        if com_model:
-            community_model = com_model
-            ## identify additionally redundant compounds
-            redundant_cpds = set()
-            community_model.medium = media["community_media"]
-            original_obj_value = com_model.optimize().objective_value
-            for cpd in media["community_media"]:
-                new_media = media["community_media"].copy()
+        # identify removal=ble compounds
+        original_time = process_time()
+        copied_model.medium = original_media
+        original_obj_value = org_model.slim_optimize()
+        redundant_cpds = set()
+        for cpd in original_media:
+            new_media = original_media.copy()
+            new_media.pop(cpd)
+            copied_model.medium = new_media
+            sol_obj_val = copied_model.slim_optimize()
+            if isclose(sol_obj_val, original_obj_value, abs_tol=1e-4):
+                redundant_cpds.add(cpd)
+            else:
+                logger.debug(f"The {sol_obj_val} objective value after the removal of {cpd} "
+                             f"does not match the original objective value of {original_obj_value}.")
+        if not redundant_cpds:
+            logger.debug("None of the media components were determined to be removable.")
+            return original_media
+
+        # vet all permutation removals of the redundant compounds
+        permuts = [p for p in permutations(redundant_cpds)]
+        if printing:
+            print(f"The {len(permuts)} permutations of the {redundant_cpds} redundant compounds, "
+                  "from absolute tolerance of 1e-4, will be examined.")
+        permut_results, failed_permut_starts = [], []
+        best = 0
+        for perm_index, permut in enumerate(permuts):
+            print(f"{perm_index}/{len(permuts)}", end="\r")
+            successful_removal = 0
+            permut_segments = [permut[:index] for index in range(len(permut), 2, -1)]
+            ## eliminate previously discovered failures and successes, respectively
+            if any([seg in failed_permut_starts for seg in permut_segments]):
+                continue
+            if best >= len(permut)/2 and any([set(permut[:best-1]) == set(
+                    list(success)[:best-1]) for success in permut_results]):
+                continue
+            new_media = original_media.copy()
+            for cpd in permut:
+                ### parameterize and simulate the community
                 new_media.pop(cpd)
-                community_model.medium = new_media
-                sol = community_model.optimize()
-                if isclose(sol.objective_value, original_obj_value, abs_tol=1e-4):
-                    redundant_cpds.add(cpd)
+                copied_model.medium = new_media
+                sol = copied_model.optimize()
+                if not isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
+                    failed_permut_starts.append(permut[:successful_removal + 1])
+                    break
+                successful_removal += 1
+            if successful_removal >= best:
+                if successful_removal > best:
+                    best = successful_removal
+                    permut_results = []
+                permut_removable = permut[:best]  # slice only the elements that are removable
+                if permut_removable not in permut_results:
+                    permut_results.append(permut_removable)
+                    if printing:
+                        print(permut_removable)
 
-            ## vet the permutations
-            permuts = [p for p in permutations(redundant_cpds)]
-            if printing:
-                print(
-                    f"The {len(permuts)} permutations of the {redundant_cpds} redundant compounds, from absolute tolerance of 1e-4, will be examined.")
-            permutation_results = []
-            best = 0
-            failed_permutation_starts = []
-            for perm_index, permut in enumerate(permuts):
-                print(f"{perm_index}/{len(permuts)}", end="\r")
-                permutation_segments = [permut[:index] for index in range(len(permut), 2, -1)]
-                ### eliminate previously discovered failures and successes, respectively
-                if not any([seg in failed_permutation_starts for seg in permutation_segments]):
-                    if best < 3 or not any([set(permut[:best - 1]) == set(list(success)[:best - 1]) for success in permutation_results]):
-                        successful_removal = 0
-                        new_media = media["community_media"].copy()
-                        for cpd in permut:
-                            ### parameterize and simulate the community
-                            new_media.pop(cpd)
-                            community_model.medium = new_media
-                            sol = community_model.optimize()
-                            if isclose(sol.objective_value, original_obj_value, abs_tol=1e-7):
-                                successful_removal += 1
-                                continue
-                            # print("objective value discrepancy:", sol.objective_value, original_obj_value)
-                            failed_permutation_starts.append(permut[:successful_removal + 1])
-                            break
-                        if successful_removal >= best:
-                            if successful_removal > best:
-                                best = successful_removal
-                                permutation_results = []
-                            permut_removable = permut[:best]  # slice only the elements that are removable
-                            if permut_removable not in permutation_results:
-                                permutation_results.append(permut_removable)
-                                if printing:
-                                    print(permut_removable)
+        # filter to only the most minimal media
+        unique_combinations, unique_paths = [], []
+        for removal_path in permut_results:
+            path_permutations = permutations(removal_path)
+            if all([set(path) in permut_results for path in path_permutations]):
+                for com in combinations(removal_path, len(removal_path)):
+                    if com not in unique_combinations:
+                        unique_combinations.append(com)
+            else:
+                unique_paths.append(removal_path)
+        if unique_combinations and printing:
+            print("Unique combinations:")
+            print(len(unique_combinations), unique_combinations)
+        if unique_paths and printing:
+            print("Unique paths:")
+            print(len(unique_paths), unique_paths)
 
-            ## filter to only the most minimal media
-            new_combinations = []
-            for permut in permutation_results:
-                if permut not in permutation_results:
-                    new_combinations.append(permut)
+        # further remove compounds from the media, while defaulting to the removal with the largest ID values
+        best_removals = {}
+        possible_removals = unique_combinations + unique_paths
+        if conserved_cpds:
+            possible_removals = [opt for opt in possible_removals if not any(cpd in conserved_cpds for cpd in opt)]
+        best = -inf
+        for removal in possible_removals:
+            cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in removal])
+            if cpdID_sum > best:
+                best = cpdID_sum
+                best_removals = {best: [removal]}
+            elif cpdID_sum == best:
+                best_removals[best].append(removal)
+        ## arbitrarily select the first removal from those that both maximize the summed cpdID and avoid conserved compounds
+        comm_media = FBAHelper.remove_media_compounds(
+            original_media, list(best_removals.values())[0][0], printing)
+        if printing:
+            print(best_removals)
+            pprint(comm_media)
+        if models:
+            media["community_media"] = comm_media
 
-            unique_combinations, unique_paths = [], []
-            for removal_path in permutation_results:
-                path_permutations = permutations(removal_path)
-                if all([set(path) in permutation_results for path in path_permutations]):
-                    combination = combinations(removal_path, len(removal_path))
-                    for com in combination:
-                        if com not in unique_combinations:
-                            unique_combinations.append(com)
-                else:
-                    unique_paths.append(removal_path)
-            if unique_combinations and printing:
-                print("Unique combinations:")
-                print(len(unique_combinations), unique_combinations)
-            if unique_paths and printing:
-                print("Unique paths:")
-                print(len(unique_paths), unique_paths)
-
-            # further remove compounds from the media, while defaulting to the removal with the largest ID values
-            possible_removal_tracker = {}
-            possible_options = unique_combinations + unique_paths
-            if conserved_cpds:
-                possible_options = [opt for opt in possible_options if not any(cpd in conserved_cpds for cpd in opt)]
-            best = -inf
-            for possible_removal in possible_options:
-                cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in possible_removal])
-                if cpdID_sum > best:
-                    best = cpdID_sum
-                    possible_removal_tracker = {best: [possible_removal]}
-                elif cpdID_sum == best:
-                    possible_removal_tracker[best].append(possible_removal)
-            media["community_media"] = FBAHelper.remove_media_compounds(
-                media["community_media"], list(possible_removal_tracker.values())[0][0], printing)
-            if printing:
-                print(possible_removal_tracker)
-                pprint(media["community_media"])
-
-        jenga_media = media["community_media"].copy()
-        jenga_time = process_time()
-        jenga_difference = DeepDiff(syntrophic_media, jenga_media)
+        # communicate results
+        jenga_media = comm_media.copy()
+        jenga_difference = DeepDiff(original_media, jenga_media)
         changed_quantity = 0 if not jenga_difference else len(list(jenga_difference.values())[0])
         if printing:
-            print(f"Jenga fluxes examined after {(jenga_time - syntrophic_time) / 60} minutes, with {changed_quantity} change(s):",
+            print(f"Jenga fluxes examined after {(process_time() - original_time) / 60} minutes, with {changed_quantity} change(s):",
                   jenga_difference)
         if export:
-            if not com_model:
+            if member_models:
                 export_name = "_".join([model.id for model in models]) + "_media.json"
             else:
-                export_name = com_model.id + "_media.json"
+                export_name = copied_model.id + "_media.json"
             with open(export_name, 'w') as out:
                 json.dump(media, out, indent=3)
-        return media
+        if models:
+            return media
+        return comm_media
         
 
 class MinimalMedia(BaseFBAPkg):
