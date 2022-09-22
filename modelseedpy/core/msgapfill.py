@@ -113,3 +113,28 @@ class MSGapfill:
         gapfiller = MSGapfill(model,default_gapfill_templates,default_gapfill_models,test_conditions,reaction_scores,blacklist)
         gfresults = gapfiller.run_gapfilling(media,target_reaction)
         return gapfiller.integrate_gapfill_solution(gfresults)
+    
+    @staticmethod
+    def build_default(mdlutl,atp_safe = True,default_gapfill_templates=[], default_gapfill_models=[],
+        additional_tests=[],blacklist=[]):
+        """
+        Setting gapfilling utility object for model
+        :return:
+        """
+        tests = []
+        if atp_safe:
+            if mdlutl.atputl:
+                mdlutl.atputl.evaluate_growth_media()
+                mdlutl.atputl.determine_growth_media()
+                mdlutl.atputl.apply_growth_media_gapfilling()
+                mdlutl.atputl.evaluate_growth_media()
+                mdlutl.atputl.expand_model_to_genome_scale()
+                tests = mdlutl.atputl.build_tests()
+        for test in additional_tests:
+            tests.append(test)
+        
+        if not self.reaction_scores:
+            self.compute_automated_reaction_scores()
+            
+        return MSGapfill(mdlutl,default_gapfill_templates, default_gapfill_models,
+                 tests,mdlutl.reaction_scores, blacklist)

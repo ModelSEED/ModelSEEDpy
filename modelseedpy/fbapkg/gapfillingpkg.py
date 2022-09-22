@@ -285,7 +285,8 @@ class GapfillingPkg(BaseFBAPkg):
         for template_compound in template.compcompounds:
             compartment = template_compound.compartment
             compartment_index = "0" if compartment == 'e' else index
-            cobra_metabolite = self.convert_template_compound(template_compound, compartment_index, template)  # TODO: move function out
+            cobra_metabolite = template_compound.to_metabolite(compartment_index)
+            #cobra_metabolite = self.convert_template_compound(template_compound, compartment_index, template)  # TODO: move function out
             if cobra_metabolite.id not in self.model.metabolites and cobra_metabolite.id not in new_metabolites:
                 new_metabolites[cobra_metabolite.id] = cobra_metabolite
                 #self.model.add_metabolites([cobra_metabolite])
@@ -302,6 +303,8 @@ class GapfillingPkg(BaseFBAPkg):
 
     # Possible new function to add to the KBaseFBAModelToCobraBuilder to extend a model with a template for gapfilling for a specific index
     def extend_model_with_template_for_gapfilling(self, template, index):
+        logger.debug(f'extend model with template: {template}, index: {index}')
+
         new_reactions = {}
         new_penalties = dict()
 

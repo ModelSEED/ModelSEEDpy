@@ -28,6 +28,7 @@ def mock_atp_biomass():
         'type': 'energy'
     }
 
+
 def mock_biomass():
     return {
         'cellwall': 0,

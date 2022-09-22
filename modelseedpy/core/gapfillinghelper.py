@@ -13,11 +13,6 @@ from numpy.f2py.cfuncs import f90modhooks
 
 logger = logging.getLogger(__name__)
 
-
-
-
-
-
 def build_cpd_id(str):
     if str.startswith("M_"):
         str = str[2:]

@@ -2,13 +2,16 @@ from modelseedpy.core.mseditorapi import MSEditorAPI, MSEquation
 from tests.test_data.mock_data import mock_model_ecoli_core
 import pytest
 
+
 @pytest.fixture
 def editor():
     return MSEditorAPI()
-    
+
+
 @pytest.fixture
 def example_model():
     return mock_model_ecoli_core()
+
 
 @pytest.fixture
 def example_model2():
