@@ -403,14 +403,15 @@ class FBAHelper:
     
     @staticmethod
     def remove_media_compounds(media_dict, compounds, printing=True):
+        edited_dic = media_dict.copy()
         for cpd in compounds:
-            if cpd in media_dict:
-                media_dict.pop(cpd)
+            if cpd in edited_dic:
+                edited_dic.pop(cpd)
                 if printing:
                     print(f"{cpd} removed")
             else:
                 print(f"ERROR: The {cpd} is not located in the media.")
-        return media_dict
+        return edited_dic
 
     @staticmethod
     def IDRxnMets(rxn):

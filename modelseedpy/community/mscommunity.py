@@ -1,5 +1,6 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.community.mscompatibility import MSCompatibility
+from modelseedpy.core.exceptions import ObjectAlreadyDefinedError
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
@@ -114,7 +115,6 @@ class MSCommunity:
         self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         msid_cobraid_hash = FBAHelper.msid_hash(self.model)
         if "cpd11416" not in msid_cobraid_hash:
-            logger.critical("Could not find biomass compound")
             raise KeyError("Could not find biomass compound for the model.")
         other_biomass_cpds = []
         for self.biomass_cpd in msid_cobraid_hash["cpd11416"]:
@@ -124,6 +124,9 @@ class MSCommunity:
                     if self.biomass_cpd in reaction.metabolites:
                         print(reaction)
                         if reaction.metabolites[self.biomass_cpd] == 1 and len(reaction.metabolites) > 1:
+                            if self.primary_biomass:
+                                raise ObjectAlreadyDefinedError(f"The primary biomass {self.primary_biomass} is already defined,"
+                                                                f"hence, the {reaction} cannot be defined as the model primary biomass.")
                             print('primary biomass defined', reaction)
                             self.primary_biomass = reaction
                         elif reaction.metabolites[self.biomass_cpd] < 0 and len(reaction.metabolites) == 1:

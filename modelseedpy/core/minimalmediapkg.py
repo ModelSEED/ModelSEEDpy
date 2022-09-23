@@ -20,7 +20,9 @@ class MinimalMediaPkg:
     
     @staticmethod
     def _exchange_solution(sol_dict):
-        return {rxn:flux for rxn, flux in sol_dict.items() if "EX_" in rxn.id and flux < 0}
+        if isinstance(list(sol_dict.keys())[0], str):
+            return {rxn:abs(flux) for rxn, flux in sol_dict.items() if "EX_" in rxn and flux < 0}
+        return {rxn:abs(flux) for rxn, flux in sol_dict.items() if "EX_" in rxn.id and flux < 0}
 
     @staticmethod
     def _influx_objective(model):
@@ -51,12 +53,11 @@ class MinimalMediaPkg:
         minimal_growth = minimal_growth or model.optimize().objective_value
         FBAHelper.add_minimal_objective_cons(model, min_value=minimal_growth)
         FBAHelper.add_objective(model, sum(MinimalMediaPkg._influx_objective(model)), "min")
-        sol = model.optimize()
-        min_flux_media = MinimalMediaPkg._exchange_solution(FBAHelper.solution_to_rxns_dict(sol, model))
-        total_flux = sum([abs(ex.flux) for ex in min_flux_media])
+        min_media = MinimalMediaPkg._exchange_solution(FBAHelper.solution_to_dict(model.optimize()))
+        total_flux = sum([abs(flux) for flux in min_media.values()])
         # verify the medium
         model2 = org_model.copy()
-        model2.medium = {rxn.id: abs(flux) for rxn, flux in min_flux_media.items()}
+        model2.medium = min_media
         simulated_sol = model2.optimize()
         if simulated_sol.status != "optimal":
             raise FeasibilityError(f"The simulation was not optimal, with a status of {simulated_sol.status}")
@@ -64,9 +65,9 @@ class MinimalMediaPkg:
             raise ObjectiveError(f"The assigned minimal_growth of {minimal_growth} was not maintained during the simulation,"
                                  f" where the observed growth value was {simulated_sol.objective_value}.")
         if printing:
-            print(f"The minimal flux media consists of {len(min_flux_media)} compounds and a {total_flux} total influx,"
+            print(f"The minimal flux media consists of {len(min_media)} compounds and a {total_flux} total influx,"
                   f" with a growth value of {simulated_sol.objective_value}")
-        return min_flux_media
+        return min_media
 
     @staticmethod
     def minimize_components(org_model, minimal_growth=None, printing=True):
@@ -149,7 +150,7 @@ class MinimalMediaPkg:
             return interdependencies
 
     @staticmethod
-    def comm_media_est(models, min_growth=0.1):
+    def comm_media_est(models, min_growth=0.1, minimization_method="jenga", printing=False):
         media = {"community_media": {}, "members": {}}
         for org_model in models:
             model = org_model.copy()
@@ -158,40 +159,44 @@ class MinimalMediaPkg:
             if duplicate_reactions:
                 logger.critical(f'CodeError: The model {model.id} contains {duplicate_reactions}'
                                 f' that compromise the model.')
-            # TODO - replace this COBRApy call with the JENGA or (ultimately) the minimal components method
-            media["members"][model.id] = {"media": minimal_medium(model, min_growth, minimize_components=True).to_dict()}
+            if minimization_method == "minFlux":
+                media["members"][model.id] = {"media": MinimalMediaPkg.minimize_flux(model, min_growth, printing)}
+            elif minimization_method == "minComponent":
+                media["members"][model.id] = {"media": minimal_medium(model, min_growth, minimize_components=True).to_dict()}
+            elif minimization_method == "jenga":
+                media["members"][model.id] = {"media": MinimalMediaPkg.jenga_method(model, printing=printing)}
             model.medium = media["members"][model.id]["media"]
             media["members"][model.id]["solution"] = FBAHelper.solution_to_dict(model.optimize())
             media["community_media"] = FBAHelper.sum_dict(model.medium, media["community_media"])
         return media
 
     @staticmethod
-    def interacting_comm_media(models, media=None, printing=True):
-        media = media or MinimalMediaPkg.comm_media_est(models)
+    def interacting_comm_media(models, minimization_method="jenga", media=None, printing=True):
+        # define the community minimal media
+        media = media or MinimalMediaPkg.comm_media_est(models, 0.1, minimization_method, printing=printing)
         org_media = media["community_media"].copy()
         original_time = process_time()
+        # remove exchanges that can be satisfied by cross-feeding
         for model in models:
             for rxnID, flux in media["members"][model.id]["solution"].items():
-                if rxnID in media["community_media"] and flux > 0:  # outflux in solutions
+                if rxnID in media["community_media"] and flux > 0:  ## outflux in solutions
                     stoich = list(model.reactions.get_by_id(rxnID).metabolites.values())[0]
-                    media["community_media"][rxnID] += flux*stoich  # the cytoplasmic removal is captured by negative reactant stoich
-
+                    media["community_media"][rxnID] += flux*stoich  ## the cytoplasmic removal is captured by negative reactant stoich
         media["community_media"] = {ID: flux for ID, flux in media["community_media"].items() if flux > 0}  # influx in media
-        syntrophic_media = media["community_media"].copy()
-        syntrophy_diff = DeepDiff(org_media, syntrophic_media)
-        changed_quantity = 0 if not syntrophy_diff else len(list(chain(*[v for v in list(dict(syntrophy_diff).values())])))
+        syntrophic_diff = DeepDiff(org_media, media["community_media"])
+        changed_quantity = 0 if not syntrophic_diff else len(list(chain(*[v for v in list(dict(syntrophic_diff).values())])))
         if printing:
             print(
                 f"Syntrophic fluxes examined after {(process_time() - original_time) / 60} minutes, "
-                f"with {changed_quantity} change(s): {syntrophy_diff}")
+                f"with {changed_quantity} change(s): {syntrophic_diff}")
         return media
 
     @staticmethod
-    def jenga_method(org_model, member_models=[], syntrophy=True, minimal_growth=0.1,
+    def jenga_method(org_model, member_models=None, syntrophy=True, minimal_growth=0.1,
                      conserved_cpds:list=None, export=True, printing=True, compatibilize=False):
         # copy and compatibilize the parameter objects
         copied_model = org_model.copy()
-        models = member_models[:]
+        models = [] if not member_models else member_models[:]
         if compatibilize:
             copied_model = MinimalMediaPkg._compatibilize(copied_model)
         original_media = MinimalMediaPkg.minimize_flux(copied_model, printing=False)
@@ -202,13 +207,13 @@ class MinimalMediaPkg:
             # subtract syntrophic interactions from media requirements
             if syntrophy:
                 media["community_media"] = MinimalMediaPkg.interacting_comm_media(
-                    models, media, printing)["community_media"]
+                    models, "jenga", media, printing)["community_media"]
             original_media = media["community_media"].copy()
 
         # identify removal=ble compounds
         original_time = process_time()
         copied_model.medium = original_media
-        original_obj_value = org_model.slim_optimize()
+        original_obj_value = org_model.optimize().objective_value
         redundant_cpds = set()
         for cpd in original_media:
             new_media = original_media.copy()
@@ -232,7 +237,7 @@ class MinimalMediaPkg:
         permut_results, failed_permut_starts = [], []
         best = 0
         for perm_index, permut in enumerate(permuts):
-            print(f"{perm_index}/{len(permuts)}", end="\r")
+            print(f"{perm_index+1}/{len(permuts)}", end="\r")
             successful_removal = 0
             permut_segments = [permut[:index] for index in range(len(permut), 2, -1)]
             ## eliminate previously discovered failures and successes, respectively
@@ -251,6 +256,7 @@ class MinimalMediaPkg:
                     failed_permut_starts.append(permut[:successful_removal + 1])
                     break
                 successful_removal += 1
+
             if successful_removal >= best:
                 if successful_removal > best:
                     best = successful_removal
@@ -260,13 +266,15 @@ class MinimalMediaPkg:
                     permut_results.append(permut_removable)
                     if printing:
                         print(permut_removable)
+                        print("best:", best)
 
         # filter to only the most minimal media
         unique_combinations, unique_paths = [], []
         for removal_path in permut_results:
             path_permutations = permutations(removal_path)
-            if all([set(path) in permut_results for path in path_permutations]):
+            if all([path in permut_results for path in path_permutations]):
                 for com in combinations(removal_path, len(removal_path)):
+                    com = set(com)
                     if com not in unique_combinations:
                         unique_combinations.append(com)
             else:
@@ -285,7 +293,7 @@ class MinimalMediaPkg:
             possible_removals = [opt for opt in possible_removals if not any(cpd in conserved_cpds for cpd in opt)]
         best = -inf
         for removal in possible_removals:
-            cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "")) for cpd in removal])
+            cpdID_sum = sum([int(cpd.split('_')[1].replace("cpd", "") if "cpd" in cpd else 500) for cpd in removal])
             if cpdID_sum > best:
                 best = cpdID_sum
                 best_removals = {best: [removal]}
@@ -305,18 +313,17 @@ class MinimalMediaPkg:
         jenga_difference = DeepDiff(original_media, jenga_media)
         changed_quantity = 0 if not jenga_difference else len(list(jenga_difference.values())[0])
         if printing:
-            print(f"Jenga fluxes examined after {(process_time() - original_time) / 60} minutes, with {changed_quantity} change(s):",
-                  jenga_difference)
+            print(f"Jenga fluxes examined after {(process_time()-original_time)/60} minutes, "
+                  f"with {changed_quantity} change(s): {jenga_difference}")
+        final_media = comm_media if "media" not in locals() else media
         if export:
             if member_models:
                 export_name = "_".join([model.id for model in models]) + "_media.json"
             else:
                 export_name = copied_model.id + "_media.json"
             with open(export_name, 'w') as out:
-                json.dump(media, out, indent=3)
-        if models:
-            return media
-        return comm_media
+                json.dump(final_media, out, indent=3)
+        return final_media
         
 
 class MinimalMedia(BaseFBAPkg):
