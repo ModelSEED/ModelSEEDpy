@@ -45,7 +45,7 @@ class MSATPCorrection:
     DEBUG = False
 
     def __init__(self,model,core_template=None,atp_medias=[],compartment="c0",max_gapfilling=None,
-        gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[]):
+        gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[],default_media_path=None):
         """
         :param model:
         :param core_template: 
@@ -57,6 +57,11 @@ class MSATPCorrection:
         :param gapfilling_delta: string : difference between lowest gapfilling and current gapfilling where media will be accepted
         :param atp_hydrolysis_id: string : ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
+        if default_media_path:
+            self.default_media_path = default_media_path
+        else:
+            self.default_media_path = _path+"/../data/atp_medias.tsv"
+        
         if isinstance(model, MSModelUtil):
             self.model = model.model
             self.modelutl = model
@@ -110,7 +115,7 @@ class MSATPCorrection:
         self.coretemplate = MSTemplateBuilder.from_dict(get_template('template_core'), None).build() 
         
     def load_default_medias(self):
-        filename = _path+"/../data/atp_medias.tsv"
+        filename = self.default_media_path
         medias = pd.read_csv(filename, sep='\t', index_col=0).to_dict()
         for media_id in medias:
             media_d = {}
@@ -391,10 +396,10 @@ class MSATPCorrection:
 
     @staticmethod
     def build_default(model,core_template=None,atp_medias=[],compartment="c0",max_gapfilling=None,
-        gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[]):
+        gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[],default_media_path=None):
         """
         Automatically creating ATP correction utility from model data
         :return:
         """
         return MSATPCorrection(model,core_template,atp_medias,compartment,max_gapfilling,
-        gapfilling_delta,atp_hydrolysis_id,load_default_medias,forced_media)
+        gapfilling_delta,atp_hydrolysis_id,load_default_medias,forced_media,default_media_path)
