@@ -576,10 +576,10 @@ class MSModelUtil:
         ------
         """
         print("Expansion started!")
-        tic = time.perf_counter()
         filtered_list = []
         for condition in condition_list:
             currmodel = self.model
+            tic = time.perf_counter()
             with currmodel:
                 self.apply_test_condition(condition)
                 if binary_search:
@@ -590,9 +590,9 @@ class MSModelUtil:
                     new_filtered = self.linear_expansion_test(reaction_list,condition,currmodel)
                     for item in new_filtered:
                         filtered_list.append(item)
-        toc = time.perf_counter()
-        print("Expansion time:",(toc-tic))
-        print("Filtered count:",len(filtered_list)," out of ",len(reaction_list))
+            toc = time.perf_counter()
+            print("Expansion time:",condition["media"].id,(toc-tic))
+            print("Filtered count:",len(filtered_list)," out of ",len(reaction_list))
         return filtered_list
 
     def add_atp_hydrolysis(self,compartment):

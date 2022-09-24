@@ -21,6 +21,25 @@ logger = logging.getLogger(__name__)
 
 _path = _dirname(_abspath(__file__))
 
+min_gap = {
+    'Glc/O2': 5,
+    'Etho/O2': 0.01,
+    'Ac/O2': 1,
+    'Pyr/O2': 3,
+    'Glyc/O2': 2,
+    'Fum/O2': 3,
+    'Succ/O2': 2,
+    'Akg/O2': 2,
+    'LLac/O2': 2,
+    'Dlac/O2': 2,
+    'For/O2': 2,
+    'For/NO3': 1.5,
+    'Pyr/NO': 2.5,
+    'Pyr/NO2': 2.5,
+    'Pyr/NO3': 2.5,
+    'Pyr/SO4': 2.5,
+}
+
 class MSATPCorrection:
 
     DEBUG = False
@@ -104,7 +123,10 @@ class MSATPCorrection:
             media = MSMedia.from_dict(media_d)
             media.id = media_id
             media.name = media_id
-            self.atp_medias.append([media,0.01])
+            min_obj = 0.01
+            if media_id in min_gap:
+                min_obj = min_gap[media_id]
+            self.atp_medias.append([media,min_obj])
     
     @staticmethod
     def find_reaction_in_template(model_reaction, template, compartment):
@@ -219,7 +241,10 @@ class MSATPCorrection:
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
+                with open("Core-"+media.id.replace("/","-")+".lp", 'w') as out:
+                    out.write(str(self.model.solver))
                 if solution.objective_value < minimum_obj or solution.status != 'optimal':
+                    self.msgapfill.lp_filename = "CoreGF-"+media.id.replace("/","-")+".lp"
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media,
                                                                                     self.atp_hydrolysis.id,
                                                                                     minimum_obj)
@@ -234,38 +259,7 @@ class MSATPCorrection:
 
         return output
 
-    def determine_growth_media(self):
-        """
-        Decides which of the test media to use as growth conditions for this model
-        :return:
-        """
-        self.selected_media = []
-        best_score = None
-        for media in self.media_gapfill_stats:
-            gfscore = 0
-            if self.media_gapfill_stats[media]:
-                gfscore = len(self.media_gapfill_stats[media]["new"].keys()) + 0.5*len(self.media_gapfill_stats[media]["reversed"].keys())
-            if best_score is None or gfscore < best_score:
-                best_score = gfscore
-        if self.max_gapfilling is None:
-            self.max_gapfilling = best_score
-
-        logger.debug(f'max_gapfilling: {self.max_gapfilling}, best_score: {best_score}')
-
-        for media in self.media_gapfill_stats:
-            gfscore = 0
-            if self.media_gapfill_stats[media]:
-                gfscore = len(self.media_gapfill_stats[media]["new"].keys()) + 0.5*len(self.media_gapfill_stats[media]["reversed"].keys())
-
-            logger.debug(f'media gapfilling score: {media.id}: {gfscore}')
-            if gfscore <= self.max_gapfilling and gfscore <= (best_score+self.gapfilling_delta):
-                self.selected_media.append(media)
-
-        for media in self.forced_media:
-            if media not in self.selected_media:
-                self.selected_media.append(media)
-
-    def determine_growth_media2(self, max_gapfilling=None):
+    def determine_growth_media(self, max_gapfilling=None):
         """
         Decides which of the test media to use as growth conditions for this model
         :return:
@@ -283,7 +277,7 @@ class MSATPCorrection:
         for media in media_scores:
             score = media_scores[media]
             logger.debug(score, best_score, max_gapfilling)
-            if score <= max_gapfilling and score <= (best_score + self.gapfilling_delta):
+            if score <= max_gapfilling and score <= (max_gapfilling + self.gapfilling_delta):
                 self.selected_media.append(media)
 
     def apply_growth_media_gapfilling(self):

@@ -554,7 +554,7 @@ class MSBuilder:
             cobra_model.objective = 'bio1'
 
         reactions_sinks = []
-        for cpd_id in ['cpd02701_c0', 'cpd11416_c0', 'cpd15302_c0']:
+        for cpd_id in ['cpd02701_c0', 'cpd11416_c0', 'cpd15302_c0', 'cpd03091_c0']:
             if cpd_id in cobra_model.metabolites:
                 m = cobra_model.metabolites.get_by_id(cpd_id)
                 rxn_exchange = Reaction('SK_' + m.id, 'Sink for ' + m.name, 'exchanges', 0, 1000)
@@ -598,7 +598,7 @@ class MSBuilder:
             model.objective = 'bio1'
         
         reactions_sinks = []
-        for cpd_id in ['cpd02701_c0', 'cpd11416_c0', 'cpd15302_c0']:
+        for cpd_id in ['cpd02701_c0', 'cpd11416_c0', 'cpd15302_c0',"cpd03091_c0"]:
             if cpd_id in model.metabolites:
                 m = model.metabolites.get_by_id(cpd_id)
                 rxn_exchange = Reaction('SK_' + m.id, 'Sink for ' + m.name, 'exchanges', 0, 1000)

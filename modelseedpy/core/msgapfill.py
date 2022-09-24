@@ -20,7 +20,7 @@ class MSGapfill:
         else:
             self.model = model
             self.modelutl = MSModelUtil(model)
-        self.auto_sink = ["cpd02701", "cpd11416", "cpd15302"]  # the cpd11416 compound is filtered during model extension with templates
+        self.auto_sink = ["cpd02701", "cpd11416", "cpd15302","cpd03091"]  # the cpd11416 compound is filtered during model extension with templates
         self.gfmodel = self.lp_filename = self.last_solution = None
         self.model_penalty = 1
         self.default_gapfill_models = default_gapfill_models
@@ -133,8 +133,8 @@ class MSGapfill:
         for test in additional_tests:
             tests.append(test)
         
-        if not self.reaction_scores:
-            self.compute_automated_reaction_scores()
+        if not mdlutl.reaction_scores:
+            mdlutl.compute_automated_reaction_scores()
             
         return MSGapfill(mdlutl,default_gapfill_templates, default_gapfill_models,
                  tests,mdlutl.reaction_scores, blacklist)

@@ -1,7 +1,7 @@
 import logging
 import re
 from cobra.core import Model
-from pyeda.inter import expr  # wheels must be specially downloaded and installed for Windows https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyeda
+#from pyeda.inter import expr  # wheels must be specially downloaded and installed for Windows https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyeda
 
 logger = logging.getLogger(__name__)
 
@@ -96,12 +96,12 @@ def get_set_set(expr_str):   # !!! this currently returns dictionaries, not sets
         return {}
     expr_str = expr_str.replace(' or ', ' | ')
     expr_str = expr_str.replace(' and ', ' & ')
-    dnf = expr(expr_str).to_dnf()
-    if len(dnf.inputs) == 1 or dnf.NAME == 'And':
-        return {frozenset({str(x) for x in dnf.inputs})}
-    else:
-        return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
-
+    #dnf = expr(expr_str).to_dnf()
+    #if len(dnf.inputs) == 1 or dnf.NAME == 'And':
+        #return {frozenset({str(x) for x in dnf.inputs})}
+    #else:
+    #    return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
+    return {}
 
 class MSModel(Model):
 
