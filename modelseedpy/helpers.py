@@ -21,7 +21,7 @@ def get_or_download_file(filename, k, value, config):
         os.makedirs(folder_path)
     if not os.path.exists(file_path):
         logger.warning("downloading data file to: %s", file_path)
-        url = "https://bioseed.mcs.anl.gov/~fxliu/modelseedpy/" + filename
+        url = "https://bioseed.mcs.anl.gov/~fliu/modelseedpy/" + filename
         r = requests.get(url, allow_redirects=True)
         with open(file_path, "wb") as fh:
             fh.write(r.content)
