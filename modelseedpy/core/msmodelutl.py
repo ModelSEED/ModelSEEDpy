@@ -323,13 +323,16 @@ class MSModelUtil:
         for gf in self.integrated_gapfillings:
             largest_index += 1
             gfid = "gf."+str(largest_index)
+            media_ref = "KBaseMedia/Empty"
+            if hasattr(gf["media"], 'info'):
+                media_ref = gf["media"].info.workspace_id+"/"+gf["media"].info.id
             gapfilling_obj = {
                 "gapfill_id": self.model.id+"."+gfid,
                 "id": gfid,
                 "integrated": 1,
                 "integrated_solution": "0",
                 "objective":gf["objective"],
-                "media_ref": gf["media"].info.workspace_id+"/"+gf["media"].info.id
+                "media_ref": media_ref
             }
             kbmodel["gapfillings"].append(gapfilling_obj)
             for rxn in gf["solution"]["new"]:
