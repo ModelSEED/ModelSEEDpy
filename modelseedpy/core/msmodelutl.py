@@ -342,16 +342,16 @@ class MSModelUtil:
                         rxnobj["gapfill_data"] = {}
                     if gfid not in rxnobj["gapfill_data"]:
                         rxnobj["gapfill_data"][gfid] = {
-                            "0" : [gapfilled_reactions["new"][rxn],1,[]]
+                            "0" : [gf["solution"]["new"][rxn],1,[]]
                         }
-            for rxn in gapfilled_reactions["reversed"]:
+            for rxn in gf["solution"]["reversed"]:
                 if rxn in rxn_hash:
                     rxnobj = rxn_hash[rxn]
                     if "gapfill_data" not in rxnobj:
                         rxnobj["gapfill_data"] = {}
                     if gfid not in rxnobj["gapfill_data"]:
                         rxnobj["gapfill_data"][gfid] = {
-                            "0" : [gapfilled_reactions["reversed"][rxn],1,[]]
+                            "0" : [gf["solution"]["reversed"][rxn],1,[]]
                         }
     
     def add_gapfilling_solution_to_kbase_model(self,newmodel,gapfilled_reactions,gfid=None,media_ref = None,reaction_genes = None):
