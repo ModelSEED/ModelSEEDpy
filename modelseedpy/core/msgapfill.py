@@ -32,8 +32,12 @@ class MSGapfill:
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
+        self.target = None
+        self.media = None
         
     def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, prefilter=True):
+        self.target = target
+        self.media = media
         if target:
             self.model.objective = self.model.problem.Objective(
                 self.model.reactions.get_by_id(target).flux_expression, direction='max')
@@ -82,6 +86,7 @@ class MSGapfill:
         return self.last_solution
     
     def integrate_gapfill_solution(self, solution):
+        self.modelutl.add_gapfilling(solution,self.target,self.media)
         for rxn_id in solution["reversed"]:
             rxn = self.model.reactions.get_by_id(rxn_id)
             if solution["reversed"][rxn_id] == ">":

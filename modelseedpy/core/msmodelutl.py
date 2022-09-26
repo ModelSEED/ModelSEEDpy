@@ -74,6 +74,7 @@ class MSModelUtil:
         self.test_objective = None
         self.reaction_scores = None
         self.score = None
+        self.integrated_gapfillings = []
     
     def compute_automated_reaction_scores(self):
         """
@@ -307,6 +308,48 @@ class MSModelUtil:
         if add_to_model == 1:
             kbmodel["modelreactions"].append(rxn_data)
         return rxn_data
+    
+    def create_kb_gapfilling_data(self,kbmodel):
+        largest_index = 0
+        if "gapfillings" not in kbmodel:
+            kbmodel["gapfillings"] = []
+        for gapfilling in kbmodel["gapfillings"]:
+            current_index = int(gapfilling["id"].split(".").pop())
+            if largest_index == 0 or largest_index < current_index:
+                largest_index = current_index
+        rxn_hash = {}
+        for rxn in kbmodel["modelreactions"]:
+            rxn_hash[rxn["id"]] = rxn
+        for gf in self.integrated_gapfillings:
+            largest_index += 1
+            gfid = "gf."+str(largest_index)
+            gapfilling_obj = {
+                "gapfill_id": self.model.id+"."+gfid,
+                "id": gfid,
+                "integrated": 1,
+                "integrated_solution": "0",
+                "objective":gf["objective"],
+                "media_ref": gf["media"].info.workspace_id+"/"+gf["media"].info.id
+            }
+            kbmodel["gapfillings"].append(gapfilling_obj)
+            for rxn in gf["solution"]["new"]:
+                if rxn in rxn_hash:
+                    rxnobj = rxn_hash[rxn]
+                    if "gapfill_data" not in rxnobj:
+                        rxnobj["gapfill_data"] = {}
+                    if gfid not in rxnobj["gapfill_data"]:
+                        rxnobj["gapfill_data"][gfid] = {
+                            "0" : [gapfilled_reactions["new"][rxn],1,[]]
+                        }
+            for rxn in gapfilled_reactions["reversed"]:
+                if rxn in rxn_hash:
+                    rxnobj = rxn_hash[rxn]
+                    if "gapfill_data" not in rxnobj:
+                        rxnobj["gapfill_data"] = {}
+                    if gfid not in rxnobj["gapfill_data"]:
+                        rxnobj["gapfill_data"][gfid] = {
+                            "0" : [gapfilled_reactions["reversed"][rxn],1,[]]
+                        }
     
     def add_gapfilling_solution_to_kbase_model(self,newmodel,gapfilled_reactions,gfid=None,media_ref = None,reaction_genes = None):
         """
@@ -594,6 +637,13 @@ class MSModelUtil:
             print("Expansion time:",condition["media"].id,(toc-tic))
             print("Filtered count:",len(filtered_list)," out of ",len(reaction_list))
         return filtered_list
+
+    def add_gapfilling(self,solution,objective,media):
+        self.integrated_gapfillings.append({
+            "solution":solution,
+            "objective":objective,
+            "media":media
+        })
 
     def add_atp_hydrolysis(self,compartment):
         #Searching for ATP hydrolysis compounds
