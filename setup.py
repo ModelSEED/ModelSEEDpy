@@ -19,17 +19,19 @@ setup(
     license=license,
     packages=find_packages(exclude=('docs')),
     package_data={
-        'modelseedpy': ['config.cfg'],
+        'modelseedpy': ['config.cfg', "compound_Xrefs.json", "compoundNames.json"],
     },
     install_requires=[
         "networkx >= 2.4",
         "cobra >= 0.17.1",
-        "scikit-learn == 0.23.2",  # too support KBase pickle models
+        "scikit-learn >= 0.23.2",  # too support KBase pickle models  # !!! The >= designation is necessary for Windows import
         "scipy >= 1.5.4",
         "chemicals >= 1.0.13",
         "chemw >= 0.3.2",
         "matplotlib >= 3.0.0",
-        "pyeda"
+        "pyeda",
+        "icecream",
+        "deepdiff"
     ],
     project_urls={
         'Documentation': 'https://modelseedpy.readthedocs.io/en/stable/',
