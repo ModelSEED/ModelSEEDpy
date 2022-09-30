@@ -12,3 +12,22 @@ class PackageError(Exception):
 class GapfillingError(Exception):
     """Error in model gapfilling"""
     pass
+
+class ObjectError(Exception):
+    """Error in the construction of a base KBase object"""
+    pass 
+
+class ParameterError(Exception):
+    """Error in a parameterization"""
+    pass 
+
+class ObjectAlreadyDefinedError(Exception):
+    pass
+
+class NoFluxError(Exception):
+    """Error for FBA solutions"""
+    pass
+
+class ObjectiveError(Exception):
+    """Erroneous assignment of a secondary objective via a constraint"""
+    pass
