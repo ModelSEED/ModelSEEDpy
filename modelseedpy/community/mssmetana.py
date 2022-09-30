@@ -4,6 +4,7 @@ from modelseedpy.community.mscommunity import MSCommunity
 from itertools import combinations, permutations, chain
 from optlang import Variable, Constraint, Objective
 from modelseedpy.core.fbahelper import FBAHelper
+from modelseedpy.core.exceptions import ObjectiveError
 from cobra.medium import minimal_medium
 from collections import Counter
 from deepdiff import DeepDiff  # (old, new)
@@ -27,6 +28,13 @@ class MSSmetana:
         self.printing = printing ; self.compatibilize = compatibilize
 
         self.models, self.community = MSSmetana._load_models(cobra_models, com_model, compatibilize)
+        for model in self.models:
+            if model.slim_optimize() == 0:
+                raise ObjectiveError(f"The model {model.id} possesses a 0 objective value in complete media, "
+                                     "which is incompatible with minimal media computations and hence SMETANA.")
+        if self.community.slim_optimize() == 0:
+            raise ObjectiveError(f"The community model {self.community.id} possesses a 0 objective value in complete media, "
+                                 "which is incompatible with minimal media computations and hence SMETANA.")
         if not media_dict:
             # if cobra_models:
             #     self.media = MinimalMediaPkg.interacting_comm_media(self.models, printing=self.printing)
