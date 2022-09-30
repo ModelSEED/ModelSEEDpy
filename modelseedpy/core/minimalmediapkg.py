@@ -49,6 +49,9 @@ class MinimalMediaPkg:
     @staticmethod
     def minimize_flux(org_model, minimal_growth=None, printing=True):
         """minimize the total in-flux of exchange reactions in the model"""
+        if org_model.slim_optimize() == 0:
+            raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
+                                 "which is incompatible with minimal media computations.")
         model = org_model.copy()
         minimal_growth = minimal_growth or model.optimize().objective_value
         FBAHelper.add_minimal_objective_cons(model, min_value=minimal_growth)
@@ -72,6 +75,9 @@ class MinimalMediaPkg:
     @staticmethod
     def minimize_components(org_model, minimal_growth=None, printing=True):
         """minimize the quantity of metabolites that are consumed by the model"""
+        if org_model.slim_optimize() == 0:
+            raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
+                                 "which is incompatible with minimal media computations.")
         model = org_model.copy()
         variables = {"ru":{}}
         FBAHelper.add_minimal_objective_cons(
@@ -195,6 +201,9 @@ class MinimalMediaPkg:
     def jenga_method(org_model, member_models=None, syntrophy=True, minimal_growth=0.1,
                      conserved_cpds:list=None, export=True, printing=True, compatibilize=False):
         # copy and compatibilize the parameter objects
+        if org_model.slim_optimize() == 0:
+            raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
+                                 "which is incompatible with minimal media computations.")
         copied_model = org_model.copy()
         models = [] if not member_models else member_models[:]
         if compatibilize:
@@ -215,6 +224,7 @@ class MinimalMediaPkg:
         copied_model.medium = original_media
         original_obj_value = org_model.optimize().objective_value
         redundant_cpds = set()
+        print(original_media)
         for cpd in original_media:
             new_media = original_media.copy()
             new_media.pop(cpd)
@@ -236,6 +246,7 @@ class MinimalMediaPkg:
                   "from absolute tolerance of 1e-4, will be examined.")
         permut_results, failed_permut_starts = [], []
         best = 0
+        print(len(permuts))
         for perm_index, permut in enumerate(permuts):
             print(f"{perm_index+1}/{len(permuts)}", end="\r")
             successful_removal = 0
@@ -326,60 +337,60 @@ class MinimalMediaPkg:
         return final_media
         
 
-class MinimalMedia(BaseFBAPkg):
-    """A class that determines the minimal media of a model"""  # investigate conversion to a staticmethod or single function for convenience and in-line utility
-    def __init__(self, model, min_growth=0.1):
-        # define the system
-        BaseFBAPkg.__init__(self, model, "Minimal Media", {"met":"metabolite"}, {"met":"string", "obj":"string"})
-        
-        # define the exchange variables, the minimal objective, and the minimal growth value
-        for cpd in FBAHelper.exchange_reactions(self.model):
-            BaseFBAPkg.build_variable(self,"met",0,1,"binary",cpd)
-        self.model = FBAHelper.add_objective(self.model, sum([var for var in self.variables["met"].values()]), "min")
-        BaseFBAPkg.build_constraint(self, "obj", min_growth, None, {
-            rxn.forward_variable:1 for rxn in FBAHelper.bio_reactions(self.model)}, "min_growth")
-        
-        # determine the set of media solutions
-        solutions = []
-        sol = self.model.optimize()
-        while sol.status == "optimal":
-            solutions.append(sol)
-            sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
-            ## omit the solution from the next search
-            BaseFBAPkg.build_constraint(self, "met", len(sol_dict)-1, len(sol_dict)-1, 
-                                        coef=sol_dict, cobra_obj=f"sol{len(solutions)}")
-            sol = self.model.optimize()
-        if not solutions:
-            logger.error("No simulations were feasible.")
-                
-        # search the permutation space by omitting previously investigated solutions
-        self.interdependencies = {}
-        for sol_index, sol in enumerate(solutions):
-            self.interdependencies[sol_index] = {}
-            for cpd in sol:
-                self.interdependencies[sol_index][cpd] = {}
-                coef = {self.variables["met"][cpd]:0}
-                coef.update({self.variables["met"][cpd2]:1 for cpd2 in sol if cpd != cpd2})
-                BaseFBAPkg.build_constraint(self, "met", sol.objective_value, 
-                                            sol.objective_value, coef, f"{cpd}-sol{sol_index}")
-                new_sol = self.model.optimize()
-                diff = DeepDiff(FBAHelper.solution_to_dict(sol), FBAHelper.solution_to_dict(new_sol))
-                
-                ## track metabolites that fill the void from the removed compound
-                while diff:
-                    for key, value in diff.items():
-                        new_mets = {re.search("(?<=[\')(.+)(?=\'])", met):change for met, change in value.items()}
-                        # this dictionary should be parsed into a list of substitute metabolites and a list of functionally coupled reactions
-                        self.interdependencies[sol_index][cpd].update(new_mets)
-                    diff = self.test_compounds(cpd, sol, sol_index, new_mets.keys())
-                        
-    def test_compounds(self, cpd, sol, sol_index, zero_compounds):
-        coef = {self.variables["met"][cpd]:0 for cpd in zero_compounds}
-        coef.update({self.variables["met"][cpd]:1 for cpd in sol if cpd not in zero_compounds})
-        cpd_name = "_".join(zero_compounds)
-        BaseFBAPkg.build_constraint(self, "met", sol.objective_value, 
-                                    sol.objective_value, coef, f"{cpd_name}-sol{sol_index}")
-        new_sol = self.model.optimize()
-        if new_sol.status != "optimal":
-            return False
-        return DeepDiff(FBAHelper.solution_to_dict(sol), FBAHelper.solution_to_dict(new_sol))
+# class MinimalMedia(BaseFBAPkg):
+#     """A class that determines the minimal media of a model"""  # investigate conversion to a staticmethod or single function for convenience and in-line utility
+#     def __init__(self, model, min_growth=0.1):
+#         # define the system
+#         BaseFBAPkg.__init__(self, model, "Minimal Media", {"met":"metabolite"}, {"met":"string", "obj":"string"})
+#
+#         # define the exchange variables, the minimal objective, and the minimal growth value
+#         for cpd in FBAHelper.exchange_reactions(self.model):
+#             BaseFBAPkg.build_variable(self,"met",0,1,"binary",cpd)
+#         self.model = FBAHelper.add_objective(self.model, sum([var for var in self.variables["met"].values()]), "min")
+#         BaseFBAPkg.build_constraint(self, "obj", min_growth, None, {
+#             rxn.forward_variable:1 for rxn in FBAHelper.bio_reactions(self.model)}, "min_growth")
+#
+#         # determine the set of media solutions
+#         solutions = []
+#         sol = self.model.optimize()
+#         while sol.status == "optimal":
+#             solutions.append(sol)
+#             sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
+#             ## omit the solution from the next search
+#             BaseFBAPkg.build_constraint(self, "met", len(sol_dict)-1, len(sol_dict)-1,
+#                                         coef=sol_dict, cobra_obj=f"sol{len(solutions)}")
+#             sol = self.model.optimize()
+#         if not solutions:
+#             logger.error("No simulations were feasible.")
+#
+#         # search the permutation space by omitting previously investigated solutions
+#         self.interdependencies = {}
+#         for sol_index, sol in enumerate(solutions):
+#             self.interdependencies[sol_index] = {}
+#             for cpd in sol:
+#                 self.interdependencies[sol_index][cpd] = {}
+#                 coef = {self.variables["met"][cpd]:0}
+#                 coef.update({self.variables["met"][cpd2]:1 for cpd2 in sol if cpd != cpd2})
+#                 BaseFBAPkg.build_constraint(self, "met", sol.objective_value,
+#                                             sol.objective_value, coef, f"{cpd}-sol{sol_index}")
+#                 new_sol = self.model.optimize()
+#                 diff = DeepDiff(FBAHelper.solution_to_dict(sol), FBAHelper.solution_to_dict(new_sol))
+#
+#                 ## track metabolites that fill the void from the removed compound
+#                 while diff:
+#                     for key, value in diff.items():
+#                         new_mets = {re.search("(?<=[\')(.+)(?=\'])", met):change for met, change in value.items()}
+#                         # this dictionary should be parsed into a list of substitute metabolites and a list of functionally coupled reactions
+#                         self.interdependencies[sol_index][cpd].update(new_mets)
+#                     diff = self.test_compounds(cpd, sol, sol_index, new_mets.keys())
+#
+#     def test_compounds(self, cpd, sol, sol_index, zero_compounds):
+#         coef = {self.variables["met"][cpd]:0 for cpd in zero_compounds}
+#         coef.update({self.variables["met"][cpd]:1 for cpd in sol if cpd not in zero_compounds})
+#         cpd_name = "_".join(zero_compounds)
+#         BaseFBAPkg.build_constraint(self, "met", sol.objective_value,
+#                                     sol.objective_value, coef, f"{cpd_name}-sol{sol_index}")
+#         new_sol = self.model.optimize()
+#         if new_sol.status != "optimal":
+#             return False
+#         return DeepDiff(FBAHelper.solution_to_dict(sol), FBAHelper.solution_to_dict(new_sol))

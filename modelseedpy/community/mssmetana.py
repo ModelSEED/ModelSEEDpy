@@ -30,10 +30,10 @@ class MSSmetana:
         self.models, self.community = MSSmetana._load_models(cobra_models, com_model, compatibilize)
         for model in self.models:
             if model.slim_optimize() == 0:
-                raise ObjectiveError(f"The model {model.id} possesses a 0 objective value in complete media, "
+                raise ObjectiveError(f"The model {model.id} possesses an objective value of 0 in complete media, "
                                      "which is incompatible with minimal media computations and hence SMETANA.")
         if self.community.slim_optimize() == 0:
-            raise ObjectiveError(f"The community model {self.community.id} possesses a 0 objective value in complete media, "
+            raise ObjectiveError(f"The community model {self.community.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations and hence SMETANA.")
         if not media_dict:
             # if cobra_models:
@@ -270,12 +270,12 @@ class MSSmetana:
                 if sol.status != 'optimal':
                     scores[model.id] = None
                     break
-                donors = [o for o in other_members if sol.values[f"y_{o.id}"] > abstol]
+                donors = [o for o in other_members if com_model.solver.primal_values[f"y_{o.id}"] > abstol]
                 donors_list.append(donors)
                 previous_con = f'iteration_{i}'
                 previous_constraints.append(previous_con)
-                FBAHelper.add_cons_vars(com_model, list(Constraint(
-                    sum(variables[o.id] for o in donors), name=previous_con, ub=len(previous_constraints)-1)), sloppy=True)
+                FBAHelper.add_cons_vars(com_model, [Constraint(
+                    sum(variables[o.id] for o in donors), name=previous_con, ub=len(previous_constraints)-1)], sloppy=True)
             if i != 0:
                 donors_counter = Counter(chain(*donors_list))
                 scores[model.id] = {o.id: donors_counter[o] / len(donors_list) for o in other_members}
