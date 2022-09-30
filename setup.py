@@ -18,9 +18,7 @@ setup(
     url='https://github.com/ModelSEED/ModelSEEDpy',
     license=license,
     packages=find_packages(exclude=('docs')),
-    package_data={
-        'modelseedpy': ['config.cfg', "compound_Xrefs.json", "compoundNames.json"],
-    },
+    include_package_data =True,
     install_requires=[
         "networkx >= 2.4",
         "cobra >= 0.17.1",
