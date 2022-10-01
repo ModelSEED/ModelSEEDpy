@@ -310,5 +310,5 @@ class MSSmetana:
                     for met in models_mets:
                         if met.id in unique_mets:
                             mp_score = 0 if met.id not in mp[model1.id] else 1
-                            smetana_scores[model1.id][model2.id] += [mu[model1.id].get(met.id,0)*sc_score*mp_score
+                            smetana_scores[model1.id][model2.id] += mu[model1.id].get(met.id,0)*sc_score*mp_score
         return smetana_scores
