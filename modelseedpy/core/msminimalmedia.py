@@ -16,7 +16,7 @@ import json, re
 logger = logging.getLogger(__name__)
 
 
-class MinimalMediaPkg:
+class MSMinimalMedia:
     
     @staticmethod
     def _exchange_solution(sol_dict):
@@ -55,8 +55,8 @@ class MinimalMediaPkg:
         model = org_model.copy()
         minimal_growth = minimal_growth or model.optimize().objective_value
         FBAHelper.add_minimal_objective_cons(model, min_value=minimal_growth)
-        FBAHelper.add_objective(model, sum(MinimalMediaPkg._influx_objective(model)), "min")
-        min_media = MinimalMediaPkg._exchange_solution(FBAHelper.solution_to_dict(model.optimize()))
+        FBAHelper.add_objective(model, sum(MSMinimalMedia._influx_objective(model)), "min")
+        min_media = MSMinimalMedia._exchange_solution(FBAHelper.solution_to_dict(model.optimize()))
         total_flux = sum([abs(flux) for flux in min_media.values()])
         # verify the medium
         model2 = org_model.copy()
@@ -113,15 +113,15 @@ class MinimalMediaPkg:
         for sol_index, sol_dict in enumerate(solution_dicts):
             sol_exchanges = [rxn for rxn in sol_dict if "EX_" in rxn.name]
             print(sol_exchanges)
-            interdependencies[sol_index] = MinimalMediaPkg._examine_permutations(model, sol_exchanges, variables, sol_dict, sol_index)
+            interdependencies[sol_index] = MSMinimalMedia._examine_permutations(model, sol_exchanges, variables, sol_dict, sol_index)
 
     @staticmethod
     def _knockout(org_model, exVar, variables, sol_dict, sol_index):
         # knockout the specified exchange
         knocked_model = org_model.copy()
-        exID = MinimalMediaPkg._varName_to_ID(exVar.name)
+        exID = MSMinimalMedia._varName_to_ID(exVar.name)
         coef = {variables["ru"][exID]: 0}
-        coef.update({variables["ru"][MinimalMediaPkg._varName_to_ID(exVar2.name)]: 1
+        coef.update({variables["ru"][MSMinimalMedia._varName_to_ID(exVar2.name)]: 1
                      for exVar2 in sol_dict if exVar != exVar2 and "EX_" in exVar2.name})
         FBAHelper.create_constraint(knocked_model, Constraint(Zero, lb=0.1, ub=None, name=f"{exVar.name}-sol{sol_index}"), coef)
         return knocked_model.optimize()
@@ -131,20 +131,20 @@ class MinimalMediaPkg:
         for exID in exchange_ids_to_explore:
             sol_dict_sans_ex = sol_dict.copy()
             sol_dict_sans_ex.pop(exID)
-            # interdependencies[sol_index][exID] = MinimalMediaPkg._examine_permutations(
+            # interdependencies[sol_index][exID] = MSMinimalMedia._examine_permutations(
             #     exID, sol_dict, sol_index, variables, sol_dict_sans_ex)
             interdependencies = {}
             
             ## explore permutations after removing the selected variable
             diff = DeepDiff(sol_dict_sans_ex, FBAHelper.solution_to_dict(
-                MinimalMediaPkg._knockout(model, exID, variables, sol_dict, sol_index)))
+                MSMinimalMedia._knockout(model, exID, variables, sol_dict, sol_index)))
             if diff:  # the addition of new exchanges or altered exchange fluxes are detected after the removed exchange
                 for key, value in diff.items():
                     print(key, value)
                     # new_mets = {re.search("(?<=[\')(.+)(?=\'])", met): change for met, change in value.items()}
                     # this dictionary should be parsed into a list of substitute metabolites and a list of functionally coupled reactions
                     interdependencies[sol_index][exID].update(new_mets)
-                    MinimalMediaPkg._examine_permutations(model, exchange_ids_to_explore, variables, sol_dict, sol_index)
+                    MSMinimalMedia._examine_permutations(model, exchange_ids_to_explore, variables, sol_dict, sol_index)
                 # coef = {variables["met"][exID]: 0 for cpd in new_mets.keys()}
                 # coef.update({variables["met"][exID]: 1 for exID in sol_dict if exID not in new_mets.keys()})
                 cpd_name = "_".join(new_mets.keys())
@@ -152,7 +152,7 @@ class MinimalMediaPkg:
                 new_sol = self.model.optimize()
                 if new_sol.status != "optimal":
                     return interdependencies
-                MinimalMediaPkg._examine_permutations(exID, new_sol, sol_index, sol_dict_sans_ex)
+                MSMinimalMedia._examine_permutations(exID, new_sol, sol_index, sol_dict_sans_ex)
             return interdependencies
 
     @staticmethod
@@ -166,11 +166,11 @@ class MinimalMediaPkg:
                 logger.critical(f'CodeError: The model {model.id} contains {duplicate_reactions}'
                                 f' that compromise the model.')
             if minimization_method == "minFlux":
-                media["members"][model.id] = {"media": MinimalMediaPkg.minimize_flux(model, min_growth, printing)}
+                media["members"][model.id] = {"media": MSMinimalMedia.minimize_flux(model, min_growth, printing)}
             elif minimization_method == "minComponents":
                 media["members"][model.id] = {"media": minimal_medium(model, min_growth, minimize_components=True).to_dict()}
             elif minimization_method == "jenga":
-                media["members"][model.id] = {"media": MinimalMediaPkg.jenga_method(model, printing=printing)}
+                media["members"][model.id] = {"media": MSMinimalMedia.jenga_method(model, printing=printing)}
                 media["community_media"] = FBAHelper.sum_dict(media["members"][model.id]["media"], media["community_media"])
             model.medium = media["members"][model.id]["media"]
             media["members"][model.id]["solution"] = FBAHelper.solution_to_dict(model.optimize())
@@ -179,7 +179,7 @@ class MinimalMediaPkg:
                 print("Community models are too excessive for direct assessment via the JENGA method; "
                       "thus, the community minimal media is estimated as the combination of member media.")
             elif minimization_method == "minFlux":
-                media["community_media"] = MinimalMediaPkg.minimize_flux(comm_model, min_growth, printing)
+                media["community_media"] = MSMinimalMedia.minimize_flux(comm_model, min_growth, printing)
             elif minimization_method == "minComponents":
                 media["community_media"] = minimal_medium(comm_model, min_growth, minimize_components=True).to_dict()
         return media
@@ -187,7 +187,7 @@ class MinimalMediaPkg:
     @staticmethod
     def interacting_comm_media(models, comm_model, minimization_method="jenga", min_growth=0.1, media=None, printing=True):
         # define the community minimal media
-        media = media or MinimalMediaPkg.comm_media_est(models, comm_model, min_growth, minimization_method, printing=printing)
+        media = media or MSMinimalMedia.comm_media_est(models, comm_model, min_growth, minimization_method, printing=printing)
         org_media = media["community_media"].copy()
         original_time = process_time()
         # remove exchanges that can be satisfied by cross-feeding
@@ -213,10 +213,10 @@ class MinimalMediaPkg:
                                  "which is incompatible with minimal media computations.")
         copied_model = org_model.copy()
         if compatibilize:
-            copied_model = MinimalMediaPkg._compatibilize(copied_model)
+            copied_model = MSMinimalMedia._compatibilize(copied_model)
         original_media = org_media or minimal_medium(copied_model, minimize_components=True).to_dict()
         # {cpd.replace("EX_", ""): flux for cpd, flux in .items()}
-        # TODO - the COBRA method must eventually be replaced with MinimalMediaPkg.minimize_components(copied_model, printing=False)
+        # TODO - the COBRA method must eventually be replaced with MSMinimalMedia.minimize_components(copied_model, printing=False)
 
         # identify removal=ble compounds
         original_time = process_time()
