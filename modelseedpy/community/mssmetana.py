@@ -1,5 +1,5 @@
 from modelseedpy.community.mscompatibility import MSCompatibility
-from modelseedpy.core.minimalmediapkg import MinimalMediaPkg
+from modelseedpy.core.msminimalmedia import MSMinimalMedia
 from modelseedpy.community.mscommunity import MSCommunity
 from itertools import combinations, permutations, chain
 from optlang import Variable, Constraint, Objective
@@ -37,17 +37,17 @@ class MSSmetana:
                                  "which is incompatible with minimal media computations and hence SMETANA.")
         if not media_dict:
             # if member_models:
-            #     self.media = MinimalMediaPkg.interacting_comm_media(self.models, printing=self.printing)
+            #     self.media = MSMinimalMedia.interacting_comm_media(self.models, printing=self.printing)
             # else:
             if minimal_media_method == "minFlux":
-                self.media = {"community_media": MinimalMediaPkg.minimize_flux(self.community, min_growth),
-                              "members": {model.id: {"media":MinimalMediaPkg.minimize_flux(model, min_growth)}}}
+                self.media = {"community_media": MSMinimalMedia.minimize_flux(self.community, min_growth),
+                              "members": {model.id: {"media":MSMinimalMedia.minimize_flux(model, min_growth)}}}
             elif minimal_media_method == "minComponents":
-                self.media = {"community_media": MinimalMediaPkg.minimize_components(self.community, min_growth),
+                self.media = {"community_media": MSMinimalMedia.minimize_components(self.community, min_growth),
                               "members": {}}
             elif minimal_media_method == "jenga":
                 # subtract syntrophic interactions from media requirements
-                self.media = MinimalMediaPkg.interacting_comm_media(self.models, com_model, "jenga", min_growth, None, printing)
+                self.media = MSMinimalMedia.interacting_comm_media(self.models, com_model, "jenga", min_growth, None, printing)
         else:
             self.media = media_dict
 
@@ -126,16 +126,16 @@ class MSSmetana:
             return media["community_media"]
         if not media:  # model_s_ is either a singular model or a list of models
             if com_model or model_s_ and not isinstance(model_s_, (list,set,tuple)):
-                return MinimalMediaPkg.jenga_method(com_model or model_s_, printing=printing)
+                return MSMinimalMedia.jenga_method(com_model or model_s_, printing=printing)
             elif isinstance(model_s_, (list,set,tuple)):
                 if syntrophy:
-                    return MinimalMediaPkg.interacting_comm_media(
+                    return MSMinimalMedia.interacting_comm_media(
                         model_s_, com_model, minimization_method, min_growth, None, printing)
-                return MinimalMediaPkg.comm_media_est(model_s_, com_model, 0.1, minimization_method, printing)
+                return MSMinimalMedia.comm_media_est(model_s_, com_model, 0.1, minimization_method, printing)
             raise TypeError("Either the com_model or model_s_ arguments must be parameterized.")
         # and's here to quit after a false, unlike all()
         if model_s_ and not isinstance(model_s_, (list,set,tuple)) and model_s_.id not in media["members"]:
-            media["members"][model_s_.id] = {"media": MinimalMediaPkg.jenga_method(model_s_, printing=printing)}
+            media["members"][model_s_.id] = {"media": MSMinimalMedia.jenga_method(model_s_, printing=printing)}
             return media["members"][model_s_.id]["media"]
 
     @staticmethod
@@ -202,7 +202,7 @@ class MSSmetana:
             model = org_model.copy()
             scores[model.id] = []
             # determines possible member contributions in the community environment, where the excretion of media compounds is irrelevant
-            approximate_minimal_media = MinimalMediaPkg.comm_media_est(member_models, com_model)
+            approximate_minimal_media = MSMinimalMedia.comm_media_est(member_models, com_model)
             possible_contributions = [ex_rxn for ex_rxn in FBAHelper.exchange_reactions(model) if ex_rxn.id not in approximate_minimal_media]
             while len(possible_contributions) > 0:
                 print("remaining possible_contributions", len(possible_contributions), end="\r")
