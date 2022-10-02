@@ -1,5 +1,5 @@
 from modelseedpy.community.mscompatibility import MSCompatibility
-from modelseedpy.core.minimalmediapkg import MinimalMediaPkg
+from modelseedpy.core.msminimalmedia import MSMinimalMedia
 from modelseedpy.community.mscommunity import MSCommunity
 from itertools import combinations, permutations, chain
 from optlang import Variable, Constraint, Objective
@@ -12,21 +12,22 @@ from typing import Iterable
 from pprint import pprint
 from numpy import array
 from numpy import mean
+from math import prod
 
 
-def _compatibilize_models(cobra_models: Iterable, printing=False):
-    return cobra_models
-    # return MSCompatibility.standardize(cobra_models, conflicts_file_name='exchanges_conflicts.json', printing=printing)
+def _compatibilize_models(member_models: Iterable, printing=False):
+    return member_models
+    # return MSCompatibility.standardize(member_models, conflicts_file_name='exchanges_conflicts.json', printing=printing)
 
 
 class MSSmetana:
-    def __init__(self, cobra_models: Iterable, com_model, min_growth=0.1, n_solutions=100,
+    def __init__(self, member_models: Iterable, com_model, min_growth=0.1, n_solutions=100,
                  abstol=1e-3, media_dict=None, printing=True, compatibilize=True, minimal_media_method="jenga"):
 
         self.min_growth = min_growth ; self.abstol = abstol ; self.n_solutions = n_solutions
         self.printing = printing ; self.compatibilize = compatibilize
 
-        self.models, self.community = MSSmetana._load_models(cobra_models, com_model, compatibilize)
+        self.models, self.community = MSSmetana._load_models(member_models, com_model, compatibilize)
         for model in self.models:
             if model.slim_optimize() == 0:
                 raise ObjectiveError(f"The model {model.id} possesses an objective value of 0 in complete media, "
@@ -35,18 +36,20 @@ class MSSmetana:
             raise ObjectiveError(f"The community model {self.community.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations and hence SMETANA.")
         if not media_dict:
-            # if cobra_models:
-            #     self.media = MinimalMediaPkg.interacting_comm_media(self.models, printing=self.printing)
+            # if member_models:
+            #     self.media = MSMinimalMedia.interacting_comm_media(self.models, printing=self.printing)
             # else:
             if minimal_media_method == "minFlux":
-                self.media = MinimalMediaPkg.minimize_flux(self.community, min_growth)
-            elif minimal_media_method == "minComponent":
-                self.media = MinimalMediaPkg.minimize_components(self.community, min_growth)
+                self.media = {"community_media": MSMinimalMedia.minimize_flux(self.community, min_growth),
+                              "members": {model.id: {"media":MSMinimalMedia.minimize_flux(model, min_growth)}}}
+            elif minimal_media_method == "minComponents":
+                self.media = {"community_media": MSMinimalMedia.minimize_components(self.community, min_growth),
+                              "members": {}}
             elif minimal_media_method == "jenga":
-                self.media = MinimalMediaPkg.jenga_method(self.community, self.models)
+                # subtract syntrophic interactions from media requirements
+                self.media = MSMinimalMedia.interacting_comm_media(self.models, com_model, "jenga", min_growth, None, printing)
         else:
             self.media = media_dict
-        self.media = {"community_media": self.media, "members": {}}
 
     def mro_score(self):
         self.mro = MSSmetana.mro(self.models, self.min_growth, self.media, self.compatibilize, self.printing)
@@ -106,50 +109,53 @@ class MSSmetana:
     ###### STATIC METHODS OF THE SMETANA SCORES, WHICH ARE APPLIED IN THE ABOVE CLASS OBJECT ######
 
     @staticmethod
-    def _load_models(cobra_models: Iterable, com_model=None, compatibilize=True):
-        if not com_model and cobra_models:
-            return cobra_models, MSCommunity.build_from_species_models(cobra_models, name="SMETANA_example", cobra_model=True)
+    def _load_models(member_models: Iterable, com_model=None, compatibilize=True):
+        if not com_model and member_models:
+            return member_models, MSCommunity.build_from_species_models(member_models, name="SMETANA_example", cobra_model=True)
         # models = PARSING_FUNCTION(community_model) # TODO the individual models of a community model must be parsed
         if compatibilize:
-            return _compatibilize_models(cobra_models), _compatibilize_models([com_model])[0]
-        return cobra_models, com_model
+            return _compatibilize_models(member_models), _compatibilize_models([com_model])[0]
+        return member_models, com_model
 
     @staticmethod
     def _get_media(media=None, com_model=None, model_s_=None, min_growth=None,
                    syntrophy=True, printing=False, minimization_method="jenga"):
+        if media:
+            if model_s_ and not isinstance(model_s_, (list, set, tuple)):
+                return media["members"][model_s_.id]["media"]
+            return media["community_media"]
         if not media:  # model_s_ is either a singular model or a list of models
-            if com_model or not isinstance(model_s_, (list,set,tuple)):
-                return MinimalMediaPkg.jenga_method(
-                    com_model or model_s_, minimal_growth=min_growth, syntrophy=syntrophy, printing=printing)
+            if com_model or model_s_ and not isinstance(model_s_, (list,set,tuple)):
+                return MSMinimalMedia.jenga_method(com_model or model_s_, printing=printing)
             elif isinstance(model_s_, (list,set,tuple)):
                 if syntrophy:
-                    return MinimalMediaPkg.interacting_comm_media(
-                        model_s_, minimization_method, None, printing)
-                return MinimalMediaPkg.comm_media_est(model_s_, 0.1, minimization_method, printing)
+                    return MSMinimalMedia.interacting_comm_media(
+                        model_s_, com_model, minimization_method, min_growth, None, printing)
+                return MSMinimalMedia.comm_media_est(model_s_, com_model, 0.1, minimization_method, printing)
             raise TypeError("Either the com_model or model_s_ arguments must be parameterized.")
         # and's here to quit after a false, unlike all()
         if model_s_ and not isinstance(model_s_, (list,set,tuple)) and model_s_.id not in media["members"]:
-            media["members"][model_s_.id] = {"media": MinimalMediaPkg.jenga_method(
-                    model_s_, minimal_growth=min_growth, syntrophy=syntrophy, printing=printing)}
+            media["members"][model_s_.id] = {"media": MSMinimalMedia.jenga_method(model_s_, printing=printing)}
             return media["members"][model_s_.id]["media"]
-        return media["community_media"]
 
     @staticmethod
-    def mro(cobra_models:Iterable, min_growth=0.1, media_dict=None, compatibilize=True, printing=False):
+    def mro(member_models:Iterable, min_growth=0.1, media_dict=None, compatibilize=True, printing=False):
         """Determine the maximal overlap of minimal media between member organisms."""
-        cobra_models = _compatibilize_models(cobra_models) if compatibilize else cobra_models
-        ind_media = {model.id: set(MSSmetana._get_media(media_dict, None, model, min_growth, printing)) for model in cobra_models}
-        pairs = {(model1, model2): ind_media[model1.id] & ind_media[model2.id] for model1, model2 in combinations(cobra_models, 2)}
+        member_models = _compatibilize_models(member_models) if compatibilize else member_models
+        mem_media = {model.id: set(MSSmetana._get_media(media_dict, None, model, min_growth, printing=printing))
+                     for model in member_models}
+        pairs = {(model1, model2): mem_media[model1.id] & mem_media[model2.id] for model1, model2 in combinations(member_models, 2)}
+        pprint(pairs)
         # ratio of the average size of intersecting minimal media between any two members and the minimal media of all members
-        return mean(list(map(len, pairs.values()))) / mean(list(map(len, ind_media.values())))
+        return mean(list(map(len, pairs.values()))) / mean(list(map(len, mem_media.values())))
 
     @staticmethod
-    def mip(cobra_models:Iterable, min_growth=0.1, interacting_media_dict=None,
+    def mip(member_models:Iterable, min_growth=0.1, interacting_media_dict=None,
             noninteracting_media_dict=None, compatibilize=True):
         """Determine the maximum quantity of nutrients that can be sourced through syntrophy"""
-        cobra_models = _compatibilize_models(cobra_models) if compatibilize else cobra_models
-        noninteracting_medium = MSSmetana._get_media(noninteracting_media_dict, None, cobra_models, min_growth, False)
-        interacting_medium = MSSmetana._get_media(interacting_media_dict, None, cobra_models, min_growth, True)
+        member_models = _compatibilize_models(member_models) if compatibilize else member_models
+        noninteracting_medium = MSSmetana._get_media(noninteracting_media_dict, None, member_models, min_growth, False)
+        interacting_medium = MSSmetana._get_media(interacting_media_dict, None, member_models, min_growth, True)
         nonint_med = noninteracting_medium if "community_media" not in noninteracting_medium else noninteracting_medium["community_media"]
         int_med = interacting_medium if "community_media" not in interacting_medium else interacting_medium["community_media"]
         interact_diff = DeepDiff(nonint_med, int_med)
@@ -158,14 +164,14 @@ class MSSmetana:
         return None, 0
 
     @staticmethod
-    def mu(cobra_models:Iterable, n_solutions=100, abstol=1e-3, compatibilize=True):
+    def mu(member_models:Iterable, n_solutions=100, abstol=1e-3, compatibilize=True):
         """the fractional frequency of each received metabolite amongst all possible alternative syntrophic solutions"""
         # determine the solutions for each member
-        # member_solutions = member_solutions if member_solutions else {model.id: model.optimize() for model in cobra_models}
+        # member_solutions = member_solutions if member_solutions else {model.id: model.optimize() for model in member_models}
         scores = {}
         if compatibilize:
-            cobra_models = _compatibilize_models(cobra_models)
-        for org_model in cobra_models:
+            member_models = _compatibilize_models(member_models)
+        for org_model in member_models:
             model = org_model.copy()
             ex_rxns = {ex_rxn: met for ex_rxn in FBAHelper.exchange_reactions(model) for met in ex_rxn.metabolites}
             variables = {ex_rxn.id: Variable('___'.join([model.id, ex_rxn.id]), lb=0, ub=1, type="binary") for ex_rxn in ex_rxns}
@@ -187,16 +193,16 @@ class MSSmetana:
         return scores
 
     @staticmethod
-    def mp(cobra_models:Iterable, com_model=None, abstol=1e-3, compatibilize=True):
+    def mp(member_models:Iterable, com_model=None, abstol=1e-3, compatibilize=True):
         """Discover the metabolites that each species can contribute to a community"""
-        cobra_models, community = MSSmetana._load_models(cobra_models, com_model, compatibilize)
+        member_models, community = MSSmetana._load_models(member_models, com_model, compatibilize)
         com_model = community.copy()
         scores = {}
-        for org_model in cobra_models:
+        for org_model in member_models:
             model = org_model.copy()
             scores[model.id] = []
             # determines possible member contributions in the community environment, where the excretion of media compounds is irrelevant
-            approximate_minimal_media = MinimalMediaPkg.comm_media_est(cobra_models)
+            approximate_minimal_media = MSMinimalMedia.comm_media_est(member_models, com_model)
             possible_contributions = [ex_rxn for ex_rxn in FBAHelper.exchange_reactions(model) if ex_rxn.id not in approximate_minimal_media]
             while len(possible_contributions) > 0:
                 print("remaining possible_contributions", len(possible_contributions), end="\r")
@@ -228,9 +234,9 @@ class MSSmetana:
         return scores
 
     @staticmethod
-    def sc(cobra_models:Iterable=None, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6, compatibilize=True):
+    def sc(member_models:Iterable=None, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6, compatibilize=True):
         """Calculate the frequency of interspecies dependency in a community"""
-        cobra_models, community = MSSmetana._load_models(cobra_models, com_model, compatibilize)
+        member_models, community = MSSmetana._load_models(member_models, com_model, compatibilize)
         com_model = community.copy()
         for rxn in com_model.reactions:
             rxn.lower_bound = 0 if 'bio' in rxn.id else rxn.lower_bound
@@ -240,7 +246,7 @@ class MSSmetana:
         variables = {}
         constraints = []
         # TODO this can be converted to an MSCommunity object by looping through each index
-        for org_model in cobra_models:
+        for org_model in member_models:
             model = org_model.copy()
             variables[model.id] = Variable(name=f'y_{model.id}', lb=0, ub=1, type='binary')
             FBAHelper.add_cons_vars(com_model, [variables[model.id]])
@@ -254,9 +260,9 @@ class MSSmetana:
 
         # calculate the SCS
         scores = {}
-        for model in cobra_models:
+        for model in member_models:
             com_model = com_model.copy()
-            other_members = [other for other in cobra_models if other.id != model.id]
+            other_members = [other for other in member_models if other.id != model.id]
             # model growth is guaranteed while minimizing the growing members of the community
             ## SMETANA_Biomass: {biomass_reactions} > {min_growth}
             smetana_biomass = Constraint(sum(rxn.flux_expression for rxn in model.reactions if "bio" in rxn.id),
@@ -281,24 +287,24 @@ class MSSmetana:
         return scores
 
     @staticmethod
-    def smetana(cobra_models: Iterable, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6,
+    def smetana(member_models: Iterable, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6,
                 prior_values=None, compatibilize=False, sc_coupling=False):
         """Quantifies the extent of syntrophy as the sum of all exchanges in a given nutritional environment"""
-        cobra_models, community = MSSmetana._load_models(cobra_models, com_model, compatibilize)
+        member_models, community = MSSmetana._load_models(member_models, com_model, compatibilize)
         com_model = community.copy()
         sc = None
         if not prior_values:
-            mu = MSSmetana.mu(cobra_models, n_solutions, abstol, compatibilize)
-            mp = MSSmetana.mp(cobra_models, com_model, abstol, compatibilize)
+            mu = MSSmetana.mu(member_models, n_solutions, abstol, compatibilize)
+            mp = MSSmetana.mp(member_models, com_model, abstol, compatibilize)
             if sc_coupling:
-                sc = MSSmetana.sc(cobra_models, com_model, min_growth, n_solutions, abstol, compatibilize)
+                sc = MSSmetana.sc(member_models, com_model, min_growth, n_solutions, abstol, compatibilize)
         elif len(prior_values) == 3:
             sc, mu, mp = prior_values
         else:
             mu, mp = prior_values
 
         smetana_scores = {}
-        for pairs in combinations(cobra_models, 2):
+        for pairs in combinations(member_models, 2):
             for model1, model2 in permutations(pairs):
                 if model1.id not in smetana_scores:
                     smetana_scores[model1.id] = {}
@@ -310,5 +316,5 @@ class MSSmetana:
                     for met in models_mets:
                         if met.id in unique_mets:
                             mp_score = 0 if met.id not in mp[model1.id] else 1
-                            smetana_scores[model1.id][model2.id] += mu[model1.id].get(met.id,0)*sc_score*mp_score
+                            smetana_scores[model1.id][model2.id] += prod([mu[model1.id].get(met.id,0), sc_score, mp_score])
         return smetana_scores
