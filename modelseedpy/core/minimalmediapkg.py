@@ -6,7 +6,7 @@ from itertools import combinations, permutations, chain
 from optlang import Variable, Constraint
 from cobra.medium import minimal_medium
 from optlang.symbolics import Zero
-from math import isclose, inf
+from math import isclose, inf, factorial
 from deepdiff import DeepDiff
 from time import process_time
 from pprint import pprint
@@ -156,7 +156,7 @@ class MinimalMediaPkg:
             return interdependencies
 
     @staticmethod
-    def comm_media_est(models, min_growth=0.1, minimization_method="jenga", printing=False):
+    def comm_media_est(models, comm_model, min_growth=0.1, minimization_method="jenga", printing=False):
         media = {"community_media": {}, "members": {}}
         for org_model in models:
             model = org_model.copy()
@@ -167,19 +167,27 @@ class MinimalMediaPkg:
                                 f' that compromise the model.')
             if minimization_method == "minFlux":
                 media["members"][model.id] = {"media": MinimalMediaPkg.minimize_flux(model, min_growth, printing)}
-            elif minimization_method == "minComponent":
+            elif minimization_method == "minComponents":
                 media["members"][model.id] = {"media": minimal_medium(model, min_growth, minimize_components=True).to_dict()}
             elif minimization_method == "jenga":
                 media["members"][model.id] = {"media": MinimalMediaPkg.jenga_method(model, printing=printing)}
+                media["community_media"] = FBAHelper.sum_dict(media["members"][model.id]["media"], media["community_media"])
             model.medium = media["members"][model.id]["media"]
             media["members"][model.id]["solution"] = FBAHelper.solution_to_dict(model.optimize())
-            media["community_media"] = FBAHelper.sum_dict(model.medium, media["community_media"])
+        if comm_model:
+            if minimization_method == "jenga":
+                print("Community models are too excessive for direct assessment via the JENGA method; "
+                      "thus, the community minimal media is estimated as the combination of member media.")
+            elif minimization_method == "minFlux":
+                media["community_media"] = MinimalMediaPkg.minimize_flux(comm_model, min_growth, printing)
+            elif minimization_method == "minComponents":
+                media["community_media"] = minimal_medium(comm_model, min_growth, minimize_components=True).to_dict()
         return media
 
     @staticmethod
-    def interacting_comm_media(models, minimization_method="jenga", media=None, printing=True):
+    def interacting_comm_media(models, comm_model, minimization_method="jenga", min_growth=0.1, media=None, printing=True):
         # define the community minimal media
-        media = media or MinimalMediaPkg.comm_media_est(models, 0.1, minimization_method, printing=printing)
+        media = media or MinimalMediaPkg.comm_media_est(models, comm_model, min_growth, minimization_method, printing=printing)
         org_media = media["community_media"].copy()
         original_time = process_time()
         # remove exchanges that can be satisfied by cross-feeding
@@ -198,33 +206,23 @@ class MinimalMediaPkg:
         return media
 
     @staticmethod
-    def jenga_method(org_model, member_models=None, syntrophy=True, minimal_growth=0.1,
-                     conserved_cpds:list=None, export=True, printing=True, compatibilize=False):
+    def jenga_method(org_model, org_media=None, conserved_cpds:list=None, export=True, printing=True, compatibilize=False):
         # copy and compatibilize the parameter objects
         if org_model.slim_optimize() == 0:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations.")
         copied_model = org_model.copy()
-        models = [] if not member_models else member_models[:]
         if compatibilize:
             copied_model = MinimalMediaPkg._compatibilize(copied_model)
-        original_media = MinimalMediaPkg.minimize_flux(copied_model, printing=False)
-        if models:
-            media = MinimalMediaPkg.comm_media_est(models, minimal_growth)
-            if compatibilize:
-                models = MinimalMediaPkg._compatibilize(member_models, printing)
-            # subtract syntrophic interactions from media requirements
-            if syntrophy:
-                media["community_media"] = MinimalMediaPkg.interacting_comm_media(
-                    models, "jenga", media, printing)["community_media"]
-            original_media = media["community_media"].copy()
+        original_media = org_media or minimal_medium(copied_model, minimize_components=True).to_dict()
+        # {cpd.replace("EX_", ""): flux for cpd, flux in .items()}
+        # TODO - the COBRA method must eventually be replaced with MinimalMediaPkg.minimize_components(copied_model, printing=False)
 
         # identify removal=ble compounds
         original_time = process_time()
         copied_model.medium = original_media
         original_obj_value = org_model.optimize().objective_value
         redundant_cpds = set()
-        print(original_media)
         for cpd in original_media:
             new_media = original_media.copy()
             new_media.pop(cpd)
@@ -238,6 +236,12 @@ class MinimalMediaPkg:
         if not redundant_cpds:
             logger.debug("None of the media components were determined to be removable.")
             return original_media
+        if len(redundant_cpds) > 9:
+            import sigfig
+            num_permuts = sigfig.round(factorial(len(redundant_cpds)), sigfigs=2, format='sci')
+            raise FeasibilityError(f"The model {copied_model.id} contains {len(redundant_cpds)} removable"
+                                   f" compounds, which yields {num_permuts} permutations and is untenable for computation."
+                                   " Select a different minimal media method such as 'minFlux' or 'minComponents'.")
 
         # vet all permutation removals of the redundant compounds
         permuts = [p for p in permutations(redundant_cpds)]
@@ -246,7 +250,6 @@ class MinimalMediaPkg:
                   "from absolute tolerance of 1e-4, will be examined.")
         permut_results, failed_permut_starts = [], []
         best = 0
-        print(len(permuts))
         for perm_index, permut in enumerate(permuts):
             print(f"{perm_index+1}/{len(permuts)}", end="\r")
             successful_removal = 0
@@ -311,30 +314,24 @@ class MinimalMediaPkg:
             elif cpdID_sum == best:
                 best_removals[best].append(removal)
         ## arbitrarily select the first removal from those that both maximize the summed cpdID and avoid conserved compounds
-        comm_media = FBAHelper.remove_media_compounds(
+        media = FBAHelper.remove_media_compounds(
             original_media, list(best_removals.values())[0][0], printing)
         if printing:
             print(best_removals)
-            pprint(comm_media)
-        if models:
-            media["community_media"] = comm_media
+            pprint(media)
 
         # communicate results
-        jenga_media = comm_media.copy()
+        jenga_media = media.copy()
         jenga_difference = DeepDiff(original_media, jenga_media)
         changed_quantity = 0 if not jenga_difference else len(list(jenga_difference.values())[0])
         if printing:
             print(f"Jenga fluxes examined after {(process_time()-original_time)/60} minutes, "
                   f"with {changed_quantity} change(s): {jenga_difference}")
-        final_media = comm_media if "media" not in locals() else media
         if export:
-            if member_models:
-                export_name = "_".join([model.id for model in models]) + "_media.json"
-            else:
-                export_name = copied_model.id + "_media.json"
+            export_name = copied_model.id + "_media.json"
             with open(export_name, 'w') as out:
-                json.dump(final_media, out, indent=3)
-        return final_media
+                json.dump(media, out, indent=3)
+        return media
         
 
 # class MinimalMedia(BaseFBAPkg):
