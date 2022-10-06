@@ -1,69 +1,91 @@
 import logging
 import re
 import time
+import json
+import sys
 from cobra import Model, Reaction, Metabolite
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 logger = logging.getLogger(__name__)
-
-def metabolite_msid(metabolite):
-    if re.search('^(cpd\d+)', metabolite.id):
-        m = re.search('^(cpd\d+)', metabolite.id)
-        return m[1]
-    for anno in metabolite.annotation:
-        if isinstance(metabolite.annotation[anno], list):
-            for item in metabolite.annotation[anno]:
-                if re.search('^(cpd\d+)', item):
-                    m = re.search('^(cpd\d+)', item)
-                    return m[1]
-        elif re.search('^(cpd\d+)', metabolite.annotation[anno]):
-            m = re.search('^(cpd\d+)', metabolite.annotation[anno])
-            return m[1]
-    return None
-    
-def reaction_msid(reaction):
-    if re.search('^(rxn\d+)', reaction.id):
-        m = re.search('^(rxn\d+)', reaction.id)
-        return m[1]
-    for anno in reaction.annotation:
-        if isinstance(reaction.annotation[anno], list):
-            for item in reaction.annotation[anno]:
-                if re.search('^(rxn\d+)', item):
-                    m = re.search('^(rxn\d+)', item)
-                    return m[1]
-        elif re.search('^(rxn\d+)', reaction.annotation[anno]):
-            m = re.search('^(rxn\d+)', reaction.annotation[anno])
-            return m[1]
-    return None
-
-def stoichiometry_to_string(stoichiometry):
-    reactants = []
-    products = []
-    for met in stoichiometry:
-        coef = stoichiometry[met]
-        if not isinstance(met, str):
-            if metabolite_msid(met) == "cpd00067":
-                met = None
-            else:
-                met = met.id
-        if met != None:
-            if coef < 0:
-                reactants.append(met)
-            else:
-                products.append(met)
-    reactants.sort()
-    products.sort()
-    return ["+".join(reactants)+"="+"+".join(products),"+".join(products)+"="+"+".join(reactants)]
-
-def search_name(name):
-    name = name.lower()
-    name = re.sub(r'_[a-z]\d*$', '', name)
-    name = re.sub(r'\W+', '', name)
-    return name
-
+logger.setLevel(logging.DEBUG)
+#handler = logging.StreamHandler(sys.stdout)
+#handler.setLevel(logging.DEBUG)
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#handler.setFormatter(formatter)
+#logger.addHandler(handler)
 
 class MSModelUtil:
-
+    mdlutls = {}
+    
+    @staticmethod
+    def metabolite_msid(metabolite):
+        if re.search('^(cpd\d+)', metabolite.id):
+            m = re.search('^(cpd\d+)', metabolite.id)
+            return m[1]
+        for anno in metabolite.annotation:
+            if isinstance(metabolite.annotation[anno], list):
+                for item in metabolite.annotation[anno]:
+                    if re.search('^(cpd\d+)', item):
+                        m = re.search('^(cpd\d+)', item)
+                        return m[1]
+            elif re.search('^(cpd\d+)', metabolite.annotation[anno]):
+                m = re.search('^(cpd\d+)', metabolite.annotation[anno])
+                return m[1]
+        return None
+    
+    @staticmethod    
+    def reaction_msid(reaction):
+        if re.search('^(rxn\d+)', reaction.id):
+            m = re.search('^(rxn\d+)', reaction.id)
+            return m[1]
+        for anno in reaction.annotation:
+            if isinstance(reaction.annotation[anno], list):
+                for item in reaction.annotation[anno]:
+                    if re.search('^(rxn\d+)', item):
+                        m = re.search('^(rxn\d+)', item)
+                        return m[1]
+            elif re.search('^(rxn\d+)', reaction.annotation[anno]):
+                m = re.search('^(rxn\d+)', reaction.annotation[anno])
+                return m[1]
+        return None
+    
+    @staticmethod
+    def stoichiometry_to_string(stoichiometry):
+        reactants = []
+        products = []
+        for met in stoichiometry:
+            coef = stoichiometry[met]
+            if not isinstance(met, str):
+                if MSModelUtil.metabolite_msid(met) == "cpd00067":
+                    met = None
+                else:
+                    met = met.id
+            if met != None:
+                if coef < 0:
+                    reactants.append(met)
+                else:
+                    products.append(met)
+        reactants.sort()
+        products.sort()
+        return ["+".join(reactants)+"="+"+".join(products),"+".join(products)+"="+"+".join(reactants)]
+    
+    @staticmethod
+    def search_name(name):
+        name = name.lower()
+        name = re.sub(r'_[a-z]\d*$', '', name)
+        name = re.sub(r'\W+', '', name)
+        return name
+    
+    @staticmethod
+    def get(model,create_if_missing = True):
+        if model in MSModelUtil.mdlutls:
+            return  MSModelUtil.mdlutls[model]
+        elif create_if_missing:
+            MSModelUtil.mdlutls[model] = MSModelUtil(model)
+            return MSModelUtil.mdlutls[model]
+        else:
+            return None
+    
     def __init__(self,model):
         self.model = model
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
@@ -82,20 +104,6 @@ class MSModelUtil:
         :return:
         """
         self.reaction_scores = {}
-    
-    def set_atputl(self,atputl):
-        """
-        Setting ATP correction utility object for model
-        :return:
-        """
-        self.atputl = atputl
-    
-    def set_gfutl(self,gfutl):
-        """
-        Setting gapfilling utility object for model
-        :return:
-        """ 
-        self.gfutl = gfutl
     
     def printlp(self,lpfilename="debug.lp"):
         with open(lpfilename, 'w') as out:
@@ -118,7 +126,7 @@ class MSModelUtil:
         if name not in self.metabolite_hash:
             self.metabolite_hash[name] = []
         self.metabolite_hash[name].append(met)
-        sname = search_name(name)
+        sname = MSModelUtil.search_name(name)
         if sname not in self.search_metabolite_hash:
             self.search_metabolite_hash[sname] = []
         self.search_metabolite_hash[sname].append(met)
@@ -128,22 +136,22 @@ class MSModelUtil:
             self.build_metabolite_hash()
         if name in self.metabolite_hash:
             return self.metabolite_hash[name]
-        sname = search_name(name)
+        sname = MSModelUtil.search_name(name)
         if sname in self.search_metabolite_hash:
             return self.search_metabolite_hash[sname]
-        logger.info(name," not found in model!")
+        logger.info(name+" not found in model!")
         return []
     
     def rxn_hash(self): 
         output = {}
         for rxn in self.model.reactions:
-            strings = stoichiometry_to_string(rxn.metabolites)
+            strings = MSModelUtil.stoichiometry_to_string(rxn.metabolites)
             output[strings[0]] = [rxn,1]
             output[strings[1]] = [rxn,-1]
         return output
     
     def find_reaction(self,stoichiometry):
-        output = stoichiometry_to_string(stoichiometry)
+        output = MSModelUtil.stoichiometry_to_string(stoichiometry)
         atpstring = output[0]
         rxn_hash = self.rxn_hash()
         if atpstring in rxn_hash:
@@ -153,7 +161,7 @@ class MSModelUtil:
     def msid_hash(self): 
         output = {}
         for cpd in self.model.metabolites:
-            msid = metabolite_msid(cpd)
+            msid = MSModelUtil.metabolite_msid(cpd)
             if msid != None:
                 if msid not in output:
                     output[msid] = []
@@ -166,6 +174,14 @@ class MSModelUtil:
             if reaction.id[:3] == 'EX_':
                 exchange_reactions.append(reaction)
         return exchange_reactions
+    
+    def nonexchange_reaction_count(self):
+        count = 0
+        for reaction in self.model.reactions:
+            if reaction.id[:3] != 'EX_' and reaction.id[:3] != 'SK_' and reaction.id[:3] != 'DM_' and reaction.id[:3] != 'bio':
+                #print(reaction.id)
+                count += 1
+        return count
     
     def exchange_hash(self):
         exchange_reactions = {}
@@ -309,109 +325,68 @@ class MSModelUtil:
             kbmodel["modelreactions"].append(rxn_data)
         return rxn_data
     
-    def create_kb_gapfilling_data(self,kbmodel):
-        largest_index = 0
+    #################################################################################
+    #Functions related to gapfilling of models
+    #################################################################################
+    def add_gapfilling(self,solution):
+        self.integrated_gapfillings.append(solution)
+    
+    def create_kb_gapfilling_data(self,kbmodel,atpmedia_ws = "94026"):
+        gapfilling_hash = {}
         if "gapfillings" not in kbmodel:
             kbmodel["gapfillings"] = []
         for gapfilling in kbmodel["gapfillings"]:
-            current_index = int(gapfilling["id"].split(".").pop())
-            if largest_index == 0 or largest_index < current_index:
-                largest_index = current_index
+            gapfilling_hash[gapfilling["id"]] = gapfilling
         rxn_hash = {}
         for rxn in kbmodel["modelreactions"]:
             rxn_hash[rxn["id"]] = rxn
         for gf in self.integrated_gapfillings:
-            largest_index += 1
-            gfid = "gf."+str(largest_index)
+            print(gf["media"].id,gf["target"])
             media_ref = "KBaseMedia/Empty"
+            gf["media"].id.replace("/",".")
+            gfid = gf["media"].id
+            if self.atputl:
+                for item in self.atputl.atp_medias:
+                    if item[0] == gf["media"]:
+                        gfid = "ATP-"+gfid
+                        media_ref = atpmedia_ws+"/"+gf["media"].id+".atp"
+                        break
             if hasattr(gf["media"], 'info'):
                 media_ref = gf["media"].info.workspace_id+"/"+gf["media"].info.id
+            suffix = 0
+            while gfid in gapfilling_hash:
+                suffix += 1
+                gfid += "."+str(suffix)
+            gapfilling_hash[gfid] = 1
             gapfilling_obj = {
-                "gapfill_id": self.model.id+"."+gfid,
+                "gapfill_id": gfid,
                 "id": gfid,
                 "integrated": 1,
                 "integrated_solution": "0",
-                "objective":gf["objective"],
+                "target":gf["target"],
+                "minobjective":gf["minobjective"],
+                "binary_check":gf["binary_check"],
                 "media_ref": media_ref
             }
             kbmodel["gapfillings"].append(gapfilling_obj)
-            for rxn in gf["solution"]["new"]:
+            for rxn in gf["new"]:
                 if rxn in rxn_hash:
                     rxnobj = rxn_hash[rxn]
                     if "gapfill_data" not in rxnobj:
                         rxnobj["gapfill_data"] = {}
                     if gfid not in rxnobj["gapfill_data"]:
                         rxnobj["gapfill_data"][gfid] = {
-                            "0" : [gf["solution"]["new"][rxn],1,[]]
+                            "0" : [gf["new"][rxn],1,[]]
                         }
-            for rxn in gf["solution"]["reversed"]:
+            for rxn in gf["reversed"]:
                 if rxn in rxn_hash:
                     rxnobj = rxn_hash[rxn]
                     if "gapfill_data" not in rxnobj:
                         rxnobj["gapfill_data"] = {}
                     if gfid not in rxnobj["gapfill_data"]:
                         rxnobj["gapfill_data"][gfid] = {
-                            "0" : [gf["solution"]["reversed"][rxn],1,[]]
+                            "0" : [gf["reversed"][rxn],1,[]]
                         }
-    
-    def add_gapfilling_solution_to_kbase_model(self,newmodel,gapfilled_reactions,gfid=None,media_ref = None,reaction_genes = None):
-        """
-        NOTE: to be moved to cobrakbase
-        """
-        rxn_table = []
-        gapfilling_obj = None
-        if gfid == None:
-            largest_index = 0
-            for gapfilling in newmodel["gapfillings"]:
-                current_index = int(gapfilling["id"].split(".").pop())
-                if largest_index == 0 or largest_index < current_index:
-                    largest_index = current_index
-            largest_index += 1
-            gfid = "gf."+str(largest_index)
-        else:
-            for gapfilling in newmodel["gapfillings"]:
-                if gapfilling["id"] == gfid:
-                    gapfilling_obj = gapfilling
-        if gapfilling_obj == None:    
-            gapfilling_obj = {
-                "gapfill_id": newmodel["id"]+"."+gfid,
-                "id": gfid,
-                "integrated": 1,
-                "integrated_solution": "0",
-                "media_ref": media_ref
-            }
-            newmodel["gapfillings"].append(gapfilling_obj)
-        cpd_hash = {}
-        for cpd in newmodel["modelcompounds"]:
-            cpd_hash[cpd["id"]] = cpd
-        for rxn in gapfilled_reactions["new"]:
-            reaction = self.model.reactions.get_by_id(rxn)
-            kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,newmodel,cpd_hash,gapfilled_reactions["new"][rxn],1,reaction_genes)
-            kbrxn["gapfill_data"][gfid] = dict()
-            kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["new"][rxn],1,[]]
-            #rxn_table.append({
-            #    'id':kbrxn["id"],
-            #    'name':kbrxn["name"],
-            #    'direction':format_direction(kbrxn["direction"]),
-            #    'gene':format_gpr(kbrxn),
-            #    'equation':format_equation(kbrxn,cpd_hash),
-            #    'newrxn':1
-            #})
-        for rxn in gapfilled_reactions["reversed"]:
-            for kbrxn in newmodel["modelreactions"]:
-                if kbrxn["id"] == rxn:
-                    kbrxn["direction"] = "="
-                    #rxn_table.append({
-                    #    'id':kbrxn["id"],
-                    #    'name':kbrxn["name"],
-                    #    'direction':format_direction(kbrxn["direction"]),
-                    #    'gene':format_gpr(kbrxn),
-                    #    'equation':format_equation(kbrxn,cpd_hash),
-                    #    'newrxn':0
-                    #})
-                    kbrxn["gapfill_data"][gfid] = dict()
-                    kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["reversed"][rxn],1,[]]
-        return rxn_table
     
     def apply_test_condition(self,condition,model = None):
         """Applies constraints and objective of specified condition to model
@@ -470,18 +445,19 @@ class MSModelUtil:
         new_objective = model.slim_optimize()
         value = new_objective
         if "change" in condition and condition["change"]:
-            if self.test_objective != None:
+            if self.test_objective:
                 value = new_objective - self.test_objective
+                logger.debug(condition["media"].id+" testing for change:"+str(value)+"="+str(new_objective)+"-"+str(self.test_objective))
         self.score = value
         if model.solver.status != 'optimal':
-            self.printlp("Infeasible.lp")
-            logger.critical("Infeasible problem - LP file printed to debug!")
+            self.printlp(condition["media"].id+"-Testing-Infeasible.lp")
+            logger.critical(ondition["media"].id+"testing leads to infeasible problem. LP file printed to debug!")
             return False
         if value >= condition["threshold"] and condition["is_max_threshold"]:
-            logger.debug("Failed high:"+str(self.test_objective)+";"+str(condition["threshold"]))
+            #logger.debug("Failed high:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
             return False
         elif value <= condition["threshold"] and not condition["is_max_threshold"]:
-            logger.debug("Failed low:"+str(self.test_objective)+";"+str(condition["threshold"]))
+            #logger.debug("Failed low:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
             return False
         self.test_objective = new_objective
         return True
@@ -546,6 +522,7 @@ class MSModelUtil:
             if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
                 if not self.test_single_condition(condition,False,currmodel):
+                    logger.debug(item[0].id+":"+item[1])
                     item[0].upper_bound = 0
                     if item not in filtered_list:
                         item.append(original_bound[count])
@@ -554,6 +531,7 @@ class MSModelUtil:
             else:
                 item[0].lower_bound = original_bound[count]
                 if not self.test_single_condition(condition,False,currmodel):
+                    logger.debug(item[0].id+":"+item[1])
                     item[0].lower_bound = 0
                     if item not in filtered_list:
                         item.append(original_bound[count])
@@ -581,27 +559,55 @@ class MSModelUtil:
         ------
         """
         newdepth = depth + 1
+        #print("Call:",str(depth),len(reaction_list))
         filtered_list = []
         #First run the full test
         if self.test_single_condition(condition,False,currmodel):
             return []
+        #Check if input list contains only one reaction:
+        if len(reaction_list) == 1:
+            #logger.debug(reaction_list[0][0].id+":"+reaction_list[0][1])
+            if reaction_list[0][1] == ">":
+                reaction_list[0].append(reaction_list[0][0].upper_bound)
+                reaction_list[0][0].upper_bound = 0
+            else:
+                reaction_list[0].append(reaction_list[0][0].lower_bound)
+                reaction_list[0][0].lower_bound = 0
+            reaction_list[0].append(self.score)
+            filtered_list.append(reaction_list[0])
+            return filtered_list
         #Break reaction list into two 
-        sub_list = []
+        original_bound = []
+        sub_lists = [[],[]]
         midway_point = int(len(reaction_list)/2)
-        #Testing first half
-        for i in range(midway_point):
-            sub_list.append(reaction_list[i])
-        new_filter = self.binary_expansion_test(reaction_list,condition,currmodel,newdepth)
+        for i, item in enumerate(reaction_list):
+            if item[1] == ">":
+                original_bound.append(item[0].upper_bound)
+            else:
+                original_bound.append(item[0].lower_bound)
+            if i < midway_point:    
+                sub_lists[0].append(item)
+            else:
+                sub_lists[1].append(item)
+                if item[1] == ">":
+                    item[0].upper_bound = 0
+                else:
+                    item[0].lower_bound = 0
+        #Submitting first half of reactions for testing
+        new_filter = self.binary_expansion_test(sub_lists[0],condition,currmodel,newdepth)
         for item in new_filter:
             filtered_list.append(item)
-        #Testing second half
-        sub_list = []
-        for i in range(midway_point+1,len(reaction_list)):
-            sub_list.append(reaction_list[i])
-        new_filter = self.binary_expansion_test(reaction_list,condition,currmodel,newdepth)
+        #Submitting second half of reactions for testing - now only breaking reactions are removed from the first list
+        for i, item in enumerate(reaction_list):
+            if i >= midway_point:    
+                if item[1] == ">":
+                    item[0].upper_bound = original_bound[i]
+                else:
+                    item[0].lower_bound = original_bound[i]
+        new_filter = self.binary_expansion_test(sub_lists[1],condition,currmodel,newdepth)
         for item in new_filter:
             filtered_list.append(item)
-        return new_filter
+        return filtered_list
         
     def reaction_expansion_test(self,reaction_list,condition_list,binary_search=False):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
@@ -621,11 +627,12 @@ class MSModelUtil:
         Raises
         ------
         """
-        print("Expansion started!")
+        logger.debug("Expansion started!")
         filtered_list = []
         for condition in condition_list:
             currmodel = self.model
             tic = time.perf_counter()
+            new_filtered = []
             with currmodel:
                 self.apply_test_condition(condition)
                 if binary_search:
@@ -636,17 +643,16 @@ class MSModelUtil:
                     new_filtered = self.linear_expansion_test(reaction_list,condition,currmodel)
                     for item in new_filtered:
                         filtered_list.append(item)
+            #Restoring knockout of newly filtered reactions, which expire after exiting the "with" block above
+            for item in new_filtered:
+                if item[1] == ">":
+                    item[0].upper_bound = 0
+                else:
+                    item[0].lower_bound = 0
             toc = time.perf_counter()
-            print("Expansion time:",condition["media"].id,(toc-tic))
-            print("Filtered count:",len(filtered_list)," out of ",len(reaction_list))
+            logger.debug("Expansion time:"+condition["media"].id+":"+str((toc-tic)))
+            logger.debug("Filtered count:"+str(len(filtered_list))+" out of "+str(len(reaction_list)))
         return filtered_list
-
-    def add_gapfilling(self,solution,objective,media):
-        self.integrated_gapfillings.append({
-            "solution":solution,
-            "objective":objective,
-            "media":media
-        })
 
     def add_atp_hydrolysis(self,compartment):
         #Searching for ATP hydrolysis compounds
@@ -674,11 +680,6 @@ class MSModelUtil:
         cobra_reaction.add_metabolites(stoichiometry)
         self.model.add_reactions([cobra_reaction])
         return {"reaction":cobra_reaction,"direction":">","new":True}
-    
-    def gapfilled_reaction_count(self):
-        count = 0
-        #TODO
-        return count
     
     @staticmethod
     def parse_id(object):

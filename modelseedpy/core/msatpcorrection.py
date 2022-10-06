@@ -44,11 +44,11 @@ class MSATPCorrection:
 
     DEBUG = False
 
-    def __init__(self,model,core_template=None,atp_medias=[],compartment="c0",max_gapfilling=None,
+    def __init__(self,model_or_mdlutl,core_template=None,atp_medias=[],compartment="c0",max_gapfilling=10,
         gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[],default_media_path=None):
         """
         :param model:
-        :param core_template: 
+        :param core_template:
         :param atp_medias: list<MSMedia> : list of additional medias to test
         :param load_default_medias: Bool : load default media set
         :param forced_media: list<string> : name of medias in which ATP production should be forced
@@ -57,17 +57,20 @@ class MSATPCorrection:
         :param gapfilling_delta: string : difference between lowest gapfilling and current gapfilling where media will be accepted
         :param atp_hydrolysis_id: string : ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
+        #Discerning input is model or mdlutl and setting internal links
+        if isinstance(model_or_mdlutl, MSModelUtil):
+            self.model = model_or_mdlutl.model
+            self.modelutl = model_or_mdlutl
+        else:
+            self.model = model_or_mdlutl
+            self.modelutl = MSModelUtil.get(model_or_mdlutl)
+        #Setting atpcorrection attribute in model utl so link is bidirectional
+        self.modelutl.atputl = self
+        
         if default_media_path:
             self.default_media_path = default_media_path
         else:
             self.default_media_path = _path+"/../data/atp_medias.tsv"
-        
-        if isinstance(model, MSModelUtil):
-            self.model = model.model
-            self.modelutl = model
-        else:
-            self.model = model
-            self.modelutl = MSModelUtil(model)
         
         self.compartment = compartment
         
@@ -102,11 +105,14 @@ class MSATPCorrection:
             self.coretemplate = core_template
         
         self.msgapfill = MSGapfill(self.modelutl, default_gapfill_templates=core_template)
+        #These should stay as None until atp correction is actually run
+        self.cumulative_core_gapfilling = None
+        self.selected_media = None
+        
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
         self.media_gapfill_stats = {}
-        self.selected_media = []
         self.filtered_noncore = []
         self.lp_filename = None
         self.multiplier = 1.2
@@ -246,17 +252,17 @@ class MSATPCorrection:
                 logger.debug('evaluate media %s - %f (%s)', media.id, solution.objective_value, solution.status)
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
-                with open("Core-"+media.id.replace("/","-")+".lp", 'w') as out:
-                    out.write(str(self.model.solver))
+                #with open("Core-"+media.id.replace("/","-")+".lp", 'w') as out:
+                #    out.write(str(self.model.solver))
                 if solution.objective_value < minimum_obj or solution.status != 'optimal':
-                    self.msgapfill.lp_filename = "CoreGF-"+media.id.replace("/","-")+".lp"
+                    #self.msgapfill.lp_filename = "CoreGF-"+media.id.replace("/","-")+".lp"
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media,
                                                                                     self.atp_hydrolysis.id,
                                                                                     minimum_obj)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
                 elif solution.objective_value >= minimum_obj:
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
-                logger.debug('gapfilling stats: %s', json.dumps(self.media_gapfill_stats[media], indent=2))
+                logger.debug('gapfilling stats: %s', json.dumps(self.media_gapfill_stats[media], indent=2,default=vars))
 
         if MSATPCorrection.DEBUG:
             with open('debug.json', 'w') as outfile:
@@ -272,17 +278,18 @@ class MSATPCorrection:
         def scoring_function(media):
             return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * \
                    len(self.media_gapfill_stats[media]["reversed"].keys())
-
+        if not max_gapfilling:
+            max_gapfilling = self.max_gapfilling
         self.selected_media = []
         media_scores = dict(
             (media, scoring_function(media)) for media in self.media_gapfill_stats if self.media_gapfill_stats[media])
         best_score = min(media_scores.values())
-        if max_gapfilling is None:
-            max_gapfilling = best_score
+        if max_gapfilling is None or max_gapfilling > (best_score+self.gapfilling_delta):
+            max_gapfilling = best_score+self.gapfilling_delta
         for media in media_scores:
             score = media_scores[media]
             logger.debug(score, best_score, max_gapfilling)
-            if score <= max_gapfilling and score <= (max_gapfilling + self.gapfilling_delta):
+            if score <= max_gapfilling:
                 self.selected_media.append(media)
 
     def apply_growth_media_gapfilling(self):
@@ -290,10 +297,11 @@ class MSATPCorrection:
         Applies the gapfilling to all selected growth media
         :return:
         """
+        self.cumulative_core_gapfilling = []#TODO: In case someone runs ATP correction twice with different parameters, before resetting this, maybe check if any of these reactions are already in the model and remove them so we're starting fresh???
         for media in self.selected_media:
-            if media in self.media_gapfill_stats and self.media_gapfill_stats[media]:
-                self.model = self.msgapfill.integrate_gapfill_solution(self.media_gapfill_stats[media])
-
+            if media in self.media_gapfill_stats and self.media_gapfill_stats[media] and MSGapfill.gapfill_count(self.media_gapfill_stats[media]) > 0:
+                self.msgapfill.integrate_gapfill_solution(self.media_gapfill_stats[media],self.cumulative_core_gapfilling)
+        
     def expand_model_to_genome_scale(self):
         """Restores noncore reactions to model while filtering out reactions that break ATP
         Parameters
@@ -393,13 +401,3 @@ class MSATPCorrection:
         atp_correction = MSATPCorrection(model, core_template, atp_medias, atp_hydrolysis_id=atp_objective,
                                          max_gapfilling=max_gapfilling, gapfilling_delta=gapfilling_delta)
         return atp_correction.run_atp_correction()
-
-    @staticmethod
-    def build_default(model,core_template=None,atp_medias=[],compartment="c0",max_gapfilling=None,
-        gapfilling_delta=0,atp_hydrolysis_id=None,load_default_medias=True,forced_media=[],default_media_path=None):
-        """
-        Automatically creating ATP correction utility from model data
-        :return:
-        """
-        return MSATPCorrection(model,core_template,atp_medias,compartment,max_gapfilling,
-        gapfilling_delta,atp_hydrolysis_id,load_default_medias,forced_media,default_media_path)
