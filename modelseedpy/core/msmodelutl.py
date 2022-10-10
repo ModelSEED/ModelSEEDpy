@@ -370,10 +370,8 @@ class MSModelUtil:
                         logger.debug(rxn_id+solution[key][rxn_id]+" needed:"+str(objective)+" with min obj:"+str(solution["minobjective"]))
                         rxnobj.upper_bound = original_bound
                     else:
-                        unneeded.append([rxn_id,solution[key][rxn_id]])
+                        unneeded.append([rxn_id,solution[key][rxn_id],key])
                         logger.debug(rxn_id+solution[key][rxn_id]+" not needed:"+str(objective))
-                        if keep_changes:
-                            del solution[key][rxn_id]
                 else:
                     original_bound = rxnobj.lower_bound
                     rxnobj.lower_bound = 0
@@ -382,10 +380,11 @@ class MSModelUtil:
                         logger.debug(rxn_id+solution[key][rxn_id]+" needed:"+str(objective)+" with min obj:"+str(solution["minobjective"]))
                         rxnobj.lower_bound = original_bound
                     else:
-                        unneeded.append([rxn_id,solution[key][rxn_id]])
+                        unneeded.append([rxn_id,solution[key][rxn_id],key])
                         logger.debug(rxn_id+solution[key][rxn_id]+" not needed:"+str(objective))
-                        if keep_changes:
-                            del solution[key][rxn_id]
+        if keep_changes:
+            for items in unneeded:
+                del solution[items[2]][items[0]]
         return unneeded
     
     def add_gapfilling(self,solution):
