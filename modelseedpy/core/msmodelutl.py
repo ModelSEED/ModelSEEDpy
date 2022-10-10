@@ -179,8 +179,8 @@ class MSModelUtil:
         count = 0
         for reaction in self.model.reactions:
             if reaction.id[:3] != 'EX_' and reaction.id[:3] != 'SK_' and reaction.id[:3] != 'DM_' and reaction.id[:3] != 'bio':
-                #print(reaction.id)
-                count += 1
+                if reaction.upper_bound > 0 or reaction.lower_bound > 0:
+                    count += 1
         return count
     
     def exchange_hash(self):
@@ -328,6 +328,66 @@ class MSModelUtil:
     #################################################################################
     #Functions related to gapfilling of models
     #################################################################################
+    """Tests if every reaction in a given gapfilling solution is actually needed for growth
+        Optionally can remove unneeded reactions from the model AND the solution object.
+        Note, this code assumes the gapfilling solution is already integrated.
+        
+        Parameters
+        ----------
+        {"new":{string reaction_id: string direction},"reversed":{string reaction_id: string direction}} - solution
+            Data for gapfilling solution to be tested
+        bool - keep_changes
+            Set this bool to True to remove the unneeded reactions from the solution and model
+        Returns
+        -------
+        list<tuple<string - reaction id, string direction>>
+            List of unneeded reactions
+            
+        Raises
+        ------
+        """
+    def test_solution(self,solution,keep_changes=False):
+        unneeded = []
+        tempmodel = self.model
+        if not keep_changes:
+            tempmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        tempmodel.objective = solution["target"]
+        pkgmgr = MSPackageManager.get_pkg_mgr(tempmodel)
+        pkgmgr.getpkg("KBaseMediaPkg").build_package(solution["media"])
+        objective = tempmodel.slim_optimize()
+        logger.debug("Starting objective:"+str(objective))
+        with open("SolutionTest.lp", 'w') as out:
+            out.write(str(tempmodel.solver))
+        types = ["new","reversed"]
+        for key in types:
+            for rxn_id in solution[key]:
+                rxnobj = tempmodel.reactions.get_by_id(rxn_id)
+                if solution[key][rxn_id] == ">":
+                    original_bound = rxnobj.upper_bound
+                    rxnobj.upper_bound = 0
+                    objective = tempmodel.slim_optimize()
+                    if objective < solution["minobjective"]:
+                        logger.debug(rxn_id+solution[key][rxn_id]+" needed:"+str(objective)+" with min obj:"+str(solution["minobjective"]))
+                        rxnobj.upper_bound = original_bound
+                    else:
+                        unneeded.append([rxn_id,solution[key][rxn_id]])
+                        logger.debug(rxn_id+solution[key][rxn_id]+" not needed:"+str(objective))
+                        if keep_changes:
+                            del solution[key][rxn_id]
+                else:
+                    original_bound = rxnobj.lower_bound
+                    rxnobj.lower_bound = 0
+                    objective = tempmodel.slim_optimize()
+                    if objective < solution["minobjective"]:
+                        logger.debug(rxn_id+solution[key][rxn_id]+" needed:"+str(objective)+" with min obj:"+str(solution["minobjective"]))
+                        rxnobj.lower_bound = original_bound
+                    else:
+                        unneeded.append([rxn_id,solution[key][rxn_id]])
+                        logger.debug(rxn_id+solution[key][rxn_id]+" not needed:"+str(objective))
+                        if keep_changes:
+                            del solution[key][rxn_id]
+        return unneeded
+    
     def add_gapfilling(self,solution):
         self.integrated_gapfillings.append(solution)
     
@@ -341,7 +401,6 @@ class MSModelUtil:
         for rxn in kbmodel["modelreactions"]:
             rxn_hash[rxn["id"]] = rxn
         for gf in self.integrated_gapfillings:
-            print(gf["media"].id,gf["target"])
             media_ref = "KBaseMedia/Empty"
             gf["media"].id.replace("/",".")
             gfid = gf["media"].id
@@ -522,7 +581,7 @@ class MSModelUtil:
             if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
                 if not self.test_single_condition(condition,False,currmodel):
-                    logger.debug(item[0].id+":"+item[1])
+                    #logger.debug(item[0].id+":"+item[1])
                     item[0].upper_bound = 0
                     if item not in filtered_list:
                         item.append(original_bound[count])
@@ -531,7 +590,7 @@ class MSModelUtil:
             else:
                 item[0].lower_bound = original_bound[count]
                 if not self.test_single_condition(condition,False,currmodel):
-                    logger.debug(item[0].id+":"+item[1])
+                    #logger.debug(item[0].id+":"+item[1])
                     item[0].lower_bound = 0
                     if item not in filtered_list:
                         item.append(original_bound[count])
@@ -559,14 +618,12 @@ class MSModelUtil:
         ------
         """
         newdepth = depth + 1
-        #print("Call:",str(depth),len(reaction_list))
         filtered_list = []
         #First run the full test
         if self.test_single_condition(condition,False,currmodel):
             return []
         #Check if input list contains only one reaction:
         if len(reaction_list) == 1:
-            #logger.debug(reaction_list[0][0].id+":"+reaction_list[0][1])
             if reaction_list[0][1] == ">":
                 reaction_list[0].append(reaction_list[0][0].upper_bound)
                 reaction_list[0][0].upper_bound = 0
@@ -609,7 +666,7 @@ class MSModelUtil:
             filtered_list.append(item)
         return filtered_list
         
-    def reaction_expansion_test(self,reaction_list,condition_list,binary_search=False):
+    def reaction_expansion_test(self,reaction_list,condition_list,binary_search=True):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
         
         Parameters

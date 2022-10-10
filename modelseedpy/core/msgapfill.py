@@ -94,6 +94,7 @@ class MSGapfill:
                 return None
         if binary_check:
             self.last_solution = pkgmgr.getpkg("GapfillingPkg").binary_check_gapfilling_solution()
+        
         self.last_solution["media"] = media
         self.last_solution["target"] = target
         self.last_solution["minobjective"] = minimum_obj
@@ -109,7 +110,6 @@ class MSGapfill:
             cumulation_solution : list
                 Optional array to cumulatively track all reactions added to the model when integrating multiple solutions
         """
-        self.mdlutl.add_gapfilling(solution)
         for rxn_id in solution["reversed"]:
             rxn = self.model.reactions.get_by_id(rxn_id)
             if solution["reversed"][rxn_id] == ">" and rxn.upper_bound <= 0:
@@ -139,22 +139,34 @@ class MSGapfill:
                     cumulative_solution.append([rxn_id,"<"])
                     rxn.upper_bound = 0
                     rxn.lower_bound = -100
+        unneeded = self.mdlutl.test_solution(solution,keep_changes=True)#Strips out unneeded reactions - which undoes some of what is done above
+        for item in unneeded:
+            for oitem in cumulative_solution:
+                if item[0] == oitem[0] and item[1] == oitem[1]:
+                    cumulative_solution.remove(oitem)
+                    break
+        self.mdlutl.add_gapfilling(solution)       
         self.cumulative_gapfilling.extend(cumulative_solution)
     
     def link_gapfilling_to_biomass(self,target="bio1"):
-        def find_dependency(item,target_rxn,tempmodel):
+        def find_dependency(item,target_rxn,tempmodel,original_objective,min_flex_obj):
             objective = tempmodel.slim_optimize()
+            logger.debug("Obj:"+str(objective))
+            with open("FlexBiomass2.lp", 'w') as out:
+                out.write(str(tempmodel.solver))
             if objective > 0:
                 target_rxn.lower_bound = 0.1
                 tempmodel.objective = min_flex_obj
                 solution = tempmodel.optimize()
+                with open("FlexBiomass3.lp", 'w') as out:
+                    out.write(str(tempmodel.solver))
                 biocpds = []
-                for reaction in self.model.reactions:
+                for reaction in tempmodel.reactions:
                     if reaction.id[0:5] == "FLEX_" and reaction.forward_variable.primal > Zero:
                         biocpds.append(reaction.id[5:])
                 item.append(biocpds)
-                print(item[0],",".join(biocpds))
-                tempmodel.objective = target_rxn.id
+                logger.debug(item[0]+":"+",".join(biocpds))
+                tempmodel.objective = original_objective
                 target_rxn.lower_bound = 0
         
         #Copying model before manipulating it
@@ -174,6 +186,8 @@ class MSGapfill:
             "add_total_biomass_constraint":False
         })
         #Creating min flex objective
+        tempmodel.objective = target_rxn
+        original_objective = tempmodel.objective
         min_flex_obj = tempmodel.problem.Objective(Zero,direction="min")
         obj_coef = dict()
         for reaction in tempmodel.reactions:
@@ -183,19 +197,20 @@ class MSGapfill:
         tempmodel.objective = min_flex_obj
         min_flex_obj.set_linear_coefficients(obj_coef)
         #Restoring biomass object
-        tempmodel.objective = target
+        tempmodel.objective = original_objective
         #Knocking out gapfilled reactions one at a time
         for item in self.cumulative_gapfilling:
+            logger.debug("KO:"+item[0]+item[1])
             rxnobj = tempmodel.reactions.get_by_id(item[0])
             if item[1] == ">":
                 original_bound = rxnobj.upper_bound
                 rxnobj.upper_bound = 0
-                find_dependency(item,target_rxn,tempmodel)
+                find_dependency(item,target_rxn,tempmodel,original_objective,min_flex_obj)
                 rxnobj.upper_bound = original_bound
             else:
                 original_bound = rxnobj.lower_bound
                 rxnobj.lower_bound = 0
-                find_dependency(item,target_rxn,tempmodel)
+                find_dependency(item,target_rxn,tempmodel,original_objective,min_flex_obj)
                 rxnobj.lower_bound = original_bound
     
     @staticmethod
