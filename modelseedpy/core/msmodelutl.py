@@ -179,7 +179,7 @@ class MSModelUtil:
         count = 0
         for reaction in self.model.reactions:
             if reaction.id[:3] != 'EX_' and reaction.id[:3] != 'SK_' and reaction.id[:3] != 'DM_' and reaction.id[:3] != 'bio':
-                if reaction.upper_bound > 0 or reaction.lower_bound > 0:
+                if reaction.upper_bound > 0 or reaction.lower_bound < 0:
                     count += 1
         return count
     
@@ -356,8 +356,6 @@ class MSModelUtil:
         pkgmgr.getpkg("KBaseMediaPkg").build_package(solution["media"])
         objective = tempmodel.slim_optimize()
         logger.debug("Starting objective:"+str(objective))
-        with open("SolutionTest.lp", 'w') as out:
-            out.write(str(tempmodel.solver))
         types = ["new","reversed"]
         for key in types:
             for rxn_id in solution[key]:
