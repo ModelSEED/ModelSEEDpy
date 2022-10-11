@@ -54,8 +54,11 @@ class MSSmetana:
     def mro_score(self):
         self.mro = MSSmetana.mro(self.models, self.min_growth, self.media, self.compatibilize, self.printing)
         if self.printing:
-            print(f"\nMRO score: {self.mro}\t\t\t{self.mro*100:.2f}% of member requirements, on average, overlap with other members "
-                  "requirements.")
+            for pair, mro in self.mro.items():
+                newcomer, established = pair.split('---')
+                print(f"\nThe {newcomer} on {established} MRO score: {mro[0]} ({mro[0]*100:.2f}%). "
+                      f"This is the percent of nutritional requirements in {newcomer} "
+                      f"that overlap with {established} ({mro[1]}/{mro[2]}).")
         return self.mro
 
     def mip_score(self, interacting_media:dict=None, noninteracting_media:dict=None):
@@ -144,10 +147,15 @@ class MSSmetana:
         member_models = _compatibilize_models(member_models) if compatibilize else member_models
         mem_media = {model.id: set(MSSmetana._get_media(media_dict, None, model, min_growth, printing=printing))
                      for model in member_models}
-        pairs = {(model1, model2): mem_media[model1.id] & mem_media[model2.id] for model1, model2 in combinations(member_models, 2)}
-        pprint(pairs)
         # ratio of the average size of intersecting minimal media between any two members and the minimal media of all members
-        return mean(list(map(len, pairs.values()))) / mean(list(map(len, mem_media.values())))
+        # MROs = array(list(map(len, pairs.values()))) / array(list(map(len, mem_media.values())))
+        mro_values = {}
+        for model1, model2 in permutations(member_models, 2):
+            intersection = len(mem_media[model1.id] & mem_media[model2.id])
+            media_length = len(mem_media[model1.id])
+            mro_values[f"{model1.id}---{model2.id})"] = (intersection/media_length, intersection, media_length)
+        return mro_values
+        # return mean(list(map(len, pairs.values()))) / mean(list(map(len, mem_media.values())))
 
     @staticmethod
     def mip(member_models:Iterable, min_growth=0.1, interacting_media_dict=None,
