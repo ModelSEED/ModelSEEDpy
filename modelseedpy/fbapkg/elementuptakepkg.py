@@ -4,8 +4,9 @@ from __future__ import absolute_import
 
 import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.core.fbahelper import FBAHelper
 
-#Base class for FBA packages
+
 class ElementUptakePkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"element uptake",{"elements":"string"},{"elements":"string"})
@@ -20,16 +21,15 @@ class ElementUptakePkg(BaseFBAPkg):
         return BaseFBAPkg.build_variable(self,"elements",0,limit,"continuous",element)
     
     def build_constraint(self,element):
-        coef = {self.variables["elements"][element] : -1}
-        for reaction in self.model.reactions:
-            if reaction.id[0:3] == "EX_":
-                total = 0
-                for metabolite in reaction.metabolites:
-                    elements = metabolite.elements
-                    if element in elements:
-                        total += elements[element]*reaction.metabolites[metabolite]
-                if total < 0:
-                    coef[reaction.reverse_variable] = -1*total
-                elif total > 0:
-                    coef[reaction.forward_variable] = total
+        coef = {self.variables["elements"][element]: -1}
+        for reaction in FBAHelper.exchange_reactions(self.model):
+            total = 0
+            for metabolite in reaction.metabolites:
+                elements = metabolite.elements
+                if element in elements:
+                    total += elements[element]*reaction.metabolites[metabolite]
+            if total < 0:
+                coef[reaction.reverse_variable] = -total
+            elif total > 0:
+                coef[reaction.forward_variable] = total
         return BaseFBAPkg.build_constraint(self,"elements",0,0,coef,element)   

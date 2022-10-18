@@ -22,7 +22,9 @@ class MSMinimalMedia:
     def _exchange_solution(sol_dict):
         if isinstance(list(sol_dict.keys())[0], str):
             return {rxn:abs(flux) for rxn, flux in sol_dict.items() if "EX_" in rxn and flux < 0}
-        return {rxn:abs(flux) for rxn, flux in sol_dict.items() if "EX_" in rxn.id and flux < 0}
+        elif hasattr(list(sol_dict.keys())[0], "id"):
+            return {rxn:abs(flux) for rxn, flux in sol_dict.items() if "EX_" in rxn.id and flux < 0}
+        return {rxn:abs(flux) for rxn, flux in sol_dict.items() if "EX_" in rxn.name and flux < 0}
 
     @staticmethod
     def _influx_objective(model):
@@ -35,9 +37,9 @@ class MSMinimalMedia:
         return influxes
 
     @staticmethod
-    def _varName_to_ID(var):
+    def _var_to_ID(var):
         rxnID = var.name
-        if "_ru" in var:
+        if "_ru" in rxnID:
             rxnID = rxnID.replace("_ru", "")
         return rxnID
 
@@ -73,86 +75,129 @@ class MSMinimalMedia:
         return min_media
 
     @staticmethod
-    def minimize_components(org_model, minimal_growth=None, printing=True):
+    def _model_growth(sol_dict):
+        return sum([flux for var, flux in sol_dict.items() if "bio" in var.name])
+
+    @staticmethod
+    def _define_min_objective(model, variables, interacting):
+        rxns = FBAHelper.exchange_reactions(model)
+        if not interacting:
+            rxns = FBAHelper.transport_reactions(model)
+        for transporter in rxns:
+            # define the variable
+            variables["ru"][transporter.id] = Variable(transporter.id+"_ru", lb=0, ub=1, type="binary")
+            model.add_cons_vars(variables["ru"][transporter.id])
+            model.solver.update()
+            # bin_flux: {rxn_bin}*1000 >= {rxn_rev_flux}
+            FBAHelper.create_constraint(model, Constraint(Zero, lb=0, ub=None, name=transporter.id+"_bin"),
+                                        coef={variables["ru"][transporter.id]: 1000, transporter.reverse_variable: -1})
+        FBAHelper.add_objective(model, sum([var for var in variables["ru"].values()]), "min")
+        return model, variables
+
+    @staticmethod
+    def minimize_components(org_model, minimal_growth=0.1, solution_limit=100, interacting=True, printing=True):
         """minimize the quantity of metabolites that are consumed by the model"""
         if org_model.slim_optimize() == 0:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations.")
         model = org_model.copy()
+        time1 = process_time()
         variables = {"ru":{}}
         FBAHelper.add_minimal_objective_cons(
             model, sum([rxn.flux_expression for rxn in model.reactions if "bio" in rxn.id]), minimal_growth)
-
+        time2 = process_time()
         # define the binary variable and constraint
-        for ex_rxn in FBAHelper.exchange_reactions(model):
-            # define the variable
-            variables["ru"][ex_rxn.id] = Variable(ex_rxn.id+"_ru", lb=0, ub=1, type="binary")
-            model.add_cons_vars(variables["ru"][ex_rxn.id])
-            # bin_flux: {rxn_bin}*1000 >= {rxn_rev_flux}
-            FBAHelper.create_constraint(model, Constraint(Zero, lb=0, ub=None, name=ex_rxn.id+"_bin"),
-                                            coef={variables["ru"][ex_rxn.id]: 1000, ex_rxn.reverse_variable: -1})
-        FBAHelper.add_objective(model, sum([var for var in variables["ru"].values()]), "min")
+        model, variables = MSMinimalMedia._define_min_objective(model, variables, interacting)
+        # print(model.objective)
+        print(f"{(time2-time1)/60} mins")
 
         # determine each solution
+        interdependencies = {}
         solution_dicts = []
         sol = model.optimize()
-        while sol.status == "optimal":  # limit to 100
+        count = 0
+        minComponents = inf
+        minMedia = None
+        time3 = process_time()
+        print(f"{(time3-time2)/60} mins")
+        while sol.status == "optimal" and count < solution_limit:
             print("sol_dicts length", len(solution_dicts), end="\r")
             sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
+            time4 = process_time()
+            print(f"{(time4-time3)/60} mins")
+            sol_growth = MSMinimalMedia._model_growth(sol_dict)
+            print(sol_growth)
+            sol_media = MSMinimalMedia._exchange_solution(sol_dict)
+            if len(sol_media) < minComponents:
+                minComponents = len(sol_media)
+                minMedia = sol_media
             solution_dicts.append(sol_dict)
             ## omit the solution from the next search
             FBAHelper.create_constraint(model, Constraint(  # build exclusion use can be emulated
-                Zero, lb=None, ub=len(sol_dict)-1,name=ex_rxn.id + f"_exclusion_sol{len(solution_dicts)}"),
-                sol_dict)
+                Zero, lb=None, ub=len(sol_dict)-1,name=f"exclude_sol{len(solution_dicts)}"), sol_dict)
+
+            # search the permutation space by omitting previously investigated solution_dicts
+            # sol_exchanges = [rxn for rxn in sol_dict if "EX_" in rxn.name]
+            # interdependencies[count] = MSMinimalMedia._examine_permutations(
+            #     model, sol_exchanges, variables, sol_dict, count, interacting)
+            time5 = process_time()
+            print(f"{(time5-time4)/60} mins")
+
             sol = model.optimize()
+            count += 1
         if not solution_dicts:
             logger.error("No simulations were feasible.")
-
-        # search the permutation space by omitting previously investigated solution_dicts
-        interdependencies = {}
-        for sol_index, sol_dict in enumerate(solution_dicts):
-            sol_exchanges = [rxn for rxn in sol_dict if "EX_" in rxn.name]
-            print(sol_exchanges)
-            interdependencies[sol_index] = MSMinimalMedia._examine_permutations(model, sol_exchanges, variables, sol_dict, sol_index)
+        return minMedia
 
     @staticmethod
-    def _knockout(org_model, exVar, variables, sol_dict, sol_index):
+    def _knockout(org_model, rxnVar, variables, sol_dict, sol_index, interacting):
         # knockout the specified exchange
         knocked_model = org_model.copy()
-        exID = MSMinimalMedia._varName_to_ID(exVar.name)
-        coef = {variables["ru"][exID]: 0}
-        coef.update({variables["ru"][MSMinimalMedia._varName_to_ID(exVar2.name)]: 1
-                     for exVar2 in sol_dict if exVar != exVar2 and "EX_" in exVar2.name})
-        FBAHelper.create_constraint(knocked_model, Constraint(Zero, lb=0.1, ub=None, name=f"{exVar.name}-sol{sol_index}"), coef)
+        knocked_model, vars = MSMinimalMedia._define_min_objective(knocked_model, {"ru":{}}, interacting)
+        coef = {rxnVar: 0}
+        if interacting:
+            coef.update({variables["ru"][MSMinimalMedia._var_to_ID(rxnVar2)]: 1
+                         for rxnVar2 in sol_dict if rxnVar != rxnVar2 and "EX_" in rxnVar2.name})
+        else:
+            coef.update({variables["ru"][MSMinimalMedia._var_to_ID(rxnVar2)]: 1
+                         for rxnVar2 in sol_dict if (
+                                 rxnVar != rxnVar2 and any(["_e0" in met.id for met in rxnVar2.metabolites]))
+                         })
+        FBAHelper.create_constraint(knocked_model, Constraint(Zero, lb=0.1, ub=None, name=f"{rxnVar.name}-sol{sol_index}"), coef)
         return knocked_model.optimize()
 
     @staticmethod
-    def _examine_permutations(model, exchange_ids_to_explore, variables, sol_dict, sol_index):
-        for exID in exchange_ids_to_explore:
+    def _examine_permutations(model, exchange_ids_to_explore, variables, sol_dict, sol_index, interacting):
+        for index, ex in enumerate(exchange_ids_to_explore):
+            print(f"{ex.name}: {index}/{len(exchange_ids_to_explore)-1} exchanges to explore")
             sol_dict_sans_ex = sol_dict.copy()
-            sol_dict_sans_ex.pop(exID)
+            sol_dict_sans_ex.pop(ex)
             # interdependencies[sol_index][exID] = MSMinimalMedia._examine_permutations(
             #     exID, sol_dict, sol_index, variables, sol_dict_sans_ex)
             interdependencies = {}
-            
+
             ## explore permutations after removing the selected variable
-            diff = DeepDiff(sol_dict_sans_ex, FBAHelper.solution_to_dict(
-                MSMinimalMedia._knockout(model, exID, variables, sol_dict, sol_index)))
+            diff = DeepDiff(sol_dict_sans_ex, FBAHelper.solution_to_dict(MSMinimalMedia._knockout(
+                model, ex, variables, sol_dict, sol_index, interacting)))
             if diff:  # the addition of new exchanges or altered exchange fluxes are detected after the removed exchange
-                for key, value in diff.items():
-                    print(key, value)
-                    # new_mets = {re.search("(?<=[\')(.+)(?=\'])", met): change for met, change in value.items()}
+                print(diff)
+                for key, changes in diff.items():
+                    # for change in changes:
+                    #     print(change)
+                    changed_reactions = [re.search("(?<=\[\')(.+)(?=\'\])", change).group() for change in changes]
                     # this dictionary should be parsed into a list of substitute metabolites and a list of functionally coupled reactions
-                    interdependencies[sol_index][exID].update(new_mets)
-                    MSMinimalMedia._examine_permutations(model, exchange_ids_to_explore, variables, sol_dict, sol_index)
+                    for exchange in [rxn for rxn in changed_reactions if "EX_" in rxn]:
+                        interdependencies[sol_index][exchange] = MSMinimalMedia._examine_permutations(
+                            model, exchange_ids_to_explore, variables, sol_dict,sol_index+1, interacting)
                 # coef = {variables["met"][exID]: 0 for cpd in new_mets.keys()}
                 # coef.update({variables["met"][exID]: 1 for exID in sol_dict if exID not in new_mets.keys()})
                 cpd_name = "_".join(new_mets.keys())
-                BaseFBAPkg.build_constraint(self, "met", 0.1, None, coef, f"{cpd_name}-sol{sol_index}")
-                new_sol = self.model.optimize()
+                new_sol = model.optimize()
+                new_sol_dict = FBAHelper.solution_to_variables_dict(new_sol, model)
+                new_sol_exchanges = [rxn for rxn in sol_dict if "EX_" in rxn.name]
                 if new_sol.status != "optimal":
                     return interdependencies
-                MSMinimalMedia._examine_permutations(exID, new_sol, sol_index, sol_dict_sans_ex)
+                MSMinimalMedia._examine_permutations(model, new_sol_exchanges, variables, new_sol_dict, sol_index+1)
             return interdependencies
 
     @staticmethod

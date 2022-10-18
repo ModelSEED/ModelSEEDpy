@@ -1,6 +1,6 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.community.mscompatibility import MSCompatibility
-from modelseedpy.core.exceptions import ObjectAlreadyDefinedError
+from modelseedpy.core.exceptions import ObjectAlreadyDefinedError, ParameterError
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
@@ -13,6 +13,7 @@ from itertools import combinations
 from optlang.symbolics import Zero
 from matplotlib import pyplot
 from pandas import DataFrame
+from numpy import array
 import logging
 #import itertools
 import cobra
@@ -21,6 +22,14 @@ import sigfig
 import re, os
 
 logger = logging.getLogger(__name__)
+
+
+def isNumber(string):
+    try:
+        float(string)
+        return True
+    except:
+        return False
 
 
 class CommunityModelSpecies:
@@ -106,7 +115,7 @@ class MSCommunity:
 
         #Define Data attributes as None
         self.solution = self.biomass_cpd = self.primary_biomass = self.biomass_drain = None
-        self.msgapfill = self.element_uptake_limit = self.kinetic_coeff = self.modelseed_db_path = None
+        self.msgapfill = self.element_uptake_limit = self.kinetic_coeff = self.msdb_path = None
         self.species = DictList()
 
         # defining the models
@@ -125,8 +134,9 @@ class MSCommunity:
                         print(reaction)
                         if reaction.metabolites[self.biomass_cpd] == 1 and len(reaction.metabolites) > 1:
                             if self.primary_biomass:
-                                raise ObjectAlreadyDefinedError(f"The primary biomass {self.primary_biomass} is already defined,"
-                                                                f"hence, the {reaction} cannot be defined as the model primary biomass.")
+                                raise ObjectAlreadyDefinedError(
+                                    f"The primary biomass {self.primary_biomass} is already defined,"
+                                    f"hence, the {reaction} cannot be defined as the model primary biomass.")
                             print('primary biomass defined', reaction)
                             self.primary_biomass = reaction
                         elif reaction.metabolites[self.biomass_cpd] < 0 and len(reaction.metabolites) == 1:
@@ -135,8 +145,7 @@ class MSCommunity:
                 other_biomass_cpds.append(self.biomass_cpd)
         for biomass_cpd in other_biomass_cpds:
             print(biomass_cpd)
-            species_obj = CommunityModelSpecies(self, biomass_cpd, names)
-            self.species.append(species_obj)
+            self.species.append(CommunityModelSpecies(self, biomass_cpd, names))
         if abundances:
             self.set_abundance(abundances)
 
@@ -259,12 +268,12 @@ class MSCommunity:
         return MSCommunity(model=newmodel,names=names,abundances=abundances)
 
     #Manipulation functions
-    def set_abundance(self,abundances):
-        #ensure normalization
+    def set_abundance(self, abundances):
+        #calculate the normalized biomass
         total_abundance = sum([abundances[species] for species in abundances])
         #map abundances to all species
         for species in abundances:
-            abundances[species] = abundances[species]/total_abundance
+            abundances[species] /= total_abundance
             if species in self.species:
                 self.species.get_by_id(species).abundance = abundances[species]
         #remake the primary biomass reaction based on abundances
@@ -272,10 +281,10 @@ class MSCommunity:
             logger.critical("Primary biomass reaction not found in community model")
         all_metabolites = {self.biomass_cpd:1}
         for species in self.species:
-            all_metabolites[species.biomass_cpd] = -1*abundances[species.id]
+            all_metabolites[species.biomass_cpd] = -abundances[species.id]
         self.primary_biomass.add_metabolites(all_metabolites,combine=False)
 
-    def set_objective(self,target = None,minimize = False): #!!! Mustn't a multilevel objective be set for community models?
+    def set_objective(self,target = None,minimize = False):  #!!! Mustn't a multilevel objective be set for community models?
         if target is None:
             target = self.primary_biomass.id
         sense = "max"
@@ -286,19 +295,19 @@ class MSCommunity:
             direction=sense
         )
 
-    def constrain(self,element_uptake_limit = None, kinetic_coeff = None,modelseed_db_path = None):
+    def constrain(self, element_uptake_limit=None, kinetic_coeff=None, msdb_path=None):
         # applying uptake constraints
-        self.element_uptake_limit = element_uptake_limit
         if element_uptake_limit:
+            self.element_uptake_limit = element_uptake_limit
             self.pkgmgr.getpkg("ElementUptakePkg").build_package(element_uptake_limit)
         # applying kinetic constraints
-        self.kinetic_coeff = kinetic_coeff
         if kinetic_coeff:
-            self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff,self)
+            self.kinetic_coeff = kinetic_coeff
+            self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff, self)
         # applying FullThermo constraints
-        self.modelseed_db_path = modelseed_db_path
-        if modelseed_db_path:
-            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_db_path':modelseed_db_path})
+        if msdb_path:
+            self.msdb_path = msdb_path
+            self.pkgmgr.getpkg("FullThermoPkg").build_package({'modelseed_db_path':msdb_path})
 
     #Utility functions
     def print_lp(self,filename = None):
@@ -312,29 +321,32 @@ class MSCommunity:
     def compute_interactions(self, solution = None,               # the COBRA simulation solution that will be parsed and visualized
                              threshold: int = 1,                  #!!! What is this threshold?
                              visualize: bool = True,              # specifies whether the net flux will be depicted in a network diagram
+                             filename: str = 'cross_feeding_diagram.svg',  # Cross-feeding figure export name
                              export_directory: str = None,        # specifies the directory to which the network diagram and associated datatable will be exported, where None does not export the content
                              node_metabolites: bool = True,       # specifies whether the metabolites of each node will be printed
                              x_offset: float = 0.15,              # specifies the x-axis buffer between each species node and its metabolite list in the network diagram
-                             show_figure: bool = True             # specifies whether the figure will be printed to the console
+                             show_figure: bool = True,            # specifies whether the figure will be printed to the console
+                             ignore_exchanges=None               # cross-fed exchanges that will not be displayed in the graphs
                              ):
         #Check for solution
+        solution = solution or self.solution
         if not solution:
-            solution = self.solution
-        if not solution:
-            logger.warning("No feasible solution!")
-            return None
+            raise ParameterError("A solution must be provided. Interactions are computed from a solution.")
+        if all(array(list(solution.fluxes.values)) == 0):
+            logger.critical("No feasible solution!")
+            return None, None
 
         #Initialize data
         metabolite_data, species_data, species_collection = {}, {"Environment":{}}, {"Environment":{}}
         data = {"IDs":[],"Metabolites/Donor":[], "Environment":[]}
-        met_list, species_list = [], [None for i in range(1000)]
+        met_list, species_list = [], [None]*1000
 
         #establish spreadsheet infrastructure for only extracellular metabolites
         for met in self.model.metabolites:
             if met.compartment == "e0":
                 met_list.append(met)
                 data["IDs"].append(met.id)
-                data["Metabolites/Donor"].append(met.name)
+                data["Metabolites/Donor"].append(re.sub(r"(_\w\d$)", "", met.name))
 
                 metabolite_data[met] = {}
                 metabolite_data[met]["Environment"] = 0
@@ -345,8 +357,6 @@ class MSCommunity:
             species_data[individual.id], species_collection[individual.id] = {}, {}
             species_list[individual.index] = individual
             data[individual.id] = []
-            data["IDs"].append(individual.index)
-            data["Metabolites/Donor"].append(individual.id)
             for other in self.species:
                 species_data[individual.id][other.id] = 0
                 species_collection[individual.id][other.id] = []
@@ -354,109 +364,130 @@ class MSCommunity:
             species_data["Environment"][individual.id] = species_data[individual.id]["Environment"] = 0
             species_collection["Environment"][individual.id], species_collection[individual.id]["Environment"] = [], []
 
-        data["IDs"].append("Environment")
-        data["Metabolites/Donor"].append("Environment")
-        for individual in self.species:
-            data["IDs"].append(individual.index)
-            data["Metabolites/Donor"].append(individual.id+" list")
-
         # computing net metabolite flux from each reaction
         for rxn in self.model.reactions:
             if rxn.id[0:3] == "EX_" and abs(solution.fluxes[rxn.id]) > Zero:
                 cpd = list(rxn.metabolites.keys())[0]
                 if cpd in metabolite_data:
-                    metabolite_data[cpd]["Environment"] += -1*solution.fluxes[rxn.id]
+                    metabolite_data[cpd]["Environment"] += -solution.fluxes[rxn.id]
             if len(rxn.id.split("_")) > 1:
                 comp_index = int(rxn.id.split("_")[-1][1:])
-                for metabolite in rxn.metabolites:
-                    if metabolite in metabolite_data:
-                        if species_list[comp_index] != None:
-                            metabolite_data[metabolite][species_list[comp_index].id] += solution.fluxes[rxn.id]*rxn.metabolites[metabolite]
+                for met in rxn.metabolites:
+                    if met in metabolite_data and species_list[comp_index]:
+                        metabolite_data[met][species_list[comp_index].id] += solution.fluxes[rxn.id]*rxn.metabolites[met]
 
-        # translating net metbaolite flux into species interaction flux
+        # translating net metabolite flux into species interaction flux
+        ignore_exchanges = ignore_exchanges or ["h2o_e0", "co2_e0"]
         for met in metabolite_data:
             #Iterating through the metabolite producers
-            total = sum([metabolite_data[met][individual.id] for individual in self.species if metabolite_data[met][individual.id] > Zero])
-            if metabolite_data[met]["Environment"] > Zero:
-                total += metabolite_data[met]["Environment"]
+            # !!! Why are fluxes normalized?
+            total = sum([max([metabolite_data[met][individual.id], 0]) for individual in self.species])
+            total += max([metabolite_data[met]["Environment"], 0])
             for individual in self.species:
-                if metabolite_data[met][individual.id] > Zero:
-                    # calculate the total net flux between each combination of species, and track the involved metabolites
-                    for other in self.species:
-                        if metabolite_data[met][other.id] < Zero:
-                            normalized_flux = abs(metabolite_data[met][individual.id]*metabolite_data[met][other.id])/total
-                            species_data[individual.id][other.id] += normalized_flux
-                            if normalized_flux > threshold:
-                                species_collection[individual.id][other.id].append(met.name)
-                    # calculate the total net flux between the species and the environment, and track the involved metabolites
-                    if metabolite_data[met]["Environment"] < Zero:
-                        normalized_flux = abs(metabolite_data[met][individual.id]*metabolite_data[met]["Environment"])/total
-                        species_data[individual.id]["Environment"] += normalized_flux
-                        if normalized_flux > threshold:
-                            species_collection[individual.id]["Environment"].append(met.name)
-            if metabolite_data[met]["Environment"] > Zero:
-                for individual in self.species:
-                    if metabolite_data[met][individual.id] < Zero:
-                        normalized_flux = abs(metabolite_data[met]["Environment"]*metabolite_data[met][individual.id])/total
-                        species_data["Environment"][individual.id] += normalized_flux
-                        if normalized_flux > threshold:
-                            species_collection["Environment"][individual.id].append(met.name)
+                if metabolite_data[met][individual.id] <= Zero:
+                    continue
+               ## calculate the total net flux between each combination of species, and track the involved metabolites
+                for other in self.species:
+                    if metabolite_data[met][other.id] >= Zero:
+                        continue
+                    # !!! Why is the flux product determined?
+                    normalized_flux = abs(metabolite_data[met][individual.id]*metabolite_data[met][other.id])/total
+                    species_data[individual.id][other.id] += normalized_flux
+                    if normalized_flux > threshold and not any([re.search(x, met.name, flags=re.IGNORECASE) for x in ignore_exchanges]):
+                        species_collection[individual.id][other.id].append(re.sub(r"(_\w\d$)", "", met.name))
+                ## calculate the total out-flux from a species to the environment
+                if metabolite_data[met]["Environment"] >= Zero:
+                    continue
+                normalized_flux = abs(metabolite_data[met][individual.id]*metabolite_data[met]["Environment"])/total
+                species_data[individual.id]["Environment"] += normalized_flux
+                if normalized_flux > threshold:
+                    species_collection[individual.id]["Environment"].append(re.sub(r"(_\w\d$)", "", met.name))
+            if metabolite_data[met]["Environment"] <= Zero:
+                continue
+            ## calculate the total in-flux to a species from the environment
+            for individual in self.species:
+                if metabolite_data[met][individual.id] >= Zero:
+                    continue
+                normalized_flux = abs(metabolite_data[met][individual.id]*metabolite_data[met]["Environment"])/total
+                species_data["Environment"][individual.id] += normalized_flux
+                if normalized_flux > threshold:
+                    species_collection["Environment"][individual.id].append(re.sub(r"(_\w\d$)", "", met.name))
 
-        # construct a dataframe
+        # construct the dataframes
         for met in met_list:
             for individual in self.species:
                 data[individual.id].append(metabolite_data[met][individual.id])
             data["Environment"].append(metabolite_data[met]["Environment"])
+
+        ## process the fluxes dataframe
+        data["IDs"].append("zzEnvironment")
+        data["Metabolites/Donor"].append(0)
+        for individual in self.species:
+            data[individual.id].append(species_data["Environment"][individual.id])
+        data["Environment"].append(0)
         for individual in self.species:
             for other in self.species:
                 data[individual.id].append(species_data[individual.id][other.id])
-            data[individual.id].append(species_data[individual.id]["Environment"])
-        for individual in self.species:
-            data["Environment"].append(species_data["Environment"][individual.id])
-        data["Environment"].append(0)
-        for individual in self.species:
-            for other in self.species:
-                data[individual.id].append("; ".join(species_collection[individual.id][other.id]))
-            data[individual.id].append("; ".join(species_collection[individual.id]["Environment"]))
-        for individual in self.species:
-            data["Environment"].append("; ".join(species_collection["Environment"][individual.id]))
-        data["Environment"].append(0)
-        data["IDs"].append("Environment list")
-        data["Metabolites/Donor"].append("Environment list")
+            data["Environment"].append(species_data[individual.id]["Environment"])
+            data["IDs"].append(f"zzSpecies{individual.index}")
+            data["Metabolites/Donor"].append(individual.id)
 
+        if len(set(list(map(len, list(data.values()))))) != 1:
+            print([(col, len(content)) for col, content in data.items()])
         self.cross_feeding_df = DataFrame(data)
-        logger.info(self.cross_feeding_df)
+        self.cross_feeding_df.index = list(map(str, self.cross_feeding_df["IDs"])) # sorted()
+        self.cross_feeding_df.index.name = "Metabolite/Donor ID"
+        self.cross_feeding_df.drop(['IDs', "Metabolites/Donor"], axis=1, inplace=True)
+        self.cross_feeding_df = self.cross_feeding_df.loc[(self.cross_feeding_df != 0).any(axis=1)]
+        self.cross_feeding_df.sort_index(inplace=True)
+
+        ## process the identities dataframe
+        exchanged_mets = {"Environment":[" "], "Donor ID":["Environment"]}
+        exchanged_mets.update({ind.id: [] for ind in self.species})
+        for individual in self.species:
+            ### environment exchanges
+            exchanged_mets[individual.id].append("; ".join(species_collection["Environment"][individual.id]))
+            exchanged_mets["Environment"].append("; ".join(species_collection[individual.id]["Environment"]))
+            ### member exchanges
+            exchanged_mets["Donor ID"].append(individual.id)
+            for other in self.species:
+                exchanged_mets[individual.id].append("; ".join(species_collection[individual.id][other.id]))
+
+        if len(set(list(map(len, list(exchanged_mets.values()))))) != 1:
+            print([(col, len(content)) for col, content in exchanged_mets.items()])
+        self.exMets_df = DataFrame(exchanged_mets)
+        self.exMets_df.index = list(map(str, self.exMets_df["Donor ID"]))
+        self.exMets_df.index.name = "Donor ID"
+        self.exMets_df.drop(["Donor ID"], axis=1, inplace=True)
+        self.exMets_df.sort_index(inplace=True)
+        self.exMets_df.fillna(" ")
+        # logger.info(self.cross_feeding_df)
 
         # graph the network diagram
         if visualize:
-            self._visualize_cross_feeding(export_directory, node_metabolites, x_offset, show_figure)
+            self._visualize_cross_feeding(filename, export_directory, node_metabolites, x_offset, show_figure)
 
-        return self.cross_feeding_df
+        return self.cross_feeding_df, self.exMets_df
 
-    def _visualize_cross_feeding(self, export_directory, node_metabolites = True, x_offset = 0.15, show_figure = True):
-        # construct an efficient DataFrame of the cross-feeding interactions
-        net_cross_feeding = {}
-        for index, row in self.cross_feeding_df.iterrows():
-            if re.search('Species\d+', row["Metabolites/Donor"]):
-                net_cross_feeding[row["Metabolites/Donor"]] = row[len(self.species):]
-
+    def _visualize_cross_feeding(self, filename, export_directory, node_metabolites = True, x_offset = 0.15, show_figure = True):
         # define species and the metabolite fluxes
-        net_cross_feeding = DataFrame(net_cross_feeding)
         self.graph = networkx.Graph()
         species_nums = {}
         for species in self.species:
-            species_nums[species.index]= set()
+            species_nums[species.index] = set()
             self.graph.add_node(species.index)
-            for index, entry in net_cross_feeding[f'Species{species.index} list'].iteritems():
-                if 'Species' in index and re.search('(\d+)', index).group() != species.index:
-                    species_nums[species.index].update(entry.split('; '))
+            for col in self.exMets_df.columns:
+                if 'Species' in col and col != f"Species{species.index}":
+                    species_nums[species.index].update(self.exMets_df.at[f"Species{species.index}", col].split('; '))
 
         # define the net fluxes for each combination of two species
-        for species_1, species_2 in combinations(list(species_nums.keys()), 2):
-            species_2_to_1 = net_cross_feeding.at[f'Species{species_2}', f'Species{species_1}']
-            species_1_to_2 = net_cross_feeding.at[f'Species{species_1}', f'Species{species_2}']
-            interaction_net_flux = sigfig.round(species_2_to_1 - species_1_to_2, 3)
-            self.graph.add_edge(species_1,species_2,flux = interaction_net_flux)  # The graph plots directionally toward the larger numbered species
+        ID_prefix = "zzSpecies" if any(["zzSpecies" in x for x in list(self.cross_feeding_df.index)]) else "Species"
+        for index1, index2 in combinations(list(species_nums.keys()), 2):
+            species_1 = min([index1, index2]) ; species_2 = max([index1, index2])
+            species_1_to_2 = self.cross_feeding_df.at[f'{ID_prefix}{species_1}', f'Species{species_2}']
+            species_2_to_1 = self.cross_feeding_df.at[f'{ID_prefix}{species_2}', f'Species{species_1}']
+            interaction_net_flux = sigfig.round(species_1_to_2 - species_2_to_1, 3)
+            self.graph.add_edge(species_1,species_2,flux = interaction_net_flux)
 
         # compose the nextwork diagram of net fluxes
         self.pos = networkx.circular_layout(self.graph)
@@ -469,10 +500,11 @@ class MSCommunity:
         self.labels = networkx.get_edge_attributes(self.graph,'flux')
         networkx.draw_networkx_edge_labels(self.graph,self.pos,edge_labels=self.labels)
 
-        if export_directory:
-            pyplot.savefig(os.path.join(export_directory, 'cross_feeding_diagram.svg'))
-            self.cross_feeding_df.to_csv(os.path.join(export_directory, 'cross_feeding.csv'))
-
+        # export and view the figure
+        filename = filename or 'cross_feeding_diagram.svg'
+        export_directory = export_directory or os.getcwd()
+        pyplot.savefig(os.path.join(export_directory, filename))
+        self.cross_feeding_df.to_csv(os.path.join(export_directory, re.sub(r"(\.\w+)",".csv",filename)))
         if show_figure:
             pyplot.show()
 
@@ -532,7 +564,7 @@ class MSCommunity:
             return self._compute_relative_abundance_from_solution()
         return None
 
-    def run(self,media,pfba = None):
+    def run(self,media,pfba = None):  # !!! why is the media needed to execute the model?
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         self.print_lp()
         save_matlab_model(self.model, self.model.name+".mat")
@@ -545,8 +577,6 @@ class MSCommunity:
         logger.info(self.model.summary())
         return self.solution
 
-
-    #Internal functions
     def _compute_relative_abundance_from_solution(self,solution = None):
         if not solution and not self.solution:
             logger.warning("No feasible solution!")
@@ -567,7 +597,7 @@ class MSCommunity:
         self.solution = None
         if solution.status != 'optimal':
             logger.warning("No solution found for the simulation.")
-            return
+            return None
         self.solution = solution
 
 

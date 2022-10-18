@@ -55,20 +55,21 @@ class FullThermoPkg(BaseFBAPkg):
         self.parameters["concentrations"] = FullThermoPkg.default_concentrations()
 
         # amalgamate default and specified paramters 
-        self.validate_parameters(parameters,            # specified parameters
-                                 ["modelseed_db_path"]  # required parameter for uploading the ModelSEED Database
-                                 ,{                     # default parameters
-            "default_max_conc":0.02,      #M
-            "default_min_conc":0.000001,  #M
-            "default_max_error":5,        #KJ/mol
-            "custom_concentrations":{},
-            "custom_deltaG_error":{},
-            "custom_compartment_potential":{},
-            "temperature":298,            #K
-            "filter":None,
-            "infeasible_model": False,
-            'dgbin':False
-        })
+        self.validate_parameters(
+            parameters,            # specified parameters
+            ["modelseed_db_path"],  # required parameter for uploading the ModelSEED Database
+            {                     # default parameters
+                "default_max_conc":0.02,      #M
+                "default_min_conc":0.000001,  #M
+                "default_max_error":5,        #KJ/mol
+                "custom_concentrations":{},
+                "custom_deltaG_error":{},
+                "custom_compartment_potential":{},
+                "temperature":298,            #K
+                "filter":None,
+                "infeasible_model": False,
+                'dgbin':False
+            })
         self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_db_path"])
         for cpd in self.parameters["custom_concentrations"]:
             self.parameters["concentrations"][cpd] = self.parameters["custom_concentrations"][cpd]

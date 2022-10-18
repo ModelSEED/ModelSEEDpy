@@ -349,8 +349,9 @@ class FBAHelper:
             model.solver.update()
 
     @staticmethod
-    def add_minimal_objective_cons(model, objective_expr=None, min_value=0.1):
+    def add_minimal_objective_cons(model, objective_expr=None, min_value=None):
         objective_expr = objective_expr or model.objective.expression
+        min_value = min_value or 0.1
         FBAHelper.create_constraint(model, Constraint(objective_expr, lb=min_value, ub=None, name="min_value"))
     
     @staticmethod
@@ -384,7 +385,11 @@ class FBAHelper:
     @staticmethod
     def exchange_reactions(model):
         return [rxn for rxn in model.reactions if "EX_" in rxn.id]
-    
+
+    @staticmethod
+    def transport_reactions(model):
+        return [rxn for rxn in model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
+
     @staticmethod
     def bio_reactions(model):
         return [rxn for rxn in model.reactions if "bio" in rxn.id]
