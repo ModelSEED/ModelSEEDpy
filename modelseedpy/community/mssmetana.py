@@ -1,5 +1,6 @@
 from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msminimalmedia import MSMinimalMedia
+from modelseedpy.community.commhelper import CommHelper
 from modelseedpy.community.mscommunity import MSCommunity
 from itertools import combinations, permutations, chain
 from optlang import Variable, Constraint, Objective
@@ -114,7 +115,8 @@ class MSSmetana:
     @staticmethod
     def _load_models(member_models: Iterable, com_model=None, compatibilize=True):
         if not com_model and member_models:
-            return member_models, MSCommunity.build_from_species_models(member_models, name="SMETANA_example", cobra_model=True)
+            model, names, abundances = CommHelper.build_from_species_models(member_models, name="SMETANA_example", cobra_model=True)
+            return member_models, MSCommunity(model, names=names, abundances=abundances)
         # models = PARSING_FUNCTION(community_model) # TODO the individual models of a community model must be parsed
         if compatibilize:
             return _compatibilize_models(member_models), _compatibilize_models([com_model])[0]

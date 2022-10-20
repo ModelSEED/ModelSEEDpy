@@ -22,14 +22,11 @@ class ElementUptakePkg(BaseFBAPkg):
     
     def build_constraint(self,element):
         coef = {self.variables["elements"][element]: -1}
-        for reaction in FBAHelper.exchange_reactions(self.model):
-            total = 0
-            for metabolite in reaction.metabolites:
-                elements = metabolite.elements
-                if element in elements:
-                    total += elements[element]*reaction.metabolites[metabolite]
-            if total < 0:
-                coef[reaction.reverse_variable] = -total
-            elif total > 0:
-                coef[reaction.forward_variable] = total
+        for exRXN in FBAHelper.exchange_reactions(self.model):
+            totalNumAtoms = sum([met.elements[element]*exRXN.metabolites[met]
+                                 for met in exRXN.metabolites if element in met.elements])
+            if totalNumAtoms < 0:
+                coef[exRXN.reverse_variable] = abs(totalNumAtoms)
+            elif totalNumAtoms > 0:
+                coef[exRXN.forward_variable] = totalNumAtoms
         return BaseFBAPkg.build_constraint(self,"elements",0,0,coef,element)   

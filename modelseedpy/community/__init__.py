@@ -7,3 +7,5 @@ from modelseedpy.community.mscommunity import *
 from modelseedpy.community.dfbapkg import dFBAPkg
 from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.community.mssmetana import MSSmetana
+from modelseedpy.community.steadycom import MSSteadyCom
+from modelseedpy.community.commhelper import CommHelper
