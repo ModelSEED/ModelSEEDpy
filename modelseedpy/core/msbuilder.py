@@ -8,7 +8,8 @@ from modelseedpy.core.msmodel import (
     get_gpr_string,
     get_reaction_constraints_from_direction,
 )
-from cobra.core import Gene, Metabolite, Model, Reaction
+from cobra.core import Gene, Metabolite, Reaction
+from modelseedpy.core.msmodel import MSModel
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
@@ -604,7 +605,7 @@ class MSBuilder:
         if self.template is None:
             self.auto_select_template()
 
-        cobra_model = Model(model_id)
+        cobra_model = MSModel(model_id, genome=self.genome, template=self.template)
         cobra_model.add_reactions(self.build_metabolic_reactions(index=index))
         cobra_model.add_reactions(
             self.build_non_metabolite_reactions(
@@ -646,7 +647,7 @@ class MSBuilder:
         :param index: index for the metabolites
         :return:
         """
-        model = Model(model_id if model_id else template.id)
+        model = MSModel(model_id if model_id else template.id, template=template)
         all_reactions = []
         for rxn in template.reactions:
             reaction = MSBuilder._build_reaction(
