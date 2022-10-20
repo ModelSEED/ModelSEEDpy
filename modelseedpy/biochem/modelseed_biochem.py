@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
+import json
 import pandas as pd
 from cobra.core.dictlist import DictList
+from modelseedpy.core.msmodel import get_reaction_constraints_from_direction
 from modelseedpy.biochem.modelseed_compound import ModelSEEDCompound, ModelSEEDCompound2
 from modelseedpy.biochem.modelseed_reaction import ModelSEEDReaction, ModelSEEDReaction2
 
 logger = logging.getLogger(__name__)
+
+_BIOCHEM_FOLDER = 'Biochemistry'
 
 ALIAS_CPD_IDENTIFIERS_ORG = {
     "BiGG": "bigg.metabolite",
@@ -174,6 +179,60 @@ def load_metabolites_from_df(
     return compounds
 
 
+def _load_metabolites(database_path: str) -> dict:
+    metabolites = {}
+    contents = os.listdir(f'{database_path}/{_BIOCHEM_FOLDER}')
+    for f in contents:
+        if f.startswith('compound_') and f.endswith('.json'):
+            with open(f'{database_path}/{_BIOCHEM_FOLDER}/{f}', 'r') as fh:
+                _compounds_data = json.load(fh)
+                for o in _compounds_data:
+                    if 'id' in o and o['id']:
+                        cpd = ModelSEEDCompound2(o['id'], o.get('formula'),
+                                                 o.get('name'), o.get('charge'), '',
+                                                 o.get('abbreviation'), None,
+                                                 o.get('mass'), o.get('deltag'), o.get('deltagerr'))
+                        metabolites[cpd.id] = cpd
+                    else:
+                        print('error', o)
+                #print(_compounds_data[0].keys())
+    return metabolites
+
+
+def _load_reactions(database_path: str, metabolites: dict) -> (dict, dict):
+    reactions = {}
+    contents = os.listdir(f'{database_path}/{_BIOCHEM_FOLDER}')
+    metabolites_indexed = {}
+    for f in contents:
+        if f.startswith('reaction_') and f.endswith('.json'):
+            with open(f'{database_path}/{_BIOCHEM_FOLDER}/{f}', 'r') as fh:
+                _reactions_data = json.load(fh)
+                for o in _reactions_data:
+                    if 'id' in o and o['id']:
+                        lower_bound, upper_bound = get_reaction_constraints_from_direction(o.get('reversibility'))
+                        stoichiometry = o.get('stoichiometry')
+                        reaction_metabolites = {}
+                        for s in stoichiometry:
+                            cmp_token = s['compartment']
+                            value = s['coefficient']
+                            cpd = metabolites[s['compound']]
+                            cpd_index_id = f"{cpd.id}_{cmp_token}"
+                            if cpd_index_id not in metabolites_indexed:
+                                cpd_token = cpd.copy()
+                                cpd_token.id = f"{cpd.id}_{cmp_token}"
+                                cpd_token.base_id = cpd.id
+                                cpd_token.compartment = cmp_token
+                                metabolites_indexed[cpd_index_id] = cpd_token
+                            reaction_metabolites[metabolites_indexed[cpd_index_id]] = value
+                        rxn = ModelSEEDReaction2(o['id'], o.get('name'), '', lower_bound, upper_bound)
+                        rxn.add_metabolites(reaction_metabolites)
+                        reactions[rxn.id] = rxn
+                    else:
+                        print('error', o)
+                #print(_reactions_data[0])
+    return reactions, metabolites_indexed
+
+
 def load_reactions_from_df(
     df: pd.DataFrame,
     database_metabolites: dict,
@@ -271,7 +330,7 @@ class ModelSEEDDatabase:
     ModelSEED database instance.
     """
 
-    def __init__(self, compounds, reactions, compound_tokens):
+    def __init__(self, compounds: list, reactions: list, compound_tokens: list):
         self.compounds = DictList()
         self.compound_tokens = DictList()
         self.reactions = DictList()
@@ -549,7 +608,7 @@ def load_database(
     return database
 
 
-def from_local(path):
+def from_local_old(path):
     database_repo = path
     reactions_url = database_repo + "/Biochemistry/reactions.tsv"
     compounds_url = database_repo + "/Biochemistry/compounds.tsv"
@@ -616,6 +675,13 @@ def from_local(path):
 
     return modelseed
 
+
+def from_local(database_path: str):
+    metabolites = _load_metabolites(database_path)
+    reactions, metabolite_tokens = _load_reactions(database_path, metabolites)
+    database = ModelSEEDDatabase(metabolites.values(), reactions.values(), metabolite_tokens.values())
+
+    return database
 
 def get_names_from_df(df):
     names = {}
