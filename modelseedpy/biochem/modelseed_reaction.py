@@ -145,6 +145,10 @@ class ModelSEEDReaction2(Reaction):
         self.status = status
 
         self.is_obsolete = is_obsolete
+        if self.is_obsolete:
+            self.is_obsolete = True
+        else:
+            self.is_obsolete = False
         self.is_abstract = is_abstract
 
         self.delta_g = float(delta_g) if delta_g else None
@@ -188,6 +192,7 @@ class ModelSEEDReaction2(Reaction):
             rxn_id, name, self.subsystem, self.lower_bound, self.upper_bound
         )
         reaction.add_metabolites(metabolites)
+        reaction.annotation.update(self.annotation)
         return reaction
 
     @property
