@@ -1,6 +1,6 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.community.steadycom import MSSteadyCom
-from modelseedpy.community.commhelper import CommHelper
+from modelseedpy.community.commhelper import build_from_species_models
 from modelseedpy.core.exceptions import ObjectAlreadyDefinedError, ParameterError
 from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.fbahelper import FBAHelper
@@ -114,7 +114,7 @@ class MSCommunity:
         self.species = DictList()
 
         # defining the models
-        self.model = model if not models else CommHelper.build_from_species_models(
+        self.model = model if not models else build_from_species_models(
             models, names=names, abundances=abundances, cobra_model=True)
         self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         msid_cobraid_hash = FBAHelper.msid_hash(self.model)
