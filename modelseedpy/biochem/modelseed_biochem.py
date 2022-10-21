@@ -139,10 +139,13 @@ def load_metabolites_from_df(
             if cpd_id in structures:
                 if "SMILE" in structures[cpd_id]:
                     smiles = structures[cpd_id]["SMILE"]
+                    aliases_annotation['SMILE'] = smiles
                 if "InChI" in structures[cpd_id]:
                     inchi = structures[cpd_id]["InChI"]
+                    aliases_annotation['InChI'] = inchi
                 if "InChIKey" in structures[cpd_id]:
                     inchi_key = structures[cpd_id]["InChIKey"]
+                    aliases_annotation['InChIKey'] = inchi_key
             inchi_key = None if pd.isna(inchi_key) or len(inchi_key) == 0 else inchi_key
             other_names = set()
             if cpd_id in names:
@@ -158,9 +161,6 @@ def load_metabolites_from_df(
                 mass,
                 delta_g,
                 delta_g_err,
-                smiles,
-                inchi_key,
-                inchi,
                 is_core,
                 is_obsolete,
                 is_cofactor,
@@ -763,6 +763,10 @@ def from_local_old(path):
 
 
 def from_local(database_path: str):
+    contents = os.listdir(f'{database_path}/Biochemistry/')
+    if 'compounds.tsv' in contents:
+        return from_local_old(database_path)
+
     compound_aliases_url = f'{database_path}/Biochemistry/Aliases/Unique_ModelSEED_Compound_Aliases.txt'
     reaction_aliases_url = f'{database_path}/Biochemistry/Aliases/Unique_ModelSEED_Reaction_Aliases.txt'
     compound_aliases = _load_aliases_df(pd.read_csv(compound_aliases_url, index_col=None, sep='\t'))
