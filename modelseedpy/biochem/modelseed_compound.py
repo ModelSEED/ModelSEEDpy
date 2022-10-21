@@ -4,8 +4,14 @@ from modelseedpy.core.mstemplate import MSTemplateSpecies
 from cobra.core import Metabolite
 import pandas as pd
 
+_SMILE_ALIAS = 'SMILE'
+_INCHI_ALIAS = 'InChI'
+_INCHI_KEY_ALIAS = 'InChIKey'
 
 class ModelSEEDCompound2(Metabolite):
+
+
+
     def __init__(
         self,
         cpd_id=None,
@@ -18,9 +24,6 @@ class ModelSEEDCompound2(Metabolite):
         mass=None,
         delta_g=None,
         delta_g_error=None,
-        smiles=None,
-        inchi_key=None,
-        inchi=None,
         is_core=False,
         is_obsolete=False,
         is_cofactor=False,
@@ -48,10 +51,6 @@ class ModelSEEDCompound2(Metabolite):
         self.delta_g = delta_g
         self.delta_g_error = delta_g_error
 
-        self.smiles = smiles
-        self.inchi_key = inchi_key
-        self.inchi = inchi
-
         self.linked_compound = None
         self.pka = pka
         self.pkb = pkb
@@ -63,7 +62,20 @@ class ModelSEEDCompound2(Metabolite):
         res = self.copy()
         res.id = f"{self.seed_id}_{compartment}"
         res.compartment = compartment
+        res.annotation.update(self.annotation)
         return res
+
+    @property
+    def smiles(self):
+        return None if _SMILE_ALIAS not in self.annotation else self.annotation[_SMILE_ALIAS]
+
+    @property
+    def inchi_key(self):
+        return None if _INCHI_KEY_ALIAS not in self.annotation else self.annotation[_INCHI_KEY_ALIAS]
+
+    @property
+    def inchi(self):
+        return None if _INCHI_ALIAS not in self.annotation else self.annotation[_INCHI_ALIAS]
 
 
 class ModelSEEDCompound(ModelSEEDObject):
