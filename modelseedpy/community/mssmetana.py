@@ -52,6 +52,15 @@ class MSSmetana:
         else:
             self.media = media_dict
 
+    def all_scores(self):
+        mro = self.mro_score()
+        mip = self.mip_score(interacting_media=self.media)
+        mu = self.mu_score()
+        mp = self.mp_score()
+        sc = self.sc_score()
+        smetana = self.smetana_score()
+        return (mro, mip, mu, mp, sc, smetana)
+
     def mro_score(self):
         self.mro = MSSmetana.mro(self.models, self.min_growth, self.media, self.compatibilize, self.printing)
         if self.printing:
