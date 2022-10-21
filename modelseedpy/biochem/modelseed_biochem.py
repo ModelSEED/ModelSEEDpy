@@ -224,12 +224,14 @@ def _load_reactions(database_path: str, metabolites: dict) -> (dict, dict):
                                 cpd_token.compartment = cmp_token
                                 metabolites_indexed[cpd_index_id] = cpd_token
                             reaction_metabolites[metabolites_indexed[cpd_index_id]] = value
-                        rxn = ModelSEEDReaction2(o['id'], o.get('name'), '', lower_bound, upper_bound)
+                        rxn = ModelSEEDReaction2(o['id'], o.get('name'), '', lower_bound, upper_bound,
+                                                 delta_g=o.get('deltag'),
+                                                 delta_g_error=o.get('deltagerr'))
                         rxn.add_metabolites(reaction_metabolites)
                         reactions[rxn.id] = rxn
                     else:
-                        print('error', o)
-                #print(_reactions_data[0])
+                        logger.error(f'failed to read reaction record {o}')
+
     return reactions, metabolites_indexed
 
 
