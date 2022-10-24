@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import pytest
 import json
 import cobra
@@ -8,13 +9,26 @@ from modelseedpy import MSATPCorrection, MSMedia
 
 @pytest.fixture
 def template():
-    with open("./tests/test_data/template_core_bigg.json", "r") as fh:
+    with open(
+        os.path.join(
+            os.path.dirname(__file__), "..", "test_data", "template_core_bigg.json"
+        ),
+        "r",
+    ) as fh:
         return MSTemplateBuilder.from_dict(json.load(fh)).build()
 
 
 @pytest.fixture
 def template_genome_scale():
-    with open("./tests/test_data/template_genome_scale_bigg.json", "r") as fh:
+    with open(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "test_data",
+            "template_genome_scale_bigg.json",
+        ),
+        "r",
+    ) as fh:
         return MSTemplateBuilder.from_dict(json.load(fh)).build()
 
 
@@ -23,7 +37,12 @@ def get_model():
     def _method(ko=None, added_compounds=None, added_reactions=None):
         if ko is None:
             ko = []
-        with open("./tests/test_data/e_coli_core.json", "r") as fh:
+        with open(
+            os.path.join(
+                os.path.dirname(__file__), "..", "test_data", "e_coli_core.json"
+            ),
+            "r",
+        ) as fh:
             model_json = json.load(fh)
             model_json["compartments"] = {
                 k + "0": v for (k, v) in model_json["compartments"].items()
