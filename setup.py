@@ -18,6 +18,9 @@ setup(
     url='https://github.com/ModelSEED/ModelSEEDpy',
     license=license,
     packages=find_packages(exclude=('docs')),
+    package_data={
+        'modelseedpy': ['config.cfg', "data/*"],
+    },
     include_package_data =True,
     install_requires=[
         "networkx >= 2.4",
@@ -29,7 +32,8 @@ setup(
         "matplotlib >= 3.0.0",
         "pyeda",
         "icecream",
-        "deepdiff"
+        "deepdiff",
+        "openpyxl"
     ],
     project_urls={
         'Documentation': 'https://modelseedpy.readthedocs.io/en/stable/',
