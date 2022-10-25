@@ -52,10 +52,16 @@ and the path to this repository is passed as an argument to the corresponding pa
  pip install pyeda_wheel_name.whl
    
    
+   
 .. toctree::
    :hidden:
-
+   
+   model_reconstruction/index
    simulate
+   escher/Index
+   kbase/Index
+   others/Index
+   webinars
    api
    
    

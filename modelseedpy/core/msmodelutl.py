@@ -1,9 +1,8 @@
 import logging
 import re
-import time
 from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are not used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-from modelseedpy.core.fbahelper import FBAHelper
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -68,12 +67,8 @@ class MSModelUtil:
     def __init__(self,model):
         self.model = model
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
-        self.atputl = None
-        self.gfutl = None
-        self.metabolite_hash = None
-        self.search_metabolite_hash = None
-        self.test_objective = None
-        self.score = None
+        self.atputl = self.gfutl = self.metabolite_hash = self.search_metabolite_hash = None
+        self.test_objective = self.score = None
     
     def printlp(self,lpfilename="debug.lp"):
         with open(lpfilename, 'w') as out:
@@ -85,13 +80,13 @@ class MSModelUtil:
         for met in self.model.metabolites:
             self.add_name_to_metabolite_hash(met.id,met)
             self.add_name_to_metabolite_hash(met.name,met)
-            for entry in met.annotation.values():
-                if isinstance(entry, list):
-                    for item in entry:
-                        self.add_name_to_metabolite_hash(item,met)
+            for item in met.annotation.values():
+                if isinstance(item, list):
+                    for entry in item:
+                        self.add_name_to_metabolite_hash(entry,met)
                 else:
-                    self.add_name_to_metabolite_hash(entry,met)
-    
+                    self.add_name_to_metabolite_hash(item,met)
+
     def add_name_to_metabolite_hash(self,name,met):
         if name not in self.metabolite_hash:
             self.metabolite_hash[name] = []
@@ -138,16 +133,12 @@ class MSModelUtil:
                 output[msid].append(cpd)
         return output
     
-    def exchange_list(self):
-        exchange_reactions = []
-        for reaction in self.model.reactions:
-            if reaction.id[:3] == 'EX_':
-                exchange_reactions.append(reaction)
-        return exchange_reactions
+    def exchange_list(self): 
+        return [rxn for rxn in self.model.reactions if 'EX_' in rxn.id]
     
     def exchange_hash(self):
         exchange_reactions = {}
-        for ex_rxn in FBAHelper.exchange_reactions(self.model):
+        for ex_rxn in self.exchange_list():
             for met in ex_rxn.metabolites:
                 if ex_rxn.metabolites[met] == -1:
                     exchange_reactions[met] = ex_rxn
@@ -180,7 +171,7 @@ class MSModelUtil:
             self.add_exchanges_for_metabolites(exchange_list)
         return output
         
-    def add_exchanges_for_metabolites(self,cpds,uptake=0,excretion=0,prefix='EX_', prefix_name='Exchange for '):
+    def add_exchanges_for_metabolites(self,cpds,uptake=0,excretion=0,prefix='EX_', prefix_name='Exchange for '):  # !!! why not use the existing COBRApy infrastructure of add_boundary() ?
         drains = []
         for cpd in cpds:
             drain_reaction = Reaction(
@@ -239,7 +230,7 @@ class MSModelUtil:
         return flux_values
 
     #Required this function to add gapfilled reactions to a KBase model for saving gapfilled model    
-    def convert_cobra_reaction_to_kbreaction(self,rxn,kbmodel,cpd_hash,direction = "=",add_to_model = 1,reaction_genes = None):
+    def convert_cobra_reaction_to_kbreaction(self, rxn, kbmodel=None, cpd_hash={}, direction="=", add_to_model=1, reaction_genes=None):
         rxnref = "~/template/reactions/id/rxn00000_c"
         if re.search('rxn\d+_[a-z]+',rxn.id):
             rxnref = re.sub("\d+$","",f"~/template/reactions/id/{rxn.id}")
@@ -269,10 +260,10 @@ class MSModelUtil:
                 "coefficient" : rxn.metabolites[met],
                 "modelcompound_ref" : "~/modelcompounds/id/"+met.id
             })
-        if reaction_genes is not None and rxn.id in reaction_genes:
+        if reaction_genes and rxn.id in reaction_genes:
             best_gene = None
             for gene, val in reaction_genes[rxn.id].items():
-                if best_gene is None or val > reaction_genes[rxn.id][best_gene]:
+                if not best_gene or val > reaction_genes[rxn.id][best_gene]:
                     best_gene = gene
             rxn_data["modelReactionProteins"] = [{"note":"Added from gapfilling","modelReactionProteinSubunits":[],"source":"Unknown"}]
             rxn_data["modelReactionProteins"][0]["modelReactionProteinSubunits"] = [
@@ -294,7 +285,7 @@ class MSModelUtil:
             for gapfilling in newmodel["gapfillings"]:
                 if gapfilling["id"] == gfid:
                     gapfilling_obj = gapfilling
-        if gapfilling_obj is None:    
+        if not gapfilling_obj:
             gapfilling_obj = {
                 "gapfill_id": newmodel["id"]+"."+gfid,
                 "id": gfid,
@@ -308,7 +299,7 @@ class MSModelUtil:
             cpd_hash[cpd["id"]] = cpd
         for rxn in gapfilled_reactions["new"]:
             reaction = self.model.reactions.get_by_id(rxn)
-            kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,newmodel,cpd_hash,gapfilled_reactions["new"][rxn],1,reaction_genes)
+            kbrxn = self.convert_cobra_reaction_to_kbreaction(reaction,newmodel,cpd_hash,gapfilled_reactions["new"][rxn],reaction_genes)
             kbrxn["gapfill_data"][gfid] = dict()
             kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["new"][rxn],1,[]]
             #rxn_table.append({

@@ -1,77 +1,63 @@
-MScompatibility
+mscompatibility
 --------------------------
 
 +++++++++++++++++++++
 MSCompatibility()
 +++++++++++++++++++++
 
-This class determines the compatibility of individual models for the construction of a community model, as well as the standardization of models to the metabolite and reaction IDs and names of the ModelSEED Database:
+This class compatibilizes a collection of individual metabolic models to facilitate syntrophy and accurate analysis of herefrom community models. This standardization leverages the ModelSEED Database as the arbitrator of metabolite and reaction IDs in the metabolic models:
 
 .. code-block:: python
 
- from modelseedpy.core import MSCompatibility
+ from modelseedpy.community import MSCompatibility
  ms_compat = MSCompatibility(modelseed_db_path, printing = True)
 
 - *modelseed_db_path* ``str``: the path to the ModelSEED Database, which is only required for the FullThermo, where ``None`` does not apply these constraints. 
 - *printing* ``bool``: specifies whether results will be printed.
 
 ----------------------
-standardize_MSD()
+standardize()
 ----------------------
 
-The IDs and names of the metabolites and reactions of a model are standardized to those of the ModelSEED Database:
+**Staticmethod**
+
+The IDs and names of the metabolites and reactions models are standardized to those of the ModelSEED Database:
 
 .. code-block:: python
 
- ms_compat.standardize_MSD(model)
+ new_models (, optionally unknown_met_ids) = MSCompatibility.standardize(models, metabolites=True, exchanges=True, conflicts_file_name=None, model_names=None, 
+                       export_directory=None, view_unknown_mets=True, printing=True, unknown_met_ids=None, changed_metabolites=None, changed_reactions=None)
 
-- *model* ``cobra.core.model.Model``: the CobraKBase model that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-
-**returns** the standardized COBRA model
-
------------------------------
-compare_models()
------------------------------
-
-Determines the consistency of reaction or metabolite IDs and names between two models:
-
-.. code-block:: python
-
- ms_compat.compare_models(model_1, model_2, metabolites = True, standardize = False)
-
-- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *models* ``Iterable o cobra.core.model.Model``: the collection of CobraKBase models that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
 - *metabolites* ``bool``: specifies whether metabolites (``True``) or reactions (``False``) will be compared between the models.
-- *standardize* ``bool``: specifies whether the models will be standardized through the ``standardize_MSD`` function.
+- *exchanges* ``bool``: specifies whether only the exchanges of the models will be standardized.
+- *conflicts_file_name* ``str``: the filename to where metabolite conflicts will be exported, where ``None`` does not export.
+- *model_names* ``list``: the collection of model names that correspond with the indices of the ``models`` parameter, which is used to distinguish the exported files of each model.
+- *export_directory* ``str``: specifies the directory to which all of the content will be exported.
+- *view_unknown_mets* & *printing* ``bool``: specifies whether the unknown metabolite IDs and other results of the alignment functionality, respectively, are printed to the console for the user to review.
+- *unknown_met_ids*, *changed_metabolites*, & *changed_reactions* ``Iterable``: collections of unknown metabolite IDs and corrected metabolites and reactions. These are internal entities that are passed as argumented to ``standardize()`` by ``align_exchanges()`` when the latter is provided ``True`` through the ``standardize`` parameter.
 
-**returns** misaligned, model_1, model_2
+**returns** the collection of standardized COBRA models, and possibly the collection of unknown metabolite IDs
 
-- *misaligned* ``list``: the collection of the discrepancies between the two models, where the differing entries for each model are both provided.
-- *model_1* & *model_2* ``cobra.core.model.Model``: the models that were compared, which is relevant only if the models were also standardized via ``standardize = True``.
+-----------------------------
+align_exchanges()
+-----------------------------
 
-----------------------
-exchanges()
-----------------------
+**Staticmethod**
 
-Model variabilities in the exchange fluxes -- such as non-standard metabolite IDs (e.g NH4) and different metabolite IDs for each isomer (e.g. L-alanine is cpd00035 while beta-alanine is cpd00085) -- are systematically corrected to facilitate a compatible community of these models.
+The exchange reactions and metabolites of metabolic models are aligned to facilitate community assemblage and cross-feeding interactions:
 
 .. code-block:: python
 
- ms_compat.exchanges(model)
+ new_models (, optionally extras) = MSCompatibility.align_exchanges(models, standardize=False, conflicts_file_name=None, 
+                                                    model_names=None, export_directory=None, printing=True, extras=False)
+ 
+- *models* ``Iterable o cobra.core.model.Model``: the collection of CobraKBase models that will be standardized. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *standardize* ``bool``: specifies whether the models will be standardized through the ``standardize`` function.
+- *conflicts_file_name* ``str``: the filename to where metabolite conflicts will be exported, where ``None`` does not export.
+- *model_names* ``Iterable``: the collection of model names that correspond with the indices of the ``models`` parameter, which is used to distinguish the exported files of each model.
+- *export_directory* ``str``: specifies the directory to which all of the content will be exported.
+- *printing* ``bool``: specifies whether results of the alignment functionality, respectively, are printed to the console for the user to review.
+- *extras* ``bool``: specifies whether the ``unique_mets``, ``unknown_met_ids``, ``changed_metabolites``, and ``changed_reactions`` collections of internal data are provided in a tuple, respectively, as the second returned object from the function. This information is not provided, and the function returns one object, when this parameter is ``False``.
 
-- *model_1* & *model_2* ``cobra.core.model.Model``: CobraKBase models that will be compared. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-
-**returns** model, unknown_met_ids
-
-- *model* ``cobra.core.model.Model``: the corrected model that is now compatible with other models to assemble a community.
-- *unknown_met_ids* ``list``: the collection of non-standard metabolite IDs that were not able to be mapped with a standard ModelSEED Database ID.
-
-
-----------------------
-Accessible content
-----------------------
-
-Several objects within the ``MSCompatibility`` class may be useful for subsequent post-processing or troubleshooting of the simulation results:
-
-- *compounds* & *reactions* ``dict``: the complete content of compounds and reactions, respectively, in the ModelSEED Database.
-- *compound_names* & *compounds_id_indexed* ``OrderedDict``: ordered dictionaries of ModelSEED compound names and IDs (``values``) according to the corresponding compound IDs and names (``keys``), respectively.
-- *reaction_ids* ``OrderedDict``: ordered dictionary of ModelSEED reaction IDs (``values``) according to the corresponding reaction names (``keys``).
+**returns** the collection of aligned COBRA models, and possibly the collection of the aforementioned ``extras``

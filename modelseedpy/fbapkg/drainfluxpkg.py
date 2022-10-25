@@ -3,16 +3,16 @@
 from __future__ import absolute_import
 
 import logging
-from optlang.symbolics import Zero, add
-from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-
 logger = logging.getLogger("modelseedpy")
+
+from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.core.fbahelper import FBAHelper
 
 #Base class for FBA packages
 class DrainFluxPkg(BaseFBAPkg):
     def __init__(self,model):
         BaseFBAPkg.__init__(self,model,"drain flux",{},{"drain"})
-        self.update_drain_fluxes(self)
+        self.update_drain_fluxes()
         
     def build_package(self,parameters):
         self.validate_parameters(parameters,[],{
@@ -24,14 +24,14 @@ class DrainFluxPkg(BaseFBAPkg):
             "update_drain_fluxes":False
         })
         if self.parameters["update_drain_fluxes"]:
-            self.update_drain_fluxes(self)
+            self.update_drain_fluxes()
         if self.parameters["add_all_intracellular_drains"]:
             for cpd in self.model.metabolites:
                 self.add_drain_reaction(cpd,self.parameters["default_uptake"],self.parameters["default_excretion"])
         else:
             for cpd in self.parameters["drain_compounds"]:
-                if cpd in self.metabolites:
-                    cpdobj = self.metabolites.get_by_id(cpd)
+                if cpd in self.model.metabolites:
+                    cpdobj = self.model.metabolites.get_by_id(cpd)
                     self.add_drain_reaction(cpdobj,self.parameters["drain_compounds"][cpd]["uptake"],self.parameters["drain_compounds"][cpd]["excretion"])
 
     def add_drain_reaction(self,cpd,uptake,excretion):

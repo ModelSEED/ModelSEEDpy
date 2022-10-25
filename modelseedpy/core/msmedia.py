@@ -3,7 +3,7 @@ from cobra.core.dictlist import DictList
 
 logger = logging.getLogger(__name__)
 
-class MediaCompound:
+class MediaCompound: 
 
     def __init__(self, compound_id, lower_bound, upper_bound, concentration=None):
         self.id = compound_id
@@ -32,8 +32,6 @@ class MSMedia:
         """
         Either dict with exchange bounds (example: {'cpd00027': (-10, 1000)}) or
         just absolute value of uptake (example: {''cpd00027': 10})
-        :param d:
-        :return:
         """
         media = MSMedia('media')
         media_compounds = []
@@ -70,4 +68,8 @@ class MSMedia:
             else:
                 new_cpds.append(newcpd)
         self.mediacompounds += new_cpds
-    
+        
+    @staticmethod
+    def add_compounds(media, media_dict):
+        media.merge(MSMedia.from_dict(media_dict))        
+        return media

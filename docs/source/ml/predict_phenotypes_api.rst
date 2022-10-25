@@ -1,4 +1,4 @@
-Predict Phenotype functions
+predict_phenotype functions
 --------------------------------------
 
 -------------------------------------------

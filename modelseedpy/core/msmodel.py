@@ -20,14 +20,14 @@ def get_reaction_constraints_from_direction(direction: str) -> (float, float):
         return -1000, 1000
 
 
-def get_direction_from_constraints(lower, upper):
-    if lower < 0 < upper:
+def get_direction_from_constraints(lower_bound, upper_bound):
+    if lower_bound < 0 < upper_bound:
         return '='
-    elif upper > 0:
+    elif upper_bound > 0:
         return '>'
-    elif lower < 0:
+    elif lower_bound < 0:
         return '<'
-    logger.error(f'The [{lower}, {upper}] bounds are not amenable with a direction string.')
+    # logger.error(f'The [{lower_bound}, {upper_bound}] bounds are not amenable with a direction string.')
     return '?'
 
 def get_gpr_string(gpr):
@@ -67,11 +67,6 @@ def split_compartment_from_index(cmp_str: str):
 
 
 def get_cmp_token(compartments):
-    """
-
-    :param compartments:
-    :return:
-    """
     if len(compartments) == 0:
         logger.warning('The compartments parameter is empty. The "c" parameter is assumed.')
         return 'c'
@@ -100,7 +95,7 @@ def get_set_set(expr_str):   # !!! this currently returns dictionaries, not sets
     if len(dnf.inputs) == 1 or dnf.NAME == 'And':
         return {frozenset({str(x) for x in dnf.inputs})}
     else:
-        return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
+        return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}  
 
 
 class MSModel(Model):

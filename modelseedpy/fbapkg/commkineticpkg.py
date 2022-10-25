@@ -21,9 +21,9 @@ class CommKineticPkg(BaseFBAPkg):
             self.build_constraint(species)
 
     def build_constraint(self,species):
-        coef = {species.biomasses[0].forward_variable:-1*self.parameters["kinetic_coef"]}
-        for reaction in self.model.reactions:
-            if int(FBAHelper.rxn_compartment(reaction)[1:]) == species.index and reaction != species.biomasses[0]:
-                coef[reaction.forward_variable] = 1
-                coef[reaction.reverse_variable] = 1
+        bioRXN = species.biomasses[0]
+        coef = {bioRXN.forward_variable:-self.parameters["kinetic_coef"]}
+        for rxn in self.model.reactions:
+            if int(FBAHelper.rxn_compartment(rxn)[1:]) == species.index and rxn != bioRXN:
+                coef.update({rxn.forward_variable:1, rxn.reverse_variable:1})
         return BaseFBAPkg.build_constraint(self,"commkin",None,0,coef,"Species"+str(species.index))

@@ -57,6 +57,9 @@ coverage.xml
 *.mo
 *.pot
 
+# local cobrakbase fonts
+examples/Flux Analysis/Users/
+
 # Django stuff:
 *.log
 local_settings.py
@@ -127,6 +130,10 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Julia dev models
+*.mat
+*.zip
 
 # Pyre type checker
 .pyre/

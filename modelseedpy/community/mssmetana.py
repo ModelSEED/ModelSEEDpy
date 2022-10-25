@@ -1,5 +1,6 @@
 from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msminimalmedia import MSMinimalMedia
+from modelseedpy.community.commhelper import build_from_species_models
 from modelseedpy.community.mscommunity import MSCommunity
 from itertools import combinations, permutations, chain
 from optlang import Variable, Constraint, Objective
@@ -12,7 +13,7 @@ from typing import Iterable
 from pprint import pprint
 from numpy import array
 from numpy import mean
-from math import prod
+# from math import prod
 
 
 def _compatibilize_models(member_models: Iterable, printing=False):
@@ -51,11 +52,23 @@ class MSSmetana:
         else:
             self.media = media_dict
 
+    def all_scores(self):
+        mro = self.mro_score()
+        mip = self.mip_score(interacting_media=self.media)
+        mu = self.mu_score()
+        mp = self.mp_score()
+        sc = self.sc_score()
+        smetana = self.smetana_score()
+        return (mro, mip, mu, mp, sc, smetana)
+
     def mro_score(self):
         self.mro = MSSmetana.mro(self.models, self.min_growth, self.media, self.compatibilize, self.printing)
         if self.printing:
-            print(f"\nMRO score: {self.mro}\t\t\t{self.mro*100:.2f}% of member requirements, on average, overlap with other members "
-                  "requirements.")
+            for pair, mro in self.mro.items():
+                newcomer, established = pair.split('---')
+                print(f"\nThe {newcomer} on {established} MRO score: {mro[0]} ({mro[0]*100:.2f}%). "
+                      f"This is the percent of nutritional requirements in {newcomer} "
+                      f"that overlap with {established} ({mro[1]}/{mro[2]}).")
         return self.mro
 
     def mip_score(self, interacting_media:dict=None, noninteracting_media:dict=None):
@@ -111,7 +124,8 @@ class MSSmetana:
     @staticmethod
     def _load_models(member_models: Iterable, com_model=None, compatibilize=True):
         if not com_model and member_models:
-            return member_models, MSCommunity.build_from_species_models(member_models, name="SMETANA_example", cobra_model=True)
+            model, names, abundances = build_from_species_models(member_models, name="SMETANA_example", cobra_model=True)
+            return member_models, MSCommunity(model, names=names, abundances=abundances)
         # models = PARSING_FUNCTION(community_model) # TODO the individual models of a community model must be parsed
         if compatibilize:
             return _compatibilize_models(member_models), _compatibilize_models([com_model])[0]
@@ -144,10 +158,15 @@ class MSSmetana:
         member_models = _compatibilize_models(member_models) if compatibilize else member_models
         mem_media = {model.id: set(MSSmetana._get_media(media_dict, None, model, min_growth, printing=printing))
                      for model in member_models}
-        pairs = {(model1, model2): mem_media[model1.id] & mem_media[model2.id] for model1, model2 in combinations(member_models, 2)}
-        pprint(pairs)
         # ratio of the average size of intersecting minimal media between any two members and the minimal media of all members
-        return mean(list(map(len, pairs.values()))) / mean(list(map(len, mem_media.values())))
+        # MROs = array(list(map(len, pairs.values()))) / array(list(map(len, mem_media.values())))
+        mro_values = {}
+        for model1, model2 in permutations(member_models, 2):
+            intersection = len(mem_media[model1.id] & mem_media[model2.id])
+            media_length = len(mem_media[model1.id])
+            mro_values[f"{model1.id}---{model2.id})"] = (intersection/media_length, intersection, media_length)
+        return mro_values
+        # return mean(list(map(len, pairs.values()))) / mean(list(map(len, mem_media.values())))
 
     @staticmethod
     def mip(member_models:Iterable, min_growth=0.1, interacting_media_dict=None,
@@ -316,5 +335,5 @@ class MSSmetana:
                     for met in models_mets:
                         if met.id in unique_mets:
                             mp_score = 0 if met.id not in mp[model1.id] else 1
-                            smetana_scores[model1.id][model2.id] += prod([mu[model1.id].get(met.id,0), sc_score, mp_score])
+                            smetana_scores[model1.id][model2.id] += mu[model1.id].get(met.id,0)*sc_score*mp_score
         return smetana_scores

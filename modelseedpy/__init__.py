@@ -46,7 +46,9 @@ from modelseedpy.core import (
 )
 from modelseedpy.core.exceptions import *
 
-from modelseedpy.community import (MSCommunity, MSCompatibility, dFBAPkg, MSSmetana)
+from modelseedpy.community import (
+    MSCommunity, CommunityModelSpecies, MSCompatibility, dFBAPkg, MSSmetana,
+    MSSteadyCom, CommHelper, build_from_species_models)
 
 from modelseedpy.fbapkg import (
     BaseFBAPkg, RevBinPkg, ReactionUsePkg, SimpleThermoPkg, TotalFluxPkg, BilevelPkg, CommKineticPkg,

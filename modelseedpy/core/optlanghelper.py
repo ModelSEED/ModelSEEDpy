@@ -117,7 +117,7 @@ class OptlangHelper:
         for index, (term1, term2) in enumerate(zipped_to_sum):
             if heuns_coefs is not None:
                 elements.extend([{"operation": "Mul", "elements": [heuns_coefs[index], term1]},
-                                              {"operation": "Mul", "elements": [heuns_coefs[index], term2]}])
+                                 {"operation": "Mul", "elements": [heuns_coefs[index], term2]}])
             else:
                 elements.append({"operation": "Mul", "elements": [term1, term2]})
         return elements

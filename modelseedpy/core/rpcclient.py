@@ -46,9 +46,8 @@ class RPCClient:
             'context': {}
            }
         body = _json.dumps(arg_hash, cls=_JSONObjectEncoder)
-        ret = _requests.post(self.url, data=body, headers=headers,
-             timeout=self.timeout,
-             verify=not self.trust_all_ssl_certificates)
+        ret = _requests.post(
+            self.url, data=body, headers=headers,timeout=self.timeout, verify=not self.trust_all_ssl_certificates)
         ret.encoding = 'utf-8'
         if ret.status_code == 500:
             if ret.headers.get('content-type') == 'application/json':

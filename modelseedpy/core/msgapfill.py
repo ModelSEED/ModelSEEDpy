@@ -8,7 +8,7 @@ from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
-from modelseedpy.core.exceptions import GapfillingError
+from modelseedpy.core.exceptions import GapfillingError  # exception is never applied
 
 class MSGapfill:
 
@@ -33,11 +33,12 @@ class MSGapfill:
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
         
-    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, prefilter=True):
+    def run_gapfilling(self, media=None, target=None, minimum_obj=0.01, binary_check=False, prefilter=True, solver = 'optland-cplex'):
         if target:
             self.model.objective = self.model.problem.Objective(
                 self.model.reactions.get_by_id(target).flux_expression, direction='max')
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        self.gfmodel.solver = solver
         pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
         pkgmgr.getpkg("GapfillingPkg").build_package({
             "auto_sink": self.auto_sink,
@@ -90,22 +91,22 @@ class MSGapfill:
                 rxn.lower_bound = -100
         for rxn_id in solution["new"]:
             rxn = self.gfmodel.reactions.get_by_id(rxn_id)
-            rxn = rxn.copy()
-            self.model.add_reactions([rxn])
+            new_rxn = rxn.copy()
+            self.model.add_reactions([new_rxn])
             coreid = re.sub(r'_[a-z]\d+$', '', rxn_id)
             if coreid in self.reaction_scores:
                 bestgene = None
                 for gene in self.reaction_scores[coreid]:
                     if not bestgene or self.reaction_scores[coreid][gene] > self.reaction_scores[coreid][bestgene]:
                         bestgene = gene
-                rxn = self.model.reactions.get_by_id(rxn_id)
-                rxn.gene_reaction_rule = bestgene
+                new_rxn = self.model.reactions.get_by_id(rxn_id)
+                new_rxn.gene_reaction_rule = bestgene
             if solution["new"][rxn_id] == ">":
-                rxn.upper_bound = 100
-                rxn.lower_bound = 0 
+                new_rxn.upper_bound = 100
+                new_rxn.lower_bound = 0 
             else:
-                rxn.upper_bound = 0
-                rxn.lower_bound = -100
+                new_rxn.upper_bound = 0
+                new_rxn.lower_bound = -100
         return self.model
     
     @staticmethod

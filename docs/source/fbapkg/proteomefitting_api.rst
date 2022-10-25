@@ -1,4 +1,4 @@
-Proteome Fitting Package
+proteomefittingpkg
 --------------------------------------
 
 +++++++++++++++++++++

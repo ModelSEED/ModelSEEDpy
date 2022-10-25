@@ -1,0 +1,25 @@
+{
+   "abbreviation": "Iron sulfide",
+   "abstract_compound": null,
+   "aliases": [
+      "Name: Hydropyrite; Iron sulfide; Marcasite; Pyrite"
+   ],
+   "charge": 0,
+   "comprised_of": null,
+   "deltag": 10000000.0,
+   "deltagerr": 10000000.0,
+   "formula": "FeS2",
+   "id": "cpd37304",
+   "inchikey": "",
+   "is_cofactor": 0,
+   "is_core": 0,
+   "is_obsolete": 0,
+   "linked_compound": null,
+   "mass": 120.0,
+   "name": "Iron sulfide",
+   "notes": null,
+   "pka": "",
+   "pkb": "",
+   "smiles": "",
+   "source": "User"
+}

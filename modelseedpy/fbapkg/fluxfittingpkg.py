@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 
 import logging
-from optlang.symbolics import Zero, add
+logger = logging.getLogger(__name__)
+from optlang.symbolics import Zero, add  # !!! Zero is never used
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 
 #Base class for FBA packages
@@ -27,30 +28,27 @@ class FluxFittingPkg(BaseFBAPkg):
         for rxnid in self.parameters["target_flux"]:
             if rxnid in self.model.reactions:
                 rxnobj = self.model.reactions.get_by_id(rxnid)
-                var = self.build_variable(rxnobj)
-                objvars.append(var ** 2)
-                const = self.build_constraint(rxnobj)
+                var = BaseFBAPkg.build_variable(self,"vfit",-1000,1000,"continuous",rxnobj)
+                objvars.append(var**2)
+                self.build_constraint(rxnobj)
         if self.parameters["set_objective"] == 1:
             self.model.objective = self.model.problem.Objective(add(objvars), direction="min", sloppy=True)
-                 
-    def build_variable(self,object):
-        return BaseFBAPkg.build_variable(self,"vfit",-1000,1000,"continuous",object)
-    
-    def build_constraint(self,object):
+            
+    def build_constraint(self,cobra_obj):
         #vfit(i) = flux(i) - v(i)
-        if object.id in self.parameters["target_flux"]:
-            flux = self.parameters["target_flux"][object.id]
+        if cobra_obj.id in self.parameters["target_flux"]:
+            flux = self.parameters["target_flux"][cobra_obj.id]
             vfitcoef = 1
             #if self.parameters["rescale_vfit_by_flux"] == True:
             #    if flux != None and abs(flux) > 0:
             #        vfitcoef = vfitcoef*flux#Multiply coef by fit flux which rescales by flux
             #    else:
             #        vfitcoef = vfitcoef*self.parameters["default_rescaling"]#Multiply coef by fit flux which rescales by flux
-            coef = {self.variables["vfit"][object.id] : vfitcoef}
+            coef = {self.variables["vfit"][cobra_obj.id] : vfitcoef}
             if self.parameters["totalflux"] == 0:
-                coef[object.forward_variable] = 1
-                coef[object.reverse_variable] = -1
+                coef[cobra_obj.forward_variable] = 1
+                coef[cobra_obj.reverse_variable] = -1
             else:
-                coef[self.pkgmgr.getpkg("TotalFluxPkg").variables["tf"][object.id]] = 1
+                coef[self.pkgmgr.getpkg("TotalFluxPkg").variables["tf"][cobra_obj.id]] = 1  # !!! the total flux package does not return anything
                 flux = abs(flux)
-            return BaseFBAPkg.build_constraint(self,"vfitc",flux,flux,coef,object)
+            return BaseFBAPkg.build_constraint(self,"vfitc",flux,flux,coef,cobra_obj)

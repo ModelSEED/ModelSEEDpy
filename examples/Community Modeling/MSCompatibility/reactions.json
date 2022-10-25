@@ -1,0 +1,60 @@
+{
+   "abbreviation": "NAD-NaAD anitporter",
+   "abstract_reaction": null,
+   "aliases": [
+      "Name: NAD-NaAD anitporter"
+   ],
+   "code": "(1) cpd00003[0] + (1) cpd00638[1] <=> (1) cpd00003[1] + (1) cpd00638[0]",
+   "compound_ids": "cpd00003;cpd00638",
+   "definition": "(1) NAD[0] + (1) Deamido-NAD[1] <=> (1) NAD[1] + (1) Deamido-NAD[0]",
+   "deltag": 10000000.0,
+   "deltagerr": 10000000.0,
+   "ec_numbers": null,
+   "equation": "(1) cpd00003[0] + (1) cpd00638[1] <=> (1) cpd00003[1] + (1) cpd00638[0]",
+   "id": "rxn48592",
+   "is_obsolete": 0,
+   "is_transport": 1,
+   "linked_reaction": null,
+   "name": "NAD-NaAD anitporter",
+   "notes": [
+      ""
+   ],
+   "pathways": null,
+   "reversibility": "=",
+   "source": "User",
+   "status": "OK",
+   "stoichiometry": [
+      {
+         "charge": -1,
+         "coefficient": -1,
+         "compartment": 0,
+         "compound": "cpd00003",
+         "formula": "C21H26N7O14P2",
+         "name": "NAD"
+      },
+      {
+         "charge": -2,
+         "coefficient": -1,
+         "compartment": 1,
+         "compound": "cpd00638",
+         "formula": "C21H24N6O15P2",
+         "name": "Deamido-NAD"
+      },
+      {
+         "charge": -1,
+         "coefficient": 1,
+         "compartment": 1,
+         "compound": "cpd00003",
+         "formula": "C21H26N7O14P2",
+         "name": "NAD"
+      },
+      {
+         "charge": -2,
+         "coefficient": 1,
+         "compartment": 0,
+         "compound": "cpd00638",
+         "formula": "C21H24N6O15P2",
+         "name": "Deamido-NAD"
+      }
+   ]
+}

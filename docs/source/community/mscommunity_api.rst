@@ -1,15 +1,15 @@
-MScommunity 
+mscommunity 
 --------------------------
 
-+++++++++++++++++++++
++++++++++++++++++++++++++
 CommunityModelSpecies()
-+++++++++++++++++++++
++++++++++++++++++++++++++
 
 This class parses species in a community model based upon the composition of the model biomass reaction:
 
 .. code-block:: python
 
- from modelseedpy.core import CommunityModelSpecies
+ from modelseedpy.community import CommunityModelSpecies
  com_species = CommunityModelSpecies(community, biocpd, names)
 
 - *community* ``cobra.core.model.Model``: the CobraKBase community model that will be simulated. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 

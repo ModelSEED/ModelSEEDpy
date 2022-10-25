@@ -28,7 +28,7 @@ def get_list_functional_roles_from_kbase(genome_ref, ws_client):
     else:
         raise ValueError("The functional roles are not under 'features', 'non_coding_features', or 'cdss'.")
 
-    # either the functional roles are under function or functions (really stupid...)
+    # either the functional roles are under function or functions
     keys_function = location_of_functional_roles[0].keys()
     function_str = "function" if "function" in keys_function else "functions"
     for functional_role in location_of_functional_roles:
@@ -70,6 +70,7 @@ def _create_sorted_master_role_list(ref_to_role):
     master_role_set = set()
     for i, feature in ref_to_role.items():
         master_role_set.update(feature)
+
     master_role_list = sorted(list(master_role_set))
     return master_role_list
 

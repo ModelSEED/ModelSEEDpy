@@ -33,6 +33,8 @@ The thermodynamic free energy of each reaction, and variable formation energies 
  
 The package applies free energy constraints for all reactions in a given model, based upon the free energy data in the ModelSEED Database. The user must specify the ``"modelseed_db_path" `` in the argument (*parameters* ``dict``). The user is also able to redefine default values through *parameters*, which is detailed in the respective API documentation.
 
+An example of ``FullThermoPkg`` is available `here <flux_analysis/FullThermodynamicsExample.ipynb>`_ .
+
 Community member growth rates
 -------------------------------
 
@@ -52,7 +54,7 @@ The package applies the kinetic coefficient (*kinetic_coef* ``float``) to the bi
 FBA Methods
 ++++++++++++
 
-``COBRAkbase`` models, either with or without additional constraints, can be simulated through a few FBA processes. 
+``COBRAkbase`` models, either with or without additional constraints, can be simulated through a few FBA processes. A broad example of FBA in ModelSEEDpy is available `here <flux_analysis/FBAExampleNotebook.ipynb>`_ .
 
 Bilevel
 ---------------------
@@ -71,6 +73,20 @@ dFBA
 
 metabofba
 ---------------------
+
+The ``MetaboFBA`` Package forces flux through observed metabolites in metabolomics data. An example is available `here <flux_analysis/MetaboFBAExample.ipynb>`_ .
+
+
+Flexible Biomass
+---------------------
+
+The ``FlexibleBiomass`` Package enables the coefficients on a biomass reaction to vary. An example is available `here <flux_analysis/FlexibleBiomass.ipynb>`_ .
+
+
+Media Scan
+---------------------
+
+The ``Media Scan`` Package concisely tests numerous media for a single model. An example is available `here <flux_analysis/MediaScan.ipynb>`_ .
 
 
 +++++++++++++++++++
