@@ -2,6 +2,7 @@ from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.fbahelper import FBAHelper
 from cobra import Model, Reaction, Metabolite
+import re
 
 
 def build_from_species_models(org_models, model_id=None, name=None, names=None, abundances=None, cobra_model=False, standardize=False):

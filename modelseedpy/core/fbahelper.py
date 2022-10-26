@@ -349,9 +349,8 @@ class FBAHelper:
             model.solver.update()
 
     @staticmethod
-    def add_minimal_objective_cons(model, objective_expr=None, min_value=None):
+    def add_minimal_objective_cons(model, objective_expr=None, min_value=0.1):
         objective_expr = objective_expr or model.objective.expression
-        min_value = min_value or 0.1
         FBAHelper.create_constraint(model, Constraint(objective_expr, lb=min_value, ub=None, name="min_value"))
     
     @staticmethod

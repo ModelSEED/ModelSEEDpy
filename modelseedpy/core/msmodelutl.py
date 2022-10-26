@@ -73,7 +73,7 @@ class MSModelUtil:
     def printlp(self,lpfilename="debug.lp"):
         with open(lpfilename, 'w') as out:
                 out.write(str(self.model.solver))
-    
+
     def build_metabolite_hash(self):
         self.metabolite_hash = {}
         self.search_metabolite_hash = {}
@@ -86,7 +86,7 @@ class MSModelUtil:
                         self.add_name_to_metabolite_hash(entry,met)
                 else:
                     self.add_name_to_metabolite_hash(item,met)
-    
+
     def add_name_to_metabolite_hash(self,name,met):
         if name not in self.metabolite_hash:
             self.metabolite_hash[name] = []
@@ -107,7 +107,7 @@ class MSModelUtil:
         logger.info(name," not found in model!")
         return []
     
-    def rxn_hash(self): 
+    def rxn_hash(self):
         output = {}
         for rxn in self.model.reactions:
             strings = stoichiometry_to_string(rxn.metabolites)
@@ -285,7 +285,7 @@ class MSModelUtil:
             for gapfilling in newmodel["gapfillings"]:
                 if gapfilling["id"] == gfid:
                     gapfilling_obj = gapfilling
-        if not gapfilling_obj:    
+        if not gapfilling_obj:
             gapfilling_obj = {
                 "gapfill_id": newmodel["id"]+"."+gfid,
                 "id": gfid,
@@ -325,7 +325,7 @@ class MSModelUtil:
                     kbrxn["gapfill_data"][gfid] = dict()
                     kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["reversed"][rxn],1,[]]
         return rxn_table
-    
+
     def apply_test_condition(self,condition,model = None):
         """Applies constraints and objective of specified condition to model
         

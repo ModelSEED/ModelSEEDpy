@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class MSMinimalMedia:
-    
+
     @staticmethod
     def _exchange_solution(sol_dict):
         if isinstance(list(sol_dict.keys())[0], str):
@@ -379,7 +379,6 @@ class MSMinimalMedia:
             with open(export_name, 'w') as out:
                 json.dump(media, out, indent=3)
         return media
-        
 
 # class MinimalMedia(BaseFBAPkg):
 #     """A class that determines the minimal media of a model"""  # investigate conversion to a staticmethod or single function for convenience and in-line utility

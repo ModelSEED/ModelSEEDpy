@@ -1,1 +1,3 @@
 include LICENSE
+Include modelseedpy/config.cfg
+graft data
