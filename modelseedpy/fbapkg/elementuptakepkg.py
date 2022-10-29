@@ -14,12 +14,9 @@ class ElementUptakePkg(BaseFBAPkg):
     def build_package(self,element_limits):
         for element, limit in element_limits.items():
             if element not in self.variables["elements"]:
-                self.build_variable(element, limit)
+                self.build_variable("elements",0,limit,"continuous",element)
                 self.build_constraint(element)
                    
-    def build_variable(self,element,limit):
-        return BaseFBAPkg.build_variable(self,"elements",0,limit,"continuous",element)
-    
     def build_constraint(self,element):
         coef = {self.variables["elements"][element]: -1}
         for exRXN in FBAHelper.exchange_reactions(self.model):

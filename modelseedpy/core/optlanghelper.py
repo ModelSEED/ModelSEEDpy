@@ -45,18 +45,19 @@ def get_expression_template(expr):
     if isinstance(expr, list):
         return {"type": "Add", "args": []}
     return {"type": expr["operation"], "args": []}
+
     
 class OptlangHelper:
     
     @staticmethod
-    def add_variables(var_name:str, var_bounds:Iterable, var_type:str="continuous"):
+    def add_variables(var_name:str, var_bounds:(list, tuple), var_type:str="continuous"):
         return {"name": var_name.replace(" ", "_"), "lb": var_bounds[0], "ub": var_bounds[1], "type": var_type}
     
     @staticmethod
-    def add_constraint(cons_name:str, cons_bounds:Iterable, cons_expr:dict):
+    def add_constraint(cons_name:str, cons_bounds:(list, tuple), cons_expr:dict):
         return {"name": cons_name.replace(" ", "_"),
-        "expression": OptlangHelper._define_expression(cons_expr),
-         "lb": cons_bounds[0], "ub": cons_bounds[1], "indicator_variable": None, "active_when": 1}
+                "expression": OptlangHelper._define_expression(cons_expr),
+                "lb": cons_bounds[0], "ub": cons_bounds[1], "indicator_variable": None, "active_when": 1}
     
     @staticmethod
     def add_objective(obj_name:str, objective_expr:Union[dict, list], direction:str):
@@ -102,6 +103,7 @@ class OptlangHelper:
                 expression["args"][-1]["args"] = arguments
             else:
                 expression["args"].append(define_term(ele))
+        # pprint(expression)
         return expression      
     
     @staticmethod
