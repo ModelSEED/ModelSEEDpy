@@ -22,11 +22,14 @@ def _compatibilize_models(member_models: Iterable, printing=False):
 
 
 class MSSmetana:
-    def __init__(self, member_models: Iterable, com_model, min_growth=0.1, n_solutions=100,
+    def __init__(self, member_models: Iterable, com_model, min_growth=0.1, n_solutions=100, environment=None,
                  abstol=1e-3, media_dict=None, printing=True, compatibilize=True, minimal_media_method="jenga"):
 
         self.min_growth = min_growth ; self.abstol = abstol ; self.n_solutions = n_solutions
         self.printing = printing ; self.compatibilize = compatibilize
+        if hasattr(environment, "get_media_constraints"):
+            environment = {"EX_" + exID: -bound[0] for exID, bound in environment.get_media_constraints().items()}
+        self.environment = environment
 
         self.models, self.community = MSSmetana._load_models(member_models, com_model, compatibilize)
         for model in self.models:
@@ -40,6 +43,8 @@ class MSSmetana:
             # if member_models:
             #     self.media = MSMinimalMedia.interacting_comm_media(self.models, printing=self.printing)
             # else:
+            comm_exchanges = [exRXN.id for exRXN in FBAHelper.exchange_reactions(self.community)]
+            self.community.medium = {rxn:bound for rxn, bound in environment.items() if rxn in comm_exchanges}
             if minimal_media_method == "minFlux":
                 self.media = {"community_media": MSMinimalMedia.minimize_flux(self.community, min_growth),
                               "members": {model.id: {"media":MSMinimalMedia.minimize_flux(model, min_growth)}}}
@@ -48,7 +53,8 @@ class MSSmetana:
                               "members": {}}
             elif minimal_media_method == "jenga":
                 # subtract syntrophic interactions from media requirements
-                self.media = MSMinimalMedia.interacting_comm_media(self.models, com_model, "jenga", min_growth, None, printing)
+                self.media = MSMinimalMedia.interacting_comm_media(
+                    self.models, com_model, "jenga", min_growth, None, self.environment, printing)
         else:
             self.media = media_dict
 

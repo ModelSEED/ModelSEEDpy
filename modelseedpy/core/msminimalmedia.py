@@ -29,12 +29,16 @@ class MSMinimalMedia:
     @staticmethod
     def _influx_objective(model):
         influxes = []
-        for ex_rxn in FBAHelper.exchange_reactions(model):
-            if len(ex_rxn.reactants) == 1:  # this is essentially 100% of exchanges
+        for ex_rxn in MSMinimalMedia.media_exchange_variables(model):
+            if len(ex_rxn.reactants) == 1:  # this is essentially every exchange
                 influxes.append(ex_rxn.reverse_variable)
             else:  # this captures edge cases
                 influxes.append(ex_rxn.forward_variable)
         return influxes
+
+    @staticmethod
+    def media_exchange_variables(model):
+        return [exRXN for exRXN in FBAHelper.exchange_reactions(model) if exRXN.id in model.medium]
 
     @staticmethod
     def _var_to_ID(var):
@@ -49,15 +53,22 @@ class MSMinimalMedia:
         return MSCompatibility.standardize(org_models, conflicts_file_name="standardization_corrections.json", printing=printing)
 
     @staticmethod
-    def minimize_flux(org_model, minimal_growth=None, printing=True):
+    def minimize_flux(org_model, minimal_growth=None, environment=None, printing=True):
         """minimize the total in-flux of exchange reactions in the model"""
         if org_model.slim_optimize() == 0:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations.")
         model = org_model.copy()
+        model.medium = environment or model.medium
+        # define the MILP
         minimal_growth = minimal_growth or model.optimize().objective_value
         FBAHelper.add_minimal_objective_cons(model, min_value=minimal_growth)
-        FBAHelper.add_objective(model, sum(MSMinimalMedia._influx_objective(model)), "min")
+        media_exchanges = MSMinimalMedia._influx_objective(model)
+        FBAHelper.add_objective(model, sum(media_exchanges), "min")
+        for exRXN in MSMinimalMedia.media_exchange_variables(model):
+            FBAHelper.create_constraint(model, Constraint(
+                exRXN.reverse_variable, lb=None,ub=environment[exRXN.id], name=exRXN.id + "_maxFlux"))
+        # parse the minimal media
         min_media = MSMinimalMedia._exchange_solution(FBAHelper.solution_to_dict(model.optimize()))
         total_flux = sum([abs(flux) for flux in min_media.values()])
         # verify the medium
@@ -199,14 +210,15 @@ class MSMinimalMedia:
                 new_sol_exchanges = [rxn for rxn in sol_dict if "EX_" in rxn.name]
                 if new_sol.status != "optimal":
                     return interdependencies
-                MSMinimalMedia._examine_permutations(model, new_sol_exchanges, variables, new_sol_dict, sol_index+1)
+                MSMinimalMedia._examine_permutations(model, new_sol_exchanges, variables, new_sol_dict, sol_index+1, interacting)
             return interdependencies
 
     @staticmethod
-    def comm_media_est(models, comm_model, min_growth=0.1, minimization_method="jenga", printing=False):
+    def comm_media_est(models, comm_model, min_growth=0.1, minimization_method="jenga", environment=None, printing=False):
         media = {"community_media": {}, "members": {}}
         for org_model in models:
             model = org_model.copy()
+            model.medium = environment or model.medium
             reactions = [rxn.name for rxn in model.variables]
             duplicate_reactions = DeepDiff(sorted(reactions), sorted(set(reactions)))
             if duplicate_reactions:
@@ -222,6 +234,8 @@ class MSMinimalMedia:
             model.medium = media["members"][model.id]["media"]
             media["members"][model.id]["solution"] = FBAHelper.solution_to_dict(model.optimize())
         if comm_model:
+            if environment:
+                comm_model.medium = environment
             if minimization_method == "jenga":
                 print("Community models are too excessive for direct assessment via the JENGA method; "
                       "thus, the community minimal media is estimated as the combination of member media.")
@@ -232,9 +246,11 @@ class MSMinimalMedia:
         return media
 
     @staticmethod
-    def interacting_comm_media(models, comm_model, minimization_method="jenga", min_growth=0.1, media=None, printing=True):
+    def interacting_comm_media(models, comm_model, minimization_method="jenga", min_growth=0.1,
+                               media=None, environment=None, printing=True):
         # define the community minimal media
-        media = media or MSMinimalMedia.comm_media_est(models, comm_model, min_growth, minimization_method, printing=printing)
+        media = media or MSMinimalMedia.comm_media_est(
+            models, comm_model, min_growth, minimization_method, environment, printing=printing)
         org_media = media["community_media"].copy()
         original_time = process_time()
         # remove exchanges that can be satisfied by cross-feeding
@@ -253,17 +269,19 @@ class MSMinimalMedia:
         return media
 
     @staticmethod
-    def jenga_method(org_model, org_media=None, conserved_cpds:list=None, export=True, printing=True, compatibilize=False):
+    def jenga_method(org_model, org_media=None, conserved_cpds:list=None,
+                     export=True, printing=True, compatibilize=False, environment=None):
         # copy and compatibilize the parameter objects
         if org_model.slim_optimize() == 0:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations.")
         copied_model = org_model.copy()
+        copied_model.medium = environment or copied_model.medium
         if compatibilize:
             copied_model = MSMinimalMedia._compatibilize(copied_model)
+        # TODO - the COBRA method must eventually be replaced with MSMinimalMedia.minimize_components(copied_model, printing=False)
         original_media = org_media or minimal_medium(copied_model, minimize_components=True).to_dict()
         # {cpd.replace("EX_", ""): flux for cpd, flux in .items()}
-        # TODO - the COBRA method must eventually be replaced with MSMinimalMedia.minimize_components(copied_model, printing=False)
 
         # identify removal=ble compounds
         original_time = process_time()

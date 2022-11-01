@@ -318,6 +318,8 @@ class FBAHelper:
     
     @staticmethod
     def parse_df(df):
+        if isinstance(df, tuple):
+            return df
         from collections import namedtuple
         dataframe = namedtuple("DataFrame", ("index", "columns", "values"))
         return dataframe(list(df.index), list(df.columns), df.to_numpy())

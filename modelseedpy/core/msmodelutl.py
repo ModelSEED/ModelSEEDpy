@@ -65,7 +65,7 @@ def search_name(name):
 class MSModelUtil:
 
     def __init__(self,model):
-        self.model = model
+        self.model = model.copy()
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         self.atputl = self.gfutl = self.metabolite_hash = self.search_metabolite_hash = None
         self.test_objective = self.score = None
@@ -516,3 +516,9 @@ class MSModelUtil:
             m = re.search('(.+)_([a-z]+)(\d*)$', object.id)
             return (m[1],m[2],m[3])
         return None
+
+    def add_kbase_media(self, kbase_media):
+        exchange_IDs = [exRXN.id for exRXN in self.exchange_list()]
+        self.model.medium = {"EX_"+exID: -bound[0] for exID, bound in kbase_media.get_media_constraints().items()
+                             if "EX_"+exID in exchange_IDs}
+        return self.model.medium
