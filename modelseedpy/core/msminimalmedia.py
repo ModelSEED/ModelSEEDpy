@@ -31,7 +31,7 @@ def _model_growth(sol_dict):
 
 def _influx_objective(model_util):
     influxes = []
-    for ex_rxn in model_util.exchange_media_list():
+    for ex_rxn in model_util.media_exchanges_list():
         if len(ex_rxn.reactants) == 1:  # this is essentially every exchange
             influxes.append(ex_rxn.reverse_variable)
         else:  # this captures edge cases
@@ -51,21 +51,6 @@ def _compatibilize(org_models, printing=False):
     return MSCompatibility.standardize(org_models, conflicts_file_name="standardization_corrections.json", printing=printing)
 
 
-def _define_min_objective(model_util, interacting):
-    rxns = model_util.exchange_list() if interacting else model_util.transport_list()
-    vars = {}
-    for rxn in rxns:
-        # define the variable
-        vars[rxn.id] = Variable(rxn.id+"_ru", lb=0, ub=1, type="binary")
-        FBAHelper.add_cons_vars(model_util.model, [vars[rxn.id]])
-        # bin_flux: {rxn_bin}*1000 >= {rxn_rev_flux}
-        FBAHelper.create_constraint(
-            model_util.model, Constraint(Zero, lb=0, ub=None, name=rxn.id+"_bin"),
-            coef={vars[rxn.id]: 1000, rxn.reverse_variable: -1})
-    FBAHelper.add_objective(model_util.model, sum(list(vars.values())), "min")
-    return model_util.model, vars
-
-
 class MSMinimalMedia:
 
     @staticmethod
@@ -75,15 +60,12 @@ class MSMinimalMedia:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations.")
         model_util = MSModelUtil(org_model)
-        model_util.model.medium = environment or model_util.model.medium
+        model_util.add_medium(environment or model_util.model.medium)
         # define the MILP
         minimal_growth = minimal_growth or model_util.model.optimize().objective_value
         FBAHelper.add_minimal_objective_cons(model_util.model, min_value=minimal_growth)
         media_exchanges = _influx_objective(model_util)
         FBAHelper.add_objective(model_util.model, sum(media_exchanges), "min")
-        for exRXN in model_util.exchange_media_list():
-            FBAHelper.create_constraint(model_util.model, Constraint(
-                exRXN.reverse_variable, lb=None,ub=environment[exRXN.id], name=exRXN.id + "_maxFlux"))
         # parse the minimal media
         min_media = _exchange_solution(FBAHelper.solution_to_dict(model_util.model.optimize()))
         total_flux = sum([abs(flux) for flux in min_media.values()])
@@ -102,39 +84,52 @@ class MSMinimalMedia:
         return min_media
 
     @staticmethod
-    def minimize_components(org_model, min_growth=0.1, solution_limit=100, interacting=True, printing=True):
+    def _define_min_objective(model_util, interacting):
+        rxns = model_util.exchange_list() if interacting else model_util.transport_list()
+        vars = {}
+        for rxn in rxns:
+            # define the variable
+            vars[rxn.id] = Variable(rxn.id + "_ru", lb=0, ub=1, type="binary")
+            FBAHelper.add_cons_vars(model_util.model, [vars[rxn.id]])
+            # bin_flux: {rxn_bin}*1000 >= {rxn_rev_flux}
+            FBAHelper.create_constraint(
+                model_util.model, Constraint(Zero, lb=0, ub=None, name=rxn.id + "_bin"),
+                coef={vars[rxn.id]: 1000, rxn.reverse_variable: -1})
+        FBAHelper.add_objective(model_util.model, sum(list(vars.values())), "min")
+        return model_util.model, vars
+
+    @staticmethod
+    def minimize_components(org_model, min_growth=0.1, solution_limit=100, interacting=True, environment=None, printing=True):
         """minimize the quantity of metabolites that are consumed by the model"""
         if org_model.slim_optimize() == 0:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations.")
         model_util = MSModelUtil(org_model)
-        time1 = process_time()
+        model_util.add_medium(environment or model_util.model.medium)
         variables = {"ru":{}}
         FBAHelper.add_minimal_objective_cons(
             model_util.model, sum([rxn.flux_expression for rxn in model_util.bio_rxns_list()]), min_growth)
-        time2 = process_time()
         # define the binary variable and constraint
-        model_util.model, variables["ru"] = _define_min_objective(model_util, interacting)
-        print(f"objective definition: {(time2-time1)/60} mins")
+        model_util.model, variables["ru"] = MSMinimalMedia._define_min_objective(model_util, interacting)
 
         # determine each solution
         interdependencies = {}
-        solution_dicts, minMedia = [], [0]*100
+        solution_dicts, minMedia = [], [0]*1000
         sol = model_util.model.optimize()
+        if "optimal" not in sol.status:
+            raise FeasibilityError(f"The model {model_util.model.id} simulation was {sol.status}.")
         time3 = process_time()
-        print(f"initial optimize complete: {(time3-time2)/60} mins")
         count = 0
         while sol.status == "optimal" and count < solution_limit:
             print("sol_dicts length", len(solution_dicts), end="\r")
             sol_dict = FBAHelper.solution_to_variables_dict(sol, model_util.model)
+            sol_rxns_dict = FBAHelper.solution_to_rxns_dict(sol, model_util.model)
             solution_dicts.append(sol_dict)
-            time4 = process_time()
-            print(f"solution parsed to variables: {(time4-time3)/60} mins")
             ## ensure that the minimal growth is respected
             if not isclose(min_growth, _model_growth(sol_dict),rel_tol=0.00001*min_growth):
                 raise ObjectiveError(f"The parameterized minimal growth of {min_growth} was not maintained, and "
                                      f"the simulation achieved {_model_growth(sol_dict)} growth.")
-            sol_media = _exchange_solution(sol_dict)
+            sol_media = _exchange_solution(sol_rxns_dict)
             minMedia = sol_media if len(sol_media) < len(minMedia) else minMedia
             ## omit the solution from the next search
             FBAHelper.create_constraint(model_util.model, Constraint(  # build exclusion use can be emulated
@@ -144,15 +139,13 @@ class MSMinimalMedia:
             # sol_exchanges = [rxn for rxn in sol_dict if "EX_" in rxn.name]
             # interdependencies[count] = MSMinimalMedia._examine_permutations(
             #     model, sol_exchanges, variables, sol_dict, count, interacting)
-            time5 = process_time()
-            print(f"minimal media is calculated and prevented from future iterations: {(time5-time4)/60} mins")
 
             sol = model_util.model.optimize()
             count += 1
         if not solution_dicts:
             logger.error("No simulations were feasible.")
         time6 = process_time()
-        print(f"final optimization: {(time6-time5)/60} mins")
+        print(f"Optimization time: {(time6-time3)/60} mins")
 
         return {rxn.id:flux for rxn, flux in minMedia.items()}
 
@@ -160,7 +153,7 @@ class MSMinimalMedia:
     def _knockout(org_model, rxnVar, variables, sol_dict, sol_index, interacting):
         # knockout the specified exchange
         knocked_model_utl = MSModelUtil(org_model)
-        knocked_model_utl, vars = _define_min_objective(knocked_model_utl, interacting)
+        knocked_model_utl, vars = MSMinimalMedia._define_min_objective(knocked_model_utl, interacting)
         coef = {rxnVar: 0}
         if interacting:
             coef.update({variables["ru"][_var_to_ID(rxnVar2)]: 1
