@@ -135,7 +135,16 @@ class MSModelUtil:
     
     def exchange_list(self): 
         return [rxn for rxn in self.model.reactions if 'EX_' in rxn.id]
-    
+
+    def exchange_media_list(self):
+        return [exRXN for exRXN in self.exchange_list() if exRXN.id in self.model.medium]
+
+    def bio_rxns_list(self):
+        return [rxn for rxn in self.model.reactions if "bio" in rxn.id]
+
+    def transport_list(self):
+        return [rxn for rxn in self.model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
+
     def exchange_hash(self):
         exchange_reactions = {}
         for ex_rxn in self.exchange_list():
