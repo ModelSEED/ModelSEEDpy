@@ -61,12 +61,13 @@ resultsTup = namedtuple("resultsTup", ("new_met_id", "unknown_met_id", "changed_
 class MSCompatibility:
         
     @staticmethod
-    def standardize(models:Iterable, metabolites:bool=True, exchanges:bool=True, conflicts_file_name:str=None, 
+    def standardize(models, metabolites:bool=True, exchanges:bool=True, conflicts_file_name:str=None,
                     model_names:list=None, export_directory:str=None, view_unknown_mets:bool=False, printing:bool=True,
                     unknown_mets:Iterable=None, changed_mets:Iterable=None, changed_rxns:Iterable=None):
         unknown_mets, changed_mets, changed_rxns = _define_vars(unknown_mets, changed_mets, changed_rxns)
         new_models = []
-        for org_model in models:
+        models = [models] if not isinstance(models, (list, tuple, set)) else models
+        for org_model in models:  # Develop a singular model function and then an abstracted version for multiple models
             model_util = MSModelUtil(org_model)
             reactions = {}
             # standardize metabolites
@@ -79,25 +80,25 @@ class MSCompatibility:
                     message = f"\n\n\nStandardize exchange reactions in {model_util.model.id}"
                     print(message, "\n", "="*len(message))
                 ex_mets = [met.id for met in model_util.exchange_mets_list()]
-                ex_rxns = [rxn.id for rxn in model_util.exchange_list()]
+                # ex_rxns = [rxn.id for rxn in model_util.exchange_list()]
                 ### correct each metabolite in each exchange reaction
                 for ex_rxn in model_util.exchange_list():
                     for met in ex_rxn.metabolites:
-                        model_util, met, reactions, results = MSCompatibility._fix_met(
+                        model_util, met, reactions, results = MSCompatibility._correct_met(
                             model_util, met, reactions, True, printing)
-                        new_id = 'EX_'+met.id if 'EX_'+met.id not in ex_rxns else 'EX_'+results.new_met_id
+                        new_rxn_id = 'EX_'+results.new_met_id
                         if all(['cpd' not in met.id, results.new_met_id not in ex_mets, results.unknown_met_id]):
                             unknown_mets.append(met.id)
                             logger.warning(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
                         changed_rxns.extend(results.changed_rxns) ; changed_mets.extend(results.changed_mets)
-                    ex_rxn.id = new_id
+                    ex_rxn.id = new_rxn_id
             else:
                 for met in model_util.model.metabolites:
-                    model_util, met, results = MSCompatibility._fix_met(model_util, met, True, True, printing)
+                    model_util, met, results = MSCompatibility._correct_met(model_util, met, True, True, printing)
                     if 'cpd' not in met.id:
                         unknown_mets.append(met.id)
                         logger.warning(f'CodeError: The metabolite {met.id} | {met.name} was not corrected to a ModelSEED metabolite.')
-                
+
                 if conflicts_file_name is not None:
                     model_names = model_names or [model.id for model in models]
                     MSCompatibility._export(
@@ -105,8 +106,9 @@ class MSCompatibility:
                         conflicts_file_name, model_names, export_directory)
             new_models.append(model_util.model)
             MSCompatibility._validate_results(model_util, org_model, unknown_mets)
+        models_id = ",".join([model.id for model in models])
         print(f'\n\n{len(changed_rxns)} reactions were substituted and '
-              f'{len(changed_mets)} metabolite IDs were redefined by standardize().')
+              f'{len(changed_mets)} metabolite IDs were redefined in {models_id} by standardize().')
         if view_unknown_mets:
             return new_models, unknown_mets
         return new_models
@@ -150,7 +152,7 @@ class MSCompatibility:
                                         f'model{model_index}_id': met.id,
                                         f'model{model_index}_met': met
                                     })
-                            model, met, reactions, results = MSCompatibility._fix_met(model_util, met, reactions, False, printing)
+                            model, met, reactions, results = MSCompatibility._correct_met(model_util, met, reactions, False, printing)
                     else:
                         former_name = unique_names[list(unique_mets.keys()).index(met.id)]
                         former_model_index = _remove_prefix(list(unique_mets[met.id].keys())[0].split('_')[0], 'model')
@@ -183,13 +185,13 @@ class MSCompatibility:
                                             f'model{model_index}_{iteration}_name': met.name,
                                             f'model{model_index}_{iteration}_met': met
                                         })
-                            model, met, reactions, results = MSCompatibility._fix_met(model_util, met, reactions, False, printing)
+                            model, met, reactions, results = MSCompatibility._correct_met(model_util, met, reactions, False, printing)
                     
                 # correct the reaction ID
                 reaction = _remove_prefix(re.sub('(_\w\d$)', '', ex_rxn.id), 'EX_')
                 if reaction in model_metabolites:
                     suffix = re.search('(_\w\d$)', reaction).group()
-                    model, met, reactions, results = MSCompatibility._fix_met(
+                    model, met, reactions, results = MSCompatibility._correct_met(
                         model_util, _remove_suffix(reaction, suffix), reactions, False, printing)
                     ex_rxn.id = 'EX_'+results.new_met_id+suffix
             new_models.append(model_util.model)
@@ -242,29 +244,6 @@ class MSCompatibility:
                             f"does not equal the new objective value {new_objective_value}.")
 
     @staticmethod
-    def _fix_met(model_util, met, reactions, standardize, printing):
-        # correct the conflict
-        base_name = ''.join(met.name.split('-')[1:]).capitalize()
-        met_name = re.sub('_\w\d$', '', met.name)
-        new_met_id = met.id
-        for possible_name in [met.name, met.name.capitalize(), met_name, met_name.capitalize(), base_name]:
-            if possible_name in compoundNames:
-                model_util, met, reactions, new_met_id, changed_mets, changed_rxns = MSCompatibility._correct_met(
-                    model_util, met, reactions, possible_name, standardize, printing)
-                return model_util, met, reactions, resultsTup(new_met_id, None, changed_mets, changed_rxns)
-        
-        # TODO - add a search through cross-references to confirm that the metabolite is unknown, despite different names
-        # general_met = re.sub("(_\w\d+$)", "", met.id)
-        # matches = _check_cross_references(met, general_met, None)
-        # if not matches:
-        #     logger.warning(f"ModelSEEDError: The old metabolite {met.id} cross-references"
-        #     f" ({compounds_cross_references[general_met]}) do not overlap with those"
-        #     f" ({compounds_cross_references[compoundNames[met_name]]}) of the new metabolite {new_met_id}.")
-        logger.warning(f'ModelSEEDError: The metabolite ({" | ".join([x for x in [met.id, met.name, base_name, met_name] if x != ""])})'
-                       " is not recognized by the ModelSEED Database")  
-        return model_util, met, reactions, resultsTup(new_met_id, met.id, [], [])
-
-    @staticmethod
     def _export(models, conflicts, conflicts_file_name, model_names, export_directory):
         if export_directory is None:
             export_directory = os.getcwd()
@@ -286,39 +265,59 @@ class MSCompatibility:
                 os.remove(file)
 
     @staticmethod
-    def _correct_met(model_util, met, reactions, met_name, standardize, printing):
-        changed_mets, changed_rxns, matches = [], [], []
-        original_id = new_met_id = met.id
-        original_name = met.name 
-        # affirm the match with cross-references, where it is possible for ModelSEED compounds
-        general_met = re.sub("(_\w\d+$)", "", met.id)
-        if 'cpd' in met.id and compounds_cross_references[general_met] != {}:
-            matches = _check_cross_references(met, general_met, met_name)
-            if not matches:
-                logger.warning(f"ModelSEEDError: The old metabolite {met.id} cross-references"
-                f" ({compounds_cross_references[general_met]}) do not overlap with those"
-                f" ({compounds_cross_references[compoundNames[met_name]]}) of the new metabolite {new_met_id}.")
-        compartment = re.search('(_\w\d+$)', met.id).group()
+    def _correct_met(model_util, met, reactions, standardize, printing):
+        # identify a matching metabolite name in the ModelSEED Database
+        base_name = ''.join(met.name.split('-')[1:]).capitalize()
+        comp = re.compile("(_\w\d+$)")
+        general_name = comp.sub('', met.name)
+        general_met = comp.sub("", met.id)
+        met_name = None
+        for possible_name in [met.name, met.name.capitalize(), general_name, general_name.capitalize(), base_name]:
+            if possible_name in compoundNames:
+                met_name = possible_name
+                break
+        if not met_name:
+            # TODO - add a search through cross-references to confirm that the metabolite is unknown, despite different names
+            # general_met = re.sub("(_\w\d+$)", "", met.id)
+            # matches = _check_cross_references(met, general_met, None)
+            # if not matches:
+            #     logger.warning(f"ModelSEEDError: The old metabolite {met.id} cross-references"
+            #     f" ({compounds_cross_references[general_met]}) do not overlap with those"
+            #     f" ({compounds_cross_references[compoundNames[met_name]]}) of the new metabolite {new_met_id}.")
+            metabolite_desc = " | ".join([x for x in [met.id, met.name, base_name, general_name] if x != ""])
+            logger.warning(f"ModelSEEDError: The metabolite ({metabolite_desc}) is not recognized by the ModelSEED Database")
+            return model_util, met, reactions, resultsTup(met.id, met.id, [], [])
+        compartment = comp.search(met.id).group()
         if _remove_suffix(met.id, compartment) == compoundNames[met_name]:
-            return model_util, met, reactions, new_met_id, changed_mets, changed_rxns
-        # Begin correcting a metabolite where its ID deviates from a compound of the same name in the ModelSEED Database
-        exchange_ids = [ex_rxn.id for ex_rxn in model_util.exchange_list()]
-        new_met_id = compoundNames[met_name]+compartment
-        # general_met = re.sub("(_\w\d+$)", "", new_met_id)
+            return model_util, met, reactions, resultsTup(met.id, None, [], [])
+
+        # correct the metabolite whose name matches a metabolite in the ModelSEED Database but whose ID deviates
+        changed_mets, changed_rxns, matches = [], [], []
+        new_met_id = original_id = met.id
+        original_name = met.name 
+        ## affirm the match with cross-references, where it is possible for ModelSEED compounds
         if 'cpd' in met.id:
             logger.warning(f"IDWarning: The original ID {met.id} is a ModelSEED ID, and "
                            f"may not be desirably changed to {new_met_id}.")
+            if compounds_cross_references[general_met] != {}:
+                matches = _check_cross_references(met, general_met, met_name)
+                if not matches:
+                    logger.warning(f"ModelSEEDError: The old metabolite {met.id} cross-references"
+                    f" ({compounds_cross_references[general_met]}) do not overlap with those"
+                    f" ({compounds_cross_references[compoundNames[met_name]]}) of the new metabolite {new_met_id}.")
+        # exchange_ids = [ex_rxn.id for ex_rxn in model_util.exchange_list()]
+        new_met_id = compoundNames[met_name]+compartment
         if new_met_id in model_util.model.metabolites:
-            ## replace the undesirable compound in each of its reactions, since the compound cannot be renamed
+            ## replace the undesirable compound in each of its reactions, since the new compound ID already exists
             for org_rxn in met.reactions:
                 original_reaction = org_rxn.reaction
-                reaction_dict = {} ; change = None
-                ### remove duplicate exchange reaction
-                if 'EX_' in org_rxn.id and 'EX_'+new_met_id in exchange_ids:
+                reaction_dict = {}
+                ### remove the old exchange reaction
+                if org_rxn.id == 'EX_'+new_met_id:
                     change = {'original': {'reaction': original_reaction},
                               'new': "-- Deleted --",
                               'justification': f"A {new_met_id} exchange reaction already exists in model {model_util.model.id},"
-                              f" thus this duplicative exchange reaction ({org_rxn.id}) is deleted."}
+                              f" thus this reaction ({org_rxn.id}) must be deleted to permit its replacement."}
                     if matches:
                         change['justification'] += f' The ID match was verified with the {matches} cross-reference(s).'
                     model_util.model.remove_reactions([org_rxn])
@@ -328,7 +327,7 @@ class MSCompatibility:
                 ### a new reaction is created in all of its instances
                 else:
                     # !!! duplicate reactions and hindrance to multiple changes on the same reaction remain challenges.
-                    #### The new reaction stoichiometry and reagents are defined
+                    #### Copy the reaction stoichiometry while introducing the new metabolite
                     rxn = org_rxn if org_rxn.id not in reactions else reactions[org_rxn.id]
                     reaction_met_ids = {}
                     redundant_mets = False
@@ -336,7 +335,6 @@ class MSCompatibility:
                         stoich = float(rxn.metabolites[rxn_met])
                         new_met = rxn_met.copy()
                         if rxn_met.id == met.id:
-                            # compartment = re.search('(_\w\d$)', rxn_met.id).group()
                             new_met.id, new_met.name = new_met_id, met_name
                             if new_met not in model_util.model.metabolites:
                                 model_util.model.add_metabolites(new_met)
@@ -375,7 +373,7 @@ class MSCompatibility:
                                      f"{len(rxn.reactants)} reactants | {len(rxn.products)} products,"
                                      f" {rxn_diff} and is therefore skipped.")
         else:
-            # rename the undesirable compound
+            ## rename the undesirable compound
             met.name = met_name+compartment
             met.id = new_met_id
             change = {'original': {'id': original_id, 'name': original_name},
@@ -392,4 +390,4 @@ class MSCompatibility:
             if printing:
                 _print_changes(change)
                     
-        return model_util, met, reactions, new_met_id, changed_mets, changed_rxns
+        return model_util, met, reactions, resultsTup(new_met_id, None, changed_mets, changed_rxns)

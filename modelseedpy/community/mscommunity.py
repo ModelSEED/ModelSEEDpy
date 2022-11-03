@@ -117,6 +117,7 @@ class MSCommunity:
         # defining the models
         self.model = model if not models else build_from_species_models(
             models, names=names, abundances=abundances, cobra_model=True)
+        self.model_util = MSModelUtil(self.model)
         self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         msid_cobraid_hash = FBAHelper.msid_hash(self.model)
         if "cpd11416" not in msid_cobraid_hash:

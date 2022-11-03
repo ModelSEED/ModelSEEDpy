@@ -23,7 +23,7 @@ def _compatibilize_models(member_models: Iterable, printing=False):
 
 class MSSmetana:
     def __init__(self, member_models: Iterable, com_model, min_growth=0.1, n_solutions=100, environment=None,
-                 abstol=1e-3, media_dict=None, printing=True, compatibilize=True, minimal_media_method="jenga"):
+                 abstol=1e-3, media_dict=None, printing=True, compatibilize=True, minimal_media_method="minComponents"):
 
         self.min_growth = min_growth ; self.abstol = abstol ; self.n_solutions = n_solutions
         self.printing = printing ; self.compatibilize = compatibilize
@@ -40,21 +40,9 @@ class MSSmetana:
             raise ObjectiveError(f"The community model {self.community.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations and hence SMETANA.")
         if not media_dict:
-            # if member_models:
-            #     self.media = MSMinimalMedia.interacting_comm_media(self.models, printing=self.printing)
-            # else:
-            comm_exchanges = [exRXN.id for exRXN in FBAHelper.exchange_reactions(self.community)]
-            self.community.medium = {rxn:bound for rxn, bound in environment.items() if rxn in comm_exchanges}
-            if minimal_media_method == "minFlux":
-                self.media = {"community_media": MSMinimalMedia.minimize_flux(self.community, min_growth),
-                              "members": {model.id: {"media":MSMinimalMedia.minimize_flux(model, min_growth)}}}
-            elif minimal_media_method == "minComponents":
-                self.media = {"community_media": MSMinimalMedia.minimize_components(self.community, min_growth),
-                              "members": {}}
-            elif minimal_media_method == "jenga":
-                # subtract syntrophic interactions from media requirements
-                self.media = MSMinimalMedia.interacting_comm_media(
-                    self.models, com_model, "jenga", min_growth, None, self.environment, printing)
+            self.community.model_util.add_medium(environment)
+            self.media = MSSmetana._get_media(
+                None, self.community, self.models, min_growth, True, printing, minimal_media_method)
         else:
             self.media = media_dict
 
@@ -139,23 +127,39 @@ class MSSmetana:
 
     @staticmethod
     def _get_media(media=None, com_model=None, model_s_=None, min_growth=None,
-                   syntrophy=True, printing=False, minimization_method="jenga"):
+                   interacting=True, printing=False, minimization_method="minComponents"):
         if media:
-            if model_s_ and not isinstance(model_s_, (list, set, tuple)):
+            if len(model_s_) == 1:
                 return media["members"][model_s_.id]["media"]
-            return media["community_media"]
-        if not media:  # model_s_ is either a singular model or a list of models
-            if com_model or model_s_ and not isinstance(model_s_, (list,set,tuple)):
-                return MSMinimalMedia.jenga_method(com_model or model_s_, printing=printing)
-            elif isinstance(model_s_, (list,set,tuple)):
-                if syntrophy:
-                    return MSMinimalMedia.interacting_comm_media(
-                        model_s_, com_model, minimization_method, min_growth, None, printing)
-                return MSMinimalMedia.comm_media_est(model_s_, com_model, 0.1, minimization_method, printing)
+            return media
+        # model_s_ is either a singular model or a list of models
+        if com_model or (model_s_ and not isinstance(model_s_, (list,set,tuple))):
+            if minimization_method == "minComponents":
+                return MSMinimalMedia.minimize_components(com_model or model_s_, min_growth, printing=printing)
+            if minimization_method == "minFlux":
+                return MSMinimalMedia.minimize_components(com_model or model_s_, min_growth, printing=printing)
+        elif isinstance(model_s_, (list,set,tuple)):
+            if minimization_method == "minFlux":
+                media = {"community_media":MSMinimalMedia.minimize_flux(com_model, min_growth, printing=printing), "members":{}}
+                for model in model_s_:
+                    media["members"][model.id] = {"media": MSMinimalMedia.minimize_flux(
+                        model, min_growth, interacting=interacting, printing=print)}
+            if minimization_method == "minComponents":
+                media = {"community_media":MSMinimalMedia.minimize_components(com_model, min_growth, printing=printing), "members":{}}
+                for model in model_s_:
+                    media["members"][model.id] = {"media": MSMinimalMedia.minimize_components(
+                        model, min_growth, interacting=interacting, printing=print)}
+            return media
+        else:
             raise TypeError("Either the com_model or model_s_ arguments must be parameterized.")
         # and's here to quit after a false, unlike all()
         if model_s_ and not isinstance(model_s_, (list,set,tuple)) and model_s_.id not in media["members"]:
-            media["members"][model_s_.id] = {"media": MSMinimalMedia.jenga_method(model_s_, printing=printing)}
+            if minimization_method == "minComponents":
+                media["members"][model_s_.id] = {"media": MSMinimalMedia.minimize_components(
+                    model_s_, min_growth, interacting=interacting, printing=printing)}
+            elif minimization_method == "minFlux":
+                media["members"][model_s_.id] = {"media": MSMinimalMedia.minimize_flux(
+                    model_s_, min_growth, interacting=interacting, printing=printing)}
             return media["members"][model_s_.id]["media"]
 
     @staticmethod
@@ -181,9 +185,7 @@ class MSSmetana:
         member_models = _compatibilize_models(member_models) if compatibilize else member_models
         noninteracting_medium = MSSmetana._get_media(noninteracting_media_dict, None, member_models, min_growth, False)
         interacting_medium = MSSmetana._get_media(interacting_media_dict, None, member_models, min_growth, True)
-        nonint_med = noninteracting_medium if "community_media" not in noninteracting_medium else noninteracting_medium["community_media"]
-        int_med = interacting_medium if "community_media" not in interacting_medium else interacting_medium["community_media"]
-        interact_diff = DeepDiff(nonint_med, int_med)
+        interact_diff = DeepDiff(noninteracting_medium["community_media"], interacting_medium["community_media"])
         if "dictionary_item_removed" in interact_diff:
             return interact_diff["dictionary_item_removed"], len(interact_diff["dictionary_item_removed"])
         return None, 0

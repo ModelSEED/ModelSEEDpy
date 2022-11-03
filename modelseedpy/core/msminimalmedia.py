@@ -29,16 +29,6 @@ def _model_growth(sol_dict):
     return sum([flux for var, flux in sol_dict.items() if "bio" in var.name])
 
 
-def _influx_objective(model_util):
-    influxes = []
-    for ex_rxn in model_util.media_exchanges_list():
-        if len(ex_rxn.reactants) == 1:  # this is essentially every exchange
-            influxes.append(ex_rxn.reverse_variable)
-        else:  # this captures edge cases
-            influxes.append(ex_rxn.forward_variable)
-    return influxes
-
-
 def _var_to_ID(var):
     rxnID = var.name
     if "_ru" in rxnID:
@@ -54,7 +44,20 @@ def _compatibilize(org_models, printing=False):
 class MSMinimalMedia:
 
     @staticmethod
-    def minimize_flux(org_model, minimal_growth=None, environment=None, printing=True):
+    def _influx_objective(model_util, interacting):
+        rxns = model_util.exchange_list() if interacting else model_util.transport_list()
+        influxes = []
+        for rxn in rxns:
+            reactant_mets_ids = [met.id for met in rxn.reactants]
+            if "EX_" in reactant_mets_ids:  # this is essentially every exchange
+                influxes.append(rxn.reverse_variable)
+            elif "EX_" in [met.id for met in rxn.products]:  # this captures edge cases
+                logger.critical(f"The reaction {rxn} lacks any exchange metabolites, and thus is indicative of an error.")
+                influxes.append(rxn.forward_variable)
+        return influxes
+
+    @staticmethod
+    def minimize_flux(org_model, minimal_growth=None, environment=None, interacting=True, printing=True):
         """minimize the total in-flux of exchange reactions in the model"""
         if org_model.slim_optimize() == 0:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
@@ -64,7 +67,8 @@ class MSMinimalMedia:
         # define the MILP
         minimal_growth = minimal_growth or model_util.model.optimize().objective_value
         FBAHelper.add_minimal_objective_cons(model_util.model, min_value=minimal_growth)
-        media_exchanges = _influx_objective(model_util)
+        model_util.model, variables = MSMinimalMedia._define_min_objective(model_util, interacting)
+        media_exchanges = MSMinimalMedia._influx_objective(model_util, interacting)
         FBAHelper.add_objective(model_util.model, sum(media_exchanges), "min")
         # parse the minimal media
         min_media = _exchange_solution(FBAHelper.solution_to_dict(model_util.model.optimize()))
@@ -207,14 +211,14 @@ class MSMinimalMedia:
             model = org_model.copy()
             model.medium = environment or model.medium
             reactions = [rxn.name for rxn in model.variables]
-            duplicate_reactions = DeepDiff(sorted(reactions), sorted(set(reactions)))
+            duplicate_reactions = DeepDiff(sorted(set(reactions)), sorted(reactions))
             if duplicate_reactions:
                 logger.critical(f'CodeError: The model {model.id} contains {duplicate_reactions}'
                                 f' that compromise the model.')
             if minimization_method == "minFlux":
-                media["members"][model.id] = {"media": MSMinimalMedia.minimize_flux(model, min_growth, printing)}
+                media["members"][model.id] = {"media": MSMinimalMedia.minimize_flux(model, min_growth, printing=printing)}
             elif minimization_method == "minComponents":
-                media["members"][model.id] = {"media": minimal_medium(model, min_growth, minimize_components=True).to_dict()}
+                media["members"][model.id] = {"media": MSMinimalMedia.minimize_components(model, min_growth, printing=printing)}
             elif minimization_method == "jenga":
                 media["members"][model.id] = {"media": MSMinimalMedia.jenga_method(model, printing=printing)}
                 media["community_media"] = FBAHelper.sum_dict(media["members"][model.id]["media"], media["community_media"])
@@ -227,9 +231,9 @@ class MSMinimalMedia:
                 print("Community models are too excessive for direct assessment via the JENGA method; "
                       "thus, the community minimal media is estimated as the combination of member media.")
             elif minimization_method == "minFlux":
-                media["community_media"] = MSMinimalMedia.minimize_flux(comm_model, min_growth, printing)
+                media["community_media"] = MSMinimalMedia.minimize_flux(comm_model, min_growth, printing=printing)
             elif minimization_method == "minComponents":
-                media["community_media"] = minimal_medium(comm_model, min_growth, minimize_components=True).to_dict()
+                media["community_media"] = MSMinimalMedia.minimize_components(comm_model, min_growth, printing=printing)
         return media
 
     @staticmethod
@@ -266,8 +270,7 @@ class MSMinimalMedia:
         copied_model.medium = environment or copied_model.medium
         if compatibilize:
             copied_model = _compatibilize(copied_model)
-        # TODO - the COBRA method must eventually be replaced with MSMinimalMedia.minimize_components(copied_model, printing=False)
-        original_media = org_media or minimal_medium(copied_model, minimize_components=True).to_dict()
+        original_media = org_media or MSMinimalMedia.minimize_components(copied_model)
         # {cpd.replace("EX_", ""): flux for cpd, flux in .items()}
 
         # identify removal=ble compounds
@@ -384,61 +387,3 @@ class MSMinimalMedia:
             with open(export_name, 'w') as out:
                 json.dump(media, out, indent=3)
         return media
-
-# class MinimalMedia(BaseFBAPkg):
-#     """A class that determines the minimal media of a model"""  # investigate conversion to a staticmethod or single function for convenience and in-line utility
-#     def __init__(self, model, min_growth=0.1):
-#         # define the system
-#         BaseFBAPkg.__init__(self, model, "Minimal Media", {"met":"metabolite"}, {"met":"string", "obj":"string"})
-#
-#         # define the exchange variables, the minimal objective, and the minimal growth value
-#         for cpd in FBAHelper.exchange_reactions(self.model):
-#             BaseFBAPkg.build_variable(self,"met",0,1,"binary",cpd)
-#         self.model = FBAHelper.add_objective(self.model, sum([var for var in self.variables["met"].values()]), "min")
-#         BaseFBAPkg.build_constraint(self, "obj", min_growth, None, {
-#             rxn.forward_variable:1 for rxn in FBAHelper.bio_reactions(self.model)}, "min_growth")
-#
-#         # determine the set of media solutions
-#         solutions = []
-#         sol = self.model.optimize()
-#         while sol.status == "optimal":
-#             solutions.append(sol)
-#             sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
-#             ## omit the solution from the next search
-#             BaseFBAPkg.build_constraint(self, "met", len(sol_dict)-1, len(sol_dict)-1,
-#                                         coef=sol_dict, cobra_obj=f"sol{len(solutions)}")
-#             sol = self.model.optimize()
-#         if not solutions:
-#             logger.error("No simulations were feasible.")
-#
-#         # search the permutation space by omitting previously investigated solutions
-#         self.interdependencies = {}
-#         for sol_index, sol in enumerate(solutions):
-#             self.interdependencies[sol_index] = {}
-#             for cpd in sol:
-#                 self.interdependencies[sol_index][cpd] = {}
-#                 coef = {self.variables["met"][cpd]:0}
-#                 coef.update({self.variables["met"][cpd2]:1 for cpd2 in sol if cpd != cpd2})
-#                 BaseFBAPkg.build_constraint(self, "met", sol.objective_value,
-#                                             sol.objective_value, coef, f"{cpd}-sol{sol_index}")
-#                 new_sol = self.model.optimize()
-#                 diff = DeepDiff(FBAHelper.solution_to_dict(sol), FBAHelper.solution_to_dict(new_sol))
-#
-#                 ## track metabolites that fill the void from the removed compound
-#                 while diff:
-#                     for key, value in diff.items():
-#                         new_mets = {re.search("(?<=[\')(.+)(?=\'])", met):change for met, change in value.items()}
-#                         # this dictionary should be parsed into a list of substitute metabolites and a list of functionally coupled reactions
-#                         self.interdependencies[sol_index][cpd].update(new_mets)
-#                     diff = self.test_compounds(cpd, sol, sol_index, new_mets.keys())
-#
-#     def test_compounds(self, cpd, sol, sol_index, zero_compounds):
-#         coef = {self.variables["met"][cpd]:0 for cpd in zero_compounds}
-#         coef.update({self.variables["met"][cpd]:1 for cpd in sol if cpd not in zero_compounds})
-#         cpd_name = "_".join(zero_compounds)
-#         BaseFBAPkg.build_constraint(self, "met", sol.objective_value,
-#                                     sol.objective_value, coef, f"{cpd_name}-sol{sol_index}")
-#         new_sol = self.model.optimize()
-#         if new_sol.status != "optimal":
-#             return False
-#         return DeepDiff(FBAHelper.solution_to_dict(sol), FBAHelper.solution_to_dict(new_sol))

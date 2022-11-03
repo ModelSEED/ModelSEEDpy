@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
-
-import logging
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
-from modelseedpy.core.fbahelper import FBAHelper
-
+import logging
 
 class ElementUptakePkg(BaseFBAPkg):
     def __init__(self,model):
@@ -19,11 +16,11 @@ class ElementUptakePkg(BaseFBAPkg):
                    
     def build_constraint(self,element):
         coef = {self.variables["elements"][element]: -1}
-        for exRXN in FBAHelper.exchange_reactions(self.model):
+        for exRXN in self.modelutl.exchange_list():
             totalNumAtoms = sum([met.elements[element]*exRXN.metabolites[met]
                                  for met in exRXN.metabolites if element in met.elements])
             if totalNumAtoms < 0:
                 coef[exRXN.reverse_variable] = abs(totalNumAtoms)
             elif totalNumAtoms > 0:
                 coef[exRXN.forward_variable] = totalNumAtoms
-        return BaseFBAPkg.build_constraint(self,"elements",0,0,coef,element)   
+        return BaseFBAPkg.build_constraint(self,"elements",0,0,coef,element)
