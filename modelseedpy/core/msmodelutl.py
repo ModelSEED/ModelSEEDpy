@@ -145,7 +145,7 @@ class MSModelUtil:
         return [exRXN for exRXN in self.exchange_list() if exRXN.id in self.model.medium]
 
     def bio_rxns_list(self):
-        return [rxn for rxn in self.model.reactions if "bio" in rxn.id]
+        return [rxn for rxn in self.model.reactions if re.search(r"(^bio\d+)", rxn.id)]
 
     def transport_list(self):
         return [rxn for rxn in self.model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
