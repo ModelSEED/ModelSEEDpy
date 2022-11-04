@@ -1,3 +1,4 @@
+import numpy
 from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msminimalmedia import MSMinimalMedia
 from modelseedpy.community.commhelper import build_from_species_models
@@ -22,19 +23,14 @@ def _compatibilize_models(member_models: Iterable, printing=False):
     return member_models
     # return MSCompatibility.standardize(member_models, conflicts_file_name='exchanges_conflicts.json', printing=printing)
 
-def _determine_min_media(model, minimization_method, min_growth, interacting, printing):
-    if minimization_method == "minComponents":
-        return MSMinimalMedia.minimize_components(model, min_growth, printing=printing)
-    if minimization_method == "minFlux":
-        return MSMinimalMedia.minimize_components(model, min_growth, interacting=interacting, printing=printing)
-
 
 class MSSmetana:
     def __init__(self, member_models: Iterable, com_model, min_growth=0.1, n_solutions=100, environment=None,
-                 abstol=1e-3, media_dict=None, printing=True, raw_content=False,
+                 abstol=1e-3, media_dict=None, printing=True, raw_content=False, antismash_json_path:str=None,
                  minimal_media_method="minComponents"):
         self.min_growth = min_growth ; self.abstol = abstol ; self.n_solutions = n_solutions
         self.printing = printing ; self.raw_content = raw_content
+        self.antismash_json_path = antismash_json_path
 
         self.models, self.community = MSSmetana._load_models(member_models, com_model)
         if environment:
@@ -74,12 +70,12 @@ class MSSmetana:
                 newcomer, established = pair.split('---')
                 print(f"\n(MRO) The {newcomer} media {media} possesses {interaction} shared "
                       f"requirements with the {established} established member.")
-        else:
-            for pair, mro in self.mro.items():
-                newcomer, established = pair.split('---')
-                print(f"\nThe {newcomer} on {established} MRO score: {mro[0]} ({mro[0]*100:.2f}%). "
-                      f"This is the percent of nutritional requirements in {newcomer} "
-                      f"that overlap with {established} ({mro[1]}/{mro[2]}).")
+                return self.mro
+        for pair, mro in self.mro.items():
+            newcomer, established = pair.split('---')
+            print(f"\nThe {newcomer} on {established} MRO score: {mro[0]} ({mro[0]*100:.2f}%). "
+                  f"This is the percent of nutritional requirements in {newcomer} "
+                  f"that overlap with {established} ({mro[1]}/{mro[2]}).")
         return self.mro
 
     def mip_score(self, interacting_media:dict=None, noninteracting_media:dict=None):
@@ -139,6 +135,36 @@ class MSSmetana:
             pprint(self.smetana)
         return self.smetana
 
+    def antiSMASH_scores(self):
+        if not hasattr(self, "antismash_json_path"):
+            raise TypeError("The antismash_json_path argument must be specified to conduct the antiSMASH scores.")
+        self.antismash = MSSmetana.antiSMASH(self.antismash_json_path)
+        if not self.printing:
+            return self.antismash
+        if self.raw_content:
+            print("\n(antismash) The biosynthetic_areas, BGCs, protein_annotations, clusterBlast, and "
+                  "num_clusterBlast from the provided antiSMASH results:\n")
+            print("The 'areas' that antiSMASH determines produce biosynthetic products:")
+            pprint(self.antismash[0])
+            print("The set of biosynthetic gene clusters:")
+            pprint(self.antismash[1])
+            print("The set of clusterblast protein annotations:")
+            pprint(self.antismash[2])
+            print("Resistance information from clusterblast")
+            pprint(self.antismash[3])
+            print("The number of proteins associated with resistance")
+            pprint(self.antismash[4])
+            return self.antismash
+        print("\nantiSMASH scores:\n")
+        print("The community exhibited:"
+              f"- {len(self.antismash[0])}'areas' that antiSMASH determines produce biosynthetic products."
+              f"- {len(self.antismash[1])} biosynthetic gene clusters."
+              f"- {len(self.antismash[2])} clusterblast protein annotations."
+              f"- {len(self.antismash[3])} parcels of resistance information from clusterblast."
+              f"- {self.antismash[4]} proteins associated with resistance.")
+        return list(map(len, self.antismash[:4]))+[self.antismash[4]]
+
+
     ###### STATIC METHODS OF THE SMETANA SCORES, WHICH ARE APPLIED IN THE ABOVE CLASS OBJECT ######
 
     @staticmethod
@@ -165,14 +191,14 @@ class MSSmetana:
             return media
         # model_s_ is either a singular model or a list of models
         if com_model:
-            com_media = _determine_min_media(com_model, minimization_method, min_growth, interacting, printing)
+            com_media = MSMinimalMedia.determine_min_media(com_model, minimization_method, min_growth, interacting, printing)
         if model_s_:
             if not isinstance(model_s_, (list,set,tuple)):
-                return _determine_min_media(model_s_, minimization_method, min_growth, interacting, printing)
+                return MSMinimalMedia.determine_min_media(model_s_, minimization_method, min_growth, interacting, printing)
             if isinstance(model_s_, (list,set,tuple)):
                 members_media = {}
                 for model in model_s_:
-                    members_media[model.id] = {"media":_determine_min_media(
+                    members_media[model.id] = {"media":MSMinimalMedia.determine_min_media(
                         model, minimization_method, min_growth, interacting, printing)}
                 if not com_model:
                     return members_media
@@ -210,40 +236,41 @@ class MSSmetana:
         return None, 0
 
     @staticmethod
-    def mp(member_models:Iterable, com_model=None, abstol=1e-3, compatibilize=True):
+    def mp(member_models:Iterable, environment, com_model=None, abstol=1e-3, compatibilize=True):
         """Discover the metabolites that each species can contribute to a community"""
         member_models, community = MSSmetana._load_models(member_models, com_model, compatibilize)
-        com_model = community.copy()
+        # TODO support parsing the individual members through the MSCommunity object
         scores = {}
         for org_model in member_models:
             model_util = MSModelUtil(org_model)
-            scores[model_util.model.id] = []
+            model_util.add_medium(environment)
+            scores[model_util.model.id] = set()
             # determines possible member contributions in the community environment, where the excretion of media compounds is irrelevant
-            approximate_minimal_media = MSMinimalMedia.comm_media_est(member_models, com_model)
-            possible_contributions = [ex_rxn for ex_rxn in model_util.exchange_list() if ex_rxn.id not in approximate_minimal_media]
-            while len(possible_contributions) > 0:
+            possible_contributions = [ex_rxn for ex_rxn in model_util.exchange_list()
+                                      if ex_rxn.id not in community.model_util.model.medium]
+            FBAHelper.add_objective(model_util.model, sum(
+                ex_rxn.flux_expression for ex_rxn in possible_contributions))
+            sol = model_util.model.optimize()
+            fluxes_contributions = [0]
+            while all([sol.status == "optimal", len(possible_contributions) > 0, fluxes_contributions]):
                 print("remaining possible_contributions", len(possible_contributions), end="\r")
-                FBAHelper.add_objective(com_model, sum(ex_rxn.flux_expression for ex_rxn in possible_contributions))
-                sol = com_model.optimize()
-                fluxes_contributions, uncertain_contributions = [], []
+                ## identify and log excreta from the solution
+                fluxes_contributions = []
                 for ex in possible_contributions:
-                    if ex.id in sol.fluxes.keys():
-                        if sol.fluxes[ex.id] >= abstol:
-                            fluxes_contributions.append(ex)
-                            possible_contributions.remove(ex)
+                    if ex.id in sol.fluxes.keys() and sol.fluxes[ex.id] >= abstol:
+                        fluxes_contributions.append(ex)
+                        possible_contributions.remove(ex)
+                        scores[model_util.model.id].update([met.id for met in ex.metabolites])
+                ## optimize the sum of the remaining exchanges that have not surpassed the abstol
+                FBAHelper.add_objective(model_util.model, sum(
+                    ex_rxn.flux_expression for ex_rxn in possible_contributions))
+                sol = model_util.model.optimize()
 
-                if sol.status != 'optimal' or not fluxes_contributions:
-                    break
-                # log confirmed contributions
-                for ex_rxn in fluxes_contributions:
-                    for met in ex_rxn.metabolites:
-                        scores[model_util.model.id].append(met.id)
-
-            # double-check the remaining possible contributions for excretion
+            ## individually checks the remaining possible contributions
             for ex_rxn in possible_contributions:
-                com_model.objective = Objective(ex_rxn.flux_expression)
-                sol = com_model.optimize()
-                if sol.status != 'optimal' or sol.objective_value < abstol:
+                model_util.model.objective = Objective(ex_rxn.flux_expression)
+                sol = model_util.model.optimize()
+                if sol.status == 'optimal' or sol.objective_value > abstol:
                     for met in ex_rxn.metabolites:
                         if met.id in scores[model_util.model.id]:
                             print("removing", met.id)
@@ -251,26 +278,34 @@ class MSSmetana:
         return scores
 
     @staticmethod
-    def mu(member_models:Iterable, environment=None, n_solutions=100, abstol=1e-3, printing=True):
+    def mu(member_models:Iterable, environment=None, member_excreta=None, n_solutions=100, abstol=1e-3, printing=True):
         """the fractional frequency of each received metabolite amongst all possible alternative syntrophic solutions"""
         # member_solutions = member_solutions if member_solutions else {model.id: model.optimize() for model in member_models}
         scores = {}
         member_models = _compatibilize_models(member_models, printing)
+        missing_members = [model for model in member_models if model.id not in member_excreta]
+        if missing_members:
+            member_excreta.update(MSSmetana.mp([missing_members], environment))
         # TODO leverage the MP for all members to determine the excreta potential of the community, which is the potential pool of
         #  syntrophic uptakes for the MU score
         for org_model in member_models:
+            other_excreta = set(numpy.array([excreta for model, excreta in member_excreta.items()
+                                            if model.id != org_model.id]).flatten())
             model_util = MSModelUtil(org_model)
             if environment:
                 model_util.add_medium(environment)
             ex_rxns = {ex_rxn: met for ex_rxn in model_util.exchange_list() for met in ex_rxn.metabolites}
-            variables = {ex_rxn.id: Variable('___'.join([model_util.model.id, ex_rxn.id]), lb=0, ub=1, type="binary"
-                                             ) for ex_rxn in ex_rxns}
+            variables = {ex_rxn.id: Variable('___'.join([model_util.model.id, ex_rxn.id]),
+                                             lb=0, ub=1, type="binary") for ex_rxn in ex_rxns}
             FBAHelper.add_cons_vars(model_util.model, [list(variables.values())])
             media, solutions = [], []
             sol = model_util.model.optimize()
             while sol.status == "optimal" and len(solutions) < n_solutions:
                 solutions.append(sol)
-                medium = set([ex_rxn for ex_rxn in ex_rxns if sol.fluxes[ex_rxn.id] < -abstol])
+                medium = set()
+                for ex in ex_rxns:
+                    if sol.fluxes[ex.id] < -abstol and ex in other_excreta:
+                        medium.add(ex)
                 constraint = Constraint(sum([variables[ex.id] for ex in medium]),
                                         ub=len(medium)-1, name=f"iteration_{len(solutions)}")
                 FBAHelper.add_cons_vars(model_util.model, [constraint])
@@ -366,3 +401,21 @@ class MSSmetana:
                             mp_score = 0 if met.id not in mp[model1.id] else 1
                             smetana_scores[model1.id][model2.id] += mu[model1.id].get(met.id,0)*sc_score*mp_score
         return smetana_scores
+
+    @staticmethod
+    def antiSMASH(antismash_json_path, ):
+        # TODO Scores 2, 4, and 5 are being explored for relevance to community formation and reveal specific member interactions/targets
+        import json
+        with open(antismash_json_path) as json_file:
+            data = json.load(json_file)
+
+        # Parse scores from the data
+        biosynthetic_areas = data["records"][0]['areas']
+        BGCs = set(numpy.array([data["records"][0]['areas'][i]['products'] for i in range(biosynthetic_areas)]).flatten())
+        len_proteins = len(data["records"][0]['modules']['antismash.modules.clusterblast']['knowncluster']['proteins'])
+        protein_annotations = [data["records"][0]['modules']['antismash.modules.clusterblast']['knowncluster']['proteins'][i]['annotations']
+                           for i in range(len_proteins)]
+        clusterBlast = [s for s in protein_annotations if "resistance" in s]
+        num_clusterBlast = sum([item.count("resistance") for item in protein_annotations])
+
+        return biosynthetic_areas, BGCs, protein_annotations, clusterBlast, num_clusterBlast

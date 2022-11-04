@@ -46,6 +46,11 @@ def verify(org_model, min_media):
     model2.medium = min_media
     return model2.optimize()
 
+def minimizeFlux_minGrowth(model, min_growth, obj):
+    FBAHelper.add_minimal_objective_cons(model, min_growth)
+    FBAHelper.add_objective(model, obj, "min")
+    return model.optimize()
+
 
 class MSMinimalMedia:
 
@@ -72,12 +77,10 @@ class MSMinimalMedia:
         model_util.add_medium(environment or model_util.model.medium)
         # define the MILP
         min_growth = min_growth or model_util.model.optimize().objective_value
-        FBAHelper.add_minimal_objective_cons(model_util.model, min_value=min_growth)
         model_util.model, variables = MSMinimalMedia._define_min_objective(model_util, interacting)
         media_exchanges = MSMinimalMedia._influx_objective(model_util, interacting)
-        FBAHelper.add_objective(model_util.model, sum(media_exchanges), "min")
         # parse the minimal media
-        sol = model_util.model.optimize()
+        sol = minimizeFlux_minGrowth(model_util.model, min_growth, sum(media_exchanges))
         sol_dict = FBAHelper.solution_to_variables_dict(sol, model_util.model)
         min_media = _exchange_solution(sol_dict)
         total_flux = sum([abs(flux) for flux in min_media.values()])
@@ -218,7 +221,16 @@ class MSMinimalMedia:
             return interdependencies
 
     @staticmethod
-    def comm_media_est(models, comm_model, min_growth=0.1, minimization_method="jenga", environment=None, printing=False):
+    def determine_min_media(model, minimization_method="minComponents", min_growth=0.1, interacting=True, printing=True):
+        if minimization_method == "minComponents":
+            return MSMinimalMedia.minimize_components(model, min_growth, printing=printing)
+        if minimization_method == "minFlux":
+            return MSMinimalMedia.minimize_components(model, min_growth, interacting=interacting, printing=printing)
+        if minimization_method == "jenga":
+            return MSMinimalMedia.jenga_method(model,printing=printing)
+
+    @staticmethod
+    def comm_media_est(models, comm_model, min_growth=0.1, minimization_method="jenga", interacting=True, environment=None, printing=False):
         media = {"community_media": {}, "members": {}}
         for org_model in models:
             model = org_model.copy()
@@ -228,12 +240,9 @@ class MSMinimalMedia:
             if duplicate_reactions:
                 logger.critical(f'CodeError: The model {model.id} contains {duplicate_reactions}'
                                 f' that compromise the model.')
-            if minimization_method == "minFlux":
-                media["members"][model.id] = {"media": MSMinimalMedia.minimize_flux(model, min_growth, printing=printing)}
-            elif minimization_method == "minComponents":
-                media["members"][model.id] = {"media": MSMinimalMedia.minimize_components(model, min_growth, printing=printing)}
-            elif minimization_method == "jenga":
-                media["members"][model.id] = {"media": MSMinimalMedia.jenga_method(model, printing=printing)}
+            media["members"][model.id] = {"media": MSMinimalMedia.determine_min_media(
+                model, minimization_method, min_growth, interacting, printing)}
+            if minimization_method == "jenga":
                 media["community_media"] = FBAHelper.sum_dict(media["members"][model.id]["media"], media["community_media"])
             model.medium = media["members"][model.id]["media"]
             media["members"][model.id]["solution"] = FBAHelper.solution_to_dict(model.optimize())
@@ -243,10 +252,9 @@ class MSMinimalMedia:
             if minimization_method == "jenga":
                 print("Community models are too excessive for direct assessment via the JENGA method; "
                       "thus, the community minimal media is estimated as the combination of member media.")
-            elif minimization_method == "minFlux":
-                media["community_media"] = MSMinimalMedia.minimize_flux(comm_model, min_growth, printing=printing)
-            elif minimization_method == "minComponents":
-                media["community_media"] = MSMinimalMedia.minimize_components(comm_model, min_growth, printing=printing)
+                return media
+            media["community_media"] = MSMinimalMedia.determine_min_media(
+                comm_model, minimization_method, min_growth, interacting, printing)
         return media
 
     @staticmethod
