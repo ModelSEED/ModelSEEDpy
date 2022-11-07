@@ -164,6 +164,9 @@ class MSModelUtil:
                 else:
                     logger.warn("Nonstandard exchange reaction ignored:"+ex_rxn.id)
         return exchange_reactions
+
+    def var_names_list(self):
+        return [var.name for var in self.model.variables]
     
     def add_missing_exchanges(self,media):
         output, exchange_list = [], []

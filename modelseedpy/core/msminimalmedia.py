@@ -46,10 +46,17 @@ def verify(org_model, min_media):
     model2.medium = min_media
     return model2.optimize()
 
-def minimizeFlux_minGrowth(model, min_growth, obj):
+def minimizeFlux_withGrowth(model, min_growth, obj):
     FBAHelper.add_minimal_objective_cons(model, min_growth)
     FBAHelper.add_objective(model, obj, "min")
-    return model.optimize()
+    print(model.objective)
+    sol = model.optimize()
+    sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
+    simulated_growth = sum([flux for var, flux in sol_dict.items() if re.search(r"(^bio\d+$)", var.name)])
+    if simulated_growth < min_growth*0.9999:
+        raise ObjectiveError(f"The assigned minimal_growth of {min_growth} was not maintained during the simulation,"
+                             f" where the observed growth value was {simulated_growth}.")
+    return sol, sol_dict
 
 
 class MSMinimalMedia:
@@ -77,19 +84,15 @@ class MSMinimalMedia:
         model_util.add_medium(environment or model_util.model.medium)
         # define the MILP
         min_growth = min_growth or model_util.model.optimize().objective_value
-        model_util.model, variables = MSMinimalMedia._define_min_objective(model_util, interacting)
+        model_util.model, variables = MSMinimalMedia._define_min_objective(model_util.model, model_util, interacting)
         media_exchanges = MSMinimalMedia._influx_objective(model_util, interacting)
         # parse the minimal media
-        sol = minimizeFlux_minGrowth(model_util.model, min_growth, sum(media_exchanges))
-        sol_dict = FBAHelper.solution_to_variables_dict(sol, model_util.model)
+        sol, sol_dict = minimizeFlux_withGrowth(model_util.model, min_growth, sum(media_exchanges))
         min_media = _exchange_solution(sol_dict)
         total_flux = sum([abs(flux) for flux in min_media.values()])
         simulated_sol = verify(org_model, min_media)
         if simulated_sol.status != "optimal":
             raise FeasibilityError(f"The simulation was not optimal, with a status of {simulated_sol.status}")
-        if _model_growth(sol_dict) < min_growth*0.9999:
-            raise ObjectiveError(f"The assigned minimal_growth of {min_growth} was not maintained during the simulation,"
-                                 f" where the observed growth value was {simulated_sol.objective_value}.")
         if printing:
             print(f"The minimal flux media consists of {len(min_media)} compounds and a {total_flux} total influx,"
                   f" with a growth value of {simulated_sol.objective_value}")
@@ -122,7 +125,7 @@ class MSMinimalMedia:
         model = model_util.model
         variables = {"ru":{}}
         FBAHelper.add_minimal_objective_cons(
-            model, sum([rxn.flux_expression for rxn in model_util.bio_rxns_list()]), min_growth)
+            model, min_growth, sum([rxn.flux_expression for rxn in model_util.bio_rxns_list()]))
         # define the binary variable and constraint
         time1 = process_time()
         model, variables["ru"] = MSMinimalMedia._define_min_objective(model, model_util, interacting)
