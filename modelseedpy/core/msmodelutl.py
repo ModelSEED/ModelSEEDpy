@@ -2,6 +2,8 @@ import logging
 import re
 from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are not used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.fbahelper import FBAHelper
+from optlang import Constraint
 import time
 
 logger = logging.getLogger(__name__)
@@ -65,7 +67,7 @@ def search_name(name):
 class MSModelUtil:
 
     def __init__(self,model):
-        self.model = model
+        self.model = model.copy()
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         self.atputl = self.gfutl = self.metabolite_hash = self.search_metabolite_hash = None
         self.test_objective = self.score = None
@@ -135,7 +137,24 @@ class MSModelUtil:
     
     def exchange_list(self): 
         return [rxn for rxn in self.model.reactions if 'EX_' in rxn.id]
-    
+
+    def exchange_mets_list(self):
+        return [met for ex_rxn in self.exchange_list() for met in ex_rxn.metabolites]
+
+    def media_exchanges_list(self):
+        return [exRXN for exRXN in self.exchange_list() if exRXN.id in self.model.medium]
+
+    def bio_rxns_list(self):
+        return [rxn for rxn in self.model.reactions if re.search(r"(^bio\d+)", rxn.id)]
+
+    def transport_list(self):
+        return [rxn for rxn in self.model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
+
+    def compatibilize(self):
+        # TODO develop a wrapped standardization via MSCompatibility
+        # self.model =
+        pass
+
     def exchange_hash(self):
         exchange_reactions = {}
         for ex_rxn in self.exchange_list():
@@ -145,6 +164,9 @@ class MSModelUtil:
                 else:
                     logger.warn("Nonstandard exchange reaction ignored:"+ex_rxn.id)
         return exchange_reactions
+
+    def var_names_list(self):
+        return [var.name for var in self.model.variables]
     
     def add_missing_exchanges(self,media):
         output, exchange_list = [], []
@@ -516,3 +538,17 @@ class MSModelUtil:
             m = re.search('(.+)_([a-z]+)(\d*)$', object.id)
             return (m[1],m[2],m[3])
         return None
+
+    def add_kbase_media(self, kbase_media):
+        exIDs = [exRXN.id for exRXN in self.exchange_list()]
+        self.model.medium = {"EX_"+exID: -bound[0] for exID, bound in kbase_media.get_media_constraints().items()
+                             if "EX_"+exID in exIDs}
+        return self.model.medium
+
+    def add_medium(self, media):
+        exIDs = [exRXN.id for exRXN in self.exchange_list()]
+        self.model.medium = {ex: uptake for ex, uptake in media.items() if ex in exIDs}
+        for exRXN in self.media_exchanges_list():
+            FBAHelper.create_constraint(self.model, Constraint(
+                exRXN.reverse_variable, lb=None,ub=media[exRXN.id], name=exRXN.id + "_maxFlux"))
+        return self.model.medium

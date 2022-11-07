@@ -318,6 +318,8 @@ class FBAHelper:
     
     @staticmethod
     def parse_df(df):
+        if isinstance(df, tuple):
+            return df
         from collections import namedtuple
         dataframe = namedtuple("DataFrame", ("index", "columns", "values"))
         return dataframe(list(df.index), list(df.columns), df.to_numpy())
@@ -349,7 +351,7 @@ class FBAHelper:
             model.solver.update()
 
     @staticmethod
-    def add_minimal_objective_cons(model, objective_expr=None, min_value=0.1):
+    def add_minimal_objective_cons(model, min_value=0.1, objective_expr=None):
         objective_expr = objective_expr or model.objective.expression
         FBAHelper.create_constraint(model, Constraint(objective_expr, lb=min_value, ub=None, name="min_value"))
     
@@ -382,18 +384,6 @@ class FBAHelper:
         return unique_objs
     
     @staticmethod
-    def exchange_reactions(model):
-        return [rxn for rxn in model.reactions if "EX_" in rxn.id]
-
-    @staticmethod
-    def transport_reactions(model):
-        return [rxn for rxn in model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
-
-    @staticmethod
-    def bio_reactions(model):
-        return [rxn for rxn in model.reactions if "bio" in rxn.id]
-    
-    @staticmethod
     def solution_to_dict(solution):
         return {key:flux for key, flux in solution.fluxes.items()}
     
@@ -424,10 +414,7 @@ class FBAHelper:
         else:
             return {met.id: stoich for met, stoich in rxn.items()}
 
-    # @staticmethod
-    # def non_interacting_community(community):
-    #     # !!! divert all exchange reactions to a sink
-    #     for rxn in community.reactions:
-    #         if "EX_" in rxn.id:
-    #             community.add_boundary(list(rxn.metabolites.keys())[0], lb=0, type="sink")
-    #     return community
+    @staticmethod
+    def convert_kbase_media(kbase_media):
+        return {"EX_"+exID: -bound[0] for exID, bound in kbase_media.get_media_constraints().items()}
+
