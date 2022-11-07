@@ -1,6 +1,6 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
-from modelseedpy.community.steadycom import MSSteadyCom
+from modelseedpy.community.mssteadycom import MSSteadyCom
 from modelseedpy.community.commhelper import build_from_species_models
 from modelseedpy.core.exceptions import ObjectAlreadyDefinedError, ParameterError
 from modelseedpy.core.msgapfill import MSGapfill
