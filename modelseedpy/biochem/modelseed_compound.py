@@ -59,9 +59,8 @@ class ModelSEEDCompound2(Metabolite):
             self.flags |= set(flags)
 
     def to_template_compartment_compound(self, compartment):
-        res = self.copy()
-        res.id = f"{self.seed_id}_{compartment}"
-        res.compartment = compartment
+        cpd_id = f"{self.seed_id}_{compartment}"
+        res = MSTemplateSpecies(cpd_id, self.charge, compartment, self.id)
         res.annotation.update(self.annotation)
         return res
 
