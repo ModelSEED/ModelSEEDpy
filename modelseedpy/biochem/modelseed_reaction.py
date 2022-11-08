@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 from modelseedpy.biochem.seed_object import ModelSEEDObject
+from cobra.core import Reaction
 from modelseedpy.core.mstemplate import MSTemplateReaction
 
 
