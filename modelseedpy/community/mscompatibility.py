@@ -233,15 +233,15 @@ class MSCompatibility:
         reactions = [rxn.name for rxn in model_util.model.variables]
         if len(reactions) != len(set(reactions)):
             duplicate_reactions = DeepDiff(set(reactions), reactions)
-            logger.critical(f'CodeError: The model {model_util.model.id} contains {duplicate_reactions}'
+            logger.critical(f'CodeError: The model {org_model.id} contains {duplicate_reactions}'
                             f' that compromise the model.')
 
         # verify that the objective value is practically unchanged
         original_objective_value = org_model.slim_optimize()
         new_objective_value = model_util.model.slim_optimize()
         if not isclose(original_objective_value, new_objective_value, rel_tol=1e-6):
-            logger.critical(f"The original objective value {original_objective_value} "
-                            f"does not equal the new objective value {new_objective_value}.")
+            logger.critical(f"The original objective value {original_objective_value} for {org_model.id}"
+                            f" does not equal the new objective value {new_objective_value}.")
 
     @staticmethod
     def _export(models, conflicts, conflicts_file_name, model_names, export_directory):

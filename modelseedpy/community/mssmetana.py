@@ -19,9 +19,12 @@ from numpy import mean
 # from math import prod
 
 
-def _compatibilize_models(member_models: Iterable, printing=False):
-    return member_models
-    # return MSCompatibility.standardize(member_models, conflicts_file_name='exchanges_conflicts.json', printing=printing)
+def _compatibilize(member_models: Iterable, printing=False):
+    # return member_models
+    models = MSCompatibility.standardize(member_models, conflicts_file_name='exchanges_conflicts.json', printing=printing)
+    if not isinstance(member_models, (set, list, tuple)):
+        return models[0]
+    return models
 
 
 class MSSmetana:
@@ -168,13 +171,13 @@ class MSSmetana:
     ###### STATIC METHODS OF THE SMETANA SCORES, WHICH ARE APPLIED IN THE ABOVE CLASS OBJECT ######
 
     @staticmethod
-    def _load_models(member_models: Iterable, com_model=None, compatibilize=True):
+    def _load_models(member_models: Iterable, com_model=None, compatibilize=True, printing=False):
         if not com_model and member_models:
             model, names, abundances = build_from_species_models(member_models, name="SMETANA_example", cobra_model=True)
             return member_models, MSCommunity(model, names=names, abundances=abundances)
         # models = PARSING_FUNCTION(community_model) # TODO the individual models of a community model must be parsed
         if compatibilize:
-            return _compatibilize_models(member_models), MSCommunity(_compatibilize_models([com_model])[0])
+            return _compatibilize(member_models), MSCommunity(_compatibilize([com_model])[0])
         return member_models, MSCommunity(com_model)
 
     @staticmethod
@@ -184,7 +187,7 @@ class MSSmetana:
         if not com_model and not model_s_:
             raise TypeError("Either the com_model or model_s_ arguments must be parameterized.")
         if media:
-            if not isinstance(model_s_, (list,set,tuple)):
+            if model_s_ and not isinstance(model_s_, (list,set,tuple)):
                 return media["members"][model_s_.id]["media"]
             elif com_model:
                 return media["community_media"]
@@ -207,38 +210,51 @@ class MSSmetana:
         return {"community_media":com_media, "members":members_media}
 
     @staticmethod
-    def mro(member_models:Iterable, min_growth=0.1, media_dict=None, raw_content=False, printing=False):
+    def mro(member_models:Iterable, min_growth=0.1, media_dict=None, raw_content=False, printing=False,
+            compatibilized=False):
         """Determine the maximal overlap of minimal media between member organisms."""
-        member_models = _compatibilize_models(member_models, printing)
+        if not compatibilized:
+            member_models = _compatibilize(member_models, printing)
         mem_media = MSSmetana._get_media(media_dict, None, member_models, min_growth, printing=printing)
+        if "community_media" in mem_media:
+            mem_media = mem_media["members"]
         # MROs = array(list(map(len, pairs.values()))) / array(list(map(len, mem_media.values())))
         mro_values = {}
         for model1, model2 in permutations(member_models, 2):
-            intersection = set(mem_media[model1.id]["media"]) & set(mem_media[model2.id]["media"])
-            media = mem_media[model1.id]
+            intersection = set(mem_media[model1.id]["media"].keys()) & set(mem_media[model2.id]["media"].keys())
+            member_media = mem_media[model1.id]["media"]
             if raw_content:
-                mro_values[f"{model1.id}---{model2.id})"] = (intersection, media)
+                mro_values[f"{model1.id}---{model2.id})"] = (intersection, member_media)
             else:
-                mro_values[f"{model1.id}---{model2.id})"] = (len(intersection)/len(media), len(intersection), len(media))
+                mro_values[f"{model1.id}---{model2.id})"] = (
+                    len(intersection)/len(member_media), len(intersection), len(member_media))
         return mro_values
         # return mean(list(map(len, pairs.values()))) / mean(list(map(len, mem_media.values())))
 
     @staticmethod
     def mip(com_model=None, member_models:Iterable=None, min_growth=0.1, interacting_media_dict=None,
-            noninteracting_media_dict=None, printing=True):
+            noninteracting_media_dict=None, printing=True, compatibilized=False):
         """Determine the maximum quantity of nutrients that can be sourced through syntrophy"""
-        com_model = _compatibilize_models(com_model, printing) if com_model else build_from_species_models(member_models)
+        member_models, com_model = MSSmetana._load_models(
+            member_models, com_model, compatibilized==False, printing=printing)
+        # determine the interacting and non-interacting media for the specified community
         noninteracting_medium = MSSmetana._get_media(noninteracting_media_dict, com_model, None, min_growth, False)
+        if "community_media" in noninteracting_medium:
+            noninteracting_medium = noninteracting_medium["community_media"]
         interacting_medium = MSSmetana._get_media(interacting_media_dict, com_model, None, min_growth, True)
-        interact_diff = DeepDiff(noninteracting_medium["community_media"], interacting_medium["community_media"])
+        if "community_media" in noninteracting_medium:
+            interacting_medium = interacting_medium["community_media"]
+        # differentiate the community media
+        interact_diff = DeepDiff(noninteracting_medium, interacting_medium)
         if "dictionary_item_removed" in interact_diff:
             return interact_diff["dictionary_item_removed"], len(interact_diff["dictionary_item_removed"])
         return None, 0
 
     @staticmethod
-    def mp(member_models:Iterable, environment, com_model=None, abstol=1e-3, compatibilize=True):
+    def mp(member_models:Iterable, environment, com_model=None, abstol=1e-3, compatibilized=False, printing=False):
         """Discover the metabolites that each species can contribute to a community"""
-        member_models, community = MSSmetana._load_models(member_models, com_model, compatibilize)
+        member_models, community = MSSmetana._load_models(
+            member_models, com_model, compatibilized==False, printing=printing)
         # TODO support parsing the individual members through the MSCommunity object
         scores = {}
         for org_model in member_models:
@@ -278,11 +294,13 @@ class MSSmetana:
         return scores
 
     @staticmethod
-    def mu(member_models:Iterable, environment=None, member_excreta=None, n_solutions=100, abstol=1e-3, printing=True):
+    def mu(member_models:Iterable, environment=None, member_excreta=None, n_solutions=100, abstol=1e-3,
+           compatibilized=False, printing=True):
         """the fractional frequency of each received metabolite amongst all possible alternative syntrophic solutions"""
         # member_solutions = member_solutions if member_solutions else {model.id: model.optimize() for model in member_models}
         scores = {}
-        member_models = _compatibilize_models(member_models, printing)
+        if not compatibilized:
+            member_models = _compatibilize(member_models, printing)
         missing_members = [model for model in member_models if model.id not in member_excreta]
         if missing_members:
             member_excreta.update(MSSmetana.mp([missing_members], environment))
@@ -317,10 +335,12 @@ class MSSmetana:
         return scores
 
     @staticmethod
-    def sc(member_models:Iterable=None, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6, compatibilize=True):
+    def sc(member_models:Iterable=None, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6,
+           compatibilized=True, printing=False):
         """Calculate the frequency of interspecies dependency in a community"""
-        member_models, community = MSSmetana._load_models(member_models, com_model, compatibilize)
-        com_model = community.copy()
+        member_models, community = MSSmetana._load_models(
+            member_models, com_model, compatibilized==False, printing=printing)
+        com_model = community.model_util.copy()
         for rxn in com_model.reactions:
             rxn.lower_bound = 0 if 'bio' in rxn.id else rxn.lower_bound
 
@@ -371,16 +391,17 @@ class MSSmetana:
 
     @staticmethod
     def smetana(member_models: Iterable, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6,
-                prior_values=None, compatibilize=False, sc_coupling=False):
+                prior_values=None, compatibilized=False, sc_coupling=False, printing=False):
         """Quantifies the extent of syntrophy as the sum of all exchanges in a given nutritional environment"""
-        member_models, community = MSSmetana._load_models(member_models, com_model, compatibilize)
+        member_models, community = MSSmetana._load_models(
+            member_models, com_model, compatibilized==False, printing=printing)
         com_model = community.copy()
         sc = None
         if not prior_values:
-            mu = MSSmetana.mu(member_models, n_solutions, abstol, compatibilize)
-            mp = MSSmetana.mp(member_models, com_model, abstol, compatibilize)
+            mu = MSSmetana.mu(member_models, n_solutions, abstol, compatibilized)
+            mp = MSSmetana.mp(member_models, com_model, abstol, compatibilized)
             if sc_coupling:
-                sc = MSSmetana.sc(member_models, com_model, min_growth, n_solutions, abstol, compatibilize)
+                sc = MSSmetana.sc(member_models, com_model, min_growth, n_solutions, abstol, compatibilized)
         elif len(prior_values) == 3:
             sc, mu, mp = prior_values
         else:

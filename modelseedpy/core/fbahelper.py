@@ -188,6 +188,10 @@ class FBAHelper:
                     #exchange_hash[base][comp]
 
     @staticmethod
+    def rxn_mets_list(rxn):
+        return [met for met in rxn.reactants+rxn.products]
+
+    @staticmethod
     def find_reaction(model,stoichiometry):
         reaction_strings = FBAHelper.stoichiometry_to_string(stoichiometry)
         atpstring = reaction_strings[0]

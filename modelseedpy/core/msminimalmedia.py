@@ -226,7 +226,8 @@ class MSMinimalMedia:
     @staticmethod
     def determine_min_media(model, minimization_method="minComponents", min_growth=0.1, interacting=True, printing=True):
         if minimization_method == "minComponents":
-            return MSMinimalMedia.minimize_components(model, min_growth, printing=printing)
+            return minimal_medium(model, min_growth, minimize_components=True)
+            # return MSMinimalMedia.minimize_components(model, min_growth, printing=printing)
         if minimization_method == "minFlux":
             return MSMinimalMedia.minimize_components(model, min_growth, interacting=interacting, printing=printing)
         if minimization_method == "jenga":
