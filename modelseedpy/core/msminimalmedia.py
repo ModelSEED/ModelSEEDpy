@@ -46,16 +46,19 @@ def verify(org_model, min_media):
     model2.medium = min_media
     return model2.optimize()
 
-def minimizeFlux_withGrowth(model, min_growth, obj):
-    FBAHelper.add_minimal_objective_cons(model, min_growth)
-    FBAHelper.add_objective(model, obj, "min")
-    print(model.objective)
-    sol = model.optimize()
-    sol_dict = FBAHelper.solution_to_variables_dict(sol, model)
+def bioFlux_check(model, sol=None, sol_dict=None, min_growth=0.1):
+    sol_dict = sol_dict or FBAHelper.solution_to_variables_dict(sol, model)
     simulated_growth = sum([flux for var, flux in sol_dict.items() if re.search(r"(^bio\d+$)", var.name)])
     if simulated_growth < min_growth*0.9999:
         raise ObjectiveError(f"The assigned minimal_growth of {min_growth} was not maintained during the simulation,"
                              f" where the observed growth value was {simulated_growth}.")
+    return sol_dict
+
+def minimizeFlux_withGrowth(model, min_growth, obj):
+    FBAHelper.add_minimal_objective_cons(model, min_growth)
+    FBAHelper.add_objective(model, obj, "min")
+    sol = model.optimize()
+    sol_dict = bioFlux_check(model, sol)
     return sol, sol_dict
 
 

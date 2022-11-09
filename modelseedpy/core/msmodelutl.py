@@ -1,8 +1,10 @@
 import logging
 import re
 from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are not used
+from modelseedpy.core.exceptions import ModelError
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.fbahelper import FBAHelper
+from optlang.symbolics import Zero
 from optlang import Constraint
 import time
 
@@ -150,10 +152,18 @@ class MSModelUtil:
     def transport_list(self):
         return [rxn for rxn in self.model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
 
-    def compatibilize(self):
-        # TODO develop a wrapped standardization via MSCompatibility
-        # self.model =
-        pass
+    def compatibilize(self, conflicts_file_name="orig_conflicts.json", printing=False):
+        from modelseedpy.community.mscompatibility import MSCompatibility
+        self.model = MSCompatibility.standardize(
+            [self.model], conflicts_file_name=conflicts_file_name, printing=printing)[0]
+        return self.model
+
+    def standard_exchanges(self):
+        for ex in self.exchange_list():
+            if len(ex.reactants) != 1 and len(ex.products) != 0:
+                raise ModelError(f"The ex {ex.id} possesses {len(ex.reactants)} reactants and "
+                                 f"{len(ex.products)} products, which are non-standard and are incompatible"
+                                 f" with various ModelSEED operations.")
 
     def exchange_hash(self):
         exchange_reactions = {}
@@ -546,9 +556,13 @@ class MSModelUtil:
         return self.model.medium
 
     def add_medium(self, media):
+        # remove old media constraints
+        # self.model.remove_cons_vars([cons for cons in self.model.constraints if "_maxInflux" in cons.name])
+        # add the new media and its flux constraints
         exIDs = [exRXN.id for exRXN in self.exchange_list()]
         self.model.medium = {ex: uptake for ex, uptake in media.items() if ex in exIDs}
-        for exRXN in self.media_exchanges_list():
-            FBAHelper.create_constraint(self.model, Constraint(
-                exRXN.reverse_variable, lb=None,ub=media[exRXN.id], name=exRXN.id + "_maxFlux"))
+        # for exRXN in self.media_exchanges_list():
+        #     FBAHelper.create_constraint(self.model, Constraint(
+        #         Zero, lb=None,ub=media[exRXN.id], name=exRXN.id + "_maxInflux"), coef={
+        #         exRXN.forward_variable:1, exRXN.reverse_variable:-1})
         return self.model.medium

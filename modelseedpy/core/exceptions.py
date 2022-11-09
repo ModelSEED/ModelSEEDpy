@@ -31,3 +31,7 @@ class NoFluxError(Exception):
 class ObjectiveError(Exception):
     """Erroneous assignment of a secondary objective via a constraint"""
     pass
+
+class ModelError(Exception):
+    """Errors in a model that corrupt the simulation"""
+    pass
