@@ -73,10 +73,12 @@ class MSModelUtil:
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         self.atputl = self.gfutl = self.metabolite_hash = self.search_metabolite_hash = None
         self.test_objective = self.score = None
+        if self.model.slim_optimize() == 0:
+            raise ModelError(f"The {self.model.id} model is broken and does not grow in complete media.")
     
     def printlp(self,lpfilename="debug.lp"):
         with open(lpfilename, 'w') as out:
-                out.write(str(self.model.solver))
+            out.write(str(self.model.solver))
 
     def build_metabolite_hash(self):
         self.metabolite_hash = {}
@@ -139,6 +141,9 @@ class MSModelUtil:
     
     def exchange_list(self): 
         return [rxn for rxn in self.model.reactions if 'EX_' in rxn.id]
+
+    def carbon_exchange_list(self):
+        return [ex for ex in self.exchange_list() if not ex.reactants[0].elements or "C" in ex.reactants[0].elements]
 
     def exchange_mets_list(self):
         return [met for ex_rxn in self.exchange_list() for met in ex_rxn.metabolites]
@@ -556,13 +561,7 @@ class MSModelUtil:
         return self.model.medium
 
     def add_medium(self, media):
-        # remove old media constraints
-        # self.model.remove_cons_vars([cons for cons in self.model.constraints if "_maxInflux" in cons.name])
         # add the new media and its flux constraints
         exIDs = [exRXN.id for exRXN in self.exchange_list()]
         self.model.medium = {ex: uptake for ex, uptake in media.items() if ex in exIDs}
-        # for exRXN in self.media_exchanges_list():
-        #     FBAHelper.create_constraint(self.model, Constraint(
-        #         Zero, lb=None,ub=media[exRXN.id], name=exRXN.id + "_maxInflux"), coef={
-        #         exRXN.forward_variable:1, exRXN.reverse_variable:-1})
         return self.model.medium
