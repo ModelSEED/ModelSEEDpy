@@ -69,16 +69,19 @@ def _get_media(media=None, com_model=None, model_s_=None, min_growth=None,
 class MSSmetana:
     def __init__(self, member_models: Iterable, com_model, min_growth=0.1, n_solutions=100, environment=None,
                  abstol=1e-3, media_dict=None, printing=True, raw_content=False, antismash_json_path:str=None,
-                 minimal_media_method="minComponents"):
+                 antismash_zip_path:str=None, minimal_media_method="minComponents"):
         self.min_growth = min_growth ; self.abstol = abstol ; self.n_solutions = n_solutions
         self.printing = printing ; self.raw_content = raw_content
-        self.antismash_json_path = antismash_json_path
+        self.antismash_json_path = antismash_json_path ; self.antismash_zip_path = antismash_zip_path
 
         # process the models
         self.models = _compatibilize(member_models)
         self.community = MSModelUtil(com_model or build_from_species_models(self.models, cobra_model=True))
         ## define the environment
         if environment:
+            if environment:
+                self.community.add_medium(environment)
+            ### standardize modelseed media into COBRApy media
             if hasattr(environment, "get_media_constraints"):
                 environment = {"EX_" + exID: -bound[0] for exID, bound in environment.get_media_constraints().items()}
             self.community.add_medium(environment)
@@ -105,7 +108,8 @@ class MSSmetana:
         return (mro, mip, mp, mu, sc, smetana)
 
     def mro_score(self):
-        self.mro = MSSmetana.mro(self.models, self.media["members"], self.min_growth, self.media, self.raw_content, self.printing, True)
+        self.mro = MSSmetana.mro(self.models, self.media["members"], self.min_growth,
+                                 self.media, self.raw_content, self.printing, True)
         if not self.printing:
             return self.mro
         if self.raw_content:
@@ -122,8 +126,8 @@ class MSSmetana:
         return self.mro
 
     def mip_score(self, interacting_media:dict=None, noninteracting_media:dict=None):
-        diff, self.mip = MSSmetana.mip(self.community.model, self.models,
-                                       self.min_growth, interacting_media, noninteracting_media, self.printing)
+        diff, self.mip = MSSmetana.mip(self.community.model, self.models, self.min_growth, interacting_media,
+                                       noninteracting_media, self.printing, True)
         if not self.printing:
             return self.mip
         print(f"\nMIP score: {self.mip}\t\t\t{self.mip} required compound(s) can be sourced via syntrophy:")
@@ -132,7 +136,7 @@ class MSSmetana:
         return self.mip
 
     def mp_score(self):
-        self.mp = MSSmetana.mp(self.models, self.community.model, self.abstol, True, self.printing)
+        self.mp = MSSmetana.mp(self.models, self.environment, self.community.model, self.abstol, self.printing)
         if not self.printing:
             return self.mp
         if self.raw_content:
@@ -258,19 +262,22 @@ class MSSmetana:
         return None, 0
 
     @staticmethod
-    def mp(member_models:Iterable, environment, com_model=None, abstol=1e-3, compatibilized=False, printing=False):
+    def mp(member_models:Iterable, environment, com_model=None, minimal_media=None, abstol=1e-3, printing=False):
         """Discover the metabolites that each species can contribute to a community"""
-        member_models, community = _load_models(
-            member_models, com_model, compatibilized==False, printing=printing)
+        community = _compatibilize(com_model) or build_from_species_models(member_models, cobra_model=True, standardize=True)
         # TODO support parsing the individual members through the MSCommunity object
         scores = {}
         for org_model in member_models:
             model_util = MSModelUtil(org_model)
-            model_util.add_medium(environment)
+            model_util.compatibilize(printing=printing)
+            if environment:
+                model_util.add_medium(environment)
+            # TODO leverage extant minimal media as the default instead of the community complete media
             scores[model_util.model.id] = set()
             # determines possible member contributions in the community environment, where the excretion of media compounds is irrelevant
             possible_contributions = [ex_rxn for ex_rxn in model_util.exchange_list()
                                       if ex_rxn.id not in community.medium]
+            ic(possible_contributions, model_util.exchange_list(), community.medium)
             FBAHelper.add_objective(model_util.model, sum(
                 ex_rxn.flux_expression for ex_rxn in possible_contributions))
             sol = model_util.model.optimize()
@@ -306,16 +313,12 @@ class MSSmetana:
         """the fractional frequency of each received metabolite amongst all possible alternative syntrophic solutions"""
         # member_solutions = member_solutions if member_solutions else {model.id: model.optimize() for model in member_models}
         scores = {}
-        if not compatibilized:
-            member_models = _compatibilize(member_models, printing)
-        if not member_excreta:
-            # TODO leverage the MP for all members to determine the excreta potential of the community, which is the potential pool of
-            #  syntrophic uptakes for the MU score
-            pass
-        else:
-            missing_members = [model for model in member_models if model.id not in member_excreta]
-            if missing_members:
-                member_excreta.update(MSSmetana.mp([missing_members], environment))
+        member_models = member_models if compatibilized else _compatibilize(member_models, printing)
+        member_excreta = member_excreta or MSSmetana.mp(member_models, environment, None, abstol, printing)
+        missing_members = [model for model in member_models if model.id not in member_excreta]
+        if missing_members:
+            member_excreta.update(MSSmetana.mp([missing_members], environment))
+        ic(member_models)
         for org_model in member_models:
             other_excreta = set(numpy.array([excreta for model, excreta in member_excreta.items()
                                             if model.id != org_model.id]).flatten())
@@ -330,10 +333,7 @@ class MSSmetana:
             sol = model_util.model.optimize()
             while sol.status == "optimal" and len(solutions) < n_solutions:
                 solutions.append(sol)
-                medium = set()
-                for ex in ex_rxns:
-                    if sol.fluxes[ex.id] < -abstol and ex in other_excreta:
-                        medium.add(ex)
+                medium = set([ex for ex in ex_rxns if sol.fluxes[ex.id] < -abstol and ex in other_excreta])
                 constraint = Constraint(sum([variables[ex.id] for ex in medium]),
                                         ub=len(medium)-1, name=f"iteration_{len(solutions)}")
                 FBAHelper.add_cons_vars(model_util.model, [constraint])
@@ -399,15 +399,15 @@ class MSSmetana:
         return scores
 
     @staticmethod
-    def smetana(member_models: Iterable, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6,
+    def smetana(member_models: Iterable, environment, com_model=None, min_growth=0.1, n_solutions=100, abstol=1e-6,
                 prior_values=None, compatibilized=False, sc_coupling=False, printing=False):
         """Quantifies the extent of syntrophy as the sum of all exchanges in a given nutritional environment"""
         member_models, community = _load_models(
             member_models, com_model, compatibilized==False, printing=printing)
         sc = None
         if not prior_values:
-            mu = MSSmetana.mu(member_models, n_solutions, abstol, compatibilized)
-            mp = MSSmetana.mp(member_models, com_model, abstol, compatibilized)
+            mp = MSSmetana.mp(member_models, environment, com_model, abstol)
+            mu = MSSmetana.mu(member_models, environment, mp, n_solutions, abstol, compatibilized)
             if sc_coupling:
                 sc = MSSmetana.sc(member_models, com_model, min_growth, n_solutions, abstol, compatibilized)
         elif len(prior_values) == 3:
