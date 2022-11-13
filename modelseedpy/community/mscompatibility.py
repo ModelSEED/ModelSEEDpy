@@ -106,8 +106,12 @@ class MSCompatibility:
             new_models.append(model)
             MSCompatibility._validate_results(model, org_model, unknown_mets)
         models_id = ",".join([model.id for model in models])
-        print(f'\n\n{len(changed_rxns)} reactions were substituted and '
-              f'{len(changed_mets)} metabolite IDs were redefined in {models_id} by standardize().')
+        if len(changed_rxns) == len(changed_mets) == 0:
+            print(f"The {'exchange ' if exchanges else ''} metabolite ID's of the model {models_id} "
+                  f"are completely standardized to ModelSEED.")
+        else:
+            print(f'\n\n{len(changed_rxns)} reactions were substituted and '
+                  f'{len(changed_mets)} metabolite IDs were redefined in {models_id} by standardize().')
         if view_unknown_mets:
             return new_models, unknown_mets
         return new_models
@@ -297,7 +301,7 @@ class MSCompatibility:
         new_met_id = original_id = met.id
         original_name = met.name 
         ## affirm the match with cross-references, where it is possible for ModelSEED compounds
-        if 'cpd' in met.id:
+        if 'cpd' in met.id:  # TODO correct an anomaly where a valid MSID is repeated with itself
             logger.warning(f"IDWarning: The original ID {met.id} is a ModelSEED ID, and "
                            f"may not be desirably changed to {new_met_id}.")
             if compounds_cross_references[general_met] != {}:
