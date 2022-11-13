@@ -177,8 +177,8 @@ class MSSteadyCom:
         return cross_feeding_df, exMets_df
 
     @staticmethod
-    def _visualize_cross_feeding(
-            cross_feeding_df, exMets_df, filename, export_directory, species, node_metabolites = True, x_offset = 0.15, show_figure = True):
+    def _visualize_cross_feeding(cross_feeding_df, exMets_df, filename, export_directory,
+            species, node_metabolites = True, x_offset = 0.15, show_figure = True):
         # define species and the metabolite fluxes
         graph = networkx.Graph()
         species_nums = {}
@@ -213,6 +213,8 @@ class MSSteadyCom:
         filename = filename or 'cross_feeding_diagram.svg'
         export_directory = export_directory or os.getcwd()
         pyplot.savefig(os.path.join(export_directory, filename))
-        cross_feeding_df.to_csv(os.path.join(export_directory, re.sub(r"(\.\w+)",".csv",filename)))
+        csv_filename = re.sub(r"(\.\w+)",".csv",filename)
+        csv_filename = csv_filename.replace("_diagram", "")
+        cross_feeding_df.to_csv(os.path.join(export_directory, csv_filename))
         if show_figure:
             pyplot.show()
