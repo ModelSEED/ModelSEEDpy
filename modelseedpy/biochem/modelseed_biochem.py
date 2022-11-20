@@ -389,7 +389,7 @@ class ModelSEEDDatabase:
         self.reactions = DictList()
         self.compounds += compounds
         self.reactions += reactions
-        self.reactions += compound_tokens
+        self.compound_tokens += compound_tokens
 
         self.inchi_key_lookup = {}
         self.metabolite_reactions = {}

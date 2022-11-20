@@ -121,7 +121,7 @@ class MSModel(Model):
         """
         Class representation for a ModelSEED model.
         """
-        super().__init__(self, id_or_model)
+        super().__init__(id_or_model)
         if genome:
             self._genome = genome
         if template:
