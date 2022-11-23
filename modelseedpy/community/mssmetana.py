@@ -79,10 +79,8 @@ class MSSmetana:
         self.community = MSModelUtil(com_model or build_from_species_models(self.models, cobra_model=True))
         ## define the environment
         if environment:
-            if environment:
-                self.community.add_medium(environment)
-            ### standardize modelseed media into COBRApy media
             if hasattr(environment, "get_media_constraints"):
+                ### standardize modelseed media into COBRApy media
                 environment = {"EX_" + exID: -bound[0] for exID, bound in environment.get_media_constraints().items()}
             self.community.add_medium(environment)
         self.environment = environment
@@ -262,6 +260,23 @@ class MSSmetana:
         return None, 0
 
     @staticmethod
+    def contributions(org_possible_contributions, scores, model_util, abstol):
+        # identify and log excreta from the solution
+        FBAHelper.add_objective(model_util.model, sum(
+            ex_rxn.flux_expression for ex_rxn in org_possible_contributions))
+        sol = model_util.model.optimize()
+        if sol.status != "optimal":
+            ## exit the while loop by returning the original possible_contributions, hence DeepDiff == {} and the while loop terminates
+            return scores, org_possible_contributions
+        # identify and log excreta from the solution
+        possible_contributions = org_possible_contributions[:]
+        for ex in org_possible_contributions:
+            if ex.id in sol.fluxes.keys() and sol.fluxes[ex.id] >= abstol:
+                possible_contributions.remove(ex)
+                scores[model_util.model.id].update([met.id for met in ex.metabolites])
+        return scores, possible_contributions
+
+    @staticmethod
     def mp(member_models:Iterable, environment, com_model=None, minimal_media=None, abstol=1e-3, printing=False):
         """Discover the metabolites that each species can contribute to a community"""
         community = _compatibilize(com_model) or build_from_species_models(member_models, cobra_model=True, standardize=True)
@@ -275,26 +290,17 @@ class MSSmetana:
             # TODO leverage extant minimal media as the default instead of the community complete media
             scores[model_util.model.id] = set()
             # determines possible member contributions in the community environment, where the excretion of media compounds is irrelevant
-            possible_contributions = [ex_rxn for ex_rxn in model_util.exchange_list()
-                                      if ex_rxn.id not in community.medium]
-            ic(possible_contributions, model_util.exchange_list(), community.medium)
-            FBAHelper.add_objective(model_util.model, sum(
-                ex_rxn.flux_expression for ex_rxn in possible_contributions))
-            sol = model_util.model.optimize()
-            fluxes_contributions = [0]
-            while all([sol.status == "optimal", len(possible_contributions) > 0, fluxes_contributions]):
+            org_possible_contributions = [ex_rxn for ex_rxn in model_util.exchange_list()
+                                          if ex_rxn.id not in community.medium and ex_rxn.upper_bound > 0]
+            ic(org_possible_contributions, len(model_util.exchange_list()), len(community.medium))
+            scores, possible_contributions = MSSmetana.contributions(
+                org_possible_contributions, scores, model_util, abstol)
+            while DeepDiff(org_possible_contributions, possible_contributions):
                 print("remaining possible_contributions", len(possible_contributions), end="\r")
-                ## identify and log excreta from the solution
-                fluxes_contributions = []
-                for ex in possible_contributions:
-                    if ex.id in sol.fluxes.keys() and sol.fluxes[ex.id] >= abstol:
-                        fluxes_contributions.append(ex)
-                        possible_contributions.remove(ex)
-                        scores[model_util.model.id].update([met.id for met in ex.metabolites])
                 ## optimize the sum of the remaining exchanges that have not surpassed the abstol
-                FBAHelper.add_objective(model_util.model, sum(
-                    ex_rxn.flux_expression for ex_rxn in possible_contributions))
-                sol = model_util.model.optimize()
+                org_possible_contributions = possible_contributions[:]
+                scores, possible_contributions = MSSmetana.contributions(
+                    org_possible_contributions, scores, model_util, abstol)
 
             ## individually checks the remaining possible contributions
             for ex_rxn in possible_contributions:

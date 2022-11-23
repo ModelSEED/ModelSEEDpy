@@ -11,6 +11,7 @@ from math import isclose, inf, factorial
 from deepdiff import DeepDiff
 from time import process_time
 from pprint import pprint
+from icecream import ic
 import logging
 import json, re
 
@@ -122,6 +123,7 @@ class MSMinimalMedia:
         if org_model.slim_optimize() == 0:
             raise ObjectiveError(f"The model {org_model.id} possesses an objective value of 0 in complete media, "
                                  "which is incompatible with minimal media computations.")
+        # ic(org_model, min_growth, solution_limit)
         model_util = MSModelUtil(org_model)
         if environment:
             model_util.add_medium(environment)
@@ -227,7 +229,8 @@ class MSMinimalMedia:
             return interdependencies
 
     @staticmethod
-    def determine_min_media(model, minimization_method="minComponents", min_growth=0.1, interacting=True, printing=True):
+    def determine_min_media(model, minimization_method="minComponents", min_growth=None, interacting=True, printing=True):
+        min_growth = min_growth or 0.1
         if minimization_method == "minComponents":
             return minimal_medium(model, min_growth, minimize_components=True)
             # return MSMinimalMedia.minimize_components(model, min_growth, printing=printing)
