@@ -12,7 +12,7 @@ from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
 
-default_blacklist = ["rxn12985", "rxn00238", "rxn07058", "rxn05305", "rxn00154", "rxn09037", "rxn10643",
+default_blacklist = ["rxn12985", "rxn00238", "rxn07058", "rxn05305", "rxn09037", "rxn10643",
                      "rxn11317", "rxn05254", "rxn05257", "rxn05258", "rxn05259", "rxn05264", "rxn05268",
                      "rxn05269", "rxn05270", "rxn05271", "rxn05272", "rxn05273", "rxn05274", "rxn05275",
                      "rxn05276", "rxn05277", "rxn05278", "rxn05279", "rxn05280", "rxn05281", "rxn05282",

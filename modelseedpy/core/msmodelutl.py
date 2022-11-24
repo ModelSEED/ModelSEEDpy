@@ -5,6 +5,8 @@ import json
 import sys
 from cobra import Model, Reaction, Metabolite
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
+from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -131,14 +133,26 @@ class MSModelUtil:
             self.search_metabolite_hash[sname] = []
         self.search_metabolite_hash[sname].append(met)
         
-    def find_met(self,name):
+    def find_met(self,name,compartment=None):
         if self.metabolite_hash == None:
             self.build_metabolite_hash()
         if name in self.metabolite_hash:
-            return self.metabolite_hash[name]
+            if not compartment:
+                return self.metabolite_hash[name]
+            for met in self.metabolite_hash[name]:
+                array = met.id.split("_")
+                if array[1] == compartment or met.compartment == compartment:
+                    return [met]
+            return None
         sname = MSModelUtil.search_name(name)
         if sname in self.search_metabolite_hash:
-            return self.search_metabolite_hash[sname]
+            if not compartment:
+                return self.search_metabolite_hash[sname]
+            for met in self.search_metabolite_hash[sname]:
+                array = met.id.split("_")
+                if array[1] == compartment or met.compartment == compartment:
+                    return [met]
+            return None 
         logger.info(name+" not found in model!")
         return []
     
@@ -238,6 +252,74 @@ class MSModelUtil:
     def reaction_scores(self):
         return {}
     
+    #################################################################################
+    #Functions related to editing the model
+    #################################################################################
+    def add_ms_reaction(self,rxn_dict,compartment_trans=["c0","e0"]):
+        modelseed = ModelSEEDBiochem.get()
+        output = []
+        for rxnid, compartment in rxn_dict.items():
+            fullid = rxnid+"_"+compartment
+            modelseed_reaction = modelseed.get_seed_reaction(rxnid)
+            reaction_stoich = modelseed_reaction.cstoichiometry
+            cobra_reaction = Reaction(fullid)
+            output.append(cobra_reaction)
+            cobra_reaction.name = modelseed_reaction.data['name']+"_"+compartment
+            metabolites_to_add = {}
+            for metabolite, stoich in reaction_stoich.items():
+                id = metabolite[0]
+                compound = modelseed.get_seed_compound(id).data
+                compartment_number = int(metabolite[1])
+                if compartment_number > len(compartment_trans):
+                    logger.critical("Compartment index "+str(compartment_number)+" out of range")
+                compartment_string = compartment_trans[compartment_number]
+                output = self.find_met(id,compartment_string)
+                cobramet = None
+                if output:
+                    cobramet = output[0]
+                else:
+                    cobramet = Metabolite(id+"_"+compartment_string, name = compound['name']+"_"+compartment_string, compartment = compartment_string)    
+                metabolites_to_add[cobramet] = stoich
+            cobra_reaction.add_metabolites(metabolites_to_add)    
+            cobra_reaction.reaction
+        self.model.add_reactions(output)
+        return output
+    
+    #################################################################################
+    #Functions related to managing biomass reactions
+    #################################################################################
+    def evaluate_biomass_reaction_mass(self,biomass_rxn_id,normalize=False):
+        biorxn = self.model.reactions.get_by_id(biomass_rxn_id)
+        #First computing energy biosynthesis coefficients
+        atp = None
+        atp_compounds = {"cpd00002":-1,"cpd00001":-1,"cpd00008":1,"cpd00009":1,"cpd00067":1}
+        mass_compounds = {'cpd11463':1,'cpd11461':1,'cpd11462':1}
+        process_compounds = {'cpd17041':1,'cpd17042':1,'cpd17043':1}
+        for met in biorxn.metabolites:
+            msid = self.metabolite_msid(met)
+            if msid == "cpd00008":
+                atp = abs(biorxn.metabolites[met])
+        #Computing non ATP total mass
+        total = 0
+        for met in biorxn.metabolites:
+            msid = self.metabolite_msid(met)
+            if msid == "cpd11416":
+                continue
+            coef = biorxn.metabolites[met]
+            if msid in mass_compounds:
+                total += coef
+            elif msid in process_compounds:
+                total += 0
+            else:
+                mw = FBAHelper.metabolite_mw(met)
+                if msid in atp_compounds:
+                    if coef < 0:
+                        coef += atp
+                    else:
+                        coef += -1*atp
+                total += mw*coef/1000
+        return {"ATP":atp,"Total":total}            
+
     #Required this function to add gapfilled compounds to a KBase model for saving gapfilled model    
     def convert_cobra_compound_to_kbcompound(self,cpd,kbmodel,add_to_model = 1):
         refid = "cpd00000"
@@ -444,6 +526,9 @@ class MSModelUtil:
                             "0" : [gf["reversed"][rxn],1,[]]
                         }
     
+    #################################################################################
+    #Functions related to applying, running, and expanding with test conditions
+    #################################################################################
     def apply_test_condition(self,condition,model = None):
         """Applies constraints and objective of specified condition to model
         

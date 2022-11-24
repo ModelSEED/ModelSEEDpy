@@ -3,6 +3,7 @@ import pandas as pd
 from cobra.core.dictlist import DictList
 from modelseedpy.biochem.modelseed_compound import ModelSEEDCompound, ModelSEEDCompound2
 from modelseedpy.biochem.modelseed_reaction import ModelSEEDReaction, ModelSEEDReaction2
+from modelseedpy.helpers import config
 
 logger = logging.getLogger(__name__)
 
@@ -197,11 +198,10 @@ def load_reactions_from_df(df: pd.DataFrame, database_metabolites: dict, names: 
     return reactions, list(metabolites_indexed.values())
 
 
-class ModelSEEDDatabase:
+class ModelSEEDDatabase:    
     """
     ModelSEED database instance.
     """
-
     def __init__(self, compounds, reactions, compound_tokens):
         self.compounds = DictList()
         self.compound_tokens = DictList()
@@ -241,6 +241,13 @@ class ModelSEEDDatabase:
 
 
 class ModelSEEDBiochem:
+    default_biochemistry = None
+    
+    @staticmethod
+    def get(create_if_missing = True):
+        if not ModelSEEDBiochem.default_biochemistry:
+            ModelSEEDBiochem.default_biochemistry = from_local(config.get("biochem","path"))
+        return ModelSEEDBiochem.default_biochemistry
     
     def __init__(self, compounds, reactions,
                  compound_aliases=None,
