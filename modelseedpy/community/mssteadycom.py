@@ -212,7 +212,7 @@ class MSSteadyCom:
         # export and view the figure
         filename = filename or 'cross_feeding_diagram.svg'
         export_directory = export_directory or os.getcwd()
-        pyplot.savefig(os.path.join(export_directory, filename))
+        pyplot.savefig(os.path.join(export_directory, filename), bbox_inches="tight", transparent=True)
         csv_filename = re.sub(r"(\.\w+)",".csv",filename)
         csv_filename = csv_filename.replace("_diagram", "")
         cross_feeding_df.to_csv(os.path.join(export_directory, csv_filename))
