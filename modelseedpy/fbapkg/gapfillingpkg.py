@@ -437,7 +437,9 @@ class GapfillingPkg(BaseFBAPkg):
             if indexhash[index] > 10:
                 if index == "none":
                     for template in self.parameters["default_gapfill_templates"]:
-                        new_penalties = self.extend_model_with_template_for_gapfilling(template, index)
+                        new_penalties = self.extend_model_with_template_for_gapfilling(
+                            template, index
+                        )
                         self.gapfilling_penalties.update(new_penalties)
                     for gfmdl in self.parameters["default_gapfill_models"]:
                         new_penalties = self.extend_model_with_model_for_gapfilling(
@@ -466,7 +468,9 @@ class GapfillingPkg(BaseFBAPkg):
                         self.gapfilling_penalties.update(new_penalties)
                 if self.parameters["gapfill_all_indecies_with_default_models"]:
                     for gfmdl in self.parameters["default_gapfill_models"]:
-                        new_penalties = self.extend_model_with_model_for_gapfilling(gfmdl, index)
+                        new_penalties = self.extend_model_with_model_for_gapfilling(
+                            gfmdl, index
+                        )
                         self.gapfilling_penalties.update(new_penalties)
         # Rescaling penalties by reaction scores and saving genes
         for reaction in self.gapfilling_penalties:

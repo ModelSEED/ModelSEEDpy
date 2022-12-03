@@ -2,6 +2,7 @@
 import math
 from modelseedpy.biochem.seed_object import ModelSEEDObject
 from cobra.core import Reaction
+from modelseedpy.core.mstemplate import MSTemplateReaction
 
 
 def to_str2(rxn, cmp_replace=None, cpd_replace={}):
@@ -188,8 +189,8 @@ class ModelSEEDReaction2(Reaction):
 
         # if len(str(index)) > 0:
         #    name = f'{self.name} [{compartment}]'
-        reaction = Reaction(
-            rxn_id, name, self.subsystem, self.lower_bound, self.upper_bound
+        reaction = MSTemplateReaction(
+            rxn_id, self.id, name, self.subsystem, self.lower_bound, self.upper_bound
         )
         reaction.add_metabolites(metabolites)
         reaction.annotation.update(self.annotation)

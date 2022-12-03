@@ -4,14 +4,12 @@ from modelseedpy.core.mstemplate import MSTemplateSpecies
 from cobra.core import Metabolite
 import pandas as pd
 
-_SMILE_ALIAS = 'SMILE'
-_INCHI_ALIAS = 'InChI'
-_INCHI_KEY_ALIAS = 'InChIKey'
+_SMILE_ALIAS = "SMILE"
+_INCHI_ALIAS = "InChI"
+_INCHI_KEY_ALIAS = "InChIKey"
+
 
 class ModelSEEDCompound2(Metabolite):
-
-
-
     def __init__(
         self,
         cpd_id=None,
@@ -59,23 +57,34 @@ class ModelSEEDCompound2(Metabolite):
             self.flags |= set(flags)
 
     def to_template_compartment_compound(self, compartment):
-        res = self.copy()
-        res.id = f"{self.seed_id}_{compartment}"
-        res.compartment = compartment
+        cpd_id = f"{self.seed_id}_{compartment}"
+        res = MSTemplateSpecies(cpd_id, self.charge, compartment, self.id)
         res.annotation.update(self.annotation)
         return res
 
     @property
     def smiles(self):
-        return None if _SMILE_ALIAS not in self.annotation else self.annotation[_SMILE_ALIAS]
+        return (
+            None
+            if _SMILE_ALIAS not in self.annotation
+            else self.annotation[_SMILE_ALIAS]
+        )
 
     @property
     def inchi_key(self):
-        return None if _INCHI_KEY_ALIAS not in self.annotation else self.annotation[_INCHI_KEY_ALIAS]
+        return (
+            None
+            if _INCHI_KEY_ALIAS not in self.annotation
+            else self.annotation[_INCHI_KEY_ALIAS]
+        )
 
     @property
     def inchi(self):
-        return None if _INCHI_ALIAS not in self.annotation else self.annotation[_INCHI_ALIAS]
+        return (
+            None
+            if _INCHI_ALIAS not in self.annotation
+            else self.annotation[_INCHI_ALIAS]
+        )
 
 
 class ModelSEEDCompound(ModelSEEDObject):

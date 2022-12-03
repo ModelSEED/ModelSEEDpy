@@ -116,12 +116,11 @@ def get_set_set(expr_str):  # !!! this currently returns dictionaries, not sets?
 
 
 class MSModel(Model):
-
     def __init__(self, id_or_model=None, genome=None, template=None):
         """
         Class representation for a ModelSEED model.
         """
-        super().__init__(self, id_or_model)
+        super().__init__(id_or_model)
         if genome:
             self._genome = genome
         if template:
