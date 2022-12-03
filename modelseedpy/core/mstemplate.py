@@ -1078,4 +1078,3 @@ class MSTemplateBuilder:
         )  # TODO: biomass object
 
         return template
-
