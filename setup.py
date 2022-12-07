@@ -10,8 +10,9 @@ with open("LICENSE") as f:
 
 setup(
     name="ModelSEEDpy",
-    version="0.2.2",
+    version="0.3.1",
     description="Python package for building and analyzing models using ModelSEED",
+    long_description_content_type="text/x-rst",
     long_description=readme,
     author="Christopher Henry",
     author_email="chenry@anl.gov",
@@ -21,6 +22,16 @@ setup(
     package_data={
         "modelseedpy": ["config.cfg"],
     },
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Intended Audience :: Science/Research",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Natural Language :: English",
+    ],
     install_requires=[
         "networkx >= 2.4",
         "cobra >= 0.17.1",
