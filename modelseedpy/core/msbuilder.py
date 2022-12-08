@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import itertools
 import cobra
@@ -178,7 +179,7 @@ grampos = {
     "cpd15352_c0": -0.00719527989638797,
     "cpd11463_c0": -0.5,
     "cpd11461_c0": -0.1,
-    "cpd11462_c0": -0.2,
+    "cpd11462_c0": -0.2
 }
 
 
@@ -639,7 +640,7 @@ class MSBuilder:
         if self.template is None:
             self.auto_select_template()
 
-        cobra_model = Model(model_id)
+        cobra_model = MSModel(model_id, genome=self.genome, template=self.template)
         cobra_model.add_reactions(self.build_metabolic_reactions(index=index))
         cobra_model.add_reactions(
             self.build_non_metabolite_reactions(
@@ -681,7 +682,7 @@ class MSBuilder:
         :param index: index for the metabolites
         :return:
         """
-        model = Model(model_id if model_id else template.id)
+        model = MSModel(model_id if model_id else template.id, template=template)
         all_reactions = []
         for rxn in template.reactions:
             reaction = MSBuilder._build_reaction(
@@ -776,3 +777,12 @@ class MSBuilder:
                 rxn.upper_bound = 0
                 rxn.lower_bound = -100
         return original_mdl
+
+def build_metabolic_model(
+    genome,
+    media=None,
+    atp_test_medias=None,
+    core_template=None,
+    genome_scale_template=None,
+):
+    pass

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cobra
 from tests.test_data.mock_data import mock_model_ecoli_core
 from modelseedpy.fbapkg.revbinpkg import RevBinPkg

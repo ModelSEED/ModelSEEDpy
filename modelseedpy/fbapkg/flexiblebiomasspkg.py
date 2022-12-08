@@ -225,7 +225,7 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                         self.model.reactions.get_by_id(
                             "FLEX_" + metabolite.id
                         ).reverse_variable
-                    ] = (-sign * mw)
+                    ] = (-1 * sign * mw)
             for met_class in classes:
                 if met_class + "_flex" in self.model.reactions:
                     massdiff = 0
@@ -313,7 +313,7 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 else:
                     const = BaseFBAPkg.build_constraint(
                         self,
-                        "f" + obj_type,
+                       "f" + obj_type,
                         0,
                         None,
                         {biovar: second_entry, object.forward_variable: -1},

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def mock_atp_biomass():
     return {
         "cellwall": 0,

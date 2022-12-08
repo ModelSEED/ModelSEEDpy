@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 class ModelSeedBuilder:
     def __init__(self, fbamodel, modelseed):
         self.fbamodel = fbamodel

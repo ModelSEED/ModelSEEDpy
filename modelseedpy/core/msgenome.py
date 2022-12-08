@@ -1,24 +1,24 @@
+# -*- coding: utf-8 -*-
 import logging
 import re
-import copy  # !!! the import is never used
 from cobra.core.dictlist import DictList
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_SPLIT = " "
+
 
 def normalize_role(s):
-    # print(s)
     s = s.strip().lower()
-    s = re.sub("[\W_]+", "", s)
+    s = re.sub(r"[\W_]+", "", s)
     return s
 
 
-def read_fasta(f, split="|", h_func=None):
+def read_fasta(f, split=DEFAULT_SPLIT, h_func=None):
     with open(f, "r") as fh:
         return parse_fasta_str(fh.read(), split, h_func)
 
-
-def parse_fasta_str(faa_str, split="|", h_func=None):
+def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
     features = []
     seq = None
     for line in faa_str.split("\n"):
@@ -32,10 +32,11 @@ def parse_fasta_str(faa_str, split="|", h_func=None):
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                desc = header_data[
-                    1
-                ]  # The unit test throws an error when this is commented
-
+                if len(header_data) > 1:
+                    desc = header_data[
+                        1
+                    ]  # The unit test throws an error when this is commented
+                    
             seq = MSFeature(seq_id, "", desc)
         else:
             if seq:
@@ -101,6 +102,20 @@ class MSGenome:
         genome = MSGenome()
         genome.features += read_fasta(filename, split, h_func)
         return genome
+
+    def to_fasta(self, filename, l=80, fn_header=None):
+        with open(filename, "w") as fh:
+            for feature in self.features:
+                h = f">{feature.id}\n"
+                if fn_header:
+                    h = fn_header(feature)
+                fh.write(h)
+                lines = [
+                    feature.seq[i : i + l] + "\n" for i in range(0, len(feature.seq), l)
+                ]
+                for line in lines:
+                    fh.write(line)
+        return filename
 
     @staticmethod
     def from_dna_fasta(filename):

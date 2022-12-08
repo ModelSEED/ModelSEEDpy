@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from cobrakbase.core.kbasegenomesgenome import normalize_role
 import pandas as pd
 

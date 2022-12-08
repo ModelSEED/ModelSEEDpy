@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from modelseedpy.core.msmodel import get_direction_from_constraints
 from modelseedpy.core.msbuilder import MSBuilder
 from tests.test_data.mock_data import mock_template, mock_genome_rast, mock_model

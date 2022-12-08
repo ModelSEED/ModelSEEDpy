@@ -21,8 +21,8 @@ ________________________________________________________________________
 
 The ModelSEEDpy packages that parse and manipulate, e.g. gapfill, metabolic models are assembled into the ``core`` directory of ModelSEEDpy. These packages are imported via::
 
- from modelseedpy.core import *   
-   
+ from modelseedpy.core import *
+
 and include the following
 
 .. toctree::
@@ -43,5 +43,3 @@ and include the following
    mstemplate_api
    rpcclient_api
    template_api
-    
-    

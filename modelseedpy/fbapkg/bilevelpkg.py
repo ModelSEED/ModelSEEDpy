@@ -23,9 +23,7 @@ class BilevelPkg(BaseFBAPkg):
             {"dualvar": "string", "objective": "string", "dualbin": "string"},
         )
 
-    def build_package(
-        self, rxn_filter=None, binary_variable_count=0
-    ):  # !!! the filter parameter is never used
+    def build_package(self, filter=None, binary_variable_count=0):
         self.validate_parameters(
             {}, [], {"binary_variable_count": binary_variable_count}
         )

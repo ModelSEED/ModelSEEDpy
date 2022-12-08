@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import itertools
 import cobra
@@ -59,7 +60,7 @@ class MSATPCorrection:
         atp_hydrolysis_id=None,
         load_default_medias=True,
         forced_media=[],
-        default_media_path=None,
+        default_media_path=None
     ):
         """
         :param model:
@@ -125,7 +126,6 @@ class MSATPCorrection:
         # These should stay as None until atp correction is actually run
         self.cumulative_core_gapfilling = None
         self.selected_media = None
-
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
@@ -285,13 +285,11 @@ class MSATPCorrection:
                 )
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
-                # with open("Core-"+media.id.replace("/","-")+".lp", 'w') as out:
-                #    out.write(str(self.model.solver))
+                
                 if (
                     solution.objective_value < minimum_obj
                     or solution.status != "optimal"
                 ):
-                    # self.msgapfill.lp_filename = "CoreGF-"+media.id.replace("/","-")+".lp"
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(
                         media, self.atp_hydrolysis.id, minimum_obj
                     )
@@ -314,7 +312,39 @@ class MSATPCorrection:
         Decides which of the test media to use as growth conditions for this model
         :return:
         """
+        self.selected_media = []
+        best_score = None
+        for media in self.media_gapfill_stats:
+            gfscore = 0
+            if self.media_gapfill_stats[media]:
+                gfscore = len(
+                    self.media_gapfill_stats[media]["new"].keys()
+                ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
+            if best_score is None or gfscore < best_score:
+                best_score = gfscore
+        if self.max_gapfilling is None:
+            self.max_gapfilling = best_score
 
+        logger.debug(f"max_gapfilling: {self.max_gapfilling}, best_score: {best_score}")
+
+        for media in self.media_gapfill_stats:
+            gfscore = 0
+            if self.media_gapfill_stats[media]:
+                gfscore = len(
+                    self.media_gapfill_stats[media]["new"].keys()
+                ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
+
+            logger.debug(f"media gapfilling score: {media.id}: {gfscore}")
+            if gfscore <= self.max_gapfilling and gfscore <= (
+                best_score + self.gapfilling_delta
+            ):
+                self.selected_media.append(media)
+
+    def determine_growth_media2(self, max_gapfilling=None):
+        """
+        Decides which of the test media to use as growth conditions for this model
+        :return:
+        """
         def scoring_function(media):
             return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * len(
                 self.media_gapfill_stats[media]["reversed"].keys()

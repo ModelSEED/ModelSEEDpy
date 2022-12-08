@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import re
 import time
@@ -620,7 +621,7 @@ class MSModelUtil:
         Raises
         ------
         """
-        if model == None:
+        if model is None:
             model = self.model
             pkgmgr = self.pkgmgr
         else:
@@ -652,7 +653,7 @@ class MSModelUtil:
         Raises
         ------
         """
-        if model == None:
+        if model is None:
             model = self.model
         if apply_condition:
             self.apply_test_condition(condition, model)
@@ -767,7 +768,6 @@ class MSModelUtil:
 
     def binary_expansion_test(self, reaction_list, condition, currmodel, depth=0):
         """Conducts a binary search for bad reaction combinations
-
         Parameters
         ----------
         reaction_list : list<[obj reaction,{>|>}]>
@@ -859,6 +859,9 @@ class MSModelUtil:
         logger.debug("Expansion started!")
         filtered_list = []
         for condition in condition_list:
+
+            logger.debug(f"testing condition {condition}")
+
             currmodel = self.model
             tic = time.perf_counter()
             new_filtered = []

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
 import logging
@@ -286,16 +287,20 @@ class FBAHelper:
         return dictionary
 
     @staticmethod
+
     def parse_media(media):
         return [cpd.id for cpd in media.data["mediacompounds"]]
 
-    @staticmethod
-    def parse_df(df):
-        from numpy import array
+    def get_reframed_model(
+        kbase_model,
+    ):
+        from reframed import from_cobrapy
 
-        return array(
-            dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()]
-        )
+        reframed_model = from_cobrapy(kbase_model)
+        if hasattr(kbase_model, "id"):
+            reframed_model.id = kbase_model.id
+        reframed_model.compartments.e0.external = True
+        return reframed_model
 
     @staticmethod
     def add_vars_cons(model, vars_cons):

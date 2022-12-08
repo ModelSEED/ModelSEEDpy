@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from modelseedpy.core.rpcclient import RPCClient
 from modelseedpy.core.msgenome import MSFeature  # !!! import is never used
 import re

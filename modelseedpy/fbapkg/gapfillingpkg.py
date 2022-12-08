@@ -831,8 +831,10 @@ class GapfillingPkg(BaseFBAPkg):
             new_solution = self.compute_gapfilled_solution()
         return new_solution
 
-    # This function is designed to KO all gapfilled reactions not included in the solution
     def knockout_gf_reactions_outside_solution(self, solution=None, flux_values=None):
+        """
+        This function is designed to KO all gap filled reactions not included in the solution
+        """
         if solution == None:
             solution = self.compute_gapfilled_solution()
         if flux_values == None:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class ModelSEEDObject:
     def __init__(self, data, api=None):
         self.data = data

@@ -26,7 +26,7 @@ A compound is reformatted for addition to a template:
 - *index* ``int``: The index of a respective compound, which will be the suffix of the reformatted compound ID.
 
 **returns** *met* ``cobra.core.model.Metabolite``: The reformatted compound for addition to a model template.
-           
+
 --------------------------------
 convert_template_reaction()
 --------------------------------
@@ -43,7 +43,7 @@ A reaction is reformatted for addition to a template:
 - *for_gapfilling* ``bool``: specifies whether the reaction direction for gapfilling or not gapfilling is used in the formatted reaction.
 
 **returns** *rxn* ``cobra.core.model.Reaction``: The reformatted reaction for addition to a model template.
-           
+
 ----------------------
 Accessible content
 ----------------------

@@ -24,7 +24,7 @@ class ReactionUsePkg(BaseFBAPkg):
             },
         )
 
-    def build_package(self, rxn_filter=None, reversibility=False):
+   def build_package(self, rxn_filter=None, reversibility=False):
         for rxn in self.model.reactions:
             # Checking that reaction passes input filter if one is provided
             if rxn_filter == None:

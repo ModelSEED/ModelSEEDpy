@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # # import the packages
 # import os
 # import cobra

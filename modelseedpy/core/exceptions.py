@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Adding a few exception classes to handle different types of errors in a central file
 class FeasibilityError(Exception):
     """Error in FBA formulation"""

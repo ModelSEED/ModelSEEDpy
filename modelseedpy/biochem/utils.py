@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from chemicals import periodic_table
 from warnings import warn
 from chemw import ChemMW

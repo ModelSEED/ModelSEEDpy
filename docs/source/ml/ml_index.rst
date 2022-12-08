@@ -21,8 +21,8 @@ ________________________________________________________________________
 
 These packages are imported via::
 
- from modelseedpy.ml import *   
-   
+ from modelseedpy.ml import *
+
 and include the following
 
 .. toctree::

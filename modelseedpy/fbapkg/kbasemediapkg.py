@@ -77,4 +77,4 @@ class KBaseMediaPkg(BaseFBAPkg):
                                             mediacpd.concentration
                                         )
                 else:
-                    logger.warn("Media compound: ", mediacpd.id, " not found in model.")
+                    logger.info(f"Media compound: {mediacpd.id} not found in model.")

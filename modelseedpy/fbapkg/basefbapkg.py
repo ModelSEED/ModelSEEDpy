@@ -18,6 +18,10 @@ from modelseedpy.core.exceptions import FeasibilityError
 
 logger = logging.getLogger(__name__)
 
+# Adding a few exception classes to handle different types of errors
+class FeasibilityError(Exception):
+    """Error in FBA formulation"""
+    pass
 
 class BaseFBAPkg:
     """
@@ -45,18 +49,17 @@ class BaseFBAPkg:
         self.variable_types = variable_types
         self.constraint_types = constraint_types
 
-        for obj_type in variable_types:
-            self.variables[obj_type] = dict()
-        for obj_type in constraint_types:
-            self.constraints[obj_type] = dict()
+        for type in variable_types:
+            self.variables[type] = dict()
+        for type in constraint_types:
+            self.constraints[type] = dict()
 
     def validate_parameters(self, params, required, defaults):
         for item in required:
             if item not in params:
                 raise ValueError(f"Required argument {item} is missing!")
-        # defaults are assigned and then replaced with custom params
-        self.parameters.update(defaults)
-        self.parameters.update(params)
+        self.parameters.update(defaults)  # we assign all defaults
+        self.parameters.update(params)  # replace defaults with params
 
     def clear(self):
         cobra_objs = []
@@ -132,14 +135,14 @@ class BaseFBAPkg:
     def all_constraints(self):
         return self.pkgmgr.all_constraints()
 
-    def add_variable_type(self, name, obj_type):
+    def add_variable_type(self, name, type):
         if name not in self.variables:
             self.variables[name] = dict()
         if name not in self.variable_types:
-            self.variable_types[name] = obj_type
+            self.variable_types[name] = type
 
-    def add_constraint_type(self, name, obj_type):
+    def add_constraint_type(self, name, type):
         if name not in self.constraints:
             self.constraints[name] = dict()
         if name not in self.constraint_types:
-            self.constraint_types[name] = obj_type
+            self.constraint_types[name] = type

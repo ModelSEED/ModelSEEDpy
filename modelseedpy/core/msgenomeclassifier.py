@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from modelseedpy.ml.predict_phenotype import create_indicator_matrix
 from modelseedpy.core.msgenome import MSGenome
 

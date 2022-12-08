@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from modelseedpy.core.msgenome import MSFeature, MSGenome, parse_fasta_str
 
 
