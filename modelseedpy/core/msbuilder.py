@@ -16,6 +16,14 @@ from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 SBO_ANNOTATION = "sbo"
 
+DEFAULT_SINKS = {
+    "cpd02701_c": 1000,  # S-Adenosyl-4-methylthio-2-oxobutanoate
+    "cpd11416_c": 1000,  # Biomass
+    "cpd15302_c": 1000,  # glycogen(n-1)
+    "cpd03091_c": 1000,  # 5'-Deoxyadenosine
+    "cpd01042_c": 1000,  # p-Cresol
+}
+
 logger = logging.getLogger(__name__)
 
 ### temp stuff ###
@@ -328,9 +336,6 @@ def build_gpr(cpx_gene_role):
 
 
 class MSBuilder:
-
-    DEFAULT_SINKS = {"cpd02701_c": 1000, "cpd11416_c": 1000, "cpd15302_c": 1000}
-
     def __init__(
         self, genome, template=None, name=None, ontology_term="RAST", index="0"
     ):
@@ -384,7 +389,7 @@ class MSBuilder:
             # template without drain specification we build only default sinks
             in_model = {
                 k: v
-                for k, v in MSBuilder.DEFAULT_SINKS.items()
+                for k, v in DEFAULT_SINKS.items()
                 if k in self.template_species_to_model_species
             }
             return [self.build_sink_reaction(x, v) for x, v in in_model.items()]
@@ -411,6 +416,7 @@ class MSBuilder:
         subsystem="exchanges",
         lower_bound=0,
         upper_bound=1000,
+        sbo_term="SBO:0000627",
     ):
         """
         SK_ for sink (SBO_0000632) DM_ for demand (SBO_0000628) EX_ for exchange (SBO_0000627)
@@ -420,6 +426,7 @@ class MSBuilder:
         @param subsystem:
         @param lower_bound:
         @param upper_bound:
+        @param sbo_term:
         @return:
         """
 
@@ -436,21 +443,33 @@ class MSBuilder:
                 upper_bound,
             )
             drain.add_metabolites({m: -1})
-            drain.annotation[SBO_ANNOTATION] = "SBO:0000627"
+            drain.annotation[SBO_ANNOTATION] = sbo_term
             return drain
 
     def build_sink_reaction(self, template_cpd_id, upper_bound):
         if upper_bound <= 0:
             raise ModelSEEDError("Sink reactions must have upper bound > 0")
         return self.build_drain_reaction(
-            template_cpd_id, "SK_", "Sink for ", "exchanges", 0, upper_bound
+            template_cpd_id,
+            "SK_",
+            "Sink for ",
+            "exchanges",
+            0,
+            upper_bound,
+            "SBO:0000632",
         )
 
     def build_demand_reaction(self, template_cpd_id, lower_bound):
         if lower_bound >= 0:
             raise ModelSEEDError("Demand reactions must have lower bound < 0")
         return self.build_drain_reaction(
-            template_cpd_id, "DM_", "Demand for ", "exchanges", lower_bound, 0
+            template_cpd_id,
+            "DM_",
+            "Demand for ",
+            "exchanges",
+            lower_bound,
+            0,
+            "SBO:0000628",
         )
 
     def _get_template_reaction_complexes(self, template_reaction):
@@ -877,8 +896,10 @@ class MSBuilder:
         reactions_sinks = self.build_drains()
         cobra_model.add_reactions(reactions_sinks)
 
+        compartment_data = {}
         for cmp_id, data in self.compartments.items():
             cmp_index_id = f"{cmp_id}{self.index}"
+            compartment_data[cmp_index_id] = data.name
             kbase_compartment_data_key = f"kbase_compartment_data_{cmp_index_id}"
             kbase_compartment_data = {
                 "pH": data.ph,
@@ -886,6 +907,8 @@ class MSBuilder:
                 "compartmentIndex": self.index,
             }
             cobra_model.notes[kbase_compartment_data_key] = kbase_compartment_data
+
+        cobra_model.compartments = compartment_data
 
         """
         for cpd_id in ["cpd02701_c0", "cpd11416_c0", "cpd15302_c0"]:
