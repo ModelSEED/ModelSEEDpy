@@ -295,6 +295,7 @@ class MSTemplateReaction(Reaction):
             rxn_id, name, self.subsystem, self.lower_bound, self.upper_bound
         )
         reaction.add_metabolites(metabolites)
+        reaction.annotation["seed.reaction"] = self.reference_id
         return reaction
 
     @staticmethod
@@ -655,6 +656,27 @@ class MSTemplate:
         self.complexes = DictList()
         self.pathways = DictList()
         self.subsystems = DictList()
+        self.drains = None
+
+    def add_drain(self, compound_id, lower_bound, upper_bound):
+        if compound_id not in self.compcompounds:
+            raise ValueError(f"{compound_id} not in template")
+        if lower_bound > upper_bound:
+            raise ValueError(
+                f"lower_bound: {lower_bound} must not be > than upper_bound: {upper_bound}"
+            )
+        if self.drains is None:
+            self.drains = {}
+        self.drains[self.compcompounds.get_by_id(compound_id)] = (
+            lower_bound,
+            upper_bound,
+        )
+
+    def add_sink(self, compound_id, default_upper_bound=1000):
+        self.add_drain(compound_id, 0, default_upper_bound)
+
+    def add_demand(self, compound_id, default_lower_bound=-1000):
+        self.add_drain(compound_id, default_lower_bound, 0)
 
     def add_compartments(self, compartments: list):
         """
@@ -858,7 +880,7 @@ class MSTemplate:
         } NewModelTemplate;
         """
 
-        return {
+        d = {
             "__VERSION__": self.__VERSION__,
             "id": self.id,
             "name": self.name,
@@ -875,6 +897,11 @@ class MSTemplate:
             "pathways": [],
             "subsystems": [],
         }
+
+        if self.drains is not None:
+            d["drain_list"] = {c.id: t for c, t in self.drains.items()}
+
+        return d
 
     def _repr_html_(self):
         """
@@ -948,6 +975,7 @@ class MSTemplateBuilder:
         self.reactions = []
         self.info = info
         self.biochemistry_ref = None
+        self.drains = {}
 
     @staticmethod
     def from_dict(d, info=None, args=None):
@@ -969,6 +997,7 @@ class MSTemplateBuilder:
         builder.reactions = d["reactions"]
         builder.biochemistry_ref = d["biochemistry_ref"]
         builder.biomasses = d["biomasses"]
+
         return builder
 
     @staticmethod
@@ -1076,5 +1105,8 @@ class MSTemplateBuilder:
         template.biomasses += list(
             map(lambda x: AttrDict(x), self.biomasses)
         )  # TODO: biomass object
+
+        for compound_id, (lb, ub) in self.drains.items():
+            template.add_drain(compound_id, lb, ub)
 
         return template

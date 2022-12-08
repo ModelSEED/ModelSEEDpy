@@ -2,6 +2,7 @@
 import logging
 import itertools
 import cobra
+from modelseedpy.core.exceptions import ModelSEEDError
 from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
 from modelseedpy.core.msmodel import (
@@ -14,48 +15,56 @@ from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 SBO_ANNOTATION = "sbo"
 
+DEFAULT_SINKS = {
+    "cpd02701_c": 1000,  # S-Adenosyl-4-methylthio-2-oxobutanoate
+    "cpd11416_c": 1000,  # Biomass
+    "cpd15302_c": 1000,  # glycogen(n-1)
+    "cpd03091_c": 1000,  # 5'-Deoxyadenosine
+    "cpd01042_c": 1000,  # p-Cresol
+}
+
 logger = logging.getLogger(__name__)
 
 ### temp stuff ###
 core_biomass = {
-    "cpd00032_c0": -1.7867,
-    "cpd00005_c0": -1.8225,
-    "cpd00169_c0": -1.496,
-    "cpd11416_c0": 1,
-    "cpd00003_c0": -3.547,
-    "cpd00008_c0": 41.257,
-    "cpd00024_c0": -1.0789,
-    "cpd00009_c0": 41.257,
-    "cpd00102_c0": -0.129,
-    "cpd00101_c0": -0.8977,
-    "cpd00236_c0": -0.8977,
-    "cpd00002_c0": -41.257,
-    "cpd00022_c0": -3.7478,
-    "cpd00020_c0": -2.8328,
-    "cpd00006_c0": 1.8225,
-    "cpd00001_c0": -41.257,
-    "cpd00072_c0": -0.0709,
-    "cpd00010_c0": 3.7478,
-    "cpd00004_c0": 3.547,
-    "cpd00061_c0": -0.5191,
-    "cpd00067_c0": 46.6265,
-    "cpd00079_c0": -0.205,
+    "cpd00032_c": -1.7867,
+    "cpd00005_c": -1.8225,
+    "cpd00169_c": -1.496,
+    "cpd11416_c": 1,
+    "cpd00003_c": -3.547,
+    "cpd00008_c": 41.257,
+    "cpd00024_c": -1.0789,
+    "cpd00009_c": 41.257,
+    "cpd00102_c": -0.129,
+    "cpd00101_c": -0.8977,
+    "cpd00236_c": -0.8977,
+    "cpd00002_c": -41.257,
+    "cpd00022_c": -3.7478,
+    "cpd00020_c": -2.8328,
+    "cpd00006_c": 1.8225,
+    "cpd00001_c": -41.257,
+    "cpd00072_c": -0.0709,
+    "cpd00010_c": 3.7478,
+    "cpd00004_c": 3.547,
+    "cpd00061_c": -0.5191,
+    "cpd00067_c": 46.6265,
+    "cpd00079_c": -0.205,
 }
 
 core_atp2 = {
-    "cpd00067_c0": 46.6265,
-    "cpd00002_c0": -41.257,
-    "cpd00008_c0": 41.257,
-    "cpd00001_c0": -41.257,
-    "cpd00009_c0": 41.257,
+    "cpd00067_c": 46.6265,
+    "cpd00002_c": -41.257,
+    "cpd00008_c": 41.257,
+    "cpd00001_c": -41.257,
+    "cpd00009_c": 41.257,
 }
 
 core_atp = {
-    "cpd00067_c0": 1,
-    "cpd00002_c0": -1,
-    "cpd00008_c0": 1,
-    "cpd00001_c0": -1,
-    "cpd00009_c0": 1,
+    "cpd00067_c": 1,
+    "cpd00002_c": -1,
+    "cpd00008_c": 1,
+    "cpd00001_c": -1,
+    "cpd00009_c": 1,
 }
 
 gramneg = {
@@ -112,7 +121,7 @@ gramneg = {
     "cpd00254_c0": -0.00280615915959131,
     "cpd11463_c0": -0.5,
     "cpd11461_c0": -0.1,
-    "cpd11462_c0": -0.2,
+    "cpd11462_c0": -0.2
 }
 
 grampos = {
@@ -179,7 +188,7 @@ grampos = {
     "cpd15352_c0": -0.00719527989638797,
     "cpd11463_c0": -0.5,
     "cpd11461_c0": -0.1,
-    "cpd11462_c0": -0.2,
+    "cpd11462_c0": -0.2
 }
 
 
@@ -273,13 +282,141 @@ def build_gpr(cpx_gene_role):
 
 
 class MSBuilder:
-    def __init__(self, genome, template=None):
+    def __init__(
+        self, genome, template=None, name=None, ontology_term="RAST", index="0"
+    ):
         """
-        for future methods with better customization
+
+        @param genome: MSGenome
+        @param template: MSTemplate
+        @param name:
+        @param ontology_term:
         """
+        if index is None or type(index) != str:
+            raise TypeError("index must be str")
+        if ontology_term is None or type(ontology_term) != str:
+            raise TypeError("ontology_term must be str")
+        self.name = name
         self.genome = genome
         self.template = template
-        self.search_name_to_genes, self.search_name_to_original = _aaaa(genome, "RAST")
+        self.search_name_to_genes, self.search_name_to_original = _aaaa(
+            genome, ontology_term
+        )
+        self.template_species_to_model_species = None
+        self.reaction_to_complex_sets = None
+        self.compartments = None
+        self.base_model = None
+        self.index = index
+
+    def build_drains(self):
+        if self.template_species_to_model_species is None:
+            logger.warning("cannot build model drains without generating model species")
+            return None
+        if self.template.drains:
+            sinks = self.build_sinks()
+            demands = self.build_demands()
+            return sinks + demands
+        else:
+            # template without drain specification we build only default sinks
+            return self.build_sinks()
+
+    def build_sinks(self):
+        if self.template_species_to_model_species is None:
+            logger.warning("cannot build model sinks without generating model species")
+            return None
+        if self.template.drains:
+            sinks = {
+                x.id: t[1]
+                for x, t in self.template.drains.items()
+                if t[1] > 0 and x.id in self.template_species_to_model_species
+            }
+            return [self.build_sink_reaction(x, v) for x, v in sinks.items()]
+        else:
+            # template without drain specification we build only default sinks
+            in_model = {
+                k: v
+                for k, v in DEFAULT_SINKS.items()
+                if k in self.template_species_to_model_species
+            }
+            return [self.build_sink_reaction(x, v) for x, v in in_model.items()]
+
+    def build_demands(self):
+        if self.template_species_to_model_species is None:
+            logger.warning("cannot build model sinks without generating model species")
+            return None
+        if self.template.drains:
+            demands = {
+                x.id: t[0]
+                for x, t in self.template.drains.items()
+                if t[0] < 0 and x.id in self.template_species_to_model_species
+            }
+            return [self.build_demand_reaction(x, v) for x, v in demands.items()]
+        else:
+            return []
+
+    def build_drain_reaction(
+        self,
+        template_cpd_id,
+        prefix="EX_",
+        name_prefix="Exchange for ",
+        subsystem="exchanges",
+        lower_bound=0,
+        upper_bound=1000,
+        sbo_term="SBO:0000627",
+    ):
+        """
+        SK_ for sink (SBO_0000632) DM_ for demand (SBO_0000628) EX_ for exchange (SBO_0000627)
+        @param template_cpd_id:
+        @param prefix:
+        @param name_prefix:
+        @param subsystem:
+        @param lower_bound:
+        @param upper_bound:
+        @param sbo_term:
+        @return:
+        """
+
+        if self.template_species_to_model_species is None:
+            logger.warning("cannot build model drains without generating model species")
+            return None
+        else:
+            m = self.template_species_to_model_species[template_cpd_id]
+            drain = Reaction(
+                f"{prefix}{m.id}",
+                f"{name_prefix}{m.name}",
+                subsystem,
+                lower_bound,
+                upper_bound,
+            )
+            drain.add_metabolites({m: -1})
+            drain.annotation[SBO_ANNOTATION] = sbo_term
+            return drain
+
+    def build_sink_reaction(self, template_cpd_id, upper_bound):
+        if upper_bound <= 0:
+            raise ModelSEEDError("Sink reactions must have upper bound > 0")
+        return self.build_drain_reaction(
+            template_cpd_id,
+            "SK_",
+            "Sink for ",
+            "exchanges",
+            0,
+            upper_bound,
+            "SBO:0000632",
+        )
+
+    def build_demand_reaction(self, template_cpd_id, lower_bound):
+        if lower_bound >= 0:
+            raise ModelSEEDError("Demand reactions must have lower bound < 0")
+        return self.build_drain_reaction(
+            template_cpd_id,
+            "DM_",
+            "Demand for ",
+            "exchanges",
+            lower_bound,
+            0,
+            "SBO:0000628",
+        )
 
     def _get_template_reaction_complexes(self, template_reaction):
         """
@@ -381,40 +518,7 @@ class MSBuilder:
         return gpr_set
 
     @staticmethod
-    def _build_reaction(reaction_id, gpr_set, template, index="0", sbo=None):
-        template_reaction = template.reactions.get_by_id(reaction_id)
-
-        reaction_compartment = template_reaction.compartment
-        metabolites = {}
-
-        for cpd, value in template_reaction.metabolites.items():
-            compartment = f"{cpd.compartment}{index}"
-            name = f"{cpd.name}_{compartment}"
-            cpd = Metabolite(
-                cpd.id + str(index), cpd.formula, name, cpd.charge, compartment
-            )
-            metabolites[cpd] = value
-
-        reaction = Reaction(
-            "{}{}".format(template_reaction.id, index),
-            "{}_{}{}".format(template_reaction.name, reaction_compartment, index),
-            "",
-            template_reaction.lower_bound,
-            template_reaction.upper_bound,
-        )
-
-        gpr_str = build_gpr2(gpr_set) if gpr_set else ""
-        reaction.add_metabolites(metabolites)
-        if gpr_str and len(gpr_str) > 0:
-            reaction.gene_reaction_rule = gpr_str  # get_gpr_string(gpr_ll)
-
-        reaction.annotation["seed.reaction"] = template_reaction.reference_id
-        if sbo:
-            reaction.annotation[SBO_ANNOTATION] = sbo
-        return reaction
-
-    @staticmethod
-    def build_exchanges(model, extra_cell="e0"):
+    def add_exchanges_to_model(model, extra_cell="e0"):
         """
         Build exchange reactions for the "extra_cell" compartment
         :param model: Cobra Model
@@ -530,15 +634,15 @@ class MSBuilder:
         return biomasses
 
     @staticmethod
-    def build_biomasses(model, template, index):
+    def build_static_biomasses(self, model, template):
         res = []
         if template.name.startswith("CoreModel"):
-            res.append(build_biomass("bio1", model, template, core_biomass, index))
-            res.append(build_biomass("bio2", model, template, core_atp, index))
+            res.append(self.build_biomass("bio1", model, template, core_biomass))
+            res.append(self.build_biomass("bio2", model, template, core_atp))
         if template.name.startswith("GramNeg"):
-            res.append(build_biomass("bio1", model, template, gramneg, index))
+            res.append(self.build_biomass("bio1", model, template, gramneg))
         if template.name.startswith("GramPos"):
-            res.append(build_biomass("bio1", model, template, grampos, index))
+            res.append(self.build_biomass("bio1", model, template, grampos))
         return res
 
     def auto_select_template(self):
@@ -577,57 +681,211 @@ class MSBuilder:
 
         return genome_class
 
-    def build_metabolic_reactions(self, index="0", allow_incomplete_complexes=True):
-        metabolic_reactions = {}
+    def generate_reaction_complex_sets(self, allow_incomplete_complexes=True):
+        self.reaction_to_complex_sets = {}
         for template_reaction in self.template.reactions:
             gpr_set = self.get_gpr_from_template_reaction(
                 template_reaction, allow_incomplete_complexes
             )
             if gpr_set:
-                metabolic_reactions[template_reaction.id] = gpr_set
+                self.reaction_to_complex_sets[template_reaction.id] = gpr_set
                 logger.debug("[%s] gpr set: %s", template_reaction.id, gpr_set)
 
-        reactions = list(
-            map(
-                lambda x: self._build_reaction(
-                    x[0], x[1], self.template, index, "SBO:0000176"
-                ),
-                metabolic_reactions.items(),
+        return self.reaction_to_complex_sets
+
+    """
+    def _build_reaction(self, reaction_id, gpr_set, template, index="0", sbo=None):
+        template_reaction = template.reactions.get_by_id(reaction_id)
+
+        reaction_compartment = template_reaction.compartment
+        metabolites = {}
+
+        for cpd, value in template_reaction.metabolites.items():
+            compartment = f"{cpd.compartment}{index}"
+            name = f"{cpd.name}_{compartment}"
+            cpd = Metabolite(
+                cpd.id + str(index), cpd.formula, name, cpd.charge, compartment
             )
+            metabolites[cpd] = value
+
+        reaction = Reaction(
+            "{}{}".format(template_reaction.id, index),
+            "{}_{}{}".format(template_reaction.name, reaction_compartment, index),
+            "",
+            template_reaction.lower_bound,
+            template_reaction.upper_bound,
         )
+
+        gpr_str = build_gpr2(gpr_set) if gpr_set else ""
+        reaction.add_metabolites(metabolites)
+        if gpr_str and len(gpr_str) > 0:
+            reaction.gene_reaction_rule = gpr_str  # get_gpr_string(gpr_ll)
+
+        reaction.annotation["seed.reaction"] = template_reaction.reference_id
+        if sbo:
+            reaction.annotation[SBO_ANNOTATION] = sbo
+        return reaction
+    """
+
+    def build_complex_groups(self, complex_sets):
+        """
+        Builds complex Group from complex sets computed from template and genome
+        Example: {'cpx00700': {'ftr01608': {'b3177'}}, 'cpx01370': {'ftr01607': {'b0142'}}}
+        @param complex_sets:
+        @return:
+        """
+        group_complexes = {}
+        for complex_set in complex_sets:
+            for complex_id in complex_set:
+                if complex_id not in group_complexes:
+                    cpx = self.template.complexes.get_by_id(complex_id)
+                    g = Group(complex_id)
+                    g.notes["complex_source"] = cpx.source
+                    for role, (t, o) in cpx.roles.items():
+                        if role.id in complex_set[complex_id]:
+                            g.notes[f"complex_subunit_note_{role.id}"] = role.name
+                            g.notes[f"complex_subunit_optional_{role.id}"] = (
+                                1 if o else 0
+                            )
+                            g.notes[f"complex_subunit_triggering_{role.id}"] = (
+                                1 if t else 0
+                            )
+                            g.notes[f"complex_subunit_features_{role.id}"] = ";".join(
+                                sorted(list(complex_set[complex_id][role.id]))
+                            )
+                    group_complexes[g.id] = g
+
+        return group_complexes
+
+    def build_metabolic_reactions(self):
+        if self.base_model is None:
+            raise ModelSEEDError(
+                "unable to generate metabolic reactions without base model"
+            )
+        if self.reaction_to_complex_sets is None:
+            raise ModelSEEDError(
+                "unable to generate metabolic reactions without generate complex sets"
+            )
+
+        if self.template_species_to_model_species is None:
+            self.template_species_to_model_species = {}
+        if self.compartments is None:
+            self.compartments = {}
+
+        reactions = []
+        for rxn_id, complex_set in self.reaction_to_complex_sets.items():
+            template_reaction = self.template.reactions.get_by_id(rxn_id)
+            for m in template_reaction.metabolites:
+                if m.compartment not in self.compartments:
+                    self.compartments[
+                        m.compartment
+                    ] = self.template.compartments.get_by_id(m.compartment)
+                if m.id not in self.template_species_to_model_species:
+                    model_metabolite = m.to_metabolite(self.index)
+                    self.template_species_to_model_species[m.id] = model_metabolite
+                    self.base_model.add_metabolites([model_metabolite])
+            reaction = template_reaction.to_reaction(self.base_model, self.index)
+            gpr_str = build_gpr2(complex_set) if complex_set else ""
+            if gpr_str and len(gpr_str) > 0:
+                reaction.gene_reaction_rule = gpr_str
+            reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
+            reaction.notes["modelseed_complex"] = ";".join(sorted(list(complex_set)))
+            reactions.append(reaction)
 
         return reactions
 
     def build_non_metabolite_reactions(
-        self, cobra_model, index="0", allow_all_non_grp_reactions=False
+        self, cobra_model, allow_all_non_grp_reactions=False
     ):
-        reactions_no_gpr = []
-        reactions_in_model = set(map(lambda x: x.id, cobra_model.reactions))
-        metabolites_in_model = set(map(lambda x: x.id, cobra_model.metabolites))
-        for rxn in self.template.reactions:
-            if rxn.type == "universal" or rxn.type == "spontaneous":
-                reaction = self._build_reaction(
-                    rxn.id, {}, self.template, index, "SBO:0000176"
-                )
-                reaction_metabolite_ids = set(
-                    map(lambda x: x.id, set(reaction.metabolites))
-                )
-                if (
-                    len(metabolites_in_model & reaction_metabolite_ids) > 0
-                    or allow_all_non_grp_reactions
-                ) and reaction.id not in reactions_in_model:
-                    reaction.annotation["seed.reaction"] = rxn.id
-                    reactions_no_gpr.append(reaction)
+        if self.base_model is None:
+            raise ModelSEEDError(
+                "unable to generate metabolic reactions without base model"
+            )
+        if self.reaction_to_complex_sets is None:
+            raise ModelSEEDError(
+                "unable to generate metabolic reactions without generate complex sets"
+            )
 
-        return reactions_no_gpr
+        if self.template_species_to_model_species is None:
+            self.template_species_to_model_species = {}
+        if self.compartments is None:
+            self.compartments = {}
+
+        reactions = []
+        for template_reaction in self.template.reactions:
+            if (
+                template_reaction.type == "universal"
+                or template_reaction.type == "spontaneous"
+            ):
+                reaction_metabolite_ids = {m.id for m in template_reaction.metabolites}
+                if (
+                    len(
+                        set(self.template_species_to_model_species)
+                        & reaction_metabolite_ids
+                    )
+                    > 0
+                    or allow_all_non_grp_reactions
+                ):
+                    for m in template_reaction.metabolites:
+                        if m.compartment not in self.compartments:
+                            self.compartments[
+                                m.compartment
+                            ] = self.template.compartments.get_by_id(m.compartment)
+                        if m.id not in self.template_species_to_model_species:
+                            model_metabolite = m.to_metabolite(self.index)
+                            self.template_species_to_model_species[
+                                m.id
+                            ] = model_metabolite
+                            self.base_model.add_metabolites([model_metabolite])
+
+                    reaction = template_reaction.to_reaction(
+                        self.base_model, self.index
+                    )
+                    reaction.annotation[SBO_ANNOTATION] = "SBO:0000672"
+                    # if template_reaction.type == "spontaneous":
+                    #    reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
+
+                    if reaction.id not in cobra_model.reactions:
+                        reactions.append(reaction)
+
+        return reactions
+
+    def build_biomass(self, rxn_id, cobra_model, template, biomass_compounds):
+        bio_rxn = Reaction(rxn_id, "biomass", "", 0, 1000)
+        metabolites = {}
+        for template_cpd_id in biomass_compounds:
+            if template_cpd_id in self.template_species_to_model_species:
+                model_species_id = self.template_species_to_model_species[
+                    template_cpd_id
+                ].id
+                cpd = cobra_model.metabolites.get_by_id(model_species_id)
+                metabolites[cpd] = biomass_compounds[template_cpd_id]
+            else:
+                template_cpd = template.compcompounds.get_by_id(template_cpd_id)
+                m = template_cpd.to_metabolite(self.index)
+                metabolites[m] = biomass_compounds[template_cpd_id]
+                self.template_species_to_model_species[template_cpd_id] = m
+                cobra_model.add_metabolites([m])
+        bio_rxn.add_metabolites(metabolites)
+        bio_rxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
+        return bio_rxn
 
     def build(
         self,
-        model_id,
+        model_id_or_id,
         index="0",
         allow_all_non_grp_reactions=False,
         annotate_with_rast=True,
     ):
+        """
+
+        @param model_id_or_id: a string ID to build from cobra.core.Model otherwise a type of cobra.core.Model
+        as Base Model
+        @param index:
+        @param allow_all_non_grp_reactions:
+        @param annotate_with_rast:
+        @return:
+        """
 
         if annotate_with_rast:
             rast = RastClient()
@@ -640,14 +898,26 @@ class MSBuilder:
         if self.template is None:
             self.auto_select_template()
 
-        cobra_model = MSModel(model_id, genome=self.genome, template=self.template)
-        cobra_model.add_reactions(self.build_metabolic_reactions(index=index))
-        cobra_model.add_reactions(
-            self.build_non_metabolite_reactions(
-                cobra_model, index, allow_all_non_grp_reactions
-            )
+        cobra_model = model_id_or_id
+        if type(model_id_or_id) == str:
+            from cobra.core import Model
+
+            cobra_model = Model(model_id_or_id)
+        self.base_model = cobra_model
+
+        self.generate_reaction_complex_sets()
+        complex_groups = self.build_complex_groups(
+            self.reaction_to_complex_sets.values()
         )
-        self.build_exchanges(cobra_model)
+
+        metabolic_reactions = self.build_metabolic_reactions()
+        cobra_model.add_reactions(metabolic_reactions)
+        non_metabolic_reactions = self.build_non_metabolite_reactions(
+            cobra_model, allow_all_non_grp_reactions
+        )
+        cobra_model.add_reactions(non_metabolic_reactions)
+        cobra_model.add_groups(list(complex_groups.values()))
+        self.add_exchanges_to_model(cobra_model)
 
         if (
             self.template.name.startswith("CoreModel")
@@ -655,13 +925,30 @@ class MSBuilder:
             or self.template.name.startswith("GramPos")
         ):
             cobra_model.add_reactions(
-                self.build_biomasses(cobra_model, self.template, index)
+                self.build_static_biomasses(cobra_model, self.template)
             )
             cobra_model.objective = "bio1"
 
-        reactions_sinks = []
-        for cpd_id in ["cpd02701_c0", "cpd11416_c0", "cpd15302_c0", "cpd03091_c0"]:
-            if cpd_id in cobra_model.metabolites:
+        reactions_sinks = self.build_drains()
+        cobra_model.add_reactions(reactions_sinks)
+
+        compartment_data = {}
+        for cmp_id, data in self.compartments.items():
+            cmp_index_id = f"{cmp_id}{self.index}"
+            compartment_data[cmp_index_id] = data.name
+            kbase_compartment_data_key = f"kbase_compartment_data_{cmp_index_id}"
+            kbase_compartment_data = {
+                "pH": data.ph,
+                "potential": 0,
+                "compartmentIndex": self.index,
+            }
+            cobra_model.notes[kbase_compartment_data_key] = kbase_compartment_data
+
+        cobra_model.compartments = compartment_data
+
+        """
+        for cpd_id in ["cpd02701_c0", "cpd11416_c0", "cpd15302_c0"]:
+           if cpd_id in cobra_model.metabolites:
                 m = cobra_model.metabolites.get_by_id(cpd_id)
                 rxn_exchange = Reaction(
                     "SK_" + m.id, "Sink for " + m.name, "exchanges", 0, 1000
@@ -669,7 +956,7 @@ class MSBuilder:
                 rxn_exchange.add_metabolites({m: -1})
                 rxn_exchange.annotation[SBO_ANNOTATION] = "SBO:0000627"
                 reactions_sinks.append(rxn_exchange)
-        cobra_model.add_reactions(reactions_sinks)
+        """
 
         return cobra_model
 
@@ -685,13 +972,11 @@ class MSBuilder:
         model = MSModel(model_id if model_id else template.id, template=template)
         all_reactions = []
         for rxn in template.reactions:
-            reaction = MSBuilder._build_reaction(
-                rxn.id, {}, template, index, "SBO:0000176"
-            )
+            reaction = rxn.to_reaction(model, index)
             reaction.annotation["seed.reaction"] = rxn.id
             all_reactions.append(reaction)
         model.add_reactions(all_reactions)
-        model.add_reactions(MSBuilder.build_exchanges(model))
+        MSBuilder.add_exchanges_to_model(model)
 
         if template.name.startswith("CoreModel"):
             bio_rxn1 = build_biomass("bio1", model, template, core_biomass, index)
