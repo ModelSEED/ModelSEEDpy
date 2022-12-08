@@ -179,7 +179,7 @@ grampos = {
     "cpd15352_c0": -0.00719527989638797,
     "cpd11463_c0": -0.5,
     "cpd11461_c0": -0.1,
-    "cpd11462_c0": -0.2
+    "cpd11462_c0": -0.2,
 }
 
 
@@ -777,6 +777,7 @@ class MSBuilder:
                 rxn.upper_bound = 0
                 rxn.lower_bound = -100
         return original_mdl
+
 
 def build_metabolic_model(
     genome,

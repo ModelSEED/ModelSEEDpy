@@ -179,6 +179,7 @@ def load_metabolites_from_df(
             logger.error("failed to read compound at Index: %s. %s", t[0], e)
     return compounds
 
+
 def _load_aliases_df(df_aliases, seed_index=1, source_index=3, alias_id_index=2):
     aliases = {}
     for i in df_aliases.itertuples():
@@ -318,6 +319,7 @@ def _load_reactions(
                         logger.error(f"failed to read reaction record {o}")
 
     return reactions, metabolites_indexed
+
 
 def load_reactions_from_df(
     df: pd.DataFrame,

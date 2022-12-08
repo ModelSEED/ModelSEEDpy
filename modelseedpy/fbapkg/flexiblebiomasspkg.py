@@ -313,7 +313,7 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 else:
                     const = BaseFBAPkg.build_constraint(
                         self,
-                       "f" + obj_type,
+                        "f" + obj_type,
                         0,
                         None,
                         {biovar: second_entry, object.forward_variable: -1},

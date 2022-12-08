@@ -287,7 +287,6 @@ class FBAHelper:
         return dictionary
 
     @staticmethod
-
     def parse_media(media):
         return [cpd.id for cpd in media.data["mediacompounds"]]
 

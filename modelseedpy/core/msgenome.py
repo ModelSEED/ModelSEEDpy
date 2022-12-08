@@ -18,6 +18,7 @@ def read_fasta(f, split=DEFAULT_SPLIT, h_func=None):
     with open(f, "r") as fh:
         return parse_fasta_str(fh.read(), split, h_func)
 
+
 def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
     features = []
     seq = None
@@ -36,7 +37,7 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
                     desc = header_data[
                         1
                     ]  # The unit test throws an error when this is commented
-                    
+
             seq = MSFeature(seq_id, "", desc)
         else:
             if seq:

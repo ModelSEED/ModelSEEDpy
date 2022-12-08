@@ -60,7 +60,7 @@ class MSATPCorrection:
         atp_hydrolysis_id=None,
         load_default_medias=True,
         forced_media=[],
-        default_media_path=None
+        default_media_path=None,
     ):
         """
         :param model:
@@ -285,7 +285,7 @@ class MSATPCorrection:
                 )
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
-                
+
                 if (
                     solution.objective_value < minimum_obj
                     or solution.status != "optimal"
@@ -345,6 +345,7 @@ class MSATPCorrection:
         Decides which of the test media to use as growth conditions for this model
         :return:
         """
+
         def scoring_function(media):
             return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * len(
                 self.media_gapfill_stats[media]["reversed"].keys()

@@ -33,7 +33,7 @@ class CommunityModelSpecies:
         biomass_cpd,  # metabolite in the biomass reaction
         names=[],  # names of the community species #TODO - look into whether there should be a names field
         name=None,  # the name of a species
-        index=None  # the index of the species
+        index=None,  # the index of the species
     ):
         self.community, self.biomass_cpd = community, biomass_cpd
         print(self.biomass_cpd.compartment)

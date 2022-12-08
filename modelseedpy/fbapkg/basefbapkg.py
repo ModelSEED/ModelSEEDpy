@@ -21,7 +21,9 @@ logger = logging.getLogger(__name__)
 # Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):
     """Error in FBA formulation"""
+
     pass
+
 
 class BaseFBAPkg:
     """

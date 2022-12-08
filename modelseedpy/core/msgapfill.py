@@ -48,7 +48,7 @@ class MSGapfill:
             "cpd02701",
             "cpd11416",
             "cpd15302",
-            "cpd03091"
+            "cpd03091",
         ]  # the cpd11416 compound is filtered during model extension with templates
         self.gfmodel = self.lp_filename = self.last_solution = None
         self.model_penalty = 1
