@@ -1,4 +1,3 @@
-
 """
 def test_compound_data_h2o(cpd):
     assert cpd.id == 'cpd00001'

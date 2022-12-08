@@ -97,7 +97,6 @@ H12	2-Aminoethano	cpd00162"""
 
 
 class BiologPlate:
-
     def __init__(self, plate_id, rows, cols):
         self.id = plate_id
         self.rows = rows
@@ -115,8 +114,8 @@ class BiologPlate:
             well = self.wells[well_id]
             for compound in self.base:
                 media[compound] = self.base[compound]
-            for compound in well['compounds']:
-                media[compound] = well['value']
+            for compound in well["compounds"]:
+                media[compound] = well["value"]
             return media
         return None
 
@@ -129,7 +128,7 @@ class BiologPlate:
                 t += '<td style="text-align:left;vertical-align:top;">'
                 for o in self.wells:
                     if o == row + col:
-                        t += self.wells[o]['desc']
+                        t += self.wells[o]["desc"]
                         # print(self.wells[o])
                 t += "</td>"
             t += "</tr>"
@@ -139,16 +138,15 @@ class BiologPlate:
 
 
 class Biolog:
-
     def __init__(self):
         self.plates = {}
 
     def add_plate(self, plate):
         if plate.id in self.plates:
-            print('replace existing plate')
+            print("replace existing plate")
         self.plates[plate.id] = plate
 
-    def run_plates(self, model, biomass=None, cmp='e'):  # !!! biomass is never used
+    def run_plates(self, model, biomass=None, cmp="e"):  # !!! biomass is never used
         prev_medium = model.medium
         compound_exchange = {}
         for ex_rxn in model.exchanges:
@@ -166,10 +164,10 @@ class Biolog:
                     if match in compound_exchange:
                         model_medium[compound_exchange[match].id] = media[o]
                     else:
-                        print('skip', o)
+                        print("skip", o)
                 model.medium = model_medium
                 ovalue = model.slim_optimize()
-                plate.wells[well_id]['growth'] = ovalue
+                plate.wells[well_id]["growth"] = ovalue
                 # print(well_id, solution)
                 # print(well_id, media)
         return prev_medium

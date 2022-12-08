@@ -9,9 +9,9 @@ def test_init():
     assert type(rev_bin.name) is str
     assert type(rev_bin.variable_types) is dict
     assert type(rev_bin.constraint_types) is dict
-    assert 'revbin' in list(rev_bin.variables.keys())
-    assert 'revbinR' in list(rev_bin.constraints.keys())
-    assert 'revbinF' in list(rev_bin.constraints.keys())
+    assert "revbin" in list(rev_bin.variables.keys())
+    assert "revbinR" in list(rev_bin.constraints.keys())
+    assert "revbinF" in list(rev_bin.constraints.keys())
 
 
 def test_build_package():
@@ -19,7 +19,7 @@ def test_build_package():
     lower_bound = 0
     upper_bound = 1
     var_type = "binary"
-    constraint_types = {"F": [None, 0],'R': [None, 1000]}
+    constraint_types = {"F": [None, 0], "R": [None, 1000]}
 
     # execute the function
     rev_bin = RevBinPkg(model=mock_model_ecoli_core(True))
@@ -34,8 +34,12 @@ def test_build_package():
         assert rev_bin_var.type == var_type
 
         for constraint_type in constraint_types:
-            rev_bin_cons = rev_bin.constraints['revbin{}'.format(constraint_type)][reaction.id]
+            rev_bin_cons = rev_bin.constraints["revbin{}".format(constraint_type)][
+                reaction.id
+            ]
             assert rev_bin_cons
             assert rev_bin_cons.lb == constraint_types[constraint_type][0]
             assert rev_bin_cons.ub == constraint_types[constraint_type][1]
-            assert rev_bin_cons.name == '{}_revbin{}'.format(reaction.id, constraint_type)
+            assert rev_bin_cons.name == "{}_revbin{}".format(
+                reaction.id, constraint_type
+            )

@@ -3,7 +3,6 @@ from modelseedpy.core.msgenome import MSGenome
 
 
 class MSGenomeClassifier:
-
     def __init__(self, model, model_features):
         self.features = model_features
         self.model = model
@@ -20,16 +19,22 @@ class MSGenomeClassifier:
         for feature in genome.features:
             if ontology_term in feature.ontology_terms:
                 features.update(feature.ontology_terms[ontology_term])
-        return {'genome': list(features)}
+        return {"genome": list(features)}
 
-    def classify(self, genome_or_roles, ontology_term='RAST'):
+    def classify(self, genome_or_roles, ontology_term="RAST"):
         """
         param genome_or_roles:
         """
         if isinstance(genome_or_roles, MSGenome):
-            genome_or_roles = self.extract_features_from_genome(genome_or_roles, ontology_term)
-        indicator_df, master_role_list = create_indicator_matrix(genome_or_roles, self.features)
-        predictions_numerical = self.model.predict(indicator_df[master_role_list].values)
+            genome_or_roles = self.extract_features_from_genome(
+                genome_or_roles, ontology_term
+            )
+        indicator_df, master_role_list = create_indicator_matrix(
+            genome_or_roles, self.features
+        )
+        predictions_numerical = self.model.predict(
+            indicator_df[master_role_list].values
+        )
         return predictions_numerical[0]
 
 
@@ -42,9 +47,10 @@ def load_classifier_from_folder(path, filename):
     """
     import pickle
     import json
-    with open(f'{path}/{filename}.pickle', 'rb') as fh:
+
+    with open(f"{path}/{filename}.pickle", "rb") as fh:
         model_filter = pickle.load(fh)
-    with open(f'{path}/{filename}_features.json', 'r') as fh:
+    with open(f"{path}/{filename}_features.json", "r") as fh:
         features = json.load(fh)
 
     return MSGenomeClassifier(model_filter, features)
