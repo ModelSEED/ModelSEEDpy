@@ -464,7 +464,7 @@ class MSModelUtil:
     """Tests if every reaction in a given gapfilling solution is actually needed for growth
         Optionally can remove unneeded reactions from the model AND the solution object.
         Note, this code assumes the gapfilling solution is already integrated.
-        
+
         Parameters
         ----------
         {"new":{string reaction_id: string direction},"reversed":{string reaction_id: string direction}} - solution
@@ -475,7 +475,7 @@ class MSModelUtil:
         -------
         list<tuple<string - reaction id, string direction>>
             List of unneeded reactions
-            
+
         Raises
         ------
         """
