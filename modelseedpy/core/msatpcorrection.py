@@ -4,6 +4,9 @@ import itertools
 import cobra
 import json
 import time
+import pandas as pd
+from os.path import abspath as _abspath
+from os.path import dirname as _dirname
 from optlang.symbolics import Zero, add
 from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
@@ -13,10 +16,33 @@ from modelseedpy.core.msmodel import (
 )
 from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core import FBAHelper, MSGapfill, MSMedia
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.helpers import get_template
 
 logger = logging.getLogger(__name__)
+
+_path = _dirname(_abspath(__file__))
+
+min_gap = {
+    "Glc/O2": 5,
+    "Etho/O2": 0.01,
+    "Ac/O2": 1,
+    "Pyr/O2": 3,
+    "Glyc/O2": 2,
+    "Fum/O2": 3,
+    "Succ/O2": 2,
+    "Akg/O2": 2,
+    "LLac/O2": 2,
+    "Dlac/O2": 2,
+    "For/O2": 2,
+    "For/NO3": 1.5,
+    "Pyr/NO": 2.5,
+    "Pyr/NO2": 2.5,
+    "Pyr/NO3": 2.5,
+    "Pyr/SO4": 2.5,
+}
 
 
 class MSATPCorrection:
@@ -25,56 +51,112 @@ class MSATPCorrection:
 
     def __init__(
         self,
-        model,
-        core_template,
-        atp_medias: list,
+        model_or_mdlutl,
+        core_template=None,
+        atp_medias=[],
         compartment="c0",
-        max_gapfilling=None,
+        max_gapfilling=10,
         gapfilling_delta=0,
         atp_hydrolysis_id=None,
+        load_default_medias=True,
+        forced_media=[],
+        default_media_path=None,
     ):
         """
-
         :param model:
         :param core_template:
-        :param atp_medias:
-        :param atp_objective:
-        :param max_gapfilling:
-        :param gapfilling_delta:
-        :param atp_hydrolysis_id: ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
+        :param atp_medias: list<MSMedia> : list of additional medias to test
+        :param load_default_medias: Bool : load default media set
+        :param forced_media: list<string> : name of medias in which ATP production should be forced
+        :param compartment: string : ID of compartment to test ATP in
+        :param max_gapfilling: string : maximum gapfilling allowed in accepted media
+        :param gapfilling_delta: string : difference between lowest gapfilling and current gapfilling where media will be accepted
+        :param atp_hydrolysis_id: string : ATP Hydrolysis reaction ID, if None it will perform a SEED reaction search
         """
-        if isinstance(model, MSModelUtil):
-            self.model = model.model
-            self.modelutl = model
+        # Discerning input is model or mdlutl and setting internal links
+        if isinstance(model_or_mdlutl, MSModelUtil):
+            self.model = model_or_mdlutl.model
+            self.modelutl = model_or_mdlutl
         else:
-            self.model = model
-            self.modelutl = MSModelUtil(model)
+            self.model = model_or_mdlutl
+            self.modelutl = MSModelUtil.get(model_or_mdlutl)
+        # Setting atpcorrection attribute in model utl so link is bidirectional
+        self.modelutl.atputl = self
+
+        if default_media_path:
+            self.default_media_path = default_media_path
+        else:
+            self.default_media_path = _path + "/../data/atp_medias.tsv"
+
         self.compartment = compartment
+
         if atp_hydrolysis_id and atp_hydrolysis_id in self.model.reactions:
             self.atp_hydrolysis = self.model.reactions.get_by_id(atp_hydrolysis_id)
         else:
             output = self.modelutl.add_atp_hydrolysis(compartment)
             self.atp_hydrolysis = output["reaction"]
+
         self.atp_medias = []
+        if load_default_medias:
+            self.load_default_medias()
         for media in atp_medias:
-            if isinstance(media, MSMedia):
-                self.atp_medias.append([media, 0.01])
-            else:
+            if isinstance(media, list):
                 self.atp_medias.append(media)
+            else:
+                self.atp_medias.append([media, 0.01])
+
+        self.forced_media = []
+        for media_id in forced_media:
+            for media in self.atp_medias:
+                if media.id == media_id:
+                    self.forced_media.append(media)
+                    break
+
         self.max_gapfilling = max_gapfilling
         self.gapfilling_delta = gapfilling_delta
-        self.coretemplate = core_template
+
+        if not core_template:
+            self.load_default_template()
+        else:
+            self.coretemplate = core_template
+
         self.msgapfill = MSGapfill(
             self.modelutl, default_gapfill_templates=core_template
         )
+        # These should stay as None until atp correction is actually run
+        self.cumulative_core_gapfilling = None
+        self.selected_media = None
         self.original_bounds = {}
         self.noncore_reactions = []
         self.other_compartments = []
         self.media_gapfill_stats = {}
-        self.selected_media = []
         self.filtered_noncore = []
         self.lp_filename = None
         self.multiplier = 1.2
+
+    def load_default_template(self):
+        self.coretemplate = MSTemplateBuilder.from_dict(
+            get_template("template_core"), None
+        ).build()
+
+    def load_default_medias(self):
+        filename = self.default_media_path
+        medias = pd.read_csv(filename, sep="\t", index_col=0).to_dict()
+        for media_id in medias:
+            media_d = {}
+            for exchange, v in medias[media_id].items():
+                if v > 0:
+                    k = exchange.split("_")[1]
+                    media_d[k] = v
+            media_d["cpd00001"] = 1000
+            media_d["cpd00067"] = 1000
+            media = MSMedia.from_dict(media_d)
+            media.id = media_id
+            media.name = media_id
+            min_obj = 0.01
+            if media_id in min_gap:
+                min_obj = min_gap[media_id]
+            self.atp_medias.append([media, min_obj])
 
     @staticmethod
     def find_reaction_in_template(model_reaction, template, compartment):
@@ -203,6 +285,7 @@ class MSATPCorrection:
                 )
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
+
                 if (
                     solution.objective_value < minimum_obj
                     or solution.status != "optimal"
@@ -215,7 +298,7 @@ class MSATPCorrection:
                     self.media_gapfill_stats[media] = {"reversed": {}, "new": {}}
                 logger.debug(
                     "gapfilling stats: %s",
-                    json.dumps(self.media_gapfill_stats[media], indent=2),
+                    json.dumps(self.media_gapfill_stats[media], indent=2, default=vars),
                 )
 
         if MSATPCorrection.DEBUG:
@@ -224,7 +307,7 @@ class MSATPCorrection:
 
         return output
 
-    def determine_growth_media(self):
+    def determine_growth_media(self, max_gapfilling=None):
         """
         Decides which of the test media to use as growth conditions for this model
         :return:
@@ -268,6 +351,8 @@ class MSATPCorrection:
                 self.media_gapfill_stats[media]["reversed"].keys()
             )
 
+        if not max_gapfilling:
+            max_gapfilling = self.max_gapfilling
         self.selected_media = []
         media_scores = dict(
             (media, scoring_function(media))
@@ -275,14 +360,14 @@ class MSATPCorrection:
             if self.media_gapfill_stats[media]
         )
         best_score = min(media_scores.values())
-        if max_gapfilling is None:
-            max_gapfilling = best_score
+        if max_gapfilling is None or max_gapfilling > (
+            best_score + self.gapfilling_delta
+        ):
+            max_gapfilling = best_score + self.gapfilling_delta
         for media in media_scores:
             score = media_scores[media]
             logger.debug(score, best_score, max_gapfilling)
-            if score <= max_gapfilling and score <= (
-                best_score + self.gapfilling_delta
-            ):
+            if score <= max_gapfilling:
                 self.selected_media.append(media)
 
     def apply_growth_media_gapfilling(self):
@@ -290,10 +375,17 @@ class MSATPCorrection:
         Applies the gapfilling to all selected growth media
         :return:
         """
+        self.cumulative_core_gapfilling = (
+            []
+        )  # TODO: In case someone runs ATP correction twice with different parameters, before resetting this, maybe check if any of these reactions are already in the model and remove them so we're starting fresh???
         for media in self.selected_media:
-            if media in self.media_gapfill_stats and self.media_gapfill_stats[media]:
-                self.model = self.msgapfill.integrate_gapfill_solution(
-                    self.media_gapfill_stats[media]
+            if (
+                media in self.media_gapfill_stats
+                and self.media_gapfill_stats[media]
+                and MSGapfill.gapfill_count(self.media_gapfill_stats[media]) > 0
+            ):
+                self.msgapfill.integrate_gapfill_solution(
+                    self.media_gapfill_stats[media], self.cumulative_core_gapfilling
                 )
 
     def expand_model_to_genome_scale(self):

@@ -17,7 +17,6 @@ default_blacklist = [
     "rxn00238",
     "rxn07058",
     "rxn05305",
-    "rxn00154",
     "rxn09037",
     "rxn10643",
     "rxn11317",
@@ -394,7 +393,7 @@ class GapfillingPkg(BaseFBAPkg):
             parameters,
             [],
             {
-                "auto_sink": ["cpd02701", "cpd11416", "cpd15302"],
+                "auto_sink": ["cpd02701", "cpd11416", "cpd15302", "cpd03091"],
                 "extend_with_template": 1,
                 "model_penalty": 1,
                 "default_gapfill_models": [],
@@ -405,9 +404,10 @@ class GapfillingPkg(BaseFBAPkg):
                 "gapfill_all_indecies_with_default_templates": 1,
                 "gapfill_all_indecies_with_default_models": 1,
                 "default_excretion": 100,
-                "default_uptake": -100,
+                "default_uptake": 100,
                 "minimum_obj": 0.01,
                 "set_objective": 1,
+                "minimize_exchanges": False,
                 "blacklist": default_blacklist,
             },
         )
@@ -496,19 +496,19 @@ class GapfillingPkg(BaseFBAPkg):
             obj_coef = dict()
             for reaction in self.model.reactions:
                 if reaction.id in self.gapfilling_penalties:
-                    # Minimizing gapfilled reactions
-                    if "reverse" in self.gapfilling_penalties[reaction.id]:
-                        obj_coef[reaction.reverse_variable] = abs(
-                            self.gapfilling_penalties[reaction.id]["reverse"]
-                        )
-                    # elif default_penalty != 0:
-                    #    obj_coef[reaction.reverse_variable] = 0
-                    if "forward" in self.gapfilling_penalties[reaction.id]:
-                        obj_coef[reaction.forward_variable] = abs(
-                            self.gapfilling_penalties[reaction.id]["forward"]
-                        )
-                    # elif default_penalty != 0:
-                    #    obj_coef[reaction.forward_variable] = 0
+                    if (
+                        self.parameters["minimize_exchanges"]
+                        or reaction.id[0:3] != "EX_"
+                    ):
+                        # Minimizing gapfilled reactions
+                        if "reverse" in self.gapfilling_penalties[reaction.id]:
+                            obj_coef[reaction.reverse_variable] = abs(
+                                self.gapfilling_penalties[reaction.id]["reverse"]
+                            )
+                        if "forward" in self.gapfilling_penalties[reaction.id]:
+                            obj_coef[reaction.forward_variable] = abs(
+                                self.gapfilling_penalties[reaction.id]["forward"]
+                            )
                 else:
                     obj_coef[reaction.forward_variable] = 0
                     obj_coef[reaction.reverse_variable] = 0

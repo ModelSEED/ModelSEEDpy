@@ -113,6 +113,7 @@ def get_set_set(expr_str):  # !!! this currently returns dictionaries, not sets?
         return {frozenset({str(x) for x in dnf.inputs})}
     else:
         return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
+    return {}
 
 
 class MSModel(Model):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 from cobra.core.dictlist import DictList
 
