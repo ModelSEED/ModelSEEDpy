@@ -207,7 +207,7 @@ def test_infinite_atp_model_growth_boost(
 def test_ms_atp_correction1(get_model, template, media_all_aerobic):
     model = get_model(["GLCpts_c0", "NADH16_c0", "CYTBD_c0", "O2t_c0"])
     atp_correction = MSATPCorrection(
-        model, template, media_all_aerobic, atp_hydrolysis_id="ATPM_c0"
+        model, template, media_all_aerobic, atp_hydrolysis_id="ATPM_c0", load_default_medias=False
     )
     atp_correction.evaluate_growth_media()
     assert len(atp_correction.noncore_reactions) == 1  # the biomass
@@ -249,7 +249,7 @@ def test_ms_atp_correction_and_gap_fill1(
     model.reactions.ATPM_c0.upper_bound = 1000
 
     atp_correction = MSATPCorrection(
-        model, template, [media_glucose_aerobic], atp_hydrolysis_id="ATPM_c0"
+        model, template, [media_glucose_aerobic], atp_hydrolysis_id="ATPM_c0", load_default_medias=False
     )
     tests = atp_correction.run_atp_correction()
 
@@ -273,6 +273,6 @@ def test_ms_atp_correction_and_gap_fill1(
     assert len(result["new"]) == 1
     assert "GLUSy_c0" in result["new"] or "GLUDy_c0" in result["new"]
 
-    model = gap_fill.integrate_gapfill_solution(result)
+    gap_fill.integrate_gapfill_solution(result)
 
-    assert model
+    # TODO: add some model testing assertion
