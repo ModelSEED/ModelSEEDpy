@@ -33,14 +33,14 @@ class TemplateReactionType(Enum):
     UNIVERSAL = "universal"
     SPONTANEOUS = "spontaneous"
     GAPFILLING = "gapfilling"
-    
+
 
 class TemplateBiomassCoefficientType(Enum):
     MOLFRACTION = "MOLFRACTION"
     MOLSPLIT = "MOLSPLIT"
     MULTIPLIER = "MULTIPLIER"
     EXACT = "EXACT"
-    
+
 
 class MSTemplateMetabolite:
     def __init__(
@@ -443,23 +443,23 @@ class MSTemplateReaction(Reaction):
 
 
 class MSTemplateBiomass:
-    
     def __init__(self):
         pass
-    
+
     @staticmethod
     def from_dict(d):
         pass
-    
+
     def add_biomass_component(self):
         pass
-    
+
     def to_reaction(self, model=None, index="0"):
         pass
-    
+
     def get_data(self):
         pass
-    
+
+
 class NewModelTemplateRole:
     def __init__(self, role_id, name, features=None, source="", aliases=None):
         """
