@@ -12,7 +12,7 @@ e.g. <https://kbase-jira.atlassian.net/browse/DATAUP-X>
 
 # Testing Instructions
 
--   Details for how to test the PR: 
+-   Details for how to test the PR:
 -   [ ] Tests pass in Travis-CI, GitHub Actions and locally
 
 # Dev Checklist:
