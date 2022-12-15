@@ -48,7 +48,6 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
 
 
 class MSFeature:
-
     def __init__(self, feature_id, sequence, description=None):
         """
 
@@ -77,7 +76,6 @@ class MSFeature:
 
 
 class MSGenome:
-
     def __init__(self):
         self.features = DictList()
 
@@ -107,13 +105,15 @@ class MSGenome:
         return genome
 
     def to_fasta(self, filename, l=80, fn_header=None):
-        with open(filename, 'w') as fh:
+        with open(filename, "w") as fh:
             for feature in self.features:
-                h = f'>{feature.id}\n'
+                h = f">{feature.id}\n"
                 if fn_header:
                     h = fn_header(feature)
                 fh.write(h)
-                lines = [feature.seq[i:i + l] + '\n' for i in range(0, len(feature.seq), l)]
+                lines = [
+                    feature.seq[i : i + l] + "\n" for i in range(0, len(feature.seq), l)
+                ]
                 for line in lines:
                     fh.write(line)
         return filename

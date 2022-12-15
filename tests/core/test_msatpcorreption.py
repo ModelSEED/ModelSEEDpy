@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import pytest
 import json
 import cobra
@@ -8,13 +9,26 @@ from modelseedpy import MSATPCorrection, MSMedia
 
 @pytest.fixture
 def template():
-    with open("./tests/test_data/template_core_bigg.json", "r") as fh:
+    with open(
+        os.path.join(
+            os.path.dirname(__file__), "..", "test_data", "template_core_bigg.json"
+        ),
+        "r",
+    ) as fh:
         return MSTemplateBuilder.from_dict(json.load(fh)).build()
 
 
 @pytest.fixture
 def template_genome_scale():
-    with open("./tests/test_data/template_genome_scale_bigg.json", "r") as fh:
+    with open(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "test_data",
+            "template_genome_scale_bigg.json",
+        ),
+        "r",
+    ) as fh:
         return MSTemplateBuilder.from_dict(json.load(fh)).build()
 
 
@@ -23,7 +37,12 @@ def get_model():
     def _method(ko=None, added_compounds=None, added_reactions=None):
         if ko is None:
             ko = []
-        with open("./tests/test_data/e_coli_core.json", "r") as fh:
+        with open(
+            os.path.join(
+                os.path.dirname(__file__), "..", "test_data", "e_coli_core.json"
+            ),
+            "r",
+        ) as fh:
             model_json = json.load(fh)
             model_json["compartments"] = {
                 k + "0": v for (k, v) in model_json["compartments"].items()
@@ -188,7 +207,11 @@ def test_infinite_atp_model_growth_boost(
 def test_ms_atp_correction1(get_model, template, media_all_aerobic):
     model = get_model(["GLCpts_c0", "NADH16_c0", "CYTBD_c0", "O2t_c0"])
     atp_correction = MSATPCorrection(
-        model, template, media_all_aerobic, atp_hydrolysis_id="ATPM_c0"
+        model,
+        template,
+        media_all_aerobic,
+        atp_hydrolysis_id="ATPM_c0",
+        load_default_medias=False,
     )
     atp_correction.evaluate_growth_media()
     assert len(atp_correction.noncore_reactions) == 1  # the biomass
@@ -230,7 +253,11 @@ def test_ms_atp_correction_and_gap_fill1(
     model.reactions.ATPM_c0.upper_bound = 1000
 
     atp_correction = MSATPCorrection(
-        model, template, [media_glucose_aerobic], atp_hydrolysis_id="ATPM_c0"
+        model,
+        template,
+        [media_glucose_aerobic],
+        atp_hydrolysis_id="ATPM_c0",
+        load_default_medias=False,
     )
     tests = atp_correction.run_atp_correction()
 
@@ -254,6 +281,6 @@ def test_ms_atp_correction_and_gap_fill1(
     assert len(result["new"]) == 1
     assert "GLUSy_c0" in result["new"] or "GLUDy_c0" in result["new"]
 
-    model = gap_fill.integrate_gapfill_solution(result)
+    gap_fill.integrate_gapfill_solution(result)
 
-    assert model
+    # TODO: add some model testing assertion
