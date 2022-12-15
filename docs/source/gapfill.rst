@@ -3,4 +3,4 @@ ________________________________________________________________________
 
 Constructed ``COBRAkbase`` models are gapfilled through the following sequence.
 
-1) 
+1)

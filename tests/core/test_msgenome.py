@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from modelseedpy.core.msgenome import MSFeature, MSGenome, parse_fasta_str
 
 
@@ -16,10 +17,12 @@ SYIFGKLDEGMSFSEATTLAREMGYTEPDPRDDLSGMDVARKLLILARETGRELELADIEIEPVLPAEFNAEGDVAAFMA
 NLSQLDDLFAARVAKARDEGKVLRYVGNIDEDGVCRVKIAEVDGNDPLFKVKNGENALAFYSHYYQPLPLVLRGYGAGND
 VTAAGVFADLLRTLSWKLGV
     """
-    features = parse_fasta_str(faa_str, ' ')
+    features = parse_fasta_str(faa_str, " ")
     assert len(features) == 1
-    assert features[0].id == 'NP_414543.1'
-    assert features[0].description == 'fused aspartate kinase/homoserine dehydrogenase 1'
+    assert features[0].id == "NP_414543.1"
+    assert (
+        features[0].description == "fused aspartate kinase/homoserine dehydrogenase 1"
+    )
     assert len(features[0].seq) == 820
 
 
@@ -43,7 +46,7 @@ PVAMTLEKNMPIGSGLGSSACSVVAALMAMNEHCGKPLNDTRLLALMGELEGRISGSIHYDNVAPCFLGGMQLMIEENDI
 ISQQVPGFDEWLWVLAYPGIKVSTAEARAILPAQYRRQDCIAHGRHLAGFIHACYSRQPELAAKLMKDVIAEPYRERLLP
 GFRQARQAVAEIGAVASGISGSGPTLFALCDKPETAQRVADWLGKNYLQNQEGFVHICRLDTAGARVLEN
     """
-    features = parse_fasta_str(faa_str, ' ')
+    features = parse_fasta_str(faa_str, " ")
     assert len(features) == 2
 
 
@@ -54,26 +57,29 @@ MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAA
     """
     features = parse_fasta_str(faa_str, None)
     assert len(features) == 1
-    assert features[0].id == 'NP_414543.1 fused aspartate kinase/homoserine dehydrogenase 1'
+    assert (
+        features[0].id
+        == "NP_414543.1 fused aspartate kinase/homoserine dehydrogenase 1"
+    )
     assert features[0].description is None
     assert len(features[0].seq) == 80
 
 
 def test_msfeature_add_ontology_term():
-    feature = MSFeature('gene1', 'MKV')
-    feature.add_ontology_term('ONTOLOGY', 'value1')
-    assert 'ONTOLOGY' in feature.ontology_terms
-    assert 'value1' in feature.ontology_terms['ONTOLOGY']
+    feature = MSFeature("gene1", "MKV")
+    feature.add_ontology_term("ONTOLOGY", "value1")
+    assert "ONTOLOGY" in feature.ontology_terms
+    assert "value1" in feature.ontology_terms["ONTOLOGY"]
 
 
 def test_msgenome_from_protein_sequences_hash1():
-    genome = MSGenome.from_protein_sequences_hash({'gene1': 'MKV'})
+    genome = MSGenome.from_protein_sequences_hash({"gene1": "MKV"})
     assert len(genome.features) == 1
     assert genome.features[0]
-    assert genome.features[0].id == 'gene1'
-    assert genome.features[0].seq == 'MKV'
+    assert genome.features[0].id == "gene1"
+    assert genome.features[0].seq == "MKV"
 
 
 def test_msgenome_from_protein_sequences_hash2():
-    genome = MSGenome.from_protein_sequences_hash({'gene1': 'MKV', 'gene2': 'MKVLGD'})
+    genome = MSGenome.from_protein_sequences_hash({"gene1": "MKV", "gene2": "MKVLGD"})
     assert len(genome.features) == 2

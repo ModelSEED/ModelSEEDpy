@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
 from modelseedpy.core.rast_client import RastClient
@@ -10,4 +11,5 @@ from modelseedpy.core.msgapfill import MSGapfill
 from modelseedpy.core.msatpcorrection import MSATPCorrection
 from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes
 from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.exceptions import *

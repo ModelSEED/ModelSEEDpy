@@ -10,7 +10,7 @@ A class of functions that assist modifying models:
 .. code-block:: python
 
  gfhelper = GapfillingHelper(blacklist = [], auto_sink = ["cpd02701_c", "cpd11416_c0", "cpd15302_c"])
- 
+
 - *blacklist* ``list``: The collection of IDs for reactions that will not be examined during gapfilling.
 - *auto_sink* ``list``: The collection of IDs for reactions that represent biomass growth.
 
@@ -57,7 +57,7 @@ Formats COBRA reactions and metabolites for ModelSEED operations, respectively:
 
  cobra_rxn = gfhelper.convert_modelreaction(reaction, bigg=False)
  cobra_met = gfhelper.convert_modelreaction(metabolite, bigg=False)
- 
+
 - *reaction* ``cobra.core.reaction.Reaction``: The COBRA reaction that will be reformatted.
 - *metabolite* ``cobra.core.metabolite.Metabolite``: The COBRA metabolite that will be reformatted.
 - *bigg* ``bool``: specifies whether the COBRA object originates from a BiGG model, which requires an additional reformulation.
@@ -74,7 +74,7 @@ Constructs binary variables for the direction of all model reactions, the sum of
 .. code-block:: python
 
  flux_values = gfhelper.binary_check_gapfilling_solution(gapfilling_penalties,add_solution_exclusion_constraint)
- 
+
 - *gapfilling_penalties* ``dict``: The collection of gapfilling penalties (``values``) for each direction of all reaction IDs (``keys``).
 - *add_solution_exclusion_constraint* ``bool``: specifies whether a binary exclusion constraint will be added based upon the primal flux values, which renders a gapfilled solution infeasible and thus permits the determination of a new solution.
 
@@ -89,7 +89,7 @@ Constructs an objective function that minimizes the flux of gapfilled reactions:
 .. code-block:: python
 
  gene = gfhelper.create_minimal_reaction_objective(penalty_hash, default_penalty = 0)
- 
+
 - *penalty_hash* ``dict``: The collection of gapfilling penalties (``values``) for each direction of all reaction IDs (``keys``), which will be minimized through this function.
 - *default_penalty* ``str``: The default gapfill penalty and is the default flux coefficient in the objective function for all reactions.
 
@@ -102,7 +102,7 @@ Constructs a metadata dictionary of a COBRA Metabolite object that is returned a
 .. code-block:: python
 
  cpd_data = gfhelper.convert_cobra_compound_to_kbcompound(cpd, kbmodel=None)
- 
+
 - *cpd* ``cobra.core.metabolite.Metabolite``: The COBRA Metabolite that will be converted into a KBase Metabolite.
 - *kbmodel* ``cobrakbase model``: The KBase model that will be expanded with ``cpd`` metadata, where ``None`` specifies that the compound will not be added.
 
@@ -117,7 +117,7 @@ Constructs a metadata dictionary of a COBRA Reaction object that is returned and
 .. code-block:: python
 
  rxn_data = gfhelper.convert_cobra_reaction_to_kbreaction(rxn, kbmodel, direction="=", add_to_model=True)
- 
+
 - *rxn* ``cobra.core.metabolite.Metabolite``: The COBRA Metabolite that will be converted into a KBase Reaction.
 - *kbmodel* ``cobrakbase model``: The KBase model that contains ``rxn``.
 - *direction* ``str``: The "<", "=", or ">" direction of ``rxn``.
@@ -134,7 +134,7 @@ Coverts an old objective function into a variable and constructs a new constrain
 .. code-block:: python
 
  gfhelper.convert_objective_to_constraint(lower_bound, upper_bound)
- 
+
 - *lower_bound* & *upper_bound* ``float``: The bounds that will contrain the objective function variable.
 
 -----------------------------------------
@@ -146,7 +146,7 @@ Returns the direction for all gapfilled reactions in a model:
 .. code-block:: python
 
  directions = gfhelper.compute_gapfilled_solution(penalty_hash, flux_values = None)
- 
+
 - *penalty_hash* ``dict``: The collection of gapfilling penalties (``values``) for each direction of all reaction IDs (``keys``), which will be minimized through this function.
 - *flux_values* ``dict``: The collection of all primal flux values (``values``) for each direction of all reaction IDs (``keys``), where ``None`` constructs *flux_values* from the from ``cobramodel`` in class object.
 
@@ -161,7 +161,7 @@ The gapfilled reactions of a solution are added to a model:
 .. code-block:: python
 
  gfhelper.add_gapfilling_solution_to_kbase_model(newmodel, penalty_hash, media_ref)
- 
+
 - *newmodel* ``cobrakbase Model``: The model to which the gapfilled content will be added.
 - *penalty_hash* ``dict``: The collection of gapfilling penalties (``values``) for each direction of all reaction IDs (``keys``), which will be minimized through this function.
 - *media_ref* ``str``: The reference of the media that was used to gapfill the model.
@@ -175,7 +175,7 @@ Returns the gapfilling reaction scores for all events, with possible weighting:
 .. code-block:: python
 
  reaction_genes = gfhelper.compute_reaction_scores(weights=None)
- 
+
 - *weights* ``dict``: The collection of gapfill-weightings (``values``) for each event, via ``"description"``, ``"event_id"``, or ``"id"`` attributes of the event (``keys``). An argument of ``None`` specifies that all events will be equally weighted.
 
 **Returns** *reaction_genes* ``dict``: The collection of reaction scores (``values``) for each gene of all reactions over all ontological events in ``fbamodel``.
@@ -189,7 +189,7 @@ Returns a new model that contains a parameterized number of duplicate content of
 .. code-block:: python
 
  newmodel = gfhelper.replicate_model(count)
- 
+
 - *count* ``int``: The number of copies of the ``cobramodel`` that are added to the new model.
 
 **Returns** *newmodel* ``cobra.core.model.Model``: The duplicated COBRA model.
@@ -203,7 +203,7 @@ Returns a new model that contains a parameterized number of duplicate content of
 .. code-block:: python
 
  newmodel = gfhelper.replicate_model(reactions, directions, tests)
- 
+
 - *reactions* ``dict``: The "<" or ">" reaction directions (``values``) for all COBRA reactions that will be tested (``keys``).
 - *tests* ``list``: The collection of tests that will be examined for the reactions in the ``cobrakbase`` model.
 

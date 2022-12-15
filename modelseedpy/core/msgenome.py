@@ -1,32 +1,29 @@
+# -*- coding: utf-8 -*-
 import logging
-logger = logging.getLogger(__name__)
-
 import re
-import copy  # !!! the import is never used
 from cobra.core.dictlist import DictList
 
+logger = logging.getLogger(__name__)
+
+DEFAULT_SPLIT = " "
 
 
 def normalize_role(s):
-    # print(s)
     s = s.strip().lower()
-    s = re.sub('[\W_]+', '', s)
+    s = re.sub(r"[\W_]+", "", s)
     return s
 
-#Static factory functions:
-            
-#def build_from_kbase_gto:
 
-
-def read_fasta(f, split='|', h_func=None):
-    with open(f, 'r') as fh:
+def read_fasta(f, split=DEFAULT_SPLIT, h_func=None):
+    with open(f, "r") as fh:
         return parse_fasta_str(fh.read(), split, h_func)
 
-def parse_fasta_str(faa_str, split='|', h_func=None):
+
+def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
     features = []
     seq = None
-    for line in faa_str.split('\n'):
-        if line.startswith('>'):
+    for line in faa_str.split("\n"):
+        if line.startswith(">"):
             if seq:
                 features.append(seq)
             seq_id = line[1:]
@@ -36,7 +33,10 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
             elif split:
                 header_data = line[1:].split(split, 1)
                 seq_id = header_data[0]
-                desc = header_data[1]  # The unit test throws an error when this is commented
+                if len(header_data) > 1:
+                    desc = header_data[
+                        1
+                    ]  # The unit test throws an error when this is commented
 
             seq = MSFeature(seq_id, "", desc)
         else:
@@ -49,12 +49,26 @@ def parse_fasta_str(faa_str, split='|', h_func=None):
 
 class MSFeature:
     def __init__(self, feature_id, sequence, description=None):
-        self.id = feature_id; self.seq = sequence
+        """
+
+        @param feature_id: identifier for the protein coding feature
+        @param sequence: protein sequence
+        @param description: description of the feature
+        """
+
+        self.id = feature_id
+        self.seq = sequence
         self.description = description  # temporary replace with proper parsing
         self.ontology_terms = {}
         self.aliases = []
 
     def add_ontology_term(self, ontology_term, value):
+        """
+        Add functional term to the feature
+
+        @param ontology_term: type of the ontology (e.g., RAST, EC)
+        @param value: value for the ontology (e.g., pyruvate kinase)
+        """
         if ontology_term not in self.ontology_terms:
             self.ontology_terms[ontology_term] = []
         if value not in self.ontology_terms[ontology_term]:
@@ -65,11 +79,44 @@ class MSGenome:
     def __init__(self):
         self.features = DictList()
 
+    def add_features(self, feature_list: list):
+        """
+
+        :param feature_list:
+        :return:
+        """
+        duplicates = list(filter(lambda o: o.id in self.features, feature_list))
+        if len(duplicates) > 0:
+            raise ValueError(
+                f"unable to add features {duplicates} already present in the genome"
+            )
+
+        for f in feature_list:
+            f._genome = self
+
+        self.features += feature_list
+
     @staticmethod
-    def from_fasta(filename, contigs=0, split='|', h_func=None):  # !!! the contigs argument is never used
+    def from_fasta(
+        filename, contigs=0, split="|", h_func=None
+    ):  # !!! the contigs argument is never used
         genome = MSGenome()
         genome.features += read_fasta(filename, split, h_func)
         return genome
+
+    def to_fasta(self, filename, l=80, fn_header=None):
+        with open(filename, "w") as fh:
+            for feature in self.features:
+                h = f">{feature.id}\n"
+                if fn_header:
+                    h = fn_header(feature)
+                fh.write(h)
+                lines = [
+                    feature.seq[i : i + l] + "\n" for i in range(0, len(feature.seq), l)
+                ]
+                for line in lines:
+                    fh.write(line)
+        return filename
 
     @staticmethod
     def from_dna_fasta(filename):
@@ -81,11 +128,11 @@ class MSGenome:
         genome = MSGenome()
         genome.features += features
         return genome
-    
+
     def alias_hash(self):
-        return {alias:gene for gene in self.features for alias in gene.aliases}
-    
-    def search_for_gene(self,query):
+        return {alias: gene for gene in self.features for alias in gene.aliases}
+
+    def search_for_gene(self, query):
         if query in self.features:
             return self.features.get_by_id(query)
         aliases = self.alias_hash()

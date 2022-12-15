@@ -81,7 +81,7 @@ Returns the collection of reactions that are constructed from the gpr set for ea
 .. code-block:: python
 
  reactions = new_model.build_metabolic_reactions(index='0', allow_incomplete_complexes=True)
- 
+
 - *index* ``str``: The compartment index of the respective model.
 - *allow_incomplete_complexes* ``bool``: specifies whether the complexes will be built regardless of total complex determination.
 
@@ -96,7 +96,7 @@ Returns the collection of reactions that lack gpr information:
 .. code-block:: python
 
  reactions_no_gpr = new_model.build_non_metabolite_reactions(cobra_model, index='0', allow_all_non_grp_reactions=False)
- 
+
 - *model* ``cobra.core.model.Model``: The COBRA model that will be expanded with exchange reactions.
 - *index* ``str``: The compartment index of the respective model.
 
@@ -111,7 +111,7 @@ Constructs a COBRA model based upon the genome in the MSBuilder class and the pr
 .. code-block:: python
 
  model = new_model.build(model_id, index='0', annotate_with_rast=True)
- 
+
 - *model_id* ``str``: The ID of the model that will be constructed.
 - *index* ``str``: The compartment index of the respective model.
 - *allow_all_non_grp_reactions* ``bool``: specifies whether non-metabolite reactions will be added to the model.
@@ -128,7 +128,7 @@ Constructs a COBRA model from a template:
 .. code-block:: python
 
  model = new_model.build_full_template_model(template, model_id=None, index='0')
- 
+
 - *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template that will guide the model construction.
 - *model_id* ``str``: The ID of the model that will be constructed.
 - *index* ``str``: The compartment index of the respective model.
@@ -145,7 +145,7 @@ A concise function that develops a COBRA metabolic model from a genome and vario
 
  model = new_model.build_full_template_model(model_id, genome, gapfill_media=None, template=None, index='0',
                               allow_all_non_grp_reactions=False, annotate_with_rast=True)
- 
+
 - *model_id* ``str``: The ID of the model that will be constructed.
 - *genome* ``modelseedpy.core.msgenome.MSGenome``: The genome that will form the COBRA model.
 - *gapfill_media* ``modelseedpy.core.msgapfill.MSGapfill``: The media that will be used to gapfill the model, where ``None`` specifies that the model will not be gapfilled.
@@ -165,11 +165,10 @@ A model is gapfilled for a target reaction, extracellular media, and model templ
 .. code-block:: python
 
  model = new_model.gapfill_model(original_mdl, target_reaction, template, media)
- 
+
 - *original_mdl* ``cobra.core.model.Model``: The model that will be gapfilled.
 - *target_reaction* ``str``: The ID of the reaction that will be defined as the objective during gapfilling.
 - *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template that will guide the model gapfilling.
 - *media* ``modelseedpy.core.msgapfill.MSGapfill``: The media that will be used to gapfill the model.
 
 **Returns** *cobra_model* ``cobra.core.model.Model``: The gapfilled COBRA model.
-

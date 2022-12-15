@@ -22,9 +22,9 @@ ________________________________________________________________________
 
 The collection of packages that constrain and investigate, e.g. dFBA, metabolic models are assembled into the ``fbapkg`` directory of ModelSEEDpy. These packages are imported::
 
- from modelseedpy.fbapkg import *   
-   
-   
+ from modelseedpy.fbapkg import *
+
+
 and include the following:
 
 .. toctree::
@@ -41,4 +41,3 @@ and include the following:
    proteomefitting_api
    reactionuse_api
    tfa_api
-   

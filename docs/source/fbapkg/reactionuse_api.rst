@@ -12,8 +12,8 @@ This class constrains the sum progressions of sets of reactions:
  from modelseedpy.fbapkg import ReactionUsePkg
  rxnuse = ReactionUsePkg(model)
 
-- *model* ``cobra.core.model.Model``: The CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-           
+- *model* ``cobra.core.model.Model``: The CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
+
 ----------------------
 build_package()
 ----------------------
@@ -26,7 +26,7 @@ The drain reactions are created through this function:
 
 - *rxn_filter* ``dict``: The reaction directions (``values``) for all reaction IDs (``keys``) that will be constrained, where ``None`` signifies that all reactions will be constrained as equilibria.
 - *reversibility* ``bool``: specifies whether the constrained reactions are reversible.
-           
+
 ----------------------------------
 build_exclusion_constraint()
 ----------------------------------

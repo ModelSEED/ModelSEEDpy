@@ -10,7 +10,7 @@ A class that defines a growth phenotype and constructs media for the phenotype:
 .. code-block:: python
 
  mspheno = MSGrowthPhenotype(obj_id, media=None, growth=None, gene_ko=[], additional_compounds=[], parent=None, name=None)
- 
+
 - *obj_id* & *name* ``str``: The ID and name of the growth phenotype.
 - *media* ``modelseedpy.core.msmedia.MSMedia``: The media in which the phenotype will be simulated.
 - *growth* ``float``: The objective value of the growth phenotype.
@@ -56,7 +56,7 @@ Formats COBRA reactions and metabolites for ModelSEED operations, respectively:
 .. code-block:: python
 
  gpf_model = gfhelper.convert_modelreaction(modelutl, default_gapfill_templates, test_conditions, default_gapfill_models=[], blacklist=[], growth_threshold=0.001, add_missing_exchanges=False)
- 
+
 - *modelutl* ``modelseedpy.core.msmodelutl.MSModelUtil``: A ``MSModelUtils`` object which possesses the model that will be gapfilled.
 - *default_gapfill_templates* & *test_conditions* ``list``: A collection of gapfilling templates and test conditions that will be used to gapfill the model.
 - *default_gapfill_models* ``list``: The collection of models that will extend ``modelutl.model`` for gapfilling.
@@ -75,7 +75,7 @@ A class that defines a growth phenotype and combines phenotypes that are defined
 .. code-block:: python
 
  mspheno = MSGrowthPhenotype(base_media=None, base_uptake=0, base_excretion=1000)
- 
+
 - *base_media* ``modelseedpy.core.msmedia.MSMedia``: The media that is associated with the growth phenotype.
 - *base_uptake* & *base_excretion* ``int``: The uptake and excretion fluxes for the examined phenotype.
 
@@ -104,7 +104,7 @@ from_kbase_object()
 .. code-block:: python
 
  growthpheno = MSGrowthPhenotypes.from_compound_hash(data, kbase_api)
- 
+
 - *data* ``dict``: The collection of phenotypes that will be defined and examined (``values``), under the ``phenotypes`` key.
 - *kbase_api* ``KBase API``: The KBase API object that can acquire media information from a KBase reference from each phenotype.
 
@@ -119,7 +119,7 @@ from_kbase_file()
 .. code-block:: python
 
  growthpheno = MSGrowthPhenotypes.from_kbase_file(filename, base_media, kbase_api)
- 
+
 - *filename* ``str``: The name of the TSV file -- with a header of "media    mediaws    growth    geneko    addtlCpd" -- that will be parsed into a ``MSGrowthPhenotypes`` object.
 - *base_media* ``str``: The media that is associated with the growth phenotype.
 - *kbase_api* ``KBase API``: The KBase API object that can acquire media information from a KBase reference from each phenotype.
@@ -135,7 +135,7 @@ from_ms_file()
 .. code-block:: python
 
  growthpheno = MSGrowthPhenotypes.from_ms_file(filename, base_media, base_uptake=0, base_excretion=100)
- 
+
 - *filename* ``str``: The name of the CSV file -- with a header of "media    mediaws    growth    geneko    addtlCpd" -- that will be parsed into a ``MSGrowthPhenotypes`` object.
 - *base_media* ``str``: The media that is associated with the growth phenotype.
 - *base_uptake* & *base_excretion* ``int``: The uptake and excretion fluxes for the examined phenotype.
@@ -151,7 +151,7 @@ Constructs a metadata dictionary of a COBRA Reaction object that is returned and
 .. code-block:: python
 
  MSGrowthPhenotypes.add_phenotypes(new_phenotypes)
- 
+
 - *new_phenotypes* ``list``: The collection of phenotypes that will be added to the ``MSGrowthPhenotypes`` object list of phenotypes.
 
 ----------------------------
@@ -163,7 +163,7 @@ Coverts an old objective function into a variable and constructs a new constrain
 .. code-block:: python
 
  gfhelper.convert_objective_to_constraint(model, biomass, add_missing_exchanges=False, correct_false_negatives=False, template=None, growth_threshold=0.001)
-  
+
 - *model* ``cobra.core.model.Model``: The model wqhose phenotypes will be simulated.
 - *biomass* ``cobra.core.reaction.Reaction``: The biomass reaction which is set as the model objective.
 - *add_missing_exchanges* ``bool``: specifies whether the missing exchange reactions will be added to the model.
