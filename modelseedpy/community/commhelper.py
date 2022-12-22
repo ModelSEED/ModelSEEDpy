@@ -92,7 +92,6 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
                     biomass_index += 1
                 else:
                     output = MSModelUtil.parse_id(rxn)
-                    print("\n", output)
                     if output is None:
                         if "e" not in rxn.compartment.id and not rxn.compartment.id[-1].isnumeric():
                             rxn.id += str(model_index)
@@ -105,7 +104,6 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
                                 rxn.id += str(model_index)
                             else:
                                 rxn.id = rxn_id + str(model_index)
-                            print(rxn_id, rxn.id)
             new_reactions.add(rxn)
         print(biomass_indices)
     # adds only unique reactions and metabolites to the community model
