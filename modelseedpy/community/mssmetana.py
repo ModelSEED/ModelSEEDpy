@@ -134,7 +134,8 @@ class MSSmetana:
         return self.mip
 
     def mp_score(self):
-        self.mp = MSSmetana.mp(self.models, self.environment, self.community.model, self.abstol, self.printing)
+        print(self.community.model.optimize())
+        self.mp = MSSmetana.mp(self.models, self.environment, self.community.model, None, self.abstol, self.printing)
         if not self.printing:
             return self.mp
         if self.raw_content:
@@ -281,6 +282,7 @@ class MSSmetana:
         """Discover the metabolites that each species can contribute to a community"""
         community = _compatibilize(com_model) or build_from_species_models(member_models, cobra_model=True, standardize=True)
         # TODO support parsing the individual members through the MSCommunity object
+        community.medium = minimal_media or MSMinimalMedia.minimize_flux(community)
         scores = {}
         for org_model in member_models:
             model_util = MSModelUtil(org_model)
@@ -291,7 +293,7 @@ class MSSmetana:
             scores[model_util.model.id] = set()
             # determines possible member contributions in the community environment, where the excretion of media compounds is irrelevant
             org_possible_contributions = [ex_rxn for ex_rxn in model_util.exchange_list()
-                                          if ex_rxn.id not in community.medium and ex_rxn.upper_bound > 0]
+                                          if (ex_rxn.id not in community.medium and ex_rxn.upper_bound > 0)]
             ic(org_possible_contributions, len(model_util.exchange_list()), len(community.medium))
             scores, possible_contributions = MSSmetana.contributions(
                 org_possible_contributions, scores, model_util, abstol)

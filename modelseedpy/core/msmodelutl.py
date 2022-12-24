@@ -142,7 +142,12 @@ class MSModelUtil:
     def exchange_list(self): 
         return [rxn for rxn in self.model.reactions if 'EX_' in rxn.id]
 
-    def carbon_exchange_list(self):
+    def carbon_mets(self):
+        return [met for met in self.model.metabolites if 'C' in met.elements]
+
+    def carbon_exchange_list(self, include_unknown=True):
+        if not include_unknown:
+            return [ex for ex in self.exchange_list() if "C" in ex.reactants[0].elements]
         return [ex for ex in self.exchange_list() if not ex.reactants[0].elements or "C" in ex.reactants[0].elements]
 
     def exchange_mets_list(self):
