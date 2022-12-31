@@ -12,7 +12,7 @@ This class offers a suite of utility functions that support editing and manipula
  from modelseedpy.fbapkg import MSModelUtil
  msutil = MSModelUtil(model)
 
-- *model* ``cobra.core.model.Model``: The CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *model* ``cobra.core.model.Model``: The CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
 
 ----------------------
 find_met()
@@ -63,7 +63,7 @@ The media compounds that are defined in the exchange reactions of the model are 
  media_compounds = msutil.add_missing_exchanges()
 
 **returns** *media_compounds* ``list``: The collection of media compounds that are represented in the exchange reactions of the model and for which drain reactions have been created.
-       
+
 -------------------------------------
 add_exchanges_for_metabolites()
 -------------------------------------
@@ -79,7 +79,7 @@ The media compounds that are defined in the exchange reactions of the model are 
 - *prefix* & *prefix_name* ``str``: The prefixes of the compound ID and name, respectively.
 
 **returns** *drain_reactions* ``list``: The drain reactions that were created for the parameterized list of compounds.
-       
+
 -------------------------------------------
 convert_cobra_compound_to_kbcompound()
 -------------------------------------------
@@ -94,7 +94,7 @@ The information of the parameterized compound will be organized into an amenable
 - *kbmodel* ``cobra.core.model.Model``: The CobraKBase model whose ``modelcompounds`` attribute will be appended with data from the COBRA metabolite, where ``None`` specifies that the defined dictionary of compound information will not be added to a model.
 
 **returns** *cpd_data* ``dict``: The dictionary of compound information in the format of the ``modelcompounds`` attribute of CobraKBase models.
-       
+
 -------------------------------------------
 convert_cobra_reaction_to_kbreaction()
 -------------------------------------------
@@ -111,7 +111,7 @@ The information of the parameterized reaction will be organized into an amenable
 - *reaction_genes* ``dict``: The collection of contribution (``values``) for each gene (``keys``) that contribute to each reaction (``keys``).
 
 **returns** *rxn_data* ``dict``: The dictionary of reaction information in the format of the ``modelreactions`` attribute of CobraKBase models.
-       
+
 -------------------------------------------
 add_gapfilling_solution_to_kbase_model()
 -------------------------------------------
@@ -129,7 +129,7 @@ The parameterized CobraKBase model will be expanded with the content of a gapfil
 - *reaction_genes* ``dict``: The collection of contribution (``values``) for each gene (``keys``) that contribute to each reaction (``keys``).
 
 **returns** *rxn_table* ``list``: A collection of dictionaries, one for each reaction that is added to the CobraKBase model.
-       
+
 ----------------------
 Accessible content
 ----------------------

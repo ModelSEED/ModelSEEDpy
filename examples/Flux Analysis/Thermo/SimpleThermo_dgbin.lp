@@ -1,5 +1,5 @@
 \ENCODING=ISO-8859-1
-\Problem name: 
+\Problem name:
 
 Maximize
  _5e410d58m1714m11ecmbb50m0242ac110001#0:
@@ -2000,89 +2000,89 @@ Bounds
  0 <= Rgrxn01116_c0_thermo#335 <= 1000
  0 <= Rgbio1_thermo#336 <= 203870.9
 Binaries
- rxn00549_c0_revbin#190  rxn05312_c0_revbin#191  rxn00247_c0_revbin#192 
- rxn00786_c0_revbin#193  rxn08865_c0_revbin#194  rxn01200_c0_revbin#195 
- rxn08525_c0_revbin#196  FRD7_c0_revbin#197  rxn00545_c0_revbin#198 
- rxn09270_c0_revbin#199  rxn00173_c0_revbin#200  rxn08288_c0_revbin#201 
- rxn00459_c0_revbin#202  rxn00083_c0_revbin#203  rxn00097_c0_revbin#204 
- rxn32421_c0_revbin#205  rxn00154_c0_revbin#206  rxn19316_c0_revbin#207 
- rxn00187_c0_revbin#208  rxn00558_c0_revbin#209  rxn05319_c0_revbin#210 
- rxn00747_c0_revbin#211  rxn05468_c0_revbin#212  rxn35242_c0_revbin#213 
- rxn08535_c0_revbin#214  rxn01115_c0_revbin#215  rxn00225_c0_revbin#216 
- rxn00500_c0_revbin#217  rxn08350_c0_revbin#218  rxn20162_c0_revbin#219 
- rxn01333_c0_revbin#220  rxn30674_c0_revbin#221  rxn01100_c0_revbin#222 
- rxn39085_c0_revbin#223  rxn08173_c0_revbin#224  rxn00285_c0_revbin#225 
- rxn00161_c0_revbin#226  rxn00543_c0_revbin#227  rxn05297_c0_revbin#228 
- rxn05467_c0_revbin#229  rxn05488_c0_revbin#230  rxn00085_c0_revbin#231 
- rxn00062_c0_revbin#232  rxn34258_c0_revbin#233  rxn00171_c0_revbin#234 
- rxn05559_c0_revbin#235  rxn09272_c0_revbin#236  rxn00604_c0_revbin#237 
- rxn00159_c0_revbin#238  rxn08972_c0_revbin#239  rxn08542_c0_revbin#240 
- rxn01106_c0_revbin#241  rxn00198_c0_revbin#242  rxn01476_c0_revbin#243 
- rxn00781_c0_revbin#244  rxn09295_c0_revbin#245  rxn00785_c0_revbin#246 
- rxn08032_c0_revbin#247  rxn00189_c0_revbin#248  rxn00336_c0_revbin#249 
- rxn00147_c0_revbin#250  rxn09269_c0_revbin#251  rxn00248_c0_revbin#252 
- rxn00974_c0_revbin#253  rxn05493_c0_revbin#254  rxn00777_c0_revbin#255 
- rxn08094_c0_revbin#256  rxn05226_c0_revbin#257  rxn05155_c0_revbin#258 
- rxn08427_c0_revbin#259  rxn00184_c0_revbin#260  rxn05469_c0_revbin#261 
- rxn32587_c0_revbin#262  rxn01116_c0_revbin#263  bio1_revbin#264 
- _EX_cpd00011_e0_revbin#265  _EX_cpd00047_e0_revbin#266 
- _EX_cpd00106_e0_revbin#267  _EX_cpd00009_e0_revbin#268 
- _EX_cpd00013_e0_revbin#269  _EX_cpd00027_e0_revbin#270 
- _EX_cpd00029_e0_revbin#271  _EX_cpd00023_e0_revbin#272 
- _EX_cpd00221_e0_revbin#273  _EX_cpd00067_e0_revbin#274 
- _EX_cpd00071_e0_revbin#275  _EX_cpd00053_e0_revbin#276 
- _EX_cpd00130_e0_revbin#277  _EX_cpd00020_e0_revbin#278 
- _EX_cpd00001_e0_revbin#279  _EX_cpd00024_e0_revbin#280 
- _EX_cpd00007_e0_revbin#281  _EX_cpd00363_e0_revbin#282 
- _EX_cpd00036_e0_revbin#283  _EX_cpd00082_e0_revbin#284 
- rxn00549_c0_dgbinF#357  rxn00549_c0_dgbinR#358  rxn05312_c0_dgbinF#359 
- rxn05312_c0_dgbinR#360  rxn00247_c0_dgbinF#361  rxn00247_c0_dgbinR#362 
- rxn00786_c0_dgbinF#363  rxn00786_c0_dgbinR#364  rxn08865_c0_dgbinF#365 
- rxn08865_c0_dgbinR#366  rxn01200_c0_dgbinF#367  rxn01200_c0_dgbinR#368 
- rxn08525_c0_dgbinF#369  rxn08525_c0_dgbinR#370  FRD7_c0_dgbinF#371 
- FRD7_c0_dgbinR#372  rxn00545_c0_dgbinF#373  rxn00545_c0_dgbinR#374 
- rxn09270_c0_dgbinF#375  rxn09270_c0_dgbinR#376  rxn00173_c0_dgbinF#377 
- rxn00173_c0_dgbinR#378  rxn08288_c0_dgbinF#379  rxn08288_c0_dgbinR#380 
- rxn00459_c0_dgbinF#381  rxn00459_c0_dgbinR#382  rxn00083_c0_dgbinF#383 
- rxn00083_c0_dgbinR#384  rxn00097_c0_dgbinF#385  rxn00097_c0_dgbinR#386 
- rxn32421_c0_dgbinF#387  rxn32421_c0_dgbinR#388  rxn00154_c0_dgbinF#389 
- rxn00154_c0_dgbinR#390  rxn19316_c0_dgbinF#391  rxn19316_c0_dgbinR#392 
- rxn00187_c0_dgbinF#393  rxn00187_c0_dgbinR#394  rxn00558_c0_dgbinF#395 
- rxn00558_c0_dgbinR#396  rxn05319_c0_dgbinF#397  rxn05319_c0_dgbinR#398 
- rxn00747_c0_dgbinF#399  rxn00747_c0_dgbinR#400  rxn05468_c0_dgbinF#401 
- rxn05468_c0_dgbinR#402  rxn35242_c0_dgbinF#403  rxn35242_c0_dgbinR#404 
- rxn08535_c0_dgbinF#405  rxn08535_c0_dgbinR#406  rxn01115_c0_dgbinF#407 
- rxn01115_c0_dgbinR#408  rxn00225_c0_dgbinF#409  rxn00225_c0_dgbinR#410 
- rxn00500_c0_dgbinF#411  rxn00500_c0_dgbinR#412  rxn08350_c0_dgbinF#413 
- rxn08350_c0_dgbinR#414  rxn20162_c0_dgbinF#415  rxn20162_c0_dgbinR#416 
- rxn01333_c0_dgbinF#417  rxn01333_c0_dgbinR#418  rxn30674_c0_dgbinF#419 
- rxn30674_c0_dgbinR#420  rxn01100_c0_dgbinF#421  rxn01100_c0_dgbinR#422 
- rxn39085_c0_dgbinF#423  rxn39085_c0_dgbinR#424  rxn08173_c0_dgbinF#425 
- rxn08173_c0_dgbinR#426  rxn00285_c0_dgbinF#427  rxn00285_c0_dgbinR#428 
- rxn00161_c0_dgbinF#429  rxn00161_c0_dgbinR#430  rxn00543_c0_dgbinF#431 
- rxn00543_c0_dgbinR#432  rxn05297_c0_dgbinF#433  rxn05297_c0_dgbinR#434 
- rxn05467_c0_dgbinF#435  rxn05467_c0_dgbinR#436  rxn05488_c0_dgbinF#437 
- rxn05488_c0_dgbinR#438  rxn00085_c0_dgbinF#439  rxn00085_c0_dgbinR#440 
- rxn00062_c0_dgbinF#441  rxn00062_c0_dgbinR#442  rxn34258_c0_dgbinF#443 
- rxn34258_c0_dgbinR#444  rxn00171_c0_dgbinF#445  rxn00171_c0_dgbinR#446 
- rxn05559_c0_dgbinF#447  rxn05559_c0_dgbinR#448  rxn09272_c0_dgbinF#449 
- rxn09272_c0_dgbinR#450  rxn00604_c0_dgbinF#451  rxn00604_c0_dgbinR#452 
- rxn00159_c0_dgbinF#453  rxn00159_c0_dgbinR#454  rxn08972_c0_dgbinF#455 
- rxn08972_c0_dgbinR#456  rxn08542_c0_dgbinF#457  rxn08542_c0_dgbinR#458 
- rxn01106_c0_dgbinF#459  rxn01106_c0_dgbinR#460  rxn00198_c0_dgbinF#461 
- rxn00198_c0_dgbinR#462  rxn01476_c0_dgbinF#463  rxn01476_c0_dgbinR#464 
- rxn00781_c0_dgbinF#465  rxn00781_c0_dgbinR#466  rxn09295_c0_dgbinF#467 
- rxn09295_c0_dgbinR#468  rxn00785_c0_dgbinF#469  rxn00785_c0_dgbinR#470 
- rxn08032_c0_dgbinF#471  rxn08032_c0_dgbinR#472  rxn00189_c0_dgbinF#473 
- rxn00189_c0_dgbinR#474  rxn00336_c0_dgbinF#475  rxn00336_c0_dgbinR#476 
- rxn00147_c0_dgbinF#477  rxn00147_c0_dgbinR#478  rxn09269_c0_dgbinF#479 
- rxn09269_c0_dgbinR#480  rxn00248_c0_dgbinF#481  rxn00248_c0_dgbinR#482 
- rxn00974_c0_dgbinF#483  rxn00974_c0_dgbinR#484  rxn05493_c0_dgbinF#485 
- rxn05493_c0_dgbinR#486  rxn00777_c0_dgbinF#487  rxn00777_c0_dgbinR#488 
- rxn08094_c0_dgbinF#489  rxn08094_c0_dgbinR#490  rxn05226_c0_dgbinF#491 
- rxn05226_c0_dgbinR#492  rxn05155_c0_dgbinF#493  rxn05155_c0_dgbinR#494 
- rxn08427_c0_dgbinF#495  rxn08427_c0_dgbinR#496  rxn00184_c0_dgbinF#497 
- rxn00184_c0_dgbinR#498  rxn05469_c0_dgbinF#499  rxn05469_c0_dgbinR#500 
- rxn32587_c0_dgbinF#501  rxn32587_c0_dgbinR#502  rxn01116_c0_dgbinF#503 
- rxn01116_c0_dgbinR#504  bio1_dgbinF#505  bio1_dgbinR#506 
+ rxn00549_c0_revbin#190  rxn05312_c0_revbin#191  rxn00247_c0_revbin#192
+ rxn00786_c0_revbin#193  rxn08865_c0_revbin#194  rxn01200_c0_revbin#195
+ rxn08525_c0_revbin#196  FRD7_c0_revbin#197  rxn00545_c0_revbin#198
+ rxn09270_c0_revbin#199  rxn00173_c0_revbin#200  rxn08288_c0_revbin#201
+ rxn00459_c0_revbin#202  rxn00083_c0_revbin#203  rxn00097_c0_revbin#204
+ rxn32421_c0_revbin#205  rxn00154_c0_revbin#206  rxn19316_c0_revbin#207
+ rxn00187_c0_revbin#208  rxn00558_c0_revbin#209  rxn05319_c0_revbin#210
+ rxn00747_c0_revbin#211  rxn05468_c0_revbin#212  rxn35242_c0_revbin#213
+ rxn08535_c0_revbin#214  rxn01115_c0_revbin#215  rxn00225_c0_revbin#216
+ rxn00500_c0_revbin#217  rxn08350_c0_revbin#218  rxn20162_c0_revbin#219
+ rxn01333_c0_revbin#220  rxn30674_c0_revbin#221  rxn01100_c0_revbin#222
+ rxn39085_c0_revbin#223  rxn08173_c0_revbin#224  rxn00285_c0_revbin#225
+ rxn00161_c0_revbin#226  rxn00543_c0_revbin#227  rxn05297_c0_revbin#228
+ rxn05467_c0_revbin#229  rxn05488_c0_revbin#230  rxn00085_c0_revbin#231
+ rxn00062_c0_revbin#232  rxn34258_c0_revbin#233  rxn00171_c0_revbin#234
+ rxn05559_c0_revbin#235  rxn09272_c0_revbin#236  rxn00604_c0_revbin#237
+ rxn00159_c0_revbin#238  rxn08972_c0_revbin#239  rxn08542_c0_revbin#240
+ rxn01106_c0_revbin#241  rxn00198_c0_revbin#242  rxn01476_c0_revbin#243
+ rxn00781_c0_revbin#244  rxn09295_c0_revbin#245  rxn00785_c0_revbin#246
+ rxn08032_c0_revbin#247  rxn00189_c0_revbin#248  rxn00336_c0_revbin#249
+ rxn00147_c0_revbin#250  rxn09269_c0_revbin#251  rxn00248_c0_revbin#252
+ rxn00974_c0_revbin#253  rxn05493_c0_revbin#254  rxn00777_c0_revbin#255
+ rxn08094_c0_revbin#256  rxn05226_c0_revbin#257  rxn05155_c0_revbin#258
+ rxn08427_c0_revbin#259  rxn00184_c0_revbin#260  rxn05469_c0_revbin#261
+ rxn32587_c0_revbin#262  rxn01116_c0_revbin#263  bio1_revbin#264
+ _EX_cpd00011_e0_revbin#265  _EX_cpd00047_e0_revbin#266
+ _EX_cpd00106_e0_revbin#267  _EX_cpd00009_e0_revbin#268
+ _EX_cpd00013_e0_revbin#269  _EX_cpd00027_e0_revbin#270
+ _EX_cpd00029_e0_revbin#271  _EX_cpd00023_e0_revbin#272
+ _EX_cpd00221_e0_revbin#273  _EX_cpd00067_e0_revbin#274
+ _EX_cpd00071_e0_revbin#275  _EX_cpd00053_e0_revbin#276
+ _EX_cpd00130_e0_revbin#277  _EX_cpd00020_e0_revbin#278
+ _EX_cpd00001_e0_revbin#279  _EX_cpd00024_e0_revbin#280
+ _EX_cpd00007_e0_revbin#281  _EX_cpd00363_e0_revbin#282
+ _EX_cpd00036_e0_revbin#283  _EX_cpd00082_e0_revbin#284
+ rxn00549_c0_dgbinF#357  rxn00549_c0_dgbinR#358  rxn05312_c0_dgbinF#359
+ rxn05312_c0_dgbinR#360  rxn00247_c0_dgbinF#361  rxn00247_c0_dgbinR#362
+ rxn00786_c0_dgbinF#363  rxn00786_c0_dgbinR#364  rxn08865_c0_dgbinF#365
+ rxn08865_c0_dgbinR#366  rxn01200_c0_dgbinF#367  rxn01200_c0_dgbinR#368
+ rxn08525_c0_dgbinF#369  rxn08525_c0_dgbinR#370  FRD7_c0_dgbinF#371
+ FRD7_c0_dgbinR#372  rxn00545_c0_dgbinF#373  rxn00545_c0_dgbinR#374
+ rxn09270_c0_dgbinF#375  rxn09270_c0_dgbinR#376  rxn00173_c0_dgbinF#377
+ rxn00173_c0_dgbinR#378  rxn08288_c0_dgbinF#379  rxn08288_c0_dgbinR#380
+ rxn00459_c0_dgbinF#381  rxn00459_c0_dgbinR#382  rxn00083_c0_dgbinF#383
+ rxn00083_c0_dgbinR#384  rxn00097_c0_dgbinF#385  rxn00097_c0_dgbinR#386
+ rxn32421_c0_dgbinF#387  rxn32421_c0_dgbinR#388  rxn00154_c0_dgbinF#389
+ rxn00154_c0_dgbinR#390  rxn19316_c0_dgbinF#391  rxn19316_c0_dgbinR#392
+ rxn00187_c0_dgbinF#393  rxn00187_c0_dgbinR#394  rxn00558_c0_dgbinF#395
+ rxn00558_c0_dgbinR#396  rxn05319_c0_dgbinF#397  rxn05319_c0_dgbinR#398
+ rxn00747_c0_dgbinF#399  rxn00747_c0_dgbinR#400  rxn05468_c0_dgbinF#401
+ rxn05468_c0_dgbinR#402  rxn35242_c0_dgbinF#403  rxn35242_c0_dgbinR#404
+ rxn08535_c0_dgbinF#405  rxn08535_c0_dgbinR#406  rxn01115_c0_dgbinF#407
+ rxn01115_c0_dgbinR#408  rxn00225_c0_dgbinF#409  rxn00225_c0_dgbinR#410
+ rxn00500_c0_dgbinF#411  rxn00500_c0_dgbinR#412  rxn08350_c0_dgbinF#413
+ rxn08350_c0_dgbinR#414  rxn20162_c0_dgbinF#415  rxn20162_c0_dgbinR#416
+ rxn01333_c0_dgbinF#417  rxn01333_c0_dgbinR#418  rxn30674_c0_dgbinF#419
+ rxn30674_c0_dgbinR#420  rxn01100_c0_dgbinF#421  rxn01100_c0_dgbinR#422
+ rxn39085_c0_dgbinF#423  rxn39085_c0_dgbinR#424  rxn08173_c0_dgbinF#425
+ rxn08173_c0_dgbinR#426  rxn00285_c0_dgbinF#427  rxn00285_c0_dgbinR#428
+ rxn00161_c0_dgbinF#429  rxn00161_c0_dgbinR#430  rxn00543_c0_dgbinF#431
+ rxn00543_c0_dgbinR#432  rxn05297_c0_dgbinF#433  rxn05297_c0_dgbinR#434
+ rxn05467_c0_dgbinF#435  rxn05467_c0_dgbinR#436  rxn05488_c0_dgbinF#437
+ rxn05488_c0_dgbinR#438  rxn00085_c0_dgbinF#439  rxn00085_c0_dgbinR#440
+ rxn00062_c0_dgbinF#441  rxn00062_c0_dgbinR#442  rxn34258_c0_dgbinF#443
+ rxn34258_c0_dgbinR#444  rxn00171_c0_dgbinF#445  rxn00171_c0_dgbinR#446
+ rxn05559_c0_dgbinF#447  rxn05559_c0_dgbinR#448  rxn09272_c0_dgbinF#449
+ rxn09272_c0_dgbinR#450  rxn00604_c0_dgbinF#451  rxn00604_c0_dgbinR#452
+ rxn00159_c0_dgbinF#453  rxn00159_c0_dgbinR#454  rxn08972_c0_dgbinF#455
+ rxn08972_c0_dgbinR#456  rxn08542_c0_dgbinF#457  rxn08542_c0_dgbinR#458
+ rxn01106_c0_dgbinF#459  rxn01106_c0_dgbinR#460  rxn00198_c0_dgbinF#461
+ rxn00198_c0_dgbinR#462  rxn01476_c0_dgbinF#463  rxn01476_c0_dgbinR#464
+ rxn00781_c0_dgbinF#465  rxn00781_c0_dgbinR#466  rxn09295_c0_dgbinF#467
+ rxn09295_c0_dgbinR#468  rxn00785_c0_dgbinF#469  rxn00785_c0_dgbinR#470
+ rxn08032_c0_dgbinF#471  rxn08032_c0_dgbinR#472  rxn00189_c0_dgbinF#473
+ rxn00189_c0_dgbinR#474  rxn00336_c0_dgbinF#475  rxn00336_c0_dgbinR#476
+ rxn00147_c0_dgbinF#477  rxn00147_c0_dgbinR#478  rxn09269_c0_dgbinF#479
+ rxn09269_c0_dgbinR#480  rxn00248_c0_dgbinF#481  rxn00248_c0_dgbinR#482
+ rxn00974_c0_dgbinF#483  rxn00974_c0_dgbinR#484  rxn05493_c0_dgbinF#485
+ rxn05493_c0_dgbinR#486  rxn00777_c0_dgbinF#487  rxn00777_c0_dgbinR#488
+ rxn08094_c0_dgbinF#489  rxn08094_c0_dgbinR#490  rxn05226_c0_dgbinF#491
+ rxn05226_c0_dgbinR#492  rxn05155_c0_dgbinF#493  rxn05155_c0_dgbinR#494
+ rxn08427_c0_dgbinF#495  rxn08427_c0_dgbinR#496  rxn00184_c0_dgbinF#497
+ rxn00184_c0_dgbinR#498  rxn05469_c0_dgbinF#499  rxn05469_c0_dgbinR#500
+ rxn32587_c0_dgbinF#501  rxn32587_c0_dgbinR#502  rxn01116_c0_dgbinF#503
+ rxn01116_c0_dgbinR#504  bio1_dgbinF#505  bio1_dgbinR#506
 End

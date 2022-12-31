@@ -7,6 +7,7 @@ from cobra.core.dictlist import DictList
 from modelseedpy.core.msmodel import get_reaction_constraints_from_direction
 from modelseedpy.biochem.modelseed_compound import ModelSEEDCompound, ModelSEEDCompound2
 from modelseedpy.biochem.modelseed_reaction import ModelSEEDReaction, ModelSEEDReaction2
+from modelseedpy.helpers import config
 
 logger = logging.getLogger(__name__)
 
@@ -139,10 +140,13 @@ def load_metabolites_from_df(
             if cpd_id in structures:
                 if "SMILE" in structures[cpd_id]:
                     smiles = structures[cpd_id]["SMILE"]
+                    aliases_annotation["SMILE"] = smiles
                 if "InChI" in structures[cpd_id]:
                     inchi = structures[cpd_id]["InChI"]
+                    aliases_annotation["InChI"] = inchi
                 if "InChIKey" in structures[cpd_id]:
                     inchi_key = structures[cpd_id]["InChIKey"]
+                    aliases_annotation["InChIKey"] = inchi_key
             inchi_key = None if pd.isna(inchi_key) or len(inchi_key) == 0 else inchi_key
             other_names = set()
             if cpd_id in names:
@@ -158,9 +162,6 @@ def load_metabolites_from_df(
                 mass,
                 delta_g,
                 delta_g_err,
-                smiles,
-                inchi_key,
-                inchi,
                 is_core,
                 is_obsolete,
                 is_cofactor,
@@ -179,43 +180,109 @@ def load_metabolites_from_df(
     return compounds
 
 
-def _load_metabolites(database_path: str) -> dict:
+def _load_aliases_df(df_aliases, seed_index=1, source_index=3, alias_id_index=2):
+    aliases = {}
+    for i in df_aliases.itertuples():
+        seed_id = i[seed_index]
+        alias_id = i[alias_id_index]
+        source = i[source_index]
+        if seed_id not in aliases:
+            aliases[seed_id] = {}
+        if source not in aliases[seed_id]:
+            aliases[seed_id][source] = set()
+        aliases[seed_id][source].add(alias_id)
+    return aliases
+
+
+def _load_metabolites(
+    database_path: str, aliases=None, names=None, structures=None
+) -> dict:
+    if aliases is None:
+        aliases = {}
+    if names is None:
+        names = {}
+    if structures is None:
+        structures = {}
     metabolites = {}
-    contents = os.listdir(f'{database_path}/{_BIOCHEM_FOLDER}')
+    contents = os.listdir(f"{database_path}/{_BIOCHEM_FOLDER}")
     for f in contents:
-        if f.startswith('compound_') and f.endswith('.json'):
-            with open(f'{database_path}/{_BIOCHEM_FOLDER}/{f}', 'r') as fh:
+        if f.startswith("compound_") and f.endswith(".json"):
+            with open(f"{database_path}/{_BIOCHEM_FOLDER}/{f}", "r") as fh:
                 _compounds_data = json.load(fh)
                 for o in _compounds_data:
-                    if 'id' in o and o['id']:
-                        cpd = ModelSEEDCompound2(o['id'], o.get('formula'),
-                                                 o.get('name'), o.get('charge'), '',
-                                                 o.get('abbreviation'), None,
-                                                 o.get('mass'), o.get('deltag'), o.get('deltagerr'))
+                    if "id" in o and o["id"]:
+                        cpd_names = set()
+                        if o["id"] in names:
+                            cpd_names |= names[o["id"]]
+                        cpd = ModelSEEDCompound2(
+                            o["id"],
+                            o.get("formula"),
+                            o.get("name"),
+                            o.get("charge"),
+                            "",
+                            o.get("abbreviation"),
+                            cpd_names,
+                            o.get("mass"),
+                            o.get("deltag"),
+                            o.get("deltagerr"),
+                            o.get("is_core"),
+                            o.get("is_obsolete"),
+                            None,
+                            o.get("pka"),
+                            o.get("pkb"),
+                            o.get("source"),
+                        )
+                        if cpd.id in aliases:
+                            cpd.annotation.update(aliases[cpd.id])
+                        if cpd.id in structures:
+                            for alias_type in structures[cpd.id]:
+                                v = structures[cpd.id][alias_type]
+                                if len(v) == 1:
+                                    cpd.annotation[alias_type] = list(v)[0]
+                                else:
+                                    logger.warning(
+                                        f"multiple {alias_type} structures found for {cpd.id}"
+                                    )
                         metabolites[cpd.id] = cpd
                     else:
-                        print('error', o)
-                #print(_compounds_data[0].keys())
+                        print("error", o)
+                # print(_compounds_data[0].keys())
     return metabolites
 
 
-def _load_reactions(database_path: str, metabolites: dict) -> (dict, dict):
+def _load_reactions(
+    database_path: str, metabolites: dict, aliases=None, names=None, ec_numbers=None
+) -> (dict, dict):
+    if aliases is None:
+        aliases = {}
+    if names is None:
+        names = {}
+    if ec_numbers is None:
+        ec_numbers = {}
     reactions = {}
-    contents = os.listdir(f'{database_path}/{_BIOCHEM_FOLDER}')
+    contents = os.listdir(f"{database_path}/{_BIOCHEM_FOLDER}")
     metabolites_indexed = {}
     for f in contents:
-        if f.startswith('reaction_') and f.endswith('.json'):
-            with open(f'{database_path}/{_BIOCHEM_FOLDER}/{f}', 'r') as fh:
+        if f.startswith("reaction_") and f.endswith(".json"):
+            with open(f"{database_path}/{_BIOCHEM_FOLDER}/{f}", "r") as fh:
                 _reactions_data = json.load(fh)
                 for o in _reactions_data:
-                    if 'id' in o and o['id']:
-                        lower_bound, upper_bound = get_reaction_constraints_from_direction(o.get('reversibility'))
-                        stoichiometry = o.get('stoichiometry')
+                    if "id" in o and o["id"]:
+                        rxn_names = set()
+                        if o["id"] in names:
+                            rxn_names |= names[o["id"]]
+                        (
+                            lower_bound,
+                            upper_bound,
+                        ) = get_reaction_constraints_from_direction(
+                            o.get("reversibility")
+                        )
+                        stoichiometry = o.get("stoichiometry")
                         reaction_metabolites = {}
                         for s in stoichiometry:
-                            cmp_token = s['compartment']
-                            value = s['coefficient']
-                            cpd = metabolites[s['compound']]
+                            cmp_token = s["compartment"]
+                            value = s["coefficient"]
+                            cpd = metabolites[s["compound"]]
                             cpd_index_id = f"{cpd.id}_{cmp_token}"
                             if cpd_index_id not in metabolites_indexed:
                                 cpd_token = cpd.copy()
@@ -223,14 +290,33 @@ def _load_reactions(database_path: str, metabolites: dict) -> (dict, dict):
                                 cpd_token.base_id = cpd.id
                                 cpd_token.compartment = cmp_token
                                 metabolites_indexed[cpd_index_id] = cpd_token
-                            reaction_metabolites[metabolites_indexed[cpd_index_id]] = value
-                        rxn = ModelSEEDReaction2(o['id'], o.get('name'), '', lower_bound, upper_bound,
-                                                 delta_g=o.get('deltag'),
-                                                 delta_g_error=o.get('deltagerr'))
+                            reaction_metabolites[
+                                metabolites_indexed[cpd_index_id]
+                            ] = value
+                        rxn = ModelSEEDReaction2(
+                            o["id"],
+                            o.get("name"),
+                            "",
+                            lower_bound,
+                            upper_bound,
+                            "",
+                            rxn_names,
+                            o.get("deltag"),
+                            o.get("deltagerr"),
+                            o.get("is_obsolete"),
+                            None,
+                            o.get("status"),
+                            o.get("source"),
+                        )
                         rxn.add_metabolites(reaction_metabolites)
+                        if rxn.id in aliases:
+                            rxn.annotation.update(aliases[rxn.id])
+                        if rxn.id in ec_numbers:
+                            rxn.annotation["ec-code"] = ec_numbers[rxn.id]
+                        metabolites[cpd.id] = cpd
                         reactions[rxn.id] = rxn
                     else:
-                        logger.error(f'failed to read reaction record {o}')
+                        logger.error(f"failed to read reaction record {o}")
 
     return reactions, metabolites_indexed
 
@@ -338,9 +424,24 @@ class ModelSEEDDatabase:
         self.reactions = DictList()
         self.compounds += compounds
         self.reactions += reactions
-        self.reactions += compound_tokens
+        self.compound_tokens += compound_tokens
+
         self.inchi_key_lookup = {}
         self.metabolite_reactions = {}
+
+        self._index_inchi()
+
+    def _index_inchi(self):
+        for m in self.compounds:
+            if m.inchi_key:
+                f, s, p = m.inchi_key.split("-")
+                if f not in self.inchi_key_lookup:
+                    self.inchi_key_lookup[f] = {}
+                if s not in self.inchi_key_lookup[f]:
+                    self.inchi_key_lookup[f][s] = set()
+                proton_pair = (m.id, p)
+                if proton_pair not in self.inchi_key_lookup[f][s]:
+                    self.inchi_key_lookup[f][s].add(proton_pair)
 
     def compounds_by_alias(self, alias, value):
         pass
@@ -349,9 +450,27 @@ class ModelSEEDDatabase:
         pass
 
     def find_compounds_by_inchi_key(self, inchi_key, exact=True):
-        pass
+        f, s, p = inchi_key.split("-")
+        if exact and f in self.inchi_key_lookup and s in self.inchi_key_lookup[f]:
+            # x is tuple (cpd.id, protonation)
+            return [self.compounds.get_by_id(x[0]) for x in self.inchi_key_lookup[f][s]]
+        elif f in self.inchi_key_lookup and not exact:
+            seed_ids = set()
+            for s in self.inchi_key_lookup[f]:
+                # x is tuple (cpd.id, protonation)
+                seed_ids |= {x[0] for x in self.inchi_key_lookup[f][s]}
 
-    def find_reactions_by_compounds(self, compounds):
+            return [self.compounds.get_by_id(seed_id) for seed_id in seed_ids]
+        else:
+            return []
+
+    def find_reactions_by_compounds(self, compounds, or_instead_of_and=False):
+        """
+
+        @param compounds: list of seed compound ids
+        @param or_instead_of_and: use OR logic instead of AND (default)
+        @return:
+        """
         pass
 
     def add_compound(self, cpd):
@@ -371,6 +490,16 @@ class ModelSEEDDatabase:
 
 
 class ModelSEEDBiochem:
+    default_biochemistry = None
+
+    @staticmethod
+    def get(create_if_missing=True):
+        if not ModelSEEDBiochem.default_biochemistry:
+            ModelSEEDBiochem.default_biochemistry = from_local(
+                config.get("biochem", "path")
+            )
+        return ModelSEEDBiochem.default_biochemistry
+
     def __init__(
         self,
         compounds,
@@ -679,11 +808,74 @@ def from_local_old(path):
 
 
 def from_local(database_path: str):
-    metabolites = _load_metabolites(database_path)
-    reactions, metabolite_tokens = _load_reactions(database_path, metabolites)
-    database = ModelSEEDDatabase(metabolites.values(), reactions.values(), metabolite_tokens.values())
+    contents = os.listdir(f"{database_path}/Biochemistry/")
+    if "compounds.tsv" in contents:
+        return from_local_old(database_path)
+
+    compound_aliases_url = (
+        f"{database_path}/Biochemistry/Aliases/Unique_ModelSEED_Compound_Aliases.txt"
+    )
+    reaction_aliases_url = (
+        f"{database_path}/Biochemistry/Aliases/Unique_ModelSEED_Reaction_Aliases.txt"
+    )
+    compound_aliases = _load_aliases_df(
+        pd.read_csv(compound_aliases_url, index_col=None, sep="\t")
+    )
+    reaction_aliases = _load_aliases_df(
+        pd.read_csv(reaction_aliases_url, index_col=None, sep="\t")
+    )
+
+    compound_structures_url = (
+        f"{database_path}/Biochemistry/Structures/Unique_ModelSEED_Structures.txt"
+    )
+    compound_structures = _load_aliases_df(
+        pd.read_csv(compound_structures_url, index_col=None, sep="\t"),
+        source_index=2,
+        alias_id_index=6,
+    )
+
+    compound_names_url = (
+        f"{database_path}/Biochemistry/Aliases/Unique_ModelSEED_Compound_Names.txt"
+    )
+    reaction_names_url = (
+        f"{database_path}/Biochemistry/Aliases/Unique_ModelSEED_Reaction_Names.txt"
+    )
+    compound_names = _load_aliases_df(
+        pd.read_csv(compound_names_url, index_col=None, sep="\t")
+    )
+    reaction_names = _load_aliases_df(
+        pd.read_csv(reaction_names_url, index_col=None, sep="\t")
+    )
+
+    reaction_ecs_url = (
+        f"{database_path}/Biochemistry/Aliases/Unique_ModelSEED_Reaction_ECs.txt"
+    )
+    reaction_ecs = _load_aliases_df(
+        pd.read_csv(reaction_ecs_url, index_col=None, sep="\t")
+    )
+
+    # build metabolites unpack names
+    metabolites = _load_metabolites(
+        database_path,
+        compound_aliases,
+        {k: v["name"] for k, v in compound_names.items()},
+        compound_structures,
+    )
+
+    # build reactions unpack names, ecs
+    reactions, metabolite_tokens = _load_reactions(
+        database_path,
+        metabolites,
+        reaction_aliases,
+        {k: v["name"] for k, v in reaction_names.items()},
+        {k: v["Enzyme Class"] for k, v in reaction_ecs.items()},
+    )
+    database = ModelSEEDDatabase(
+        metabolites.values(), reactions.values(), metabolite_tokens.values()
+    )
 
     return database
+
 
 def get_names_from_df(df):
     names = {}

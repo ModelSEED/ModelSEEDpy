@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # # ------------------------ Define an arbitrary model --------------------------------------
 
 # import optlang
@@ -80,16 +81,16 @@
 # # ------------------------ test the dynamicFBA Package ---------------------------------------
 
 # # import statements
-# from numpy import float64 
+# from numpy import float64
 # from math import inf
-# from numpy import nan   
+# from numpy import nan
 # import pandas
 # import cobra
 # import json
 # import re
 
 # empty = ['', '-', '', None, nan, 'NaN']
-   
+
 # # add the units of logarithm to the Magnesium concentration
 # def isnumber(string):
 #     string = str(string)
@@ -100,12 +101,12 @@
 #     except:
 #         print(string)
 #         return False
-    
+
 # def average(num_1, num_2 = None):
 #     if type(num_1) is list:
 #         average = sum(num_1) / len(num_1)
 #         return average
-#     elif isnumber(num_1): 
+#     elif isnumber(num_1):
 #         if num_2 is not None:
 #             numbers = [num_1, num_2]
 #             average = sum(numbers) / len(numbers)
@@ -120,24 +121,24 @@
 # dfba = dynamicFBAPkg(model, total_time = 5, timestep = 1, initial_concentrations = initial_concentrations, reaction_kinetics = reaction_kinetics, logging = True)
 
 # def test_init():
-#     # assert results of the model 
+#     # assert results of the model
 #     assert type(dfba.model) is cobra.core.model.Model
 #     assert dfba.verbose is False
 #     assert type(dfba.parameters) is dict
 #     assert type(dfba.variables) is dict
 #     assert ('timesteps' and 'reaction_kinetics' and 'initial_concentrations') in list(dfba.parameters.keys())
 #     assert ('time_series' and 'concentrations') in list(dfba.variables.keys())
-    
+
 #     # ensure that the dataframes are generated
 #     assert type(dfba.fluxes_df) is pandas.core.frame.DataFrame
 #     assert type(dfba.concentrations_df) is pandas.core.frame.DataFrame
-    
+
 # def test_simulate():
 #     # execute the function
 # #     dfba.simulate(source = 'custom')
 #     temperature = 25
 #     p_h = 7
-    
+
 #     # ------------------------ execute the simulate mechanics -----------------------------------
 #     solutions = []
 #     for dfba.timestep in range(1,dfba.parameters['timesteps']+1):
@@ -154,7 +155,7 @@
 #                 kinetic_flux = dfba.parameters['calculated_rate_laws'][reaction.id.lower()]
 #             else:
 #                 if dfba.verbose:
-#                     print(f'--> ERROR: The {reaction.name} reaction is not defined in the kinetics data.')    
+#                     print(f'--> ERROR: The {reaction.name} reaction is not defined in the kinetics data.')
 #                 continue
 
 #             if not isnumber(kinetic_flux):
@@ -166,7 +167,7 @@
 #             else:
 #                 reaction.lower_bound = kinetic_flux
 #                 reaction.upper_bound = kinetic_flux
-                
+
 #             assert isnumber(reaction.lower_bound)
 #             assert isnumber(reaction.upper_bound)
 #             assert reaction.lower_bound == reaction.upper_bound == kinetic_flux
@@ -178,12 +179,12 @@
 #         solutions.append(solution)
 #         print(f'\nobjective value for timestep {dfba.timestep}: ', solution.objective_value, '\n\n')
 #         dfba.update_concentrations(solution)
-    
+
 #     for solution in solutions:
 #         assert type(solution) is cobra.core.solution.Solution
-    
+
 #     # evaluate the dataframes
-#     assert type(dfba.fluxes_df) is pandas.core.frame.DataFrame    
+#     assert type(dfba.fluxes_df) is pandas.core.frame.DataFrame
 #     for index, row in dfba.fluxes_df.iterrows():
 #         for entry in row:
 #             if type(entry) is float:
@@ -192,7 +193,7 @@
 #                 assert type(entry) == float64
 #             else:
 #                 assert type(entry) is None
-       
+
 #     assert type(dfba.concentrations_df) is pandas.core.frame.DataFrame
 #     for index, row in dfba.concentrations_df.iterrows():
 #         for entry in row:

@@ -1,4 +1,4 @@
-API 
+ModelSEEDpy API
 ________________________________________________________________________
 
 The detailed documentation of all user-operable classes and functions in the ModelSEEDpy library are provided.

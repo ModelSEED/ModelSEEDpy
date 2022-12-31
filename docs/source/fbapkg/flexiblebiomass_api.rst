@@ -12,8 +12,8 @@ This class constrains metabolites of the biomass reaction and adjusts the object
  from modelseedpy.fbapkg import FlexibleBiomassPkg
  flexbio = FlexibleBiomassPkg(model)
 
-- *model* ``cobra.core.model.Model``: the CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-           
+- *model* ``cobra.core.model.Model``: the CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
+
 ----------------------
 build_package()
 ----------------------

@@ -96,7 +96,7 @@ This class is a representation of ModelSEED models:
  from modelseedpy.core import MSModel
  msmodel = MSModel(id_or_model=None, genome=None, template=None)
 
-- *id_or_model* ``str || cobra.core.model.Model``: Either the ID of a model or the actual CobraKBase model object that will be represented through this class. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *id_or_model* ``str || cobra.core.model.Model``: Either the ID of a model or the actual CobraKBase model object that will be represented through this class. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
 - *genome* ``genome object``: The representative object of the genome.
 - *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template of the represented model.
 

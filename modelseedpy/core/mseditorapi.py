@@ -1,19 +1,23 @@
+# -*- coding: utf-8 -*-
 import logging
+
 logger = logging.getLogger(__name__)
 from cobra.core import Reaction
 import cobra
 import re
 
-class MSEditorAPI:
 
+class MSEditorAPI:
     @staticmethod
-    def remove_reactions(model, rxn_id_list = []):
-        model_reactions = ' '.join([rxn.id for rxn in model.reactions]) # removed from loop for greater efficiency
+    def remove_reactions(model, rxn_id_list=[]):
+        model_reactions = " ".join(
+            [rxn.id for rxn in model.reactions]
+        )  # removed from loop for greater efficiency
         for rxn_id in rxn_id_list:
             if not model.reactions.has_id(rxn_id):
-                compartment = re.search(f'(?<={rxn_id})(\_\w\d)', model_reactions)
+                compartment = re.search(f"(?<={rxn_id})(\_\w\d)", model_reactions)
                 if not compartment:
-                    raise Exception('Reaction', rxn_id, 'is not in the model.')
+                    raise Exception("Reaction", rxn_id, "is not in the model.")
                 else:
                     rxn_id += compartment.group()
             model.remove_reactions([rxn_id])
@@ -51,33 +55,44 @@ class MSEditorAPI:
             if gpr:
                 model.reactions.get_by_id(rxn_id).gene_reaction_rule = gpr
         except:
-            raise Exception(f'The gpr {gpr} is invalid. Perhaps check parentheses.')  # not working, unsure exactly why
-    
+            raise Exception(
+                f'The gpr {gpr} is invalid. Perhaps check parentheses.'
+            )  # not working, unsure exactly why
+
     @staticmethod
-    def edit_biomass_compound(model, biomass_id, cpd_id, new_coef):
-        if cpd_id not in model.metabolites:
-            raise Exception('Metabolite', cpd_id, ' is not in the model.')
+    def edit_biomass_compound(model, biomass_id, cpd_id, new_coef, rescale=1):
         if biomass_id in model.reactions:
-            model.reactions.get_by_id(biomass_id).add_metabolites(
-                    {model.metabolites.get_by_id(cpd_id): new_coef}, combine=False)
+            if cpd_id in model.metabolites:
+                model.reactions.get_by_id(biomass_id).add_metabolites(
+                    {model.metabolites.get_by_id(cpd_id): new_coef}, combine=False
+                )
+            else:
+                raise Exception("Metabolite", cpd_id, " is not in the model.")
         else:  # if there is no biomass reaction
             biomass_rxn = Reaction(biomass_id)
             model.add_reaction(biomass_rxn)
-            biomass_rxn.add_metabolites({model.metabolites.get_by_id(cpd_id): new_coef})
+            if cpd_id in model.metabolites:
+                biomass_rxn.add_metabolites(
+                    {model.metabolites.get_by_id(cpd_id): new_coef}
+                )
+            else:
+                raise Exception("Metabolite ", cpd_id, " is not in the model.")
 
     @staticmethod
     def compute_molecular_weight(model, metabolite_id):
         if metabolite_id not in model.metabolites:
-            raise ValueError(f'The metabolite {metabolite_id} is not defined in the model')
+            raise Exception(
+                "Error, metabolite", metabolite_id, "not found in the model"
+            )
         return model.metabolites.get_by_id(metabolite_id).formula_weight
 
     @staticmethod
-    def add_custom_reaction(model,rxn_id,MSEquation,gpr = None):
+    def add_custom_reaction(model, rxn_id, MSEquation, gpr=None, genome=None):
         new_rxn = Reaction(id=rxn_id)
         # going on the assumption that all metabolites are present in the model
         metabolites = {}
-        for key, stoich in MSEquation.equation.items():
-            met_id = key[0]+'_'+key[1]
+        for key in MSEquation.equation:
+            met_id = key[0] + "_" + key[1]
             if met_id in model.metabolites:
                 metabolites[met_id] = stoich
             else:
@@ -88,12 +103,10 @@ class MSEditorAPI:
             new_rxn.gene_reaction_rule = gpr
 
         # adjust the bounds based on the arrow direction  -1000, 1000, 0
-        new_rxn.lower_bound = 0
-        new_rxn.upper_bound = 1000
-        if MSEquation.direction == '<':
+        if MSEquation.direction == "left":
             new_rxn.lower_bound = -1000
             new_rxn.upper_bound = 0
-        elif MSEquation.direction == '=':
+        if MSEquation.direction == "reversable":
             new_rxn.lower_bound = -1000
 
     @staticmethod  
@@ -119,9 +132,9 @@ class MSEditorAPI:
             cobra_reaction.lower_bound = -1000
             cobra_reaction.upper_bound = 0
         model.add_reactions([cobra_reaction])
-        
+
     @staticmethod
-    def copy_model_reactions(model,source_model,rxn_id_list = []):
+    def copy_model_reactions(model, source_model, rxn_id_list=[]):
         for rxnid in rxn_id_list:
             if rxnid in source_model.reactions:
                 model.add_reactions([source_model.reactions.get_by_id(rxnid)])

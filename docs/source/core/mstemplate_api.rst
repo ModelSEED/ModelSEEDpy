@@ -5,7 +5,7 @@ mstemplate
 TemplateReactionType
 +++++++++++++++++++++
 
-A class that defines reaction types, where the attributes ``CONDITIONAL``, ``UNIVERSAL``, ``SPONTANEOUS``, and ``GAPFILLING`` correspond to the strings ``"conditional"``, ``"universal"``, ``"spontaneous"``, and ``"gapfilling"``, respectively: 
+A class that defines reaction types, where the attributes ``CONDITIONAL``, ``UNIVERSAL``, ``SPONTANEOUS``, and ``GAPFILLING`` correspond to the strings ``"conditional"``, ``"universal"``, ``"spontaneous"``, and ``"gapfilling"``, respectively:
 
 +++++++++++++++++++++
 MSTemplateMetabolite
@@ -15,7 +15,7 @@ A function that assembles a unique list of features for the specified genome:
 
 .. code-block:: python
 
- met_template = MSTemplateMetabolite(cpd_id, formula=None, name='', default_charge=None, mass=None, 
+ met_template = MSTemplateMetabolite(cpd_id, formula=None, name='', default_charge=None, mass=None,
                    delta_g=None, delta_g_error=None, is_cofactor=False, abbreviation='', aliases=None)
 
 - *cpd_id*, *name*, *formula*, *abbreviation*, & *aliases* ``str``: The ID, name, formula, abbreviation, and alias of the ModelSEED compound that will be constructed into a template.
@@ -116,7 +116,7 @@ Property setter methods that set the name or formula of the template compound, r
  met_template.formula(formula)
 
 - *name* & *formula* ``string``: The name and formula that will be assigned to the respective metabolite.
- 
+
 --------------------------------
 from_dict()
 --------------------------------
@@ -151,7 +151,7 @@ A class that defines a metabolite of a template:
 
 .. code-block:: python
 
- rxn_template = MSTemplateSpecies(rxn_id: str, reference_id: str, name='', subsystem='', lower_bound=0.0, 
+ rxn_template = MSTemplateSpecies(rxn_id: str, reference_id: str, name='', subsystem='', lower_bound=0.0,
                  upper_bound=None,reaction_type=TemplateReactionType.CONDITIONAL, gapfill_direction='=',
                  base_cost=1000, reverse_penalty=1000, forward_penalty=1000, status='OK')
 
@@ -197,7 +197,7 @@ Creates a COBRA object for a ModelSEEDpy reaction:
 - *index* ``string``: The compartment within which the reaction executes.
 
 **returns** *reaction* ``cobra.core.reaction.Reaction``: The COBRA metabolite object of the respective metabolite.
- 
+
 --------------------------------
 from_dict()
 --------------------------------
@@ -339,7 +339,7 @@ A class that defines a template for a protein complex:
  complex_template = NewModelTemplateComplex(complex_id, name, source='', reference='', confidence=0, template=None)
 
 - *complex_id*, *name*, *source*, *reference* ``str``: The ID, name, source, and reference of the complex that will be refined into a template.
-- *confidence* ``int``: A confidence rating of the 
+- *confidence* ``int``: A confidence rating of the
 - *template* ``modelseedpy.core.mstemplate.MSTemplate``: The template upon which the complex will be added.
 
 ----------------
@@ -524,7 +524,7 @@ A function that returns the template data:
 .. code-block:: python
 
  template_data = template.get_data()
- 
+
 **Returns** *template_data* ``dict``: The template data organized into a dictionary structure.
 
 -----------------
@@ -536,7 +536,7 @@ Constructs and returns strings of the template content:
 .. code-block:: python
 
  template_html = template.__repr_html__()
- 
+
 **Returns** *template_html* ``str``: A str of the template data organized into HTML.
 
 
@@ -565,7 +565,7 @@ Returns a template builder object that is constructed from a dictionary:
 
  builder = complex_template.from_dict(template_dict)
 
-- *template_dict* ``dict``: A dictionary description of the template, which possesses keys of ``"id"``, ``"name"``, ``"domain"``, ``"type"``, ``"__VERSION__"``, ``"compartments"``, ``"roles"``, ``"complexes"``, ``"compounds"``, ``"compcompounds"``, ``"reactions"``, ``"biochemistry_ref"``, & ``"biomasses"``. 
+- *template_dict* ``dict``: A dictionary description of the template, which possesses keys of ``"id"``, ``"name"``, ``"domain"``, ``"type"``, ``"__VERSION__"``, ``"compartments"``, ``"roles"``, ``"complexes"``, ``"compounds"``, ``"compcompounds"``, ``"reactions"``, ``"biochemistry_ref"``, & ``"biomasses"``.
 
 **Returns** *builder* ``modelseedpy.core.mstemplate.MSTemplateBuilder``: The template builder object that was constructed from the dictionary.
 
@@ -625,4 +625,3 @@ The function that amalgamates the content of the MSTemplateBuilder object into a
  template = complex_template.build()
 
 **Returns** *template* ``modelseedpy.core.mstemplate.MSTemplate``: The MSTemplate object that is constructed from the content of the MSTemplateBuilder object.
-

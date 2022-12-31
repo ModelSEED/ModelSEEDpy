@@ -17,8 +17,8 @@ The total uptake of specific elements can be constrained through the ``ElementUp
  from modelseedpy.fbapkg import ElementUptakePkg
  eleup = ElementUptakePkg(model)
  eleup.build_package(element_limits)
- 
-The package applies uptake limits for any elemental symbol (``values`` and ``keys`` of the ``element_limits`` dictionary, respectively) to a given model. 
+
+The package applies uptake limits for any elemental symbol (``values`` and ``keys`` of the ``element_limits`` dictionary, respectively) to a given model.
 
 Reaction Thermodynamics
 -------------------------
@@ -30,7 +30,7 @@ The thermodynamic free energy of each reaction, and variable formation energies 
  from modelseedpy.fbapkg import FullThermoPkg
  tfa = FullThermoPkg(model)
  tfa.build_package(parameters)
- 
+
 The package applies free energy constraints for all reactions in a given model, based upon the free energy data in the ModelSEED Database. The user must specify the ``"modelseed_db_path" `` in the argument (*parameters* ``dict``). The user is also able to redefine default values through *parameters*, which is detailed in the respective API documentation.
 
 An example of ``FullThermoPkg`` is available `here <flux_analysis/FullThermodynamicsExample.ipynb>`_ .
@@ -45,8 +45,8 @@ The growth rate of community members can be constrained with a kinetic rate cons
  from modelseedpy.community import CommKineticPkg
  commkin = CommKineticPkg(model)
  commkin.build_package(kinetic_coef)
- 
-The package applies the kinetic coefficient (*kinetic_coef* ``float``) to the biomass reaction of each species in a given community model. 
+
+The package applies the kinetic coefficient (*kinetic_coef* ``float``) to the biomass reaction of each species in a given community model.
 
 
 
@@ -102,7 +102,7 @@ The ``MSCommunity`` package is an original package from ModelSEEDpy that resolve
 
 .. code-block:: python
 
- from modelseedpy.community import MSCommunity 
+ from modelseedpy.community import MSCommunity
  mscom = MSCommunity(model, names=[], abundances=None, pfba = True, lp_filename = None)
  solution = mscom.run(media = None, pfba = True)
 

@@ -1,8 +1,8 @@
 {
-   "Fe2+": {
-      "model0_id": "cpd10515_e0",
-      "model0_formula": "Fe",
-      "model1_id": "r293_e0",
-      "model1_formula": "*"
-   }
+  "Fe2+": {
+    "model0_formula": "Fe",
+    "model0_id": "cpd10515_e0",
+    "model1_formula": "*",
+    "model1_id": "r293_e0"
+  }
 }

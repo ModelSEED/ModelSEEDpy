@@ -12,13 +12,13 @@ This class defines and executes dynamic FBA simulations of COBRA models:
  from modelseedpy.community import dFBAPkg
  dfba = dFBAPkg(model, modelseed_db_path, solver = 'glpk', warnings = True, verbose = False, printing = False, jupyter = False)
 
-- *model* ``cobra.core.model.Model``: the CobraKBase model that will be simulated. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *model* ``cobra.core.model.Model``: the CobraKBase model that will be simulated. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
 - *modelseed_db_path* ``str``: specifies the path to a local version of the ModelSEED Database.
 - *solver* ``str``: specifies which linear programmating algorithm will be used to simulate the FBA model. The `glpk` solver is selected by default since it is free and universally accessible.
 - *warnings*, *verbose*, & *printing* ``bool``: specifies whether simulation warnings, details and calculations, or results will be printed, respectively. These options are valuable for troubleshooting.
-- *jupyter* ``bool``: specifies whether simulation is being conducted in a Jupyter notebook, in which case the printed DataFrames will be expressed with the ``display()`` function. 
+- *jupyter* ``bool``: specifies whether simulation is being conducted in a Jupyter notebook, in which case the printed DataFrames will be expressed with the ``display()`` function.
 
-           
+
 ----------------------
 simulate()
 ----------------------
@@ -27,8 +27,8 @@ A cobrakbase model is simulated with the parameterized kinetics data over the de
 
 .. code-block:: python
 
- dfba.simulate(kinetics_path = None, initial_concentrations_M: dict = {}, total_time = 200, timestep = 20, export_name = None, 
-               export_directory = None, kinetics_data = {}, temperature = 25, p_h = 7, cellular_dry_mass_fg = 222, cellular_fL = 1, 
+ dfba.simulate(kinetics_path = None, initial_concentrations_M: dict = {}, total_time = 200, timestep = 20, export_name = None,
+               export_directory = None, kinetics_data = {}, temperature = 25, p_h = 7, cellular_dry_mass_fg = 222, cellular_fL = 1,
                figure_title = 'Metabolic perturbation', included_metabolites = [], labeled_plots = True, visualize = True, export = True)
 
 - *kinetics_path* & *kinetics_data* ``str`` & ``dict``: either the path to a `JSON` file that can be imported or a dictionary argument that provide the kinetics data that will constrain the model in the simulation. The `JSON` structure in both means of providing the data, and possesses the following nesting: ``<reaction>`` -> ``<source>`` -> ``substituted_rate_law`` + ``initial_concentrations_M`` + optional keys (such as ``metadata``). The ``substituted_rate_law`` key must contain the mathematically valid rate law expression as a string that can be evaluated through the `eval() built-in function <https://pythongeeks.org/python-eval-function/>`_ of Python, where each metabolite in the rate law is represented by a **single letter variable** that is defined with a `ModelSEED Compound ID <https://modelseed.org/biochem/compounds>`_ in the ``met_id`` key. The concentrations of the ``initial_concentrations_M`` key must be provided in units of Molar and defined for the rate law variable letters.
@@ -67,9 +67,9 @@ A cobrakbase model is simulated with the parameterized kinetics data over the de
         }
     }
   }
-       
+
 The additional keys can provide provenance of the datum source:
-            
+
 .. code-block:: json
 
  {
@@ -132,14 +132,14 @@ The additional keys can provide provenance of the datum source:
  }
 
 - *initial_concentrations_M* ``dict``: specifies initial concentrations of the simulated metabolites that supplant values from the kinetics data. Every metabolite in this dictionary must be defined in the model, and the concentrations in units of molar must be assigned according to the metabolite's ModelSEED Compound ID:
-           
+
 .. code-block:: json
 
  {
-    "cpd00002":0.0200, 
+    "cpd00002":0.0200,
     "cpd00008":0.0014
  }
- 
+
 - *total_time* & *timestep* ``float``: specify the total time and the timstep of the simulation in minutes.
 - *export_name* & *export_directory* ``str``: specify the folder name and directory to which the simulation content will be exported, where `None` defaults to a unique folder name in the current working directory.
 - *temperature* & *p_h* ``float``: optionally specify the temperature and pH at which the simulation will occur, respective, which allows the most closely matched datum to be parameterized, where multiple datum exist for the same reaction.
@@ -161,7 +161,7 @@ A multitude of values are stored within the ``dFBA`` object, and can be subseque
  from dfbapy import dFBA
  dfba = dFBA(model)
  dfba.simulate(reaction_kinetics, None, total_time, timestep)
- 
+
  # evaluate the dFBA simulation contents
  print(dir(dfba))
 
@@ -171,7 +171,7 @@ The following list highlights stored content in the ``dFBA`` object after a simu
 - *concentrations* & *fluxes* ``pandas.core.frame.DataFrame``: `Pandas DataFrames <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`_ that contain the ``mM`` concentrations (or changes thereof) for each metabolite and ``mmol/g_(dw)/hr`` fluxes for each reaction, respectively.
 - *kinetics_data* ``dict``: A dictionary of the kinetics data constrains the model.
 - *timestep_value* ``float``: The simulation timestep in minutes.
-- *compound_ids* ``dict``: A dictionary of all ModelSEED IDs with their names as values, which is loaded from the ModelSEED Database via the parameterized path. 
+- *compound_ids* ``dict``: A dictionary of all ModelSEED IDs with their names as values, which is loaded from the ModelSEED Database via the parameterized path.
 - *cell_dry_mass* & *cell_liters* ``float``: The mass and volume of the simulated cell.
 - *changed* & *unchanged* ``set``: The exclusive sets of metabolites whose concentrations either changed or did not change over the simulation, respectively.
 - *constrained* ``OrderedDict``: A dictionary with reaction names as the keys and their respective kinetic constraints as the values.

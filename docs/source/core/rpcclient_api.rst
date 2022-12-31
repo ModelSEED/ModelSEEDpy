@@ -21,7 +21,7 @@ __str__()
 ----------------
 
 **returns** *error_string* ``str``: A descriptive string of the Server Error that consists of the content that was provided in the initiation of the class.
-           
+
 -------------------------------------
 Accessible content
 -------------------------------------
@@ -58,7 +58,7 @@ call()
 - *token* ``str``: The token that authorizes access to the URL site.
 
 **returns** *resp_result* ``str``: The requests result where it exists, otherwise ``None``.
-           
+
 -------------------------------------
 Accessible content
 -------------------------------------

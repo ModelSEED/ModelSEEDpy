@@ -12,7 +12,7 @@ This class compatibilizes a collection of individual metabolic models to facilit
  from modelseedpy.community import MSCompatibility
  ms_compat = MSCompatibility(modelseed_db_path, printing = True)
 
-- *modelseed_db_path* ``str``: the path to the ModelSEED Database, which is only required for the FullThermo, where ``None`` does not apply these constraints. 
+- *modelseed_db_path* ``str``: the path to the ModelSEED Database, which is only required for the FullThermo, where ``None`` does not apply these constraints.
 - *printing* ``bool``: specifies whether results will be printed.
 
 ----------------------

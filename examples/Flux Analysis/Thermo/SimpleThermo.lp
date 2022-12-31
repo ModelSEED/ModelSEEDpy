@@ -1,5 +1,5 @@
 \ENCODING=ISO-8859-1
-\Problem name: 
+\Problem name:
 
 Minimize
  _77358bb8m1647m11ecm92a7m0242ac110001#0: - 1.496 cpd00169_c0_potential#286
@@ -1722,39 +1722,39 @@ Bounds
  0 <= Rgrxn01116_c0_thermo#335 <= 1000
  0 <= Rgbio1_thermo#336 <= 203870.9
 Binaries
- rxn00549_c0_revbin#190  rxn05312_c0_revbin#191  rxn00247_c0_revbin#192 
- rxn00786_c0_revbin#193  rxn08865_c0_revbin#194  rxn01200_c0_revbin#195 
- rxn08525_c0_revbin#196  FRD7_c0_revbin#197  rxn00545_c0_revbin#198 
- rxn09270_c0_revbin#199  rxn00173_c0_revbin#200  rxn08288_c0_revbin#201 
- rxn00459_c0_revbin#202  rxn00083_c0_revbin#203  rxn00097_c0_revbin#204 
- rxn32421_c0_revbin#205  rxn00154_c0_revbin#206  rxn19316_c0_revbin#207 
- rxn00187_c0_revbin#208  rxn00558_c0_revbin#209  rxn05319_c0_revbin#210 
- rxn00747_c0_revbin#211  rxn05468_c0_revbin#212  rxn35242_c0_revbin#213 
- rxn08535_c0_revbin#214  rxn01115_c0_revbin#215  rxn00225_c0_revbin#216 
- rxn00500_c0_revbin#217  rxn08350_c0_revbin#218  rxn20162_c0_revbin#219 
- rxn01333_c0_revbin#220  rxn30674_c0_revbin#221  rxn01100_c0_revbin#222 
- rxn39085_c0_revbin#223  rxn08173_c0_revbin#224  rxn00285_c0_revbin#225 
- rxn00161_c0_revbin#226  rxn00543_c0_revbin#227  rxn05297_c0_revbin#228 
- rxn05467_c0_revbin#229  rxn05488_c0_revbin#230  rxn00085_c0_revbin#231 
- rxn00062_c0_revbin#232  rxn34258_c0_revbin#233  rxn00171_c0_revbin#234 
- rxn05559_c0_revbin#235  rxn09272_c0_revbin#236  rxn00604_c0_revbin#237 
- rxn00159_c0_revbin#238  rxn08972_c0_revbin#239  rxn08542_c0_revbin#240 
- rxn01106_c0_revbin#241  rxn00198_c0_revbin#242  rxn01476_c0_revbin#243 
- rxn00781_c0_revbin#244  rxn09295_c0_revbin#245  rxn00785_c0_revbin#246 
- rxn08032_c0_revbin#247  rxn00189_c0_revbin#248  rxn00336_c0_revbin#249 
- rxn00147_c0_revbin#250  rxn09269_c0_revbin#251  rxn00248_c0_revbin#252 
- rxn00974_c0_revbin#253  rxn05493_c0_revbin#254  rxn00777_c0_revbin#255 
- rxn08094_c0_revbin#256  rxn05226_c0_revbin#257  rxn05155_c0_revbin#258 
- rxn08427_c0_revbin#259  rxn00184_c0_revbin#260  rxn05469_c0_revbin#261 
- rxn32587_c0_revbin#262  rxn01116_c0_revbin#263  bio1_revbin#264 
- _EX_cpd00071_e0_revbin#265  _EX_cpd00067_e0_revbin#266 
- _EX_cpd00009_e0_revbin#267  _EX_cpd00007_e0_revbin#268 
- _EX_cpd00020_e0_revbin#269  _EX_cpd00027_e0_revbin#270 
- _EX_cpd00221_e0_revbin#271  _EX_cpd00053_e0_revbin#272 
- _EX_cpd00011_e0_revbin#273  _EX_cpd00130_e0_revbin#274 
- _EX_cpd00001_e0_revbin#275  _EX_cpd00047_e0_revbin#276 
- _EX_cpd00013_e0_revbin#277  _EX_cpd00023_e0_revbin#278 
- _EX_cpd00082_e0_revbin#279  _EX_cpd00106_e0_revbin#280 
- _EX_cpd00036_e0_revbin#281  _EX_cpd00363_e0_revbin#282 
- _EX_cpd00024_e0_revbin#283  _EX_cpd00029_e0_revbin#284 
+ rxn00549_c0_revbin#190  rxn05312_c0_revbin#191  rxn00247_c0_revbin#192
+ rxn00786_c0_revbin#193  rxn08865_c0_revbin#194  rxn01200_c0_revbin#195
+ rxn08525_c0_revbin#196  FRD7_c0_revbin#197  rxn00545_c0_revbin#198
+ rxn09270_c0_revbin#199  rxn00173_c0_revbin#200  rxn08288_c0_revbin#201
+ rxn00459_c0_revbin#202  rxn00083_c0_revbin#203  rxn00097_c0_revbin#204
+ rxn32421_c0_revbin#205  rxn00154_c0_revbin#206  rxn19316_c0_revbin#207
+ rxn00187_c0_revbin#208  rxn00558_c0_revbin#209  rxn05319_c0_revbin#210
+ rxn00747_c0_revbin#211  rxn05468_c0_revbin#212  rxn35242_c0_revbin#213
+ rxn08535_c0_revbin#214  rxn01115_c0_revbin#215  rxn00225_c0_revbin#216
+ rxn00500_c0_revbin#217  rxn08350_c0_revbin#218  rxn20162_c0_revbin#219
+ rxn01333_c0_revbin#220  rxn30674_c0_revbin#221  rxn01100_c0_revbin#222
+ rxn39085_c0_revbin#223  rxn08173_c0_revbin#224  rxn00285_c0_revbin#225
+ rxn00161_c0_revbin#226  rxn00543_c0_revbin#227  rxn05297_c0_revbin#228
+ rxn05467_c0_revbin#229  rxn05488_c0_revbin#230  rxn00085_c0_revbin#231
+ rxn00062_c0_revbin#232  rxn34258_c0_revbin#233  rxn00171_c0_revbin#234
+ rxn05559_c0_revbin#235  rxn09272_c0_revbin#236  rxn00604_c0_revbin#237
+ rxn00159_c0_revbin#238  rxn08972_c0_revbin#239  rxn08542_c0_revbin#240
+ rxn01106_c0_revbin#241  rxn00198_c0_revbin#242  rxn01476_c0_revbin#243
+ rxn00781_c0_revbin#244  rxn09295_c0_revbin#245  rxn00785_c0_revbin#246
+ rxn08032_c0_revbin#247  rxn00189_c0_revbin#248  rxn00336_c0_revbin#249
+ rxn00147_c0_revbin#250  rxn09269_c0_revbin#251  rxn00248_c0_revbin#252
+ rxn00974_c0_revbin#253  rxn05493_c0_revbin#254  rxn00777_c0_revbin#255
+ rxn08094_c0_revbin#256  rxn05226_c0_revbin#257  rxn05155_c0_revbin#258
+ rxn08427_c0_revbin#259  rxn00184_c0_revbin#260  rxn05469_c0_revbin#261
+ rxn32587_c0_revbin#262  rxn01116_c0_revbin#263  bio1_revbin#264
+ _EX_cpd00071_e0_revbin#265  _EX_cpd00067_e0_revbin#266
+ _EX_cpd00009_e0_revbin#267  _EX_cpd00007_e0_revbin#268
+ _EX_cpd00020_e0_revbin#269  _EX_cpd00027_e0_revbin#270
+ _EX_cpd00221_e0_revbin#271  _EX_cpd00053_e0_revbin#272
+ _EX_cpd00011_e0_revbin#273  _EX_cpd00130_e0_revbin#274
+ _EX_cpd00001_e0_revbin#275  _EX_cpd00047_e0_revbin#276
+ _EX_cpd00013_e0_revbin#277  _EX_cpd00023_e0_revbin#278
+ _EX_cpd00082_e0_revbin#279  _EX_cpd00106_e0_revbin#280
+ _EX_cpd00036_e0_revbin#281  _EX_cpd00363_e0_revbin#282
+ _EX_cpd00024_e0_revbin#283  _EX_cpd00029_e0_revbin#284
 End

@@ -12,8 +12,8 @@ This class constrains metabolites of the biomass reaction and adjusts the object
  from modelseedpy.fbapkg import FluxFittingPkg
  flexbio = FluxFittingPkg(model)
 
-- *model* ``cobra.core.model.Model``: the CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-           
+- *model* ``cobra.core.model.Model``: the CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
+
 ----------------------
 build_package()
 ----------------------
@@ -36,7 +36,7 @@ The drain reactions are created through this function:
             "rescale_vfit_by_flux":true
  }
 
-can be supplanted in the ``parameters`` argument by listing the ``key`` to be changed with the new ``value``. The ``target_flux`` sub-dictionary specifies the fluxes (``values``) for each reaction ID (``keys``) that will be constrained through this package. 
+can be supplanted in the ``parameters`` argument by listing the ``key`` to be changed with the new ``value``. The ``target_flux`` sub-dictionary specifies the fluxes (``values``) for each reaction ID (``keys``) that will be constrained through this package.
 
 ----------------------
 Accessible content

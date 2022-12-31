@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import numpy as np
 import pandas as pd
@@ -15,7 +16,9 @@ def get_functional_roles(genome, ontology_term):
 
 def get_list_functional_roles_from_kbase(genome_ref, ws_client):
     list_functional_roles = []
-    genome_object_data = ws_client.get_objects2({'objects': [{'ref': genome_ref}]})['data'][0]['data']
+    genome_object_data = ws_client.get_objects2({"objects": [{"ref": genome_ref}]})[
+        "data"
+    ][0]["data"]
 
     # determine where functional roles are kept
     keys_location = genome_object_data.keys()
@@ -26,7 +29,9 @@ def get_list_functional_roles_from_kbase(genome_ref, ws_client):
     elif "cdss" in keys_location:
         location_of_functional_roles = genome_object_data["cdss"]
     else:
-        raise ValueError("The functional roles are not under 'features', 'non_coding_features', or 'cdss'.")
+        raise ValueError(
+            "The functional roles are not under 'features', 'non_coding_features', or 'cdss'."
+        )
 
     # either the functional roles are under function or functions
     keys_function = location_of_functional_roles[0].keys()
@@ -40,7 +45,7 @@ def get_list_functional_roles_from_kbase(genome_ref, ws_client):
                 list_functional_roles.extend(role_to_insert.split(" / "))
             elif "; " in role_to_insert:
                 list_functional_roles.extend(role_to_insert.split("; "))
-            elif 'hypothetical protein' in role_to_insert:
+            elif "hypothetical protein" in role_to_insert:
                 pass
             else:
                 list_functional_roles.append(role_to_insert)
@@ -82,20 +87,28 @@ def create_indicator_matrix(ref_to_role, master_role_list=None):
     ref_to_indication = {}
     # make indicator rows for each
     for genome_id, features in ref_to_role.items():
-        matching_index = [i for i, role in enumerate(master_role_list) if role in set(features)]
+        matching_index = [
+            i for i, role in enumerate(master_role_list) if role in set(features)
+        ]
         indicators = np.zeros(len(master_role_list))
         try:
             indicators[np.array(matching_index)] = 1
         except IndexError:
-            raise IndexError('The genomes or genomeSet that you have submitted wasn’t annotated using the \
+            raise IndexError(
+                "The genomes or genomeSet that you have submitted wasn’t annotated using the \
                 RAST annotation pipeline. Please annotate the genomes via ‘Annotate Microbial Genome’ app \
                 (https://narrative.kbase.us/#appcatalog/app/RAST_SDK/reannotate_microbial_genome/release)or \
                 genomeSets via Annotate Multiple Microbial Genomes’ app \
                 (https://narrative.kbase.us/#appcatalog/app/RAST_SDK/reannotate_microbial_genomes/release) and \
-                resubmit the RAST annotated genome/genomeSets into the Predict Phenotype app. (')
+                resubmit the RAST annotated genome/genomeSets into the Predict Phenotype app. ("
+            )
         ref_to_indication[genome_id] = indicators.astype(int)
 
-    indicator_matrix = pd.DataFrame.from_dict(data=ref_to_indication, orient='index',
-                                              columns=master_role_list).reset_index() \
+    indicator_matrix = (
+        pd.DataFrame.from_dict(
+            data=ref_to_indication, orient="index", columns=master_role_list
+        )
+        .reset_index()
         .rename(columns={"index": "Genome Reference"})
+    )
     return indicator_matrix, master_role_list

@@ -12,8 +12,8 @@ This class constrains exchange reactions and media compounds:
  from modelseedpy.fbapkg import KBaseMediaPkg
  kbmedia = KBaseMediaPkg(model)
 
-- *model* ``cobra.core.model.Model``: the CobraKBase model that will be edited. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
-           
+- *model* ``cobra.core.model.Model``: the CobraKBase model that will be edited. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
+
 ----------------------
 build_package()
 ----------------------
@@ -24,7 +24,7 @@ The drain reactions are created through this function:
 
  kbmedia.build_package(media_or_parameters, default_uptake=None, default_excretion=None)
 
-- *media_or_parameters* ``dict | cobrakbase.core.kbasebiochem.media.Media``: The parameters that govern flux bounds of the exchange reactions, or the media that will be simulated with the specified model. The default parameters 
+- *media_or_parameters* ``dict | cobrakbase.core.kbasebiochem.media.Media``: The parameters that govern flux bounds of the exchange reactions, or the media that will be simulated with the specified model. The default parameters
 
 .. code-block:: json
 

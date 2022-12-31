@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.community.mssteadycom import MSSteadyCom
 from modelseedpy.community.commhelper import build_from_species_models
@@ -12,8 +14,10 @@ from cobra.core.dictlist import DictList
 from cobra.io import save_matlab_model
 from optlang.symbolics import Zero
 from pandas import DataFrame
+from pprint import pprint
 import logging
-#import itertools
+
+# import itertools
 import cobra
 import re, os
 
@@ -71,7 +75,7 @@ class CommunityModelSpecies:
                     self.biomass_drain = rxn
 
         if len(self.biomasses) == 0:
-            logger.critical("No biomass reaction found for species "+self.id)
+            logger.critical("No biomass reaction found for species " + self.id)
         if not self.biomass_drain:
             logger.info("Making biomass drain reaction for species: "+self.id)
             self.biomass_drain = Reaction(
@@ -101,6 +105,20 @@ class CommunityModelSpecies:
         if self.community.lp_filename:
             self.community.print_lp(self.community.lp_filename+"_"+self.id+"_ATP")
         return self.community.model.optimize()
+
+    def compute_max_atp(self):
+        if not self.atp_hydrolysis:
+            logger.critical("No ATP hydrolysis found for species:" + self.id)
+        self.community.model.objective = self.community.model.problem.Objective(
+            Zero, direction="max"
+        )
+        self.community.model.objective.set_linear_coefficients(
+            {self.atp_hydrolysis.forward_variable: 1}
+        )
+        if self.community.lp_filename:
+            self.community.print_lp(self.community.lp_filename + "_" + self.id + "_ATP")
+        return self.community.model.optimize()
+
 
 class MSCommunity:
     def __init__(self, model=None,            # the model that will be defined
@@ -140,7 +158,10 @@ class MSCommunity:
                                     f"hence, the {reaction} cannot be defined as the model primary biomass.")
                             print('primary biomass defined', reaction)
                             self.primary_biomass = reaction
-                        elif reaction.metabolites[self.biomass_cpd] < 0 and len(reaction.metabolites) == 1:
+                        elif (
+                            reaction.metabolites[self.biomass_cpd] < 0
+                            and len(reaction.metabolites) == 1
+                        ):
                             self.biomass_drain = reaction
             elif 'c' in self.biomass_cpd.compartment:
                 other_biomass_cpds.append(self.biomass_cpd)
@@ -154,7 +175,7 @@ class MSCommunity:
     def set_abundance(self, abundances):
         #calculate the normalized biomass
         total_abundance = sum([abundances[species] for species in abundances])
-        #map abundances to all species
+        # map abundances to all species
         for species in abundances:
             abundances[species] /= total_abundance
             if species in self.species:
@@ -162,7 +183,7 @@ class MSCommunity:
         #remake the primary biomass reaction based on abundances
         if self.primary_biomass is None:
             logger.critical("Primary biomass reaction not found in community model")
-        all_metabolites = {self.biomass_cpd:1}
+        all_metabolites = {self.biomass_cpd: 1}
         for species in self.species:
             all_metabolites[species.biomass_cpd] = -abundances[species.id]
         self.primary_biomass.add_metabolites(all_metabolites,combine=False)
@@ -218,21 +239,23 @@ class MSCommunity:
         blacklist = blacklist or []
         if not target:
             target = self.primary_biomass.id
-        self.set_objective(target,minimize)
-        gfname = FBAHelper.medianame(media)+"-"+target
+        self.set_objective(target, minimize)
+        gfname = FBAHelper.medianame(media) + "-" + target
         if suffix:
             gfname += f"-{suffix}"
         self.gapfillings[gfname] = MSGapfill(self.util.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist)
         gfresults = self.gapfillings[gfname].run_gapfilling(media,target, solver = solver)
         if not gfresults:
-            logger.critical("Gapfilling failed with the specified model, media, and target reaction.")
+            logger.critical(
+                "Gapfilling failed with the specified model, media, and target reaction."
+            )
             return None
         return self.gapfillings[gfname].integrate_gapfill_solution(gfresults)
 
     def test_individual_species(self, media=None, allow_cross_feeding=True, run_atp=True, run_biomass=True):
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-        #Iterating over species and running tests
-        data = {"Species":[],"Biomass":[],"ATP":[]}
+        # Iterating over species and running tests
+        data = {"Species": [], "Biomass": [], "ATP": []}
         for individual in self.species:
             data["Species"].append(individual.id)
             with self.util.model:
@@ -241,9 +264,13 @@ class MSCommunity:
                     for indtwo in self.species:
                         if indtwo != individual:
                             indtwo.disable_species()
-                if run_biomass:  #If testing biomass, setting objective to individual species biomass and optimizing
+                if (
+                    run_biomass
+                ):  # If testing biomass, setting objective to individual species biomass and optimizing
                     data["Biomass"].append(individual.compute_max_biomass())
-                if run_atp:      #If testing atp, setting objective to individual species atp and optimizing
+                if (
+                    run_atp
+                ):  # If testing atp, setting objective to individual species atp and optimizing
                     data["ATP"].append(individual.compute_max_atp())
         df = DataFrame(data)
         logger.info(df)
@@ -267,7 +294,7 @@ class MSCommunity:
             new_objective = self.util.model.problem.Objective(Zero,direction="max")
             self.util.model.objective = new_objective
             new_objective.set_linear_coefficients(objcoef)
-            self.run(media,pfba)
+            self.run(media, pfba)
             return self._compute_relative_abundance_from_solution()
 
     def run(self,media,pfba = None):  # !!! why is the media needed to execute the model?
@@ -287,21 +314,25 @@ class MSCommunity:
         if not solution and not self.solution:
             logger.warning("No feasible solution!")
             return None
-        data = {"Species":[],"Abundance":[]}
-        totalgrowth = sum([self.solution.fluxes[species.biomasses[0].id] for species in self.species])
+        data = {"Species": [], "Abundance": []}
+        totalgrowth = sum(
+            [self.solution.fluxes[species.biomasses[0].id] for species in self.species]
+        )
         if totalgrowth == 0:
             logger.warning("The community did not grow!")
             return None
         for species in self.species:
             data["Species"].append(species.id)
-            data["Abundance"].append(self.solution.fluxes[species.biomasses[0].id]/totalgrowth)
+            data["Abundance"].append(
+                self.solution.fluxes[species.biomasses[0].id] / totalgrowth
+            )
         df = DataFrame(data)
         logger.info(df)
         return df
 
     def _set_solution(self,solution):
         self.solution = None
-        if solution.status != 'optimal':
+        if solution.status != "optimal":
             logger.warning("No solution found for the simulation.")
             return None
         self.solution = solution

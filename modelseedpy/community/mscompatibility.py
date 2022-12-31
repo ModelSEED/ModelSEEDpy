@@ -206,7 +206,7 @@ class MSCompatibility:
             for met_id, content in met_conflicts.items():
                 export_met_conflicts[met_id] = {}
                 for key, val in content.items():
-                    if '_met' not in key:
+                    if "_met" not in key:
                         export_met_conflicts[met_id][key] = val
                     else:
                         export_met_conflicts[met_id][key.replace('_met','_formula')] = val.formula
@@ -252,7 +252,7 @@ class MSCompatibility:
     def _export(models, conflicts, conflicts_file_name, model_names, export_directory):
         if export_directory is None:
             export_directory = os.getcwd()
-                    
+
         file_paths = []
         if conflicts_file_name:
             path = os.path.join(export_directory,conflicts_file_name)
@@ -264,7 +264,9 @@ class MSCompatibility:
                 path = os.path.join(export_directory,f'{model_names[index]}.json')
                 file_paths.append(os.path.relpath(path, export_directory))
                 save_json_model(model, path)
-        with ZipFile('_'.join(model_names[:4])+'.zip', 'w', compression = ZIP_LZMA) as zip:
+        with ZipFile(
+            "_".join(model_names[:4]) + ".zip", "w", compression=ZIP_LZMA
+        ) as zip:
             for file in file_paths:
                 zip.write(file)
                 os.remove(file)

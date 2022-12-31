@@ -39,20 +39,19 @@ Installation
 ModelSEEDpy can be installed via ``pip`` through the ``PyPI`` channel::
 
  pip install modelseedpy
-   
+
 The associated ModelSEED Database, which is required for a few packages, is simply downloaded by cloning the GitHub repository::
 
  git clone https://github.com/ModelSEED/ModelSEEDDatabase.git
-   
-and the path to this repository is passed as an argument to the corresponding packages. 
+
+and the path to this repository is passed as an argument to the corresponding packages.
 
 **Windows users** must separately install the ``pyeda`` module: 1) download the appropriate wheel for your Python version from `this website <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyeda>`_ ; and 2) install the wheel through the following commands in a command prompt/powershell console::
 
  cd path/to/pyeda/wheel
  pip install pyeda_wheel_name.whl
-   
-   
-   
+
+
 .. toctree::
    :hidden:
    
@@ -63,5 +62,3 @@ and the path to this repository is passed as an argument to the corresponding pa
    others/Index
    webinars
    api
-   
-   

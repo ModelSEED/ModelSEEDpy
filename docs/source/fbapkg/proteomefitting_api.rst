@@ -12,7 +12,7 @@ This class constrains the sum progressions of sets of reactions:
  from modelseedpy.fbapkg import ProteomeFittingPkg
  proteofit = ProteomeFittingPkg(model)
 
-- *model* ``cobra.core.model.Model``: The CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package. 
+- *model* ``cobra.core.model.Model``: The CobraKBase model that will be constrained. The conversion from `standard COBRA models  <https://cobrapy.readthedocs.io/en/latest/autoapi/cobra/core/model/index.html>`_ to CobraKBase models is facilitated by the `cobrakbase` package.
 
 ----------------------
 build_package()
@@ -44,7 +44,7 @@ The reactions that are defined in the protemoe are constrained and used to refin
  }
 
 where keys of ``proteome`` and ``condition``, which lack default values, must be defined.
-       
+
 ----------------------
 Accessible content
 ----------------------
