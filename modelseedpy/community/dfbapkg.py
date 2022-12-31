@@ -32,14 +32,14 @@ def isnumber(string):
 class dFBAPkg(BaseFBAPkg):
     def __init__(self, 
                  model,                   # Cobrakbase model
-                 modelseed_db_path: str,  # local path to the ModelSEED Database
+                 msdb_path: str,  # local path to the ModelSEED Database
                  solver: str = 'glpk',    # specifies the LP solver
                  warnings: bool = True, verbose: bool = False, printing: bool = False, jupyter: bool = False
                  ):
         # define the parameter and variable dictionaries
         BaseFBAPkg.__init__(self, model, "BasedFBA", {"met": "metabolite"}, {"conc": 'metabolite'})
         self.pkgmgr.addpkgs(["FullThermoPkg"])
-        # self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["modelseed_db_path"])
+        # self.parameters["modelseed_api"] = FBAHelper.get_modelseed_db_api(self.parameters["msdb_path"])
             
         # define simulation conditions
         self.warnings: bool = warnings; self.verbose: bool = verbose; self.printing: bool = printing; self.jupyter: bool = jupyter 

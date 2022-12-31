@@ -1,7 +1,11 @@
 import logging
 import re
 from cobra import Model, Reaction, Metabolite  # !!! Model and Metabolite are not used
+from modelseedpy.core.exceptions import ModelError
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.core.fbahelper import FBAHelper
+from optlang.symbolics import Zero
+from optlang import Constraint
 import time
 
 logger = logging.getLogger(__name__)
@@ -65,15 +69,17 @@ def search_name(name):
 class MSModelUtil:
 
     def __init__(self,model):
-        self.model = model
+        self.model = model.copy()
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         self.atputl = self.gfutl = self.metabolite_hash = self.search_metabolite_hash = None
         self.test_objective = self.score = None
+        if self.model.slim_optimize() == 0:
+            raise ModelError(f"The {self.model.id} model is broken and does not grow in complete media.")
     
     def printlp(self,lpfilename="debug.lp"):
         with open(lpfilename, 'w') as out:
-                out.write(str(self.model.solver))
-    
+            out.write(str(self.model.solver))
+
     def build_metabolite_hash(self):
         self.metabolite_hash = {}
         self.search_metabolite_hash = {}
@@ -86,7 +92,7 @@ class MSModelUtil:
                         self.add_name_to_metabolite_hash(entry,met)
                 else:
                     self.add_name_to_metabolite_hash(item,met)
-    
+
     def add_name_to_metabolite_hash(self,name,met):
         if name not in self.metabolite_hash:
             self.metabolite_hash[name] = []
@@ -107,7 +113,7 @@ class MSModelUtil:
         logger.info(name," not found in model!")
         return []
     
-    def rxn_hash(self): 
+    def rxn_hash(self):
         output = {}
         for rxn in self.model.reactions:
             strings = stoichiometry_to_string(rxn.metabolites)
@@ -135,7 +141,40 @@ class MSModelUtil:
     
     def exchange_list(self): 
         return [rxn for rxn in self.model.reactions if 'EX_' in rxn.id]
-    
+
+    def carbon_mets(self):
+        return [met for met in self.model.metabolites if 'C' in met.elements]
+
+    def carbon_exchange_list(self, include_unknown=True):
+        if not include_unknown:
+            return [ex for ex in self.exchange_list() if "C" in ex.reactants[0].elements]
+        return [ex for ex in self.exchange_list() if not ex.reactants[0].elements or "C" in ex.reactants[0].elements]
+
+    def exchange_mets_list(self):
+        return [met for ex_rxn in self.exchange_list() for met in ex_rxn.metabolites]
+
+    def media_exchanges_list(self):
+        return [exRXN for exRXN in self.exchange_list() if exRXN.id in self.model.medium]
+
+    def bio_rxns_list(self):
+        return [rxn for rxn in self.model.reactions if re.search(r"(^bio\d+)", rxn.id)]
+
+    def transport_list(self):
+        return [rxn for rxn in self.model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
+
+    def compatibilize(self, conflicts_file_name="orig_conflicts.json", printing=False):
+        from modelseedpy.community.mscompatibility import MSCompatibility
+        self.model = MSCompatibility.standardize(
+            [self.model], conflicts_file_name=conflicts_file_name, printing=printing)[0]
+        return self.model
+
+    def standard_exchanges(self):
+        for ex in self.exchange_list():
+            if len(ex.reactants) != 1 and len(ex.products) != 0:
+                raise ModelError(f"The ex {ex.id} possesses {len(ex.reactants)} reactants and "
+                                 f"{len(ex.products)} products, which are non-standard and are incompatible"
+                                 f" with various ModelSEED operations.")
+
     def exchange_hash(self):
         exchange_reactions = {}
         for ex_rxn in self.exchange_list():
@@ -145,6 +184,9 @@ class MSModelUtil:
                 else:
                     logger.warn("Nonstandard exchange reaction ignored:"+ex_rxn.id)
         return exchange_reactions
+
+    def var_names_list(self):
+        return [var.name for var in self.model.variables]
     
     def add_missing_exchanges(self,media):
         output, exchange_list = [], []
@@ -285,7 +327,7 @@ class MSModelUtil:
             for gapfilling in newmodel["gapfillings"]:
                 if gapfilling["id"] == gfid:
                     gapfilling_obj = gapfilling
-        if not gapfilling_obj:    
+        if not gapfilling_obj:
             gapfilling_obj = {
                 "gapfill_id": newmodel["id"]+"."+gfid,
                 "id": gfid,
@@ -325,7 +367,7 @@ class MSModelUtil:
                     kbrxn["gapfill_data"][gfid] = dict()
                     kbrxn["gapfill_data"][gfid]["0"] = [gapfilled_reactions["reversed"][rxn],1,[]]
         return rxn_table
-    
+
     def apply_test_condition(self,condition,model = None):
         """Applies constraints and objective of specified condition to model
         
@@ -516,3 +558,15 @@ class MSModelUtil:
             m = re.search('(.+)_([a-z]+)(\d*)$', object.id)
             return (m[1],m[2],m[3])
         return None
+
+    def add_kbase_media(self, kbase_media):
+        exIDs = [exRXN.id for exRXN in self.exchange_list()]
+        self.model.medium = {"EX_"+exID: -bound[0] for exID, bound in kbase_media.get_media_constraints().items()
+                             if "EX_"+exID in exIDs}
+        return self.model.medium
+
+    def add_medium(self, media):
+        # add the new media and its flux constraints
+        exIDs = [exRXN.id for exRXN in self.exchange_list()]
+        self.model.medium = {ex: uptake for ex, uptake in media.items() if ex in exIDs}
+        return self.model.medium

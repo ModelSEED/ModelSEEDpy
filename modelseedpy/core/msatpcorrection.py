@@ -13,6 +13,7 @@ from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.fbahelper import FBAHelper
 from modelseedpy.core.msgapfill import MSGapfill
+from modelseedpy.core.msmedia import MSMedia
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,12 @@ class MSATPCorrection:
         else:
             output = self.modelutl.add_atp_hydrolysis(compartment)
             self.atp_hydrolysis = output["reaction"]
-        self.atp_medias = atp_medias
+        self.atp_medias = []
+        for media in atp_medias:
+            if isinstance(media,MSMedia):
+                self.atp_medias.append([media,0.01])
+            else:
+                self.atp_medias.append(media)        
         self.max_gapfilling = max_gapfilling
         self.gapfilling_delta = gapfilling_delta
         self.coretemplate = core_template
@@ -103,7 +109,8 @@ class MSATPCorrection:
             logger.debug(f"ATP bounds: {self.atp_hydrolysis.lower_bound} : {self.atp_hydrolysis.upper_bound}")
             #self.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
             pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
-            for media in self.atp_medias:
+            for media_tuple in self.atp_medias:
+                media = media_tuple[0]
                 logger.debug('evaluate media %s', media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
                 solution = self.model.optimize()
@@ -113,7 +120,7 @@ class MSATPCorrection:
                 if solution.objective_value == 0 or solution.status != 'optimal':
                     self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(media, self.atp_hydrolysis.id)
                     #IF gapfilling fails - need to activate and penalize the noncore and try again
-                elif solution.objective_value > 0 or solution.status == 'optimal':
+                elif solution.objective_value >= media_tuple[1]:
                     self.media_gapfill_stats[media] = {'reversed': {}, 'new': {}}
         with open('debug.json', 'w') as outfile:
             json.dump(self.media_gapfill_stats[media], outfile)

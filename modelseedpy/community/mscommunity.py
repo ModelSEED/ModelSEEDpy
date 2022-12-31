@@ -1,5 +1,6 @@
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
-from modelseedpy.community.steadycom import MSSteadyCom
+from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.community.mssteadycom import MSSteadyCom
 from modelseedpy.community.commhelper import build_from_species_models
 from modelseedpy.core.exceptions import ObjectAlreadyDefinedError, ParameterError
 from modelseedpy.core.msgapfill import MSGapfill
@@ -52,13 +53,16 @@ class CommunityModelSpecies:
                 self.id = "Species"+str(self.index)
 
         logger.info("Making atp hydrolysis reaction for species: "+self.id)
-        atp_rxn = FBAHelper.add_atp_hydrolysis(self.community.model,"c"+str(self.index))
+        atp_rxn = FBAHelper.add_atp_hydrolysis(self.community.util.model,"c"+str(self.index))
         # FBAHelper.add_autodrain_reactions_to_self.community_model(self.community.model)  # !!! FIXME This FBAHelper function is not defined.
         self.atp_hydrolysis = atp_rxn["reaction"]
         self.biomass_drain = None
         self.biomasses, self.reactions = [], []
-        for rxn in self.community.model.reactions:
-            if int(FBAHelper.rxn_compartment(rxn)[1:]) == self.index and 'bio' not in rxn.name:
+        for rxn in self.community.util.model.reactions:
+            rxnComp = FBAHelper.rxn_compartment(rxn)
+            if not rxnComp:
+                print(f"The reaction {rxn.id} strangely lacks a compartment.")
+            elif int(rxnComp[1:]) == self.index and 'bio' not in rxn.name:
                 self.reactions.append(rxn)
             if self.biomass_cpd in rxn.metabolites:
                 if rxn.metabolites[self.biomass_cpd] == 1 and len(rxn.metabolites) > 1:
@@ -72,7 +76,7 @@ class CommunityModelSpecies:
             logger.info("Making biomass drain reaction for species: "+self.id)
             self.biomass_drain = Reaction(
                 id="DM_"+self.biomass_cpd.id, name="DM_" + self.biomass_cpd.name, lower_bound=0, upper_bound=100)
-            self.community.model.add_reactions([self.biomass_drain])
+            self.community.util.model.add_reactions([self.biomass_drain])
             self.biomass_drain.add_metabolites({self.biomass_cpd: -1})
             self.biomass_drain.annotation["sbo"] = 'SBO:0000627'
 
@@ -114,17 +118,19 @@ class MSCommunity:
         self.species = DictList()
 
         # defining the models
-        self.model = model if not models else build_from_species_models(
+        model = model if not models else build_from_species_models(
             models, names=names, abundances=abundances, cobra_model=True)
-        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
-        msid_cobraid_hash = FBAHelper.msid_hash(self.model)
+        self.util = MSModelUtil(model)
+        self.id = self.util.model.id
+        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.util.model)
+        msid_cobraid_hash = FBAHelper.msid_hash(self.util.model)
         if "cpd11416" not in msid_cobraid_hash:
             raise KeyError("Could not find biomass compound for the model.")
         other_biomass_cpds = []
         for self.biomass_cpd in msid_cobraid_hash["cpd11416"]:
             print(self.biomass_cpd)
             if self.biomass_cpd.compartment == "c0":
-                for reaction in self.model.reactions:
+                for reaction in self.util.model.reactions:
                     if self.biomass_cpd in reaction.metabolites:
                         print(reaction)
                         if reaction.metabolites[self.biomass_cpd] == 1 and len(reaction.metabolites) > 1:
@@ -167,8 +173,8 @@ class MSCommunity:
         sense = "max"
         if minimize:
             sense = "min"
-        self.model.objective = self.model.problem.Objective(
-            self.model.reactions.get_by_id(target).flux_expression,
+        self.util.model.objective = self.util.model.problem.Objective(
+            self.util.model.reactions.get_by_id(target).flux_expression,
             direction=sense
         )
 
@@ -189,7 +195,7 @@ class MSCommunity:
     def steadycom(self, solution=None, media=None, filename=None, export_directory=None,
                   node_metabolites=True, flux_threshold=1, visualize=True, ignore_mets=None):
         return MSSteadyCom.compute(
-            self, self.model, None, solution or self.run(media), filename=filename, export_directory=export_directory,
+            self, self.util.model, None, solution or self.run(media), filename=filename, export_directory=export_directory,
             node_metabolites=node_metabolites, flux_threshold=flux_threshold, visualize=visualize,
             show_figure=True, ignore_mets=ignore_mets)
 
@@ -199,18 +205,24 @@ class MSCommunity:
             filename = self.lp_filename
         if filename:
             with open(filename+".lp", 'w') as out:
-                out.write(str(self.model.solver))
+                out.write(str(self.util.model.solver))
                 out.close()
 
     #Analysis functions
-    def gapfill(self, media = None, target = None, minimize = False,default_gapfill_templates = [], default_gapfill_models = [], test_conditions = [], reaction_scores = {}, blacklist = [], suffix = None, solver = 'glpk'):
+    def gapfill(self, media = None, target = None, minimize = False, default_gapfill_templates=None, default_gapfill_models=None,
+                test_conditions=None, reaction_scores=None, blacklist=None, suffix = None, solver = 'glpk'):
+        default_gapfill_templates = default_gapfill_templates or []
+        default_gapfill_models = default_gapfill_models or []
+        test_conditions = test_conditions or []
+        reaction_scores = reaction_scores or {}
+        blacklist = blacklist or []
         if not target:
             target = self.primary_biomass.id
         self.set_objective(target,minimize)
         gfname = FBAHelper.medianame(media)+"-"+target
         if suffix:
             gfname += f"-{suffix}"
-        self.gapfillings[gfname] = MSGapfill(self.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist)
+        self.gapfillings[gfname] = MSGapfill(self.util.model, default_gapfill_templates, default_gapfill_models, test_conditions, reaction_scores, blacklist)
         gfresults = self.gapfillings[gfname].run_gapfilling(media,target, solver = solver)
         if not gfresults:
             logger.critical("Gapfilling failed with the specified model, media, and target reaction.")
@@ -223,7 +235,7 @@ class MSCommunity:
         data = {"Species":[],"Biomass":[],"ATP":[]}
         for individual in self.species:
             data["Species"].append(individual.id)
-            with self.model:
+            with self.util.model:
                 #If no interaction allowed, iterate over all other species and disable them
                 if not allow_cross_feeding:
                     for indtwo in self.species:
@@ -238,10 +250,11 @@ class MSCommunity:
         return df
 
     def atp_correction(self,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0):
-        self.atpcorrect = MSATPCorrection(self.model,core_template, atp_medias, atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0)
+        self.atpcorrect = MSATPCorrection(self.util.model,core_template, atp_medias,
+                                          atp_objective="bio2", max_gapfilling=None, gapfilling_delta=0)
 
     def predict_abundances(self,media=None,pfba=True,kinetic_coeff = None):
-        with self.model:   # WITH, here, discards changes after each simulation
+        with self.util.model:   # WITH, here, discards changes after each simulation
             if not kinetic_coeff:
                 kinetic_coeff = self.kinetic_coeff
             if not kinetic_coeff: #Kinetic coefficients must be used for this formulation to work
@@ -251,8 +264,8 @@ class MSCommunity:
             objcoef = {}
             for species in self.species:
                 objcoef[species.biomasses[0].forward_variable] = 1
-            new_objective = self.model.problem.Objective(Zero,direction="max")
-            self.model.objective = new_objective
+            new_objective = self.util.model.problem.Objective(Zero,direction="max")
+            self.util.model.objective = new_objective
             new_objective.set_linear_coefficients(objcoef)
             self.run(media,pfba)
             return self._compute_relative_abundance_from_solution()
@@ -260,14 +273,14 @@ class MSCommunity:
     def run(self,media,pfba = None):  # !!! why is the media needed to execute the model?
         self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         self.print_lp()
-        save_matlab_model(self.model, self.model.name+".mat")
+        save_matlab_model(self.util.model, self.util.model.name+".mat")
         if pfba or self.pfba:
-            self._set_solution(cobra.flux_analysis.pfba(self.model))
+            self._set_solution(cobra.flux_analysis.pfba(self.util.model))
         else:
-            self._set_solution(self.model.optimize())
+            self._set_solution(self.util.model.optimize())
         if not self.solution:
             return None
-        logger.info(self.model.summary())
+        logger.info(self.util.model.summary())
         return self.solution
 
     def _compute_relative_abundance_from_solution(self,solution = None):

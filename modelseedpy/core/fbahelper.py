@@ -13,6 +13,7 @@ from optlang import Constraint
 from scipy.odr import Output  # !!! Output is never used
 from typing import Iterable
 from chemw import ChemMW
+from numpy import nan
 from warnings import warn
 #from Carbon.Aliases import false
 
@@ -188,6 +189,10 @@ class FBAHelper:
                     #exchange_hash[base][comp]
 
     @staticmethod
+    def rxn_mets_list(rxn):
+        return [met for met in rxn.reactants+rxn.products]
+
+    @staticmethod
     def find_reaction(model,stoichiometry):
         reaction_strings = FBAHelper.stoichiometry_to_string(stoichiometry)
         atpstring = reaction_strings[0]
@@ -317,10 +322,16 @@ class FBAHelper:
         return [cpd.id for cpd in media.data['mediacompounds']]
     
     @staticmethod
-    def parse_df(df):
+    def parse_df(df, float_values=True):
+        if isinstance(df, tuple):
+            return df
         from collections import namedtuple
         dataframe = namedtuple("DataFrame", ("index", "columns", "values"))
-        return dataframe(list(df.index), list(df.columns), df.to_numpy())
+        df.dropna(inplace=True)
+        values = df.to_numpy()
+        if float_values:
+            values = values.astype("float64")
+        return dataframe(list(df.index), list(df.columns), values)
     
     @staticmethod
     def add_cons_vars(model, vars_cons, sloppy=False):
@@ -349,9 +360,8 @@ class FBAHelper:
             model.solver.update()
 
     @staticmethod
-    def add_minimal_objective_cons(model, objective_expr=None, min_value=None):
+    def add_minimal_objective_cons(model, min_value=0.1, objective_expr=None):
         objective_expr = objective_expr or model.objective.expression
-        min_value = min_value or 0.1
         FBAHelper.create_constraint(model, Constraint(objective_expr, lb=min_value, ub=None, name="min_value"))
     
     @staticmethod
@@ -381,18 +391,6 @@ class FBAHelper:
                 unique_objs.add(obj)
                 unique_ids.remove(obj.id)
         return unique_objs
-    
-    @staticmethod
-    def exchange_reactions(model):
-        return [rxn for rxn in model.reactions if "EX_" in rxn.id]
-
-    @staticmethod
-    def transport_reactions(model):
-        return [rxn for rxn in model.reactions if any(["_e0" in met.id for met in rxn.metabolites])]
-
-    @staticmethod
-    def bio_reactions(model):
-        return [rxn for rxn in model.reactions if "bio" in rxn.id]
     
     @staticmethod
     def solution_to_dict(solution):
@@ -425,10 +423,7 @@ class FBAHelper:
         else:
             return {met.id: stoich for met, stoich in rxn.items()}
 
-    # @staticmethod
-    # def non_interacting_community(community):
-    #     # !!! divert all exchange reactions to a sink
-    #     for rxn in community.reactions:
-    #         if "EX_" in rxn.id:
-    #             community.add_boundary(list(rxn.metabolites.keys())[0], lb=0, type="sink")
-    #     return community
+    @staticmethod
+    def convert_kbase_media(kbase_media):
+        return {"EX_"+exID: -bound[0] for exID, bound in kbase_media.get_media_constraints().items()}
+

@@ -2,6 +2,7 @@ from modelseedpy.community.mscompatibility import MSCompatibility
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.fbahelper import FBAHelper
 from cobra import Model, Reaction, Metabolite
+import re
 
 
 def build_from_species_models(org_models, model_id=None, name=None, names=None, abundances=None, cobra_model=False, standardize=False):
@@ -30,18 +31,17 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
         models = MSCompatibility.standardize(org_models, conflicts_file_name='exchanges_conflicts.json', model_names=names)
     else:
         models = MSCompatibility.align_exchanges(org_models, 'exchanges_conflicts.json', names)
-    newmodel = Model(model_id, name)
     biomass_compounds, biomass_indices = [], []
     biomass_index = minimal_biomass_index = 2
     new_metabolites, new_reactions = set(), set()
     for model_index, org_model in enumerate(models):
-        model = org_model.copy()
-        model_reaction_ids = [rxn.id for rxn in model.reactions]
+        model_util = MSModelUtil(org_model)
+        model_reaction_ids = [rxn.id for rxn in model_util.model.reactions]
         model_index += 1
         # print([rxn.id for rxn in model.reactions if "bio" in rxn.id])
         # print(model_index, model.id)
         # Rename metabolites
-        for met in model.metabolites:
+        for met in model_util.model.metabolites:
             # Renaming compartments
             output = MSModelUtil.parse_id(met)
             if output is None:
@@ -51,9 +51,9 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
                     print(met.id)
                     met.id = met.id.split("_")[:-1] + met.compartment
             else:
-                name, compartment, index = output
+                name, compartment, out_index = output
                 index = 0 if compartment == "e" else model_index
-                if index == "":
+                if out_index == "":
                     met.id += str(index)
                     met.compartment += str(index)
                 elif compartment == "e":
@@ -63,13 +63,16 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
                     met.id = name + "_" + met.compartment
             new_metabolites.add(met)
             if "cpd11416_c" in met.id:
-                print(met.id, model.id)
+                print(met.id, model_util.model.id)
                 biomass_compounds.append(met)
         # Rename reactions
-        for rxn in model.reactions:  # !!! all reactions should have a non-zero compartment index
+        for rxn in model_util.model.reactions:  # !!! all reactions should have a non-zero compartment index
             if rxn.id[0:3] != "EX_":
                 if re.search('^(bio)(\d+)$', rxn.id):
                     index = int(rxn.id.removeprefix('bio'))
+                    if biomass_index == 2:
+                        while f"bio{biomass_index}" in model_reaction_ids:
+                            biomass_index += 1
                     if index not in biomass_indices and index >= minimal_biomass_index:
                         biomass_indices.append(index)
                         print(rxn.id, '2')
@@ -96,11 +99,16 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
                         name, compartment, index = output
                         if compartment != "e":
                             rxn.name = name + "_" + compartment + str(model_index)
+                            rxn_id = re.search(r"(.+\_\w)(?=\d+)", rxn.id).group()
                             if index == "":
                                 rxn.id += str(model_index)
+                            else:
+                                rxn.id = rxn_id + str(model_index)
             new_reactions.add(rxn)
         print(biomass_indices)
     # adds only unique reactions and metabolites to the community model
+    newmodel = Model(model_id or "+".join([model.id for model in models]),
+                     name or "+".join([model.name for model in models]))
     newmodel.add_reactions(FBAHelper.filter_cobra_set(new_reactions))
     newmodel.add_metabolites(FBAHelper.filter_cobra_set(new_metabolites))
 
@@ -114,6 +122,7 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
 
     # define the model objective
     FBAHelper.add_objective(newmodel, comm_biorxn.flux_expression)
+    return newmodel
 
     # create a biomass sink reaction
     newutl = MSModelUtil(newmodel)
@@ -121,6 +130,7 @@ def build_from_species_models(org_models, model_id=None, name=None, names=None, 
     if cobra_model:
         return newmodel
     return newmodel, names, abundances
+
 
 
 class CommHelper:
