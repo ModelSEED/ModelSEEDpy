@@ -13,6 +13,7 @@ from optlang import Constraint
 from scipy.odr import Output  # !!! Output is never used
 from typing import Iterable
 from chemw import ChemMW
+from numpy import nan
 from warnings import warn
 #from Carbon.Aliases import false
 
@@ -321,12 +322,16 @@ class FBAHelper:
         return [cpd.id for cpd in media.data['mediacompounds']]
     
     @staticmethod
-    def parse_df(df):
+    def parse_df(df, float_values=True):
         if isinstance(df, tuple):
             return df
         from collections import namedtuple
         dataframe = namedtuple("DataFrame", ("index", "columns", "values"))
-        return dataframe(list(df.index), list(df.columns), df.to_numpy())
+        df.dropna(inplace=True)
+        values = df.to_numpy()
+        if float_values:
+            values = values.astype("float64")
+        return dataframe(list(df.index), list(df.columns), values)
     
     @staticmethod
     def add_cons_vars(model, vars_cons, sloppy=False):

@@ -223,7 +223,7 @@ class MSMinimalMedia:
                             model, exchange_ids_to_explore, variables, sol_dict,sol_index+1, interacting)
                 # coef = {variables["met"][exID]: 0 for cpd in new_mets.keys()}
                 # coef.update({variables["met"][exID]: 1 for exID in sol_dict if exID not in new_mets.keys()})
-                cpd_name = "_".join(new_mets.keys())
+                # cpd_name = "_".join(new_mets.keys())
                 new_sol = model.optimize()
                 new_sol_dict = FBAHelper.solution_to_variables_dict(new_sol, model)
                 new_sol_exchanges = [rxn for rxn in sol_dict if "EX_" in rxn.name]
