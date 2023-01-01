@@ -11,7 +11,7 @@ from modelseedpy.helpers import config
 
 logger = logging.getLogger(__name__)
 
-_BIOCHEM_FOLDER = 'Biochemistry'
+_BIOCHEM_FOLDER = "Biochemistry"
 
 ALIAS_CPD_IDENTIFIERS_ORG = {
     "BiGG": "bigg.metabolite",

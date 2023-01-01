@@ -3,10 +3,10 @@
 from __future__ import absolute_import
 
 import logging
-# import re   
-# from optlang.symbolics import Zero, add
-# import json as _json
-# from cobra.core import Gene, Metabolite, Model, Reaction
+import re
+from optlang.symbolics import Zero, add
+import json as _json
+from cobra.core import Gene, Metabolite, Model, Reaction
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.exceptions import FeasibilityError
 
