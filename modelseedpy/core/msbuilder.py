@@ -558,6 +558,7 @@ class MSBuilder:
     @staticmethod
     def build_biomass_new(model, template, index):
         biomasses = []
+        types = ["cofactor", "lipid", "cellwall"]
         for bio in template.biomasses:
             # Creating biomass reaction object
             metabolites = {}
