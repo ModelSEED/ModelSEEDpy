@@ -46,7 +46,7 @@ setup(
         "pytest",
     ],
     project_urls={
-        "Documentation": "https://modelseedpy.readthedocs.io/en/stable/",
+        "Documentation": "https://modelseedpy.readthedocs.io/en/latest/",
         "Issues": "https://github.com/ModelSEED/ModelSEEDpy/issues",
     },
 )
