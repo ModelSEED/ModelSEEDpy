@@ -19,6 +19,7 @@ from warnings import warn
 
 logger = logging.getLogger(__name__)
 
+
 class FBAHelper:
     @staticmethod
     def add_autodrain_reactions_to_community_model(
@@ -136,6 +137,7 @@ class FBAHelper:
     @staticmethod
     def get_modelseed_db_api(modelseed_path):
         from modelseedpy.biochem import from_local
+
         return from_local(modelseed_path)
 
     @staticmethod

@@ -15,13 +15,15 @@ from modelseedpy.core.msmodel import (
     get_cmp_token,
 )
 from cobra.core.dictlist import DictList
-#from gevent.libev.corecext import self
+
+# from gevent.libev.corecext import self
 
 # from cobrakbase.kbase_object_info import KBaseObjectInfo
 
 logger = logging.getLogger(__name__)
 
 SBO_ANNOTATION = "sbo"
+
 
 class AttrDict(dict):
     """
@@ -446,8 +448,11 @@ class MSTemplateReaction(Reaction):
     #    return "{id}: {stoichiometry}".format(
     #        id=self.id, stoichiometry=self.build_reaction_string())
 
+
 class MSTemplateBiomassComponent:
-    def __init__(self,metabolite,comp_class,coefficient,coefficient_type,linked_metabolites):
+    def __init__(
+        self, metabolite, comp_class, coefficient, coefficient_type, linked_metabolites
+    ):
         """
         :param metabolite:MSTemplateMetabolite
         :param comp_class:string
@@ -455,7 +460,7 @@ class MSTemplateBiomassComponent:
         :param coefficient_type:string
         :param linked_metabolites:{MSTemplateMetabolite:float}
         """
-        self.id = metabolite.id+"_"+comp_class
+        self.id = metabolite.id + "_" + comp_class
         self.metabolite = metabolite
         self.comp_class = comp_class
         self.coefficient = coefficient
@@ -463,33 +468,53 @@ class MSTemplateBiomassComponent:
         self.linked_metabolites = linked_metabolites
 
     @staticmethod
-    def from_dict(d,template):
+    def from_dict(d, template):
         met_id = d["templatecompcompound_ref"].split("/").pop()
         metabolite = template.compcompounds.get_by_id(met_id)
         linked_metabolites = {}
-        for count,item in enumerate(d["linked_compound_refs"]):
+        for count, item in enumerate(d["linked_compound_refs"]):
             l_met_id = item.split("/").pop()
             l_metabolite = template.compcompounds.get_by_id(l_met_id)
             linked_metabolites[l_metabolite] = d["link_coefficients"][count]
-        self = MSTemplateBiomassComponent(metabolite,d["class"],d["coefficient"],d["coefficient_type"],linked_metabolites)
+        self = MSTemplateBiomassComponent(
+            metabolite,
+            d["class"],
+            d["coefficient"],
+            d["coefficient_type"],
+            linked_metabolites,
+        )
         return self
-    
+
     def get_data(self):
         data = {
-            "templatecompcompound_ref" : "~/compcompounds/id/"+self.metabolite.id,
-            "class" : self.comp_class,
-            "coefficient" : self.coefficient,
-            "coefficient_type" : self.coefficient_type,
-            "linked_compound_refs" : [],
-            "link_coefficients" : []
+            "templatecompcompound_ref": "~/compcompounds/id/" + self.metabolite.id,
+            "class": self.comp_class,
+            "coefficient": self.coefficient,
+            "coefficient_type": self.coefficient_type,
+            "linked_compound_refs": [],
+            "link_coefficients": [],
         }
         for met in self.linked_metabolites:
-            data["linked_compound_refs"].append("~/compcompounds/id/"+met.id)
+            data["linked_compound_refs"].append("~/compcompounds/id/" + met.id)
             data["link_coefficients"].append(self.linked_metabolites[met])
         return data
 
+
 class MSTemplateBiomass:
-    def __init__(self,bio_id,name,type,dna,rna,protein,lipid,cellwall,cofactor,energy,other):
+    def __init__(
+        self,
+        bio_id,
+        name,
+        type,
+        dna,
+        rna,
+        protein,
+        lipid,
+        cellwall,
+        cofactor,
+        energy,
+        other,
+    ):
         """
 
         :param bio_id:string
@@ -517,42 +542,97 @@ class MSTemplateBiomass:
         self.other = other
         self.templateBiomassComponents = DictList()
         self._template = None
-    
+
     @staticmethod
-    def from_table(filename_or_df,template,bio_id,name,type,dna,rna,protein,lipid,cellwall,cofactor,energy,other):
-        self = MSTemplateBiomass(bio_id,name,type,dna,rna,protein,lipid,cellwall,cofactor,energy,other)
+    def from_table(
+        filename_or_df,
+        template,
+        bio_id,
+        name,
+        type,
+        dna,
+        rna,
+        protein,
+        lipid,
+        cellwall,
+        cofactor,
+        energy,
+        other,
+    ):
+        self = MSTemplateBiomass(
+            bio_id,
+            name,
+            type,
+            dna,
+            rna,
+            protein,
+            lipid,
+            cellwall,
+            cofactor,
+            energy,
+            other,
+        )
         if isinstance(filename_or_df, str):
             filename_or_df = pd.read_table(filename_or_df)
         for index, row in filename_or_df.iterrows():
             if row["biomass_id"] == bio_id:
-                metabolite = template.compcompounds.get_by_id(row["id"]+"_"+row["compartment"])
+                metabolite = template.compcompounds.get_by_id(
+                    row["id"] + "_" + row["compartment"]
+                )
                 linked_mets = {}
-                if isinstance(row["linked_compounds"], str) and len(row["linked_compounds"]) > 0:
+                if (
+                    isinstance(row["linked_compounds"], str)
+                    and len(row["linked_compounds"]) > 0
+                ):
                     array = row["linked_compounds"].split("|")
                     for item in array:
                         sub_array = item.split(":")
-                        l_met = template.compcompounds.get_by_id(sub_array[0]+"_"+row["compartment"])
+                        l_met = template.compcompounds.get_by_id(
+                            sub_array[0] + "_" + row["compartment"]
+                        )
                         linked_mets[l_met] = float(sub_array[1])
-                self.add_biomass_component(metabolite,row["class"],row["coefficient"],row["coefficient_type"],linked_mets)
+                self.add_biomass_component(
+                    metabolite,
+                    row["class"],
+                    row["coefficient"],
+                    row["coefficient_type"],
+                    linked_mets,
+                )
         return self
-        
+
     @staticmethod
-    def from_dict(d,template):
-        self = MSTemplateBiomass(d["id"],d["name"],d["type"],d["dna"],d["rna"],d["protein"],d["lipid"],d["cellwall"],d["cofactor"],d["energy"],d["other"])
+    def from_dict(d, template):
+        self = MSTemplateBiomass(
+            d["id"],
+            d["name"],
+            d["type"],
+            d["dna"],
+            d["rna"],
+            d["protein"],
+            d["lipid"],
+            d["cellwall"],
+            d["cofactor"],
+            d["energy"],
+            d["other"],
+        )
         for item in d["templateBiomassComponents"]:
-            biocomp = MSTemplateBiomassComponent.from_dict(item,template)
+            biocomp = MSTemplateBiomassComponent.from_dict(item, template)
             self.templateBiomassComponents.add(biocomp)
         self._template = template
         return self
-        
-    def add_biomass_component(self,metabolite,comp_class,coefficient,coefficient_type,linked_mets={}):
-        biocomp = MSTemplateBiomassComponent(metabolite,comp_class,coefficient,coefficient_type,linked_mets)
+
+    def add_biomass_component(
+        self, metabolite, comp_class, coefficient, coefficient_type, linked_mets={}
+    ):
+        biocomp = MSTemplateBiomassComponent(
+            metabolite, comp_class, coefficient, coefficient_type, linked_mets
+        )
         self.templateBiomassComponents.add(biocomp)
 
-    def get_or_create_metabolite(self,model,baseid,compartment=None,index=None):
+    def get_or_create_metabolite(self, model, baseid, compartment=None, index=None):
         fullid = baseid
         if compartment:
-            fullid += "_"+compartment
+            fullid += "_" + compartment
         tempid = fullid
         if index:
             fullid += index
@@ -563,94 +643,128 @@ class MSTemplateBiomass:
             model.metabolites.add(met)
             return met
         logger.error(
-                "Could not find biomass metabolite [%s] in model or template!",
-                fullid,
+            "Could not find biomass metabolite [%s] in model or template!",
+            fullid,
         )
-    
-    def get_or_create_reaction(self,model,baseid,compartment=None,index=None):
+
+    def get_or_create_reaction(self, model, baseid, compartment=None, index=None):
         fullid = baseid
         if compartment:
-            fullid += "_"+compartment
+            fullid += "_" + compartment
         tempid = fullid
         if index:
             fullid += index
         if fullid in model.metabolites:
             return model.reactions.get_by_id(fullid)
         if tempid in self._template.reactions:
-            rxn = self._template.reactions.get_by_id(tempid).to_reaction(model,index)
+            rxn = self._template.reactions.get_by_id(tempid).to_reaction(model, index)
             model.reactions.add(rxn)
             return rxn
         newrxn = Reaction(fullid, fullid, "biomasses", 0, 1000)
         model.reactions.add(newrxn)
         return newrxn
-    
-    def build_biomass(self, model, index="0",classic=False,GC=0.5):
-        types = ["cofactor", "lipid", "cellwall","protein","dna","rna","energy","other"]
+
+    def build_biomass(self, model, index="0", classic=False, GC=0.5):
+        types = [
+            "cofactor",
+            "lipid",
+            "cellwall",
+            "protein",
+            "dna",
+            "rna",
+            "energy",
+            "other",
+        ]
         type_abundances = {
-            "cofactor":self.cofactor,
-            "lipid":self.lipid,
-            "cellwall":self.cellwall,
-            "protein":self.protein,
-            "dna":self.dna,
-            "rna":self.rna,
-            "energy":self.energy
+            "cofactor": self.cofactor,
+            "lipid": self.lipid,
+            "cellwall": self.cellwall,
+            "protein": self.protein,
+            "dna": self.dna,
+            "rna": self.rna,
+            "energy": self.energy,
         }
         # Creating biomass reaction object
         metabolites = {}
         biorxn = Reaction(self.id, self.name, "biomasses", 0, 1000)
         # Adding standard compounds for DNA, RNA, protein, and biomass
         if not classic and self.type == "growth":
-            met = self.get_or_create_metabolite(model,"cpd11416", "c", index)
+            met = self.get_or_create_metabolite(model, "cpd11416", "c", index)
             metabolites[met] = 1
-        specific_reactions = {
-            "dna":None,
-            "rna":None,
-            "protein":None
-        }
+        specific_reactions = {"dna": None, "rna": None, "protein": None}
         if not classic and self.dna > 0:
-            met = self.get_or_create_metabolite(model,"cpd11461", "c", index)
-            specific_reactions["dna"] = self.get_or_create_reaction(model,"rxn05294", "c", index)
-            specific_reactions["dna"].subtract_metabolites(specific_reactions["dna"].metabolites)
+            met = self.get_or_create_metabolite(model, "cpd11461", "c", index)
+            specific_reactions["dna"] = self.get_or_create_reaction(
+                model, "rxn05294", "c", index
+            )
+            specific_reactions["dna"].subtract_metabolites(
+                specific_reactions["dna"].metabolites
+            )
             specific_reactions["dna"].metabolites[met] = 1
             metabolites[met] = -1 * self.dna
         if not classic and self.protein > 0:
-            met = self.get_or_create_metabolite(model,"cpd11463", "c", index)
-            specific_reactions["protein"] = self.get_or_create_reaction(model,"rxn05296", "c", index)
-            specific_reactions["protein"].subtract_metabolites(specific_reactions["protein"].metabolites)
+            met = self.get_or_create_metabolite(model, "cpd11463", "c", index)
+            specific_reactions["protein"] = self.get_or_create_reaction(
+                model, "rxn05296", "c", index
+            )
+            specific_reactions["protein"].subtract_metabolites(
+                specific_reactions["protein"].metabolites
+            )
             specific_reactions["protein"].metabolites[met] = 1
             metabolites[met] = -1 * self.protein
         if not classic and self.rna > 0:
-            met = self.get_or_create_metabolite(model,"cpd11462", "c", index)
-            specific_reactions["rna"] = self.get_or_create_reaction(model,"rxn05295", "c", index)
-            specific_reactions["rna"].subtract_metabolites(specific_reactions["rna"].metabolites)
+            met = self.get_or_create_metabolite(model, "cpd11462", "c", index)
+            specific_reactions["rna"] = self.get_or_create_reaction(
+                model, "rxn05295", "c", index
+            )
+            specific_reactions["rna"].subtract_metabolites(
+                specific_reactions["rna"].metabolites
+            )
             specific_reactions["rna"].metabolites[met] = 1
             metabolites[met] = -1 * self.rna
         bio_type_hash = {}
         for type in types:
             for comp in self.templateBiomassComponents:
                 if type == comp.comp_class:
-                    met = self.get_or_create_metabolite(model, comp.metabolite.id, None, index)
+                    met = self.get_or_create_metabolite(
+                        model, comp.metabolite.id, None, index
+                    )
                     if type not in bio_type_hash:
                         bio_type_hash[type] = {"items": [], "total_mw": 0}
                     if FBAHelper.metabolite_mw(met):
-                        bio_type_hash[type]["total_mw"] += -1*FBAHelper.metabolite_mw(met) * comp.coefficient/1000
+                        bio_type_hash[type]["total_mw"] += (
+                            -1 * FBAHelper.metabolite_mw(met) * comp.coefficient / 1000
+                        )
                     bio_type_hash[type]["items"].append(comp)
         for type in bio_type_hash:
             for comp in bio_type_hash[type]["items"]:
                 coef = None
-                if comp.coefficient_type == "MOLFRACTION" or comp.coefficient_type == "MOLSPLIT":
-                    coef = (type_abundances[type] / bio_type_hash[type]["total_mw"])*comp.coefficient
+                if (
+                    comp.coefficient_type == "MOLFRACTION"
+                    or comp.coefficient_type == "MOLSPLIT"
+                ):
+                    coef = (
+                        type_abundances[type] / bio_type_hash[type]["total_mw"]
+                    ) * comp.coefficient
                 elif comp.coefficient_type == "MULTIPLIER":
                     coef = type_abundances[type] * comp.coefficient
                 elif comp.coefficient_type == "EXACT":
                     coef = comp.coefficient
                 elif comp.coefficient_type == "AT":
-                    coef = comp.coefficient * (1-GC) * (type_abundances[type] / bio_type_hash[type]["total_mw"])
+                    coef = (
+                        comp.coefficient
+                        * (1 - GC)
+                        * (type_abundances[type] / bio_type_hash[type]["total_mw"])
+                    )
                 elif comp.coefficient_type == "GC":
-                    coef = comp.coefficient * GC * (type_abundances[type] / bio_type_hash[type]["total_mw"])
+                    coef = (
+                        comp.coefficient
+                        * GC
+                        * (type_abundances[type] / bio_type_hash[type]["total_mw"])
+                    )
                 if coef:
-                    met = model.metabolites.get_by_id(comp.metabolite.id+index)
-                    if type not in ("dna","protein","rna") or classic:
+                    met = model.metabolites.get_by_id(comp.metabolite.id + index)
+                    if type not in ("dna", "protein", "rna") or classic:
                         if met in metabolites:
                             metabolites[met] += coef
                         else:
@@ -662,38 +776,47 @@ class MSTemplateBiomass:
                         else:
                             specific_reactions[type].metabolites[met] = coef
                     for l_met in comp.linked_metabolites:
-                        met = self.get_or_create_metabolite(model, l_met.id, None, index)
-                        if type not in ("dna","protein","rna") or classic:
+                        met = self.get_or_create_metabolite(
+                            model, l_met.id, None, index
+                        )
+                        if type not in ("dna", "protein", "rna") or classic:
                             if met in metabolites:
-                                metabolites[met] += (coef * comp.linked_metabolites[l_met])
+                                metabolites[met] += (
+                                    coef * comp.linked_metabolites[l_met]
+                                )
                             else:
-                                metabolites[met] = (coef * comp.linked_metabolites[l_met])
+                                metabolites[met] = coef * comp.linked_metabolites[l_met]
                         elif not classic:
                             if met in metabolites:
-                                specific_reactions[type].metabolites[met] += (coef * comp.linked_metabolites[l_met])
+                                specific_reactions[type].metabolites[met] += (
+                                    coef * comp.linked_metabolites[l_met]
+                                )
                             else:
-                                specific_reactions[type].metabolites[met] = (coef * comp.linked_metabolites[l_met])
+                                specific_reactions[type].metabolites[met] = (
+                                    coef * comp.linked_metabolites[l_met]
+                                )
         biorxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
         biorxn.add_metabolites(metabolites)
         return biorxn
 
     def get_data(self):
         data = {
-            "id" : self.id,
-            "name" : self.name,
-            "type" : self.type,
-            "dna" : self.dna,
-            "rna" : self.rna,
-            "protein" : self.protein,
-            "lipid" : self.lipid,
-            "cellwall" : self.cellwall,
-            "cofactor" : self.cofactor,
-            "energy" : self.energy,
-            "other" : self.other,
-            "templateBiomassComponents" : []
+            "id": self.id,
+            "name": self.name,
+            "type": self.type,
+            "dna": self.dna,
+            "rna": self.rna,
+            "protein": self.protein,
+            "lipid": self.lipid,
+            "cellwall": self.cellwall,
+            "cofactor": self.cofactor,
+            "energy": self.energy,
+            "other": self.other,
+            "templateBiomassComponents": [],
         }
         for comp in self.templateBiomassComponents:
             data["templateBiomassComponents"].append(comp.get_data())
+
 
 class NewModelTemplateRole:
     def __init__(self, role_id, name, features=None, source="", aliases=None):
@@ -917,16 +1040,44 @@ class MSTemplate:
         self.pathways = DictList()
         self.subsystems = DictList()
         self.drains = None
-    
+
     ################# Replaces biomass reactions from an input TSV table ############################
-    def overwrite_biomass_from_table(self,filename_or_df,bio_id,name,type,dna,rna,protein,lipid,cellwall,cofactor,energy,other):
+    def overwrite_biomass_from_table(
+        self,
+        filename_or_df,
+        bio_id,
+        name,
+        type,
+        dna,
+        rna,
+        protein,
+        lipid,
+        cellwall,
+        cofactor,
+        energy,
+        other,
+    ):
         if isinstance(filename_or_df, str):
             filename_or_df = pd.read_table(filename_or_df)
-        newbio = MSTemplateBiomass.from_table(filename_or_df,self,bio_id,name,type,dna,rna,protein,lipid,cellwall,cofactor,energy,other)
+        newbio = MSTemplateBiomass.from_table(
+            filename_or_df,
+            self,
+            bio_id,
+            name,
+            type,
+            dna,
+            rna,
+            protein,
+            lipid,
+            cellwall,
+            cofactor,
+            energy,
+            other,
+        )
         if newbio.id in self.biomasses:
             self.biomasses.remove(newbio.id)
         self.biomasses.add(newbio)
-        
+
     def add_drain(self, compound_id, lower_bound, upper_bound):
         if compound_id not in self.compcompounds:
             raise ValueError(f"{compound_id} not in template")
@@ -1051,7 +1202,7 @@ class MSTemplate:
                 x._template_compound = self.compounds.get_by_id(x.cpd_id)
                 x._template_compound.species.add(x)
         self.compcompounds += comp_compounds
-    
+
     def add_biomasses(self, biomasses: list):
         """
         Add biomasses to the template
@@ -1069,7 +1220,7 @@ class MSTemplate:
         for x in biomasses:
             x._template = self
         self.biomasses += biomasses
-    
+
     def add_reactions(self, reaction_list: list):
         """
 
