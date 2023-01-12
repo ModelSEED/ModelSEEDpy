@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
 import logging
 from chemicals import periodic_table
 import re
@@ -12,7 +11,6 @@ from cobra.core import (
 )  # !!! Gene, Metabolite, and Model are never used
 from cobra.util import solver as sutil  # !!! sutil is never used
 import time
-from modelseedpy.biochem import from_local
 from scipy.odr.odrpack import Output  # !!! Output is never used
 from chemw import ChemMW
 from warnings import warn
@@ -118,8 +116,11 @@ class FBAHelper:
     @staticmethod
     def metabolite_mw(metabolite):
         try:
-            chem_mw = ChemMW()
-            chem_mw.mass(metabolite.formula)
+            if not metabolite.formula:
+                return 0
+            formula = re.sub("R\d*", "", metabolite.formula)
+            chem_mw = ChemMW(printing=False)
+            chem_mw.mass(formula)
             return chem_mw.raw_mw
         except:
             warn(
@@ -127,6 +128,7 @@ class FBAHelper:
                 + metabolite.id
                 + " possesses an unconventional formula {metabolite.formula}; hence, the MW cannot be computed."
             )
+            return 0
 
     @staticmethod
     def elemental_mass():
@@ -134,6 +136,8 @@ class FBAHelper:
 
     @staticmethod
     def get_modelseed_db_api(modelseed_path):
+        from modelseedpy.biochem import from_local
+
         return from_local(modelseed_path)
 
     @staticmethod
