@@ -451,7 +451,12 @@ class MSTemplateReaction(Reaction):
 
 class MSTemplateBiomassComponent:
     def __init__(
-        self, metabolite, comp_class: str, coefficient: float, coefficient_type: str, linked_metabolites
+        self,
+        metabolite,
+        comp_class: str,
+        coefficient: float,
+        coefficient_type: str,
+        linked_metabolites,
     ):
         """
         :param metabolite:MSTemplateMetabolite
