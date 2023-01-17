@@ -640,7 +640,7 @@ class MSTemplateBiomass:
             return model.metabolites.get_by_id(fullid)
         if tempid in self._template.compcompounds:
             met = self._template.compcompounds.get_by_id(tempid).to_metabolite(index)
-            model.metabolites.add(met)
+            model.add_metabolites([met])
             return met
         logger.error(
             "Could not find biomass metabolite [%s] in model or template!",
@@ -658,13 +658,13 @@ class MSTemplateBiomass:
             return model.reactions.get_by_id(fullid)
         if tempid in self._template.reactions:
             rxn = self._template.reactions.get_by_id(tempid).to_reaction(model, index)
-            model.reactions.add(rxn)
+            model.add_reactions([rxn])
             return rxn
         newrxn = Reaction(fullid, fullid, "biomasses", 0, 1000)
-        model.reactions.add(newrxn)
+        model.add_reactions(newrxn)
         return newrxn
 
-    def build_biomass(self, model, index="0", classic=False, GC=0.5):
+    def build_biomass(self, model, index="0", classic=False, GC=0.5,add_to_model=True):
         types = [
             "cofactor",
             "lipid",
@@ -700,7 +700,8 @@ class MSTemplateBiomass:
             specific_reactions["dna"].subtract_metabolites(
                 specific_reactions["dna"].metabolites
             )
-            specific_reactions["dna"].metabolites[met] = 1
+            specific_reactions["dna"].add_metabolites({met:1})
+            metabolites[met] = 1
             metabolites[met] = -1 * self.dna
         if not classic and self.protein > 0:
             met = self.get_or_create_metabolite(model, "cpd11463", "c", index)
@@ -710,7 +711,7 @@ class MSTemplateBiomass:
             specific_reactions["protein"].subtract_metabolites(
                 specific_reactions["protein"].metabolites
             )
-            specific_reactions["protein"].metabolites[met] = 1
+            specific_reactions["protein"].add_metabolites({met:1})
             metabolites[met] = -1 * self.protein
         if not classic and self.rna > 0:
             met = self.get_or_create_metabolite(model, "cpd11462", "c", index)
@@ -720,7 +721,7 @@ class MSTemplateBiomass:
             specific_reactions["rna"].subtract_metabolites(
                 specific_reactions["rna"].metabolites
             )
-            specific_reactions["rna"].metabolites[met] = 1
+            specific_reactions["rna"].add_metabolites({met:1})
             metabolites[met] = -1 * self.rna
         bio_type_hash = {}
         for type in types:
@@ -752,13 +753,13 @@ class MSTemplateBiomass:
                     coef = comp.coefficient
                 elif comp.coefficient_type == "AT":
                     coef = (
-                        comp.coefficient
+                        2 * comp.coefficient
                         * (1 - GC)
                         * (type_abundances[type] / bio_type_hash[type]["total_mw"])
                     )
                 elif comp.coefficient_type == "GC":
                     coef = (
-                        comp.coefficient
+                        2 * comp.coefficient
                         * GC
                         * (type_abundances[type] / bio_type_hash[type]["total_mw"])
                     )
@@ -771,10 +772,7 @@ class MSTemplateBiomass:
                             metabolites[met] = coef
                     elif not classic:
                         coef = coef / type_abundances[type]
-                        if met in metabolites:
-                            specific_reactions[type].metabolites[met] += coef
-                        else:
-                            specific_reactions[type].metabolites[met] = coef
+                        specific_reactions[type].add_metabolites({met:coef})
                     for l_met in comp.linked_metabolites:
                         met = self.get_or_create_metabolite(
                             model, l_met.id, None, index
@@ -787,16 +785,13 @@ class MSTemplateBiomass:
                             else:
                                 metabolites[met] = coef * comp.linked_metabolites[l_met]
                         elif not classic:
-                            if met in metabolites:
-                                specific_reactions[type].metabolites[met] += (
-                                    coef * comp.linked_metabolites[l_met]
-                                )
-                            else:
-                                specific_reactions[type].metabolites[met] = (
-                                    coef * comp.linked_metabolites[l_met]
-                                )
+                            specific_reactions[type].add_metabolites({met:coef * comp.linked_metabolites[l_met]})
         biorxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
         biorxn.add_metabolites(metabolites)
+        if add_to_model:
+            if biorxn.id in model.reactions:
+                model.remove_reactions([biorxn.id])
+            model.add_reactions([biorxn])
         return biorxn
 
     def get_data(self):

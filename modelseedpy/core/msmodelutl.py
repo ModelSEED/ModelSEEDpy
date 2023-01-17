@@ -4,6 +4,7 @@ import re
 import time
 import json
 import sys
+import pandas as pd
 from cobra import Model, Reaction, Metabolite
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
@@ -306,6 +307,31 @@ class MSModelUtil:
         print(len(output))
         self.model.add_reactions(output)
         return output
+    
+    #################################################################################
+    # Functions related to utility functions
+    #################################################################################
+    def build_model_data_hash(self):
+        data = {
+            "Model":self.id,
+            "Genome":self.genome.info.metadata["Name"],
+            "Genes":self.genome.info.metadata["Number of Protein Encoding Genes"],
+            
+        }
+        return data
+    
+    def compare_reactions(self, reaction_list,filename):
+        data = {}
+        for rxn in reaction_list:
+            for met in rxn.metabolites:
+                if met.id not in data:
+                    data[met.id] = {}
+                    for other_rxn in reaction_list:
+                         data[met.id][other_rxn.id] = 0
+                data[met.id][rxn.id] = rxn.metabolites[met]
+        df = pd.DataFrame(data)
+        df = df.transpose()
+        df.to_csv(filename)
 
     #################################################################################
     # Functions related to managing biomass reactions
