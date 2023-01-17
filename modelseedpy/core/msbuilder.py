@@ -634,7 +634,6 @@ class MSBuilder:
             biomasses.append(biorxn)
         return biomasses
 
-    @staticmethod
     def build_static_biomasses(self, model, template):
         res = []
         if template.name.startswith("CoreModel"):
@@ -862,7 +861,7 @@ class MSBuilder:
                 cpd = cobra_model.metabolites.get_by_id(model_species_id)
                 metabolites[cpd] = biomass_compounds[template_cpd_id]
             else:
-                template_cpd = template.compcompounds.get_by_id(template_cpd_id)
+                template_cpd = template.compcompounds.get_by_id(template_cpd_id[:-1])
                 m = template_cpd.to_metabolite(self.index)
                 metabolites[m] = biomass_compounds[template_cpd_id]
                 self.template_species_to_model_species[template_cpd_id] = m
