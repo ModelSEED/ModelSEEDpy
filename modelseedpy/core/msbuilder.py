@@ -9,7 +9,7 @@ from modelseedpy.core.msmodel import (
     get_gpr_string,
     get_reaction_constraints_from_direction,
 )
-from cobra.core import Gene, Metabolite, Model, Reaction
+from cobra.core import Gene, Metabolite, Model, Reaction, Group
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 
