@@ -896,6 +896,7 @@ class MSBuilder:
         @param annotate_with_rast:
         @return:
         """
+        self.index = index
 
         if annotate_with_rast:
             rast = RastClient()
