@@ -7,6 +7,7 @@ from cobra.core.dictlist import DictList
 from modelseedpy.biochem.modelseed_compound import ModelSEEDCompound, ModelSEEDCompound2
 from modelseedpy.biochem.modelseed_reaction import ModelSEEDReaction, ModelSEEDReaction2
 from modelseedpy.helpers import config
+from modelseedpy.core.msmodel import get_reaction_constraints_from_direction
 
 logger = logging.getLogger(__name__)
 
