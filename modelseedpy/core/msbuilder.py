@@ -886,6 +886,8 @@ class MSBuilder:
         index="0",
         allow_all_non_grp_reactions=False,
         annotate_with_rast=True,
+        biomass_classic=False,
+        biomass_gc=0.5,
     ):
         """
 
@@ -894,6 +896,8 @@ class MSBuilder:
         @param index:
         @param allow_all_non_grp_reactions:
         @param annotate_with_rast:
+        @param biomass_classic:
+        @param biomass_gc:
         @return:
         """
         self.index = index
@@ -931,6 +935,23 @@ class MSBuilder:
         cobra_model.add_groups(list(complex_groups.values()))
         self.add_exchanges_to_model(cobra_model)
 
+        biomass_reactions = []
+        for rxn_biomass in self.template.biomasses:
+            reaction = rxn_biomass.build_biomass(
+                cobra_model, "0", biomass_classic, biomass_gc
+            )
+            for m in reaction.metabolites:
+                if "modelseed_template_id" in m.notes:
+                    self.template_species_to_model_species[
+                        m.notes["modelseed_template_id"]
+                    ] = m
+            biomass_reactions.append(reaction)
+
+        if len(biomass_reactions) > 0:
+            cobra_model.add_reactions(biomass_reactions)
+            cobra_model.objective = biomass_reactions[0].id
+
+        """
         if (
             self.template.name.startswith("CoreModel")
             or self.template.name.startswith("GramNeg")
@@ -940,6 +961,7 @@ class MSBuilder:
                 self.build_static_biomasses(cobra_model, self.template)
             )
             cobra_model.objective = "bio1"
+        """
 
         reactions_sinks = self.build_drains()
         cobra_model.add_reactions(reactions_sinks)
@@ -1027,10 +1049,15 @@ class MSBuilder:
         allow_all_non_grp_reactions=False,
         annotate_with_rast=True,
         gapfill_model=True,
+        classic_biomass=False,
     ):
         builder = MSBuilder(genome, template)
         model = builder.build(
-            model_id, index, allow_all_non_grp_reactions, annotate_with_rast
+            model_id,
+            index,
+            allow_all_non_grp_reactions,
+            annotate_with_rast,
+            classic_biomass,
         )
         # Gapfilling model
         if gapfill_model:
