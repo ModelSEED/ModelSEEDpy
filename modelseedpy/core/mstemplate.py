@@ -670,7 +670,7 @@ class MSTemplateBiomass:
         model.add_reactions(newrxn)
         return newrxn
 
-    def build_biomass(self, model, index="0", classic=False, GC=0.5,add_to_model=True):
+    def build_biomass(self, model, index="0", classic=False, GC=0.5, add_to_model=True):
         types = [
             "cofactor",
             "lipid",
@@ -695,7 +695,7 @@ class MSTemplateBiomass:
         biorxn = Reaction(self.id, self.name, "biomasses", 0, 1000)
         # Adding standard compounds for DNA, RNA, protein, and biomass
         specific_reactions = {"dna": None, "rna": None, "protein": None}
-        exclusions = {"cpd17041_c":1,"cpd17042_c":1,"cpd17043_c":1}
+        exclusions = {"cpd17041_c": 1, "cpd17042_c": 1, "cpd17043_c": 1}
         if not classic and self.dna > 0:
             met = self.get_or_create_metabolite(model, "cpd11461", "c", index)
             specific_reactions["dna"] = self.get_or_create_reaction(
@@ -703,13 +703,23 @@ class MSTemplateBiomass:
             )
             specific_reactions["dna"].name = "DNA synthesis"
             if "rxn13783_c" + index in model.reactions:
-                specific_reactions["dna"].gene_reaction_rule = model.reactions.get_by_id("rxn13783_c" + index).gene_reaction_rule
-                specific_reactions["dna"].notes['modelseed_complex'] = model.reactions.get_by_id("rxn13783_c" + index).notes['modelseed_complex']                
-                model.remove_reactions([model.reactions.get_by_id("rxn13783_c" + index)])
+                specific_reactions[
+                    "dna"
+                ].gene_reaction_rule = model.reactions.get_by_id(
+                    "rxn13783_c" + index
+                ).gene_reaction_rule
+                specific_reactions["dna"].notes[
+                    "modelseed_complex"
+                ] = model.reactions.get_by_id("rxn13783_c" + index).notes[
+                    "modelseed_complex"
+                ]
+                model.remove_reactions(
+                    [model.reactions.get_by_id("rxn13783_c" + index)]
+                )
             specific_reactions["dna"].subtract_metabolites(
                 specific_reactions["dna"].metabolites
             )
-            specific_reactions["dna"].add_metabolites({met:1})
+            specific_reactions["dna"].add_metabolites({met: 1})
             metabolites[met] = 1
             metabolites[met] = -1 * self.dna
         if not classic and self.protein > 0:
@@ -719,13 +729,23 @@ class MSTemplateBiomass:
             )
             specific_reactions["protein"].name = "Protein synthesis"
             if "rxn13782_c" + index in model.reactions:
-                specific_reactions["protein"].gene_reaction_rule = model.reactions.get_by_id("rxn13782_c" + index).gene_reaction_rule
-                specific_reactions["protein"].notes['modelseed_complex'] = model.reactions.get_by_id("rxn13782_c" + index).notes['modelseed_complex']                
-                model.remove_reactions([model.reactions.get_by_id("rxn13782_c" + index)])
+                specific_reactions[
+                    "protein"
+                ].gene_reaction_rule = model.reactions.get_by_id(
+                    "rxn13782_c" + index
+                ).gene_reaction_rule
+                specific_reactions["protein"].notes[
+                    "modelseed_complex"
+                ] = model.reactions.get_by_id("rxn13782_c" + index).notes[
+                    "modelseed_complex"
+                ]
+                model.remove_reactions(
+                    [model.reactions.get_by_id("rxn13782_c" + index)]
+                )
             specific_reactions["protein"].subtract_metabolites(
                 specific_reactions["protein"].metabolites
             )
-            specific_reactions["protein"].add_metabolites({met:1})
+            specific_reactions["protein"].add_metabolites({met: 1})
             metabolites[met] = -1 * self.protein
         if not classic and self.rna > 0:
             met = self.get_or_create_metabolite(model, "cpd11462", "c", index)
@@ -734,13 +754,23 @@ class MSTemplateBiomass:
             )
             specific_reactions["rna"].name = "mRNA synthesis"
             if "rxn13784_c" + index in model.reactions:
-                specific_reactions["rna"].gene_reaction_rule = model.reactions.get_by_id("rxn13784_c" + index).gene_reaction_rule
-                specific_reactions["rna"].notes['modelseed_complex'] = model.reactions.get_by_id("rxn13784_c" + index).notes['modelseed_complex']                
-                model.remove_reactions([model.reactions.get_by_id("rxn13784_c" + index)])
+                specific_reactions[
+                    "rna"
+                ].gene_reaction_rule = model.reactions.get_by_id(
+                    "rxn13784_c" + index
+                ).gene_reaction_rule
+                specific_reactions["rna"].notes[
+                    "modelseed_complex"
+                ] = model.reactions.get_by_id("rxn13784_c" + index).notes[
+                    "modelseed_complex"
+                ]
+                model.remove_reactions(
+                    [model.reactions.get_by_id("rxn13784_c" + index)]
+                )
             specific_reactions["rna"].subtract_metabolites(
                 specific_reactions["rna"].metabolites
             )
-            specific_reactions["rna"].add_metabolites({met:1})
+            specific_reactions["rna"].add_metabolites({met: 1})
             metabolites[met] = -1 * self.rna
         bio_type_hash = {}
         for type in types:
@@ -774,13 +804,15 @@ class MSTemplateBiomass:
                     coef = comp.coefficient
                 elif comp.coefficient_type == "AT":
                     coef = (
-                        2 * comp.coefficient
+                        2
+                        * comp.coefficient
                         * (1 - GC)
                         * (type_abundances[type] / bio_type_hash[type]["total_mw"])
                     )
                 elif comp.coefficient_type == "GC":
                     coef = (
-                        2 * comp.coefficient
+                        2
+                        * comp.coefficient
                         * GC
                         * (type_abundances[type] / bio_type_hash[type]["total_mw"])
                     )
@@ -793,7 +825,7 @@ class MSTemplateBiomass:
                             metabolites[met] = coef
                     elif not classic:
                         coef = coef / type_abundances[type]
-                        specific_reactions[type].add_metabolites({met:coef})
+                        specific_reactions[type].add_metabolites({met: coef})
                     for l_met in comp.linked_metabolites:
                         met = self.get_or_create_metabolite(
                             model, l_met.id, None, index
@@ -806,7 +838,9 @@ class MSTemplateBiomass:
                             else:
                                 metabolites[met] = coef * comp.linked_metabolites[l_met]
                         elif not classic:
-                            specific_reactions[type].add_metabolites({met:coef * comp.linked_metabolites[l_met]})
+                            specific_reactions[type].add_metabolites(
+                                {met: coef * comp.linked_metabolites[l_met]}
+                            )
         biorxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
         biorxn.add_metabolites(metabolites)
         if add_to_model:

@@ -115,7 +115,7 @@ class FBAHelper:
 
     @staticmethod
     def metabolite_mw(metabolite):
-        fixed_masses = {"cpd11416":1,"cpd17041":0,"cpd17042":0,"cpd17043":0}
+        fixed_masses = {"cpd11416": 1, "cpd17041": 0, "cpd17042": 0, "cpd17043": 0}
         msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
         if msid in fixed_masses:
             return fixed_masses[msid]

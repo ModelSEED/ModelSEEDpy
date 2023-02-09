@@ -668,7 +668,10 @@ class MSBuilder:
         group_complexes = {}
         for complex_set in complex_sets:
             for complex_id in complex_set:
-                if complex_id not in group_complexes and complex_id in self.template.complexes:
+                if (
+                    complex_id not in group_complexes
+                    and complex_id in self.template.complexes
+                ):
                     cpx = self.template.complexes.get_by_id(complex_id)
                     g = Group(complex_id)
                     g.notes["complex_source"] = cpx.source
@@ -943,7 +946,9 @@ class MSBuilder:
             model.objective = "bio1"
         else:
             for bio in template.biomasses:
-                bio.build_biomass(self, model, index, classic=False, GC=0.5,add_to_model=True)
+                bio.build_biomass(
+                    self, model, index, classic=False, GC=0.5, add_to_model=True
+                )
             model.objective = "bio1"
 
         reactions_sinks = []
