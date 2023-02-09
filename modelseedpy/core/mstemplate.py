@@ -693,15 +693,18 @@ class MSTemplateBiomass:
         metabolites = {}
         biorxn = Reaction(self.id, self.name, "biomasses", 0, 1000)
         # Adding standard compounds for DNA, RNA, protein, and biomass
-        if not classic and self.type == "growth":
-            met = self.get_or_create_metabolite(model, "cpd11416", "c", index)
-            metabolites[met] = 1
         specific_reactions = {"dna": None, "rna": None, "protein": None}
+        exclusions = {"cpd17041_c":1,"cpd17042_c":1,"cpd17043_c":1}
         if not classic and self.dna > 0:
             met = self.get_or_create_metabolite(model, "cpd11461", "c", index)
             specific_reactions["dna"] = self.get_or_create_reaction(
                 model, "rxn05294", "c", index
             )
+            specific_reactions["dna"].name = "DNA synthesis"
+            if "rxn13783_c" + index in model.reactions:
+                specific_reactions["dna"].gene_reaction_rule = model.reactions.get_by_id("rxn13783_c" + index).gene_reaction_rule
+                specific_reactions["dna"].notes['modelseed_complex'] = model.reactions.get_by_id("rxn13783_c" + index).notes['modelseed_complex']                
+                model.remove_reactions([model.reactions.get_by_id("rxn13783_c" + index)])
             specific_reactions["dna"].subtract_metabolites(
                 specific_reactions["dna"].metabolites
             )
@@ -713,6 +716,11 @@ class MSTemplateBiomass:
             specific_reactions["protein"] = self.get_or_create_reaction(
                 model, "rxn05296", "c", index
             )
+            specific_reactions["protein"].name = "Protein synthesis"
+            if "rxn13782_c" + index in model.reactions:
+                specific_reactions["protein"].gene_reaction_rule = model.reactions.get_by_id("rxn13782_c" + index).gene_reaction_rule
+                specific_reactions["protein"].notes['modelseed_complex'] = model.reactions.get_by_id("rxn13782_c" + index).notes['modelseed_complex']                
+                model.remove_reactions([model.reactions.get_by_id("rxn13782_c" + index)])
             specific_reactions["protein"].subtract_metabolites(
                 specific_reactions["protein"].metabolites
             )
@@ -723,6 +731,11 @@ class MSTemplateBiomass:
             specific_reactions["rna"] = self.get_or_create_reaction(
                 model, "rxn05295", "c", index
             )
+            specific_reactions["rna"].name = "mRNA synthesis"
+            if "rxn13784_c" + index in model.reactions:
+                specific_reactions["rna"].gene_reaction_rule = model.reactions.get_by_id("rxn13784_c" + index).gene_reaction_rule
+                specific_reactions["rna"].notes['modelseed_complex'] = model.reactions.get_by_id("rxn13784_c" + index).notes['modelseed_complex']                
+                model.remove_reactions([model.reactions.get_by_id("rxn13784_c" + index)])
             specific_reactions["rna"].subtract_metabolites(
                 specific_reactions["rna"].metabolites
             )
@@ -731,7 +744,9 @@ class MSTemplateBiomass:
         bio_type_hash = {}
         for type in types:
             for comp in self.templateBiomassComponents:
-                if type == comp.comp_class:
+                if comp.metabolite.id in exclusions and not classic:
+                    pass
+                elif type == comp.comp_class:
                     met = self.get_or_create_metabolite(
                         model, comp.metabolite.id, None, index
                     )
