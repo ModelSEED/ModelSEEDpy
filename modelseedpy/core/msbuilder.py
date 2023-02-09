@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import itertools
+from enum import Enum
 import cobra
 from modelseedpy.core.exceptions import ModelSEEDError
 from modelseedpy.core.rast_client import RastClient
@@ -192,6 +193,13 @@ grampos = {
 }
 
 
+class MSGenomeClass(Enum):
+    P = "Gram Positive"
+    N = "Gram Negative"
+    C = "Cyano"
+    A = "Archaea"
+
+
 def build_biomass(rxn_id, cobra_model, template, biomass_compounds, index="0"):
     bio_rxn = Reaction(rxn_id, "biomass", "", 0, 1000)
     metabolites = {}
@@ -299,6 +307,7 @@ class MSBuilder:
         self.name = name
         self.genome = genome
         self.template = template
+        self.genome_class = None
         self.search_name_to_genes, self.search_name_to_original = _aaaa(
             genome, ontology_term
         )
@@ -574,9 +583,10 @@ class MSBuilder:
         from modelseedpy.helpers import get_template, get_classifier
         from modelseedpy.core.mstemplate import MSTemplateBuilder
 
-        genome_classifier = get_classifier("knn_ACNP_RAST_filter")
-        genome_class = genome_classifier.classify(self.genome)
+        genome_classifier = get_classifier("knn_ACNP_RAST_filter_01_17_2023")
+        self.genome_class = genome_classifier.classify(self.genome)
 
+        # TODO: update with enum MSGenomeClass
         template_genome_scale_map = {
             "A": "template_gram_neg",
             "C": "template_gram_neg",
@@ -591,16 +601,16 @@ class MSBuilder:
         }
 
         if (
-            genome_class in template_genome_scale_map
-            and genome_class in template_core_map
+            self.genome_class in template_genome_scale_map
+            and self.genome_class in template_core_map
         ):
             self.template = MSTemplateBuilder.from_dict(
-                get_template(template_genome_scale_map[genome_class])
+                get_template(template_genome_scale_map[self.genome_class])
             ).build()
         elif self.template is None:
-            raise Exception(f"unable to select template for {genome_class}")
+            raise Exception(f"unable to select template for {self.genome_class}")
 
-        return genome_class
+        return self.genome_class
 
     def generate_reaction_complex_sets(self, allow_incomplete_complexes=True):
         self.reaction_to_complex_sets = {}
@@ -793,20 +803,25 @@ class MSBuilder:
 
     def build(
         self,
-        model_id_or_id,
+        model_or_id,
         index="0",
         allow_all_non_grp_reactions=False,
         annotate_with_rast=True,
+        biomass_classic=False,
+        biomass_gc=0.5,
     ):
         """
 
-        @param model_id_or_id: a string ID to build from cobra.core.Model otherwise a type of cobra.core.Model
+        @param model_or_id: a string ID to build from cobra.core.Model otherwise a type of cobra.core.Model
         as Base Model
         @param index:
         @param allow_all_non_grp_reactions:
         @param annotate_with_rast:
+        @param biomass_classic:
+        @param biomass_gc:
         @return:
         """
+        self.index = index
 
         if annotate_with_rast:
             rast = RastClient()
@@ -819,11 +834,12 @@ class MSBuilder:
         if self.template is None:
             self.auto_select_template()
 
-        cobra_model = model_id_or_id
-        if type(model_id_or_id) == str:
+        cobra_model = model_or_id
+        if type(model_or_id) == str:
             from cobra.core import Model
 
-            cobra_model = Model(model_id_or_id)
+            cobra_model = Model(model_or_id)
+
         self.base_model = cobra_model
 
         self.generate_reaction_complex_sets()
@@ -840,6 +856,23 @@ class MSBuilder:
         cobra_model.add_groups(list(complex_groups.values()))
         self.add_exchanges_to_model(cobra_model)
 
+        biomass_reactions = []
+        for rxn_biomass in self.template.biomasses:
+            reaction = rxn_biomass.build_biomass(
+                cobra_model, "0", biomass_classic, biomass_gc
+            )
+            for m in reaction.metabolites:
+                if "modelseed_template_id" in m.notes:
+                    self.template_species_to_model_species[
+                        m.notes["modelseed_template_id"]
+                    ] = m
+            biomass_reactions.append(reaction)
+
+        if len(biomass_reactions) > 0:
+            cobra_model.add_reactions(biomass_reactions)
+            cobra_model.objective = biomass_reactions[0].id
+
+        """
         if (
             self.template.name.startswith("CoreModel")
             or self.template.name.startswith("GramNeg")
@@ -852,6 +885,7 @@ class MSBuilder:
             for bio in self.template.biomasses:
                 bio.build_biomass(cobra_model, index, classic=False, GC=gc,add_to_model=True)
             cobra_model.objective = "bio1"
+        """
 
         reactions_sinks = self.build_drains()
         cobra_model.add_reactions(reactions_sinks)
@@ -935,10 +969,15 @@ class MSBuilder:
         allow_all_non_grp_reactions=False,
         annotate_with_rast=True,
         gapfill_model=True,
+        classic_biomass=False,
     ):
         builder = MSBuilder(genome, template)
         model = builder.build(
-            model_id, index, allow_all_non_grp_reactions, annotate_with_rast
+            model_id,
+            index,
+            allow_all_non_grp_reactions,
+            annotate_with_rast,
+            classic_biomass,
         )
         # Gapfilling model
         if gapfill_model:

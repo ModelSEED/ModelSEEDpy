@@ -174,6 +174,7 @@ class MSTemplateSpecies(Metabolite):
         if len(str(index)) > 0:
             name = f"{self.name} [{compartment}]"
         metabolite = Metabolite(cpd_id, self.formula, name, self.charge, compartment)
+        metabolite.notes["modelseed_template_id"] = self.id
         return metabolite
 
     @property
