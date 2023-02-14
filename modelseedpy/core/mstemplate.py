@@ -654,13 +654,14 @@ class MSTemplateBiomass:
         )
 
     def get_or_create_reaction(self, model, baseid, compartment=None, index=None):
+        logger.debug(f"{baseid}, {compartment}, {index}")
         fullid = baseid
         if compartment:
             fullid += "_" + compartment
         tempid = fullid
         if index:
             fullid += index
-        if fullid in model.metabolites:
+        if fullid in model.reactions:
             return model.reactions.get_by_id(fullid)
         if tempid in self._template.reactions:
             rxn = self._template.reactions.get_by_id(tempid).to_reaction(model, index)
