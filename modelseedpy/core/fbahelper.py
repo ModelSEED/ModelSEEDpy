@@ -115,18 +115,24 @@ class FBAHelper:
 
     @staticmethod
     def metabolite_mw(metabolite):
+        fixed_masses = {"cpd11416": 1, "cpd17041": 0, "cpd17042": 0, "cpd17043": 0}
+        msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+        if msid in fixed_masses:
+            return fixed_masses[msid]
+        if not metabolite.formula:
+            return 0
+        formula = re.sub("R\d*", "", metabolite.formula)
         try:
-            if not metabolite.formula:
-                return 0
-            formula = re.sub("R\d*", "", metabolite.formula)
             chem_mw = ChemMW(printing=False)
             chem_mw.mass(formula)
             return chem_mw.raw_mw
         except:
-            warn(
+            logger.warn(
                 "The compound "
                 + metabolite.id
-                + " possesses an unconventional formula {metabolite.formula}; hence, the MW cannot be computed."
+                + " possesses an unconventional formula "
+                + metabolite.formula
+                + "; hence, the MW cannot be computed."
             )
             return 0
 

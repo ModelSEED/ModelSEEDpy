@@ -564,85 +564,6 @@ class MSBuilder:
             pass
         return model.metabolites.get_by_id(full_id)
 
-    @staticmethod
-    def build_biomass_new(model, template, index):
-        biomasses = []
-        types = ["cofactor", "lipid", "cellwall"]
-        for bio in template.biomasses:
-            # Creating biomass reaction object
-            metabolites = {}
-            biorxn = Reaction(bio.id, bio.name, "biomasses", 0, 1000)
-            # Adding standard compounds for DNA, RNA, protein, and biomass
-            if bio["type"] == "growth":
-                met = MSBuilder.get_or_create_metabolite(
-                    model, template, "cpd11416", "c", index
-                )
-                metabolites[met] = 1
-            if "dna" in bio and bio["dna"] > 0:
-                met = MSBuilder.get_or_create_metabolite(
-                    model, template, "cpd11461", "c", index
-                )
-                metabolites[met] = -1 * bio["dna"]
-            if "protein" in bio and bio["protein"] > 0:
-                met = MSBuilder.get_or_create_metabolite(
-                    model, template, "cpd11463", "c", index
-                )
-                metabolites[met] = -1 * bio["protein"]
-            if "rna" in bio and bio["rna"] > 0:
-                met = MSBuilder.get_or_create_metabolite(
-                    model, template, "cpd11462", "c", index
-                )
-                metabolites[met] = -1 * bio["rna"]
-            bio_type_hash = {}
-            for type in types:
-                for comp in bio["templateBiomassComponents"]:
-                    fullid = FBAHelper.id_from_ref(comp["templatecompcompound_ref"])
-                    (baseid, compartment, ignore_index) = FBAHelper.parse_id(fullid)
-                    comp["met"] = MSBuilder.get_or_create_metabolite(
-                        model, template, baseid, compartment, index
-                    )
-                    if type not in bio_type_hash:
-                        bio_type_hash[type] = {"items": [], "total_mw": 0}
-                    if FBAHelper.metabolite_mw(comp["met"]):
-                        types[type] += FBAHelper.metabolite_mw(comp["met"]) / 1000
-                    bio_type_hash[type].append(comp)
-            for type in bio_type_hash:
-                compmass = bio[type]
-                for comp in bio_type_hash[type]:
-                    coef = None
-                    if comp["coefficient_type"] == "MOLFRACTION":
-                        coef = compmass / types[type] * comp["coefficient"]
-                    elif comp["coefficient_type"] == "MOLSPLIT":
-                        coef = compmass / types[type] * comp["coefficient"]
-                    elif comp["coefficient_type"] == "MULTIPLIER":
-                        coef = biorxn[type] * comp["coefficient"]
-                    elif comp["coefficient_type"] == "EXACT":
-                        coef = comp["coefficient"]
-                    if coef:
-                        met = model.metabolites.get_by_id("cpd11416_c0")
-                        if met in metabolites:
-                            metabolites[met] += coef
-                        else:
-                            metabolites[met] = coef
-                        metabolites[met] = coef
-                        for count, value in enumerate(comp["linked_compound_refs"]):
-                            met = model.metabolites.get_by_id(
-                                FBAHelper.id_from_ref(value)
-                            )
-                            if met in metabolites:
-                                metabolites[met] += (
-                                    coef * comp["link_coefficients"][count]
-                                )
-                            else:
-                                metabolites[met] = (
-                                    coef * comp["link_coefficients"][count]
-                                )
-
-            biorxn.annotation[SBO_ANNOTATION] = "SBO:0000629"
-            biorxn.add_metabolites(metabolites)
-            biomasses.append(biorxn)
-        return biomasses
-
     def build_static_biomasses(self, model, template):
         res = []
         if template.name.startswith("CoreModel"):
@@ -747,7 +668,10 @@ class MSBuilder:
         group_complexes = {}
         for complex_set in complex_sets:
             for complex_id in complex_set:
-                if complex_id not in group_complexes:
+                if (
+                    complex_id not in group_complexes
+                    and complex_id in self.template.complexes
+                ):
                     cpx = self.template.complexes.get_by_id(complex_id)
                     g = Group(complex_id)
                     g.notes["complex_source"] = cpx.source
@@ -957,9 +881,12 @@ class MSBuilder:
             or self.template.name.startswith("GramNeg")
             or self.template.name.startswith("GramPos")
         ):
-            cobra_model.add_reactions(
-                self.build_static_biomasses(cobra_model, self.template)
-            )
+            gc = 0.5
+            if hasattr(self.genome,"info"):
+                gc = float(self.genome.info.metadata["GC content"])
+                print("Genome custom GC:",gc)
+            for bio in self.template.biomasses:
+                bio.build_biomass(cobra_model, index, classic=False, GC=gc,add_to_model=True)
             cobra_model.objective = "bio1"
         """
 
@@ -1017,13 +944,11 @@ class MSBuilder:
             bio_rxn2 = build_biomass("bio2", model, template, core_atp, index)
             model.add_reactions([bio_rxn1, bio_rxn2])
             model.objective = "bio1"
-        if template.name.startswith("GramNeg"):
-            bio_rxn1 = build_biomass("bio1", model, template, gramneg, index)
-            model.add_reactions([bio_rxn1])
-            model.objective = "bio1"
-        if template.name.startswith("GramPos"):
-            bio_rxn1 = build_biomass("bio1", model, template, grampos, index)
-            model.add_reactions([bio_rxn1])
+        else:
+            for bio in template.biomasses:
+                bio.build_biomass(
+                    self, model, index, classic=False, GC=0.5, add_to_model=True
+                )
             model.objective = "bio1"
 
         reactions_sinks = []

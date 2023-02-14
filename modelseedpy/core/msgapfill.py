@@ -147,7 +147,7 @@ class MSGapfill:
         ----------
         solution : dict
             Specifies the reactions to be added to the model to implement the gapfilling solution
-        cumulation_solution : list
+        cumulative_solution : list
             Optional array to cumulatively track all reactions added to the model when integrating multiple solutions
         """
         for rxn_id in solution["reversed"]:
