@@ -823,6 +823,8 @@ class MSTemplateBiomass:
         for comp in self.templateBiomassComponents:
             data["templateBiomassComponents"].append(comp.get_data())
 
+        return data
+
 
 class NewModelTemplateRole:
     def __init__(self, role_id, name, features=None, source="", aliases=None):
