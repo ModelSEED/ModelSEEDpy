@@ -654,7 +654,7 @@ class MSTemplateBiomass:
         )
 
     def get_or_create_reaction(self, model, baseid, compartment=None, index=None):
-        logger.debug(f'{baseid}, {compartment}, {index}')
+        logger.debug(f"{baseid}, {compartment}, {index}")
         fullid = baseid
         if compartment:
             fullid += "_" + compartment
