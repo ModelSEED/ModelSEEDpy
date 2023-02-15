@@ -583,7 +583,7 @@ class MSTemplateBiomass:
         for index, row in filename_or_df.iterrows():
             if row["biomass_id"] == bio_id:
                 metabolite = template.compcompounds.get_by_id(
-                    row["id"] + "_" + row["compartment"]
+                    f'{row["id"]}_{row["compartment"]}'
                 )
                 linked_mets = {}
                 if (
@@ -594,7 +594,7 @@ class MSTemplateBiomass:
                     for item in array:
                         sub_array = item.split(":")
                         l_met = template.compcompounds.get_by_id(
-                            sub_array[0] + "_" + row["compartment"]
+                            f'{sub_array[0]}_{row["compartment"]}'
                         )
                         linked_mets[l_met] = float(sub_array[1])
                 self.add_biomass_component(

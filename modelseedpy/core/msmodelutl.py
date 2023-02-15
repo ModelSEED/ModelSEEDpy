@@ -307,27 +307,26 @@ class MSModelUtil:
         print(len(output))
         self.model.add_reactions(output)
         return output
-    
+
     #################################################################################
     # Functions related to utility functions
     #################################################################################
     def build_model_data_hash(self):
         data = {
-            "Model":self.id,
-            "Genome":self.genome.info.metadata["Name"],
-            "Genes":self.genome.info.metadata["Number of Protein Encoding Genes"],
-            
+            "Model": self.id,
+            "Genome": self.genome.info.metadata["Name"],
+            "Genes": self.genome.info.metadata["Number of Protein Encoding Genes"],
         }
         return data
-    
-    def compare_reactions(self, reaction_list,filename):
+
+    def compare_reactions(self, reaction_list, filename):
         data = {}
         for rxn in reaction_list:
             for met in rxn.metabolites:
                 if met.id not in data:
                     data[met.id] = {}
                     for other_rxn in reaction_list:
-                         data[met.id][other_rxn.id] = 0
+                        data[met.id][other_rxn.id] = 0
                 data[met.id][rxn.id] = rxn.metabolites[met]
         df = pd.DataFrame(data)
         df = df.transpose()
@@ -508,6 +507,7 @@ class MSModelUtil:
 
     def test_solution(self, solution, keep_changes=False):
         unneeded = []
+        removed_rxns = []
         tempmodel = self.model
         if not keep_changes:
             tempmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
@@ -535,6 +535,7 @@ class MSModelUtil:
                         )
                         rxnobj.upper_bound = original_bound
                     else:
+                        removed_rxns.append(rxnobj)
                         unneeded.append([rxn_id, solution[key][rxn_id], key])
                         logger.debug(
                             rxn_id
@@ -557,6 +558,7 @@ class MSModelUtil:
                         )
                         rxnobj.lower_bound = original_bound
                     else:
+                        removed_rxns.append(rxnobj)
                         unneeded.append([rxn_id, solution[key][rxn_id], key])
                         logger.debug(
                             rxn_id
@@ -565,6 +567,7 @@ class MSModelUtil:
                             + str(objective)
                         )
         if keep_changes:
+            tempmodel.remove_reactions(removed_rxns)
             for items in unneeded:
                 del solution[items[2]][items[0]]
         return unneeded
@@ -682,6 +685,7 @@ class MSModelUtil:
         if model is None:
             model = self.model
         if apply_condition:
+            print("applying - bad")
             self.apply_test_condition(condition, model)
         new_objective = model.slim_optimize()
         value = new_objective
@@ -882,12 +886,10 @@ class MSModelUtil:
         Raises
         ------
         """
-        logger.debug("Expansion started!")
+        logger.debug(f"Expansion started! Binary = {binary_search}")
         filtered_list = []
         for condition in condition_list:
-
             logger.debug(f"testing condition {condition}")
-
             currmodel = self.model
             tic = time.perf_counter()
             new_filtered = []
@@ -921,6 +923,10 @@ class MSModelUtil:
                 + " out of "
                 + str(len(reaction_list))
             )
+            filterlist = []
+            for item in new_filtered:
+                filterlist.append(item[0].id + item[1])
+            logger.debug(",".join(filterlist))
         return filtered_list
 
     def add_atp_hydrolysis(self, compartment):
