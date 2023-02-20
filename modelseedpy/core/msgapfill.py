@@ -10,7 +10,6 @@ from optlang.symbolics import Zero, add
 from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
-from modelseedpy.fbapkg.gapfillingpkg import default_blacklist
 from modelseedpy.core.exceptions import GapfillingError
 
 
@@ -57,7 +56,7 @@ class MSGapfill:
         self.gapfill_templates_by_index, self.gapfill_models_by_index = {}, {}
         self.gapfill_all_indecies_with_default_templates = True
         self.gapfill_all_indecies_with_default_models = True
-        self.blacklist = list(set(default_blacklist + blacklist))
+        self.blacklist = list(set(blacklist))
         self.test_condition_iteration_limit = 10
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores

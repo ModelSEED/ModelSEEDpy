@@ -507,6 +507,7 @@ class MSModelUtil:
 
     def test_solution(self, solution, keep_changes=False):
         unneeded = []
+        removed_rxns = []
         tempmodel = self.model
         if not keep_changes:
             tempmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
@@ -534,6 +535,7 @@ class MSModelUtil:
                         )
                         rxnobj.upper_bound = original_bound
                     else:
+                        removed_rxns.append(rxnobj)
                         unneeded.append([rxn_id, solution[key][rxn_id], key])
                         logger.debug(
                             rxn_id
@@ -556,6 +558,7 @@ class MSModelUtil:
                         )
                         rxnobj.lower_bound = original_bound
                     else:
+                        removed_rxns.append(rxnobj)
                         unneeded.append([rxn_id, solution[key][rxn_id], key])
                         logger.debug(
                             rxn_id
@@ -564,6 +567,7 @@ class MSModelUtil:
                             + str(objective)
                         )
         if keep_changes:
+            tempmodel.remove_reactions(removed_rxns)
             for items in unneeded:
                 del solution[items[2]][items[0]]
         return unneeded
@@ -681,6 +685,7 @@ class MSModelUtil:
         if model is None:
             model = self.model
         if apply_condition:
+            print("applying - bad")
             self.apply_test_condition(condition, model)
         new_objective = model.slim_optimize()
         value = new_objective
@@ -881,12 +886,10 @@ class MSModelUtil:
         Raises
         ------
         """
-        logger.debug("Expansion started!")
+        logger.debug(f"Expansion started! Binary = {binary_search}")
         filtered_list = []
         for condition in condition_list:
-
             logger.debug(f"testing condition {condition}")
-
             currmodel = self.model
             tic = time.perf_counter()
             new_filtered = []
@@ -920,6 +923,10 @@ class MSModelUtil:
                 + " out of "
                 + str(len(reaction_list))
             )
+            filterlist = []
+            for item in new_filtered:
+                filterlist.append(item[0].id + item[1])
+            logger.debug(",".join(filterlist))
         return filtered_list
 
     def add_atp_hydrolysis(self, compartment):
