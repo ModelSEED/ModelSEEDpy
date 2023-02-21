@@ -1302,7 +1302,9 @@ class MSTemplate:
                 if cpx.id not in self.complexes:
                     self.add_complexes([cpx])
                 complex_replace.add(self.complexes.get_by_id(cpx.id))
+
             x._metabolites = metabolites_replace
+            x._update_awareness()
             x.complexes = complex_replace
 
         self.reactions += reaction_list
