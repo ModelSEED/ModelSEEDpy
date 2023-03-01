@@ -658,13 +658,14 @@ class MSTemplateBiomass:
         )
 
     def get_or_create_reaction(self, model, baseid, compartment=None, index=None):
+        logger.debug(f"{baseid}, {compartment}, {index}")
         fullid = baseid
         if compartment:
             fullid += "_" + compartment
         tempid = fullid
         if index:
             fullid += index
-        if fullid in model.metabolites:
+        if fullid in model.reactions:
             return model.reactions.get_by_id(fullid)
         if tempid in self._template.reactions:
             rxn = self._template.reactions.get_by_id(tempid).to_reaction(model, index)
@@ -870,6 +871,8 @@ class MSTemplateBiomass:
         }
         for comp in self.templateBiomassComponents:
             data["templateBiomassComponents"].append(comp.get_data())
+
+        return data
 
 
 class NewModelTemplateRole:
@@ -1303,7 +1306,9 @@ class MSTemplate:
                 if cpx.id not in self.complexes:
                     self.add_complexes([cpx])
                 complex_replace.add(self.complexes.get_by_id(cpx.id))
+
             x._metabolites = metabolites_replace
+            x._update_awareness()
             x.complexes = complex_replace
 
         self.reactions += reaction_list

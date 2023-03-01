@@ -878,7 +878,9 @@ class MSBuilder:
             biomass_reactions.append(reaction)
 
         if len(biomass_reactions) > 0:
-            cobra_model.add_reactions(biomass_reactions)
+            for rxn in biomass_reactions:
+                if rxn.id not in cobra_model.reactions:
+                    cobra_model.add_reactions([rxn])
             cobra_model.objective = biomass_reactions[0].id
 
         """

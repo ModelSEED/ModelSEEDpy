@@ -48,7 +48,7 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
 
 
 class MSFeature:
-    def __init__(self, feature_id, sequence, description=None):
+    def __init__(self, feature_id, sequence, description=None, aliases=None):
         """
 
         @param feature_id: identifier for the protein coding feature
@@ -60,7 +60,7 @@ class MSFeature:
         self.seq = sequence
         self.description = description  # temporary replace with proper parsing
         self.ontology_terms = {}
-        self.aliases = []
+        self.aliases = aliases
 
     def add_ontology_term(self, ontology_term, value):
         """
