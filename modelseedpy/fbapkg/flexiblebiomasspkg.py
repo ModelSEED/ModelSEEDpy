@@ -93,7 +93,13 @@ class FlexibleBiomassPkg(BaseFBAPkg):
         for metabolite in self.parameters["bio_rxn"].metabolites:
             met_class[metabolite] = None
             msid = MSModelUtil.metabolite_msid(metabolite)
-            if msid != "cpd11416" and msid != None:
+            if (
+                msid != "cpd11416"
+                and msid != "cpd11463"
+                and msid != "cpd11462"
+                and msid != "cpd11461"
+                and msid != None
+            ):
                 if msid in refcpd:
                     met_class[metabolite] = "refcpd"
                 else:
@@ -111,20 +117,24 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                     self.parameters["use_" + curr_class + "_class"] = None
                     break
         # Creating FLEX reactions and constraints for unclassified compounds
-        flexcpds = []
+        flexcpds = {}
         for metabolite in self.parameters["bio_rxn"].metabolites:
             if not met_class[metabolite]:
-                flexcpds.append(metabolite)
+                flexcpds[metabolite] = self.parameters["bio_rxn"].metabolites[
+                    metabolite
+                ]
             elif (
                 met_class[metabolite] != "refcpd"
                 and not self.parameters["use_" + met_class[metabolite] + "_class"]
             ):
-                flexcpds.append(metabolite)
+                flexcpds[metabolite] = self.parameters["bio_rxn"].metabolites[
+                    metabolite
+                ]
         self.modelutl.add_exchanges_for_metabolites(
             flexcpds,
             uptake=1000,
             excretion=1000,
-            prefix="FLEX_",
+            prefix="FLEX_" + self.parameters["bio_rxn"].id + "_",
             prefix_name="Biomass flex for ",
         )
         for metabolite in flexcpds:
@@ -206,24 +216,32 @@ class FlexibleBiomassPkg(BaseFBAPkg):
         pass
 
     def build_constraint(self, cobra_obj, obj_type):
-        element_mass = FBAHelper.elemental_mass()  # !!! element_mass is never used
         if obj_type == "flxbio":
             # Sum(MW*(vdrn,for-vdrn,ref)) + Sum(massdiff*(vrxn,for-vrxn,ref)) = 0
             coef = {}
             for metabolite in self.parameters["bio_rxn"].metabolites:
-                if "FLEX_" + metabolite.id in self.model.reactions:
+                if (
+                    "FLEX_" + self.parameters["bio_rxn"].id + "_" + metabolite.id
+                    in self.model.reactions
+                ):
                     mw = FBAHelper.metabolite_mw(metabolite)
                     sign = -1
                     if self.parameters["bio_rxn"].metabolites[metabolite] > 0:
                         sign = 1
                     coef[
                         self.model.reactions.get_by_id(
-                            "FLEX_" + metabolite.id
+                            "FLEX_"
+                            + self.parameters["bio_rxn"].id
+                            + "_"
+                            + metabolite.id
                         ).forward_variable
                     ] = (sign * mw)
                     coef[
                         self.model.reactions.get_by_id(
-                            "FLEX_" + metabolite.id
+                            "FLEX_"
+                            + self.parameters["bio_rxn"].id
+                            + "_"
+                            + metabolite.id
                         ).reverse_variable
                     ] = (-1 * sign * mw)
             for met_class in classes:
@@ -238,8 +256,11 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                         coef[rxn.reverse_variable] = -massdiff
             return BaseFBAPkg.build_constraint(self, obj_type, 0, 0, coef, cobra_obj)
         elif obj_type == "flxcpd" or obj_type == "flxcls":
+            first_entry = None
+            second_entry = None
+            product = False
             biovar = self.parameters["bio_rxn"].forward_variable
-            object = cobra_obj
+            object = None
             const = None
             if obj_type == "flxcpd":
                 # 0.75 * abs(bio_coef) * vbio - vdrn,for >= 0
@@ -250,7 +271,11 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 second_entry = self.parameters["flex_coefficient"][1] * abs(
                     self.parameters["bio_rxn"].metabolites[cobra_obj]
                 )
-                object = self.model.reactions.get_by_id("FLEX_" + cobra_obj.id)
+                if self.parameters["bio_rxn"].metabolites[cobra_obj] > 0:
+                    product = True
+                object = self.model.reactions.get_by_id(
+                    "FLEX_" + self.parameters["bio_rxn"].id + "_" + cobra_obj.id
+                )
             elif (
                 cobra_obj.id[0:-5] == None
                 or not self.parameters["use_" + cobra_obj.id[0:-5] + "_class"]
@@ -263,87 +288,157 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 second_entry = self.parameters["use_" + cobra_obj.id[0:-5] + "_class"][
                     1
                 ]
+                object = cobra_obj
             if first_entry == second_entry:
                 # If the value is positive, lock in the forward variable and set the reverse to zero
                 if first_entry > 0:
-                    const = BaseFBAPkg.build_constraint(
-                        self,
-                        "f" + obj_type,
-                        0,
-                        0,
-                        {biovar: second_entry, object.forward_variable: -1},
-                        cobra_obj,
-                    )
-                    object.lower_bound = 0
+                    if product:
+                        const = self.build_constraint(
+                            "f" + obj_type,
+                            0,
+                            0,
+                            {biovar: second_entry, object.forward_variable: -1},
+                            cobra_obj,
+                        )
+                        object.lower_bound = 0
+                    else:
+                        const = self.build_constraint(
+                            "f" + obj_type,
+                            0,
+                            0,
+                            {biovar: second_entry, object.reverse_variable: -1},
+                            cobra_obj,
+                        )
+                        object.upper_bound = 0
                 # If the value is negative, lock in the reverse variable and set the forward to zero
                 elif first_entry < 0:
-                    const = BaseFBAPkg.build_constraint(
-                        self,
-                        "r" + obj_type,
-                        0,
-                        0,
-                        {biovar: -first_entry, object.reverse_variable: -1},
-                        cobra_obj,
-                    )
-                    object.upper_bound = 0
+                    if product:
+                        const = self.build_constraint(
+                            "r" + obj_type,
+                            0,
+                            0,
+                            {biovar: -first_entry, object.reverse_variable: -1},
+                            cobra_obj,
+                        )
+                        object.upper_bound = 0
+                    else:
+                        const = self.build_constraint(
+                            "r" + obj_type,
+                            0,
+                            0,
+                            {biovar: -first_entry, object.forward_variable: -1},
+                            cobra_obj,
+                        )
+                        object.lower_bound = 0
                 # If the value is zero, lock both variables to zero
                 if first_entry == 0:
                     object.lower_bound = 0
                     object.upper_bound = 0
             elif second_entry >= 0:
                 if first_entry >= 0:
-                    const = BaseFBAPkg.build_constraint(
-                        self,
-                        "f" + obj_type,
-                        0,
-                        None,
-                        {biovar: second_entry, object.forward_variable: -1},
-                        cobra_obj,
-                    )
-                    object.lower_bound = 0
-                    if first_entry > 0:
-                        BaseFBAPkg.build_constraint(
+                    if product:
+                        const = BaseFBAPkg.build_constraint(
                             self,
+                            "f" + obj_type,
+                            0,
+                            None,
+                            {biovar: second_entry, object.forward_variable: -1},
+                            cobra_obj,
+                        )
+                        object.lower_bound = 0
+                        if first_entry > 0:
+                            BaseFBAPkg.build_constraint(
+                                self,
+                                "r" + obj_type,
+                                0,
+                                None,
+                                {biovar: -first_entry, object.forward_variable: 1},
+                                cobra_obj,
+                            )
+                    else:
+                        const = BaseFBAPkg.build_constraint(
+                            self,
+                            "f" + obj_type,
+                            0,
+                            None,
+                            {biovar: second_entry, object.reverse_variable: -1},
+                            cobra_obj,
+                        )
+                        object.upper_bound = 0
+                        if first_entry > 0:
+                            BaseFBAPkg.build_constraint(
+                                self,
+                                "r" + obj_type,
+                                0,
+                                None,
+                                {biovar: -first_entry, object.reverse_variable: 1},
+                                cobra_obj,
+                            )
+                else:
+                    if product:
+                        const = self.build_constraint(
+                            "f" + obj_type,
+                            0,
+                            None,
+                            {biovar: second_entry, object.forward_variable: -1},
+                            cobra_obj,
+                        )
+                        self.build_constraint(
                             "r" + obj_type,
                             0,
                             None,
-                            {biovar: -first_entry, object.forward_variable: 1},
+                            {biovar: -first_entry, object.reverse_variable: -1},
                             cobra_obj,
                         )
-                else:
-                    const = BaseFBAPkg.build_constraint(
-                        self,
-                        "f" + obj_type,
-                        0,
-                        None,
-                        {biovar: second_entry, object.forward_variable: -1},
-                        cobra_obj,
-                    )
-                    BaseFBAPkg.build_constraint(
-                        self,
+                    else:
+                        const = self.build_constraint(
+                            "f" + obj_type,
+                            0,
+                            None,
+                            {biovar: second_entry, object.reverse_variable: -1},
+                            cobra_obj,
+                        )
+                        self.build_constraint(
+                            "r" + obj_type,
+                            0,
+                            None,
+                            {biovar: -first_entry, object.forward_variable: -1},
+                            cobra_obj,
+                        )
+            else:
+                if second_entry < 0:
+                    if product:
+                        const = self.build_constraint(
+                            "f" + obj_type,
+                            0,
+                            None,
+                            {biovar: second_entry, object.reverse_variable: 1},
+                            cobra_obj,
+                        )
+                    else:
+                        const = self.build_constraint(
+                            "f" + obj_type,
+                            0,
+                            None,
+                            {biovar: second_entry, object.forward_variable: 1},
+                            cobra_obj,
+                        )
+                if product:
+                    self.build_constraint(
                         "r" + obj_type,
                         0,
                         None,
                         {biovar: -first_entry, object.reverse_variable: -1},
                         cobra_obj,
                     )
-            else:
-                if second_entry < 0:
-                    const = BaseFBAPkg.build_constraint(
-                        self,
-                        "f" + obj_type,
+                    object.lower_bound = 0
+                else:
+                    self.build_constraint(
+                        "r" + obj_type,
                         0,
                         None,
-                        {biovar: second_entry, object.reverse_variable: 1},
+                        {biovar: -first_entry, object.forward_variable: -1},
                         cobra_obj,
                     )
-                BaseFBAPkg.build_constraint(
-                    self,
-                    "r" + obj_type,
-                    0,
-                    None,
-                    {biovar: -first_entry, object.reverse_variable: -1},
-                    cobra_obj,
-                )
-                object.upper_bound = 0
+                    object.upper_bound = 0
             return const

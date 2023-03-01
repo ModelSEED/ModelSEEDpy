@@ -5,10 +5,15 @@ import time
 import json
 import sys
 import pandas as pd
+import cobra
 from cobra import Model, Reaction, Metabolite
+from optlang.symbolics import Zero
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
 from modelseedpy.core.fbahelper import FBAHelper
+from multiprocessing import Value
+
+# from builtins import None
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -105,6 +110,9 @@ class MSModelUtil:
         self.reaction_scores = None
         self.score = None
         self.integrated_gapfillings = []
+        self.attributes = {}
+        if hasattr(self.model, "attributes"):
+            self.attributes = self.model
 
     def compute_automated_reaction_scores(self):
         """
@@ -270,6 +278,22 @@ class MSModelUtil:
     #################################################################################
     # Functions related to editing the model
     #################################################################################
+    def get_attributes(self, key=None, default=None):
+        if not key:
+            return self.attributes
+        if key not in self.attributes:
+            self.attributes[key] = default
+        return self.attributes[key]
+
+    def save_attributes(self, value, key=None):
+        attributes = self.get_attributes()
+        if key:
+            attributes[key] = value
+        else:
+            self.attributes = value
+        if hasattr(self.model, "attributes"):
+            self.model.attributes = self.attributes
+
     def add_ms_reaction(self, rxn_dict, compartment_trans=["c0", "e0"]):
         modelseed = ModelSEEDBiochem.get()
         output = []
@@ -923,11 +947,150 @@ class MSModelUtil:
                 + " out of "
                 + str(len(reaction_list))
             )
-            filterlist = []
+            # Adding filter results to attributes
+            gf_filter_att = self.get_attributes("gf_filter", {})
+            if condition["media"].id not in gf_filter_att:
+                gf_filter_att[condition["media"].id] = {}
+            if condition["objective"] not in gf_filter_att[condition["media"].id]:
+                gf_filter_att[condition["media"].id][condition["objective"]] = {}
+            if (
+                condition["threshold"]
+                not in gf_filter_att[condition["media"].id][condition["objective"]]
+            ):
+                gf_filter_att[condition["media"].id][condition["objective"]][
+                    condition["threshold"]
+                ] = {}
             for item in new_filtered:
-                filterlist.append(item[0].id + item[1])
-            logger.debug(",".join(filterlist))
+                if (
+                    item[0].id
+                    not in gf_filter_att[condition["media"].id][condition["objective"]][
+                        condition["threshold"]
+                    ]
+                ):
+                    gf_filter_att[condition["media"].id][condition["objective"]][
+                        condition["threshold"]
+                    ][item[0].id] = {}
+                if (
+                    item[1]
+                    not in gf_filter_att[condition["media"].id][condition["objective"]][
+                        condition["threshold"]
+                    ][item[0].id]
+                ):
+                    if len(item) < 3:
+                        gf_filter_att[condition["media"].id][condition["objective"]][
+                            condition["threshold"]
+                        ][item[0].id][item[1]] = None
+                    else:
+                        gf_filter_att[condition["media"].id][condition["objective"]][
+                            condition["threshold"]
+                        ][item[0].id][item[1]] = item[2]
+            gf_filter_att = self.save_attributes(gf_filter_att, "gf_filter")
         return filtered_list
+
+    #################################################################################
+    # Functions related to biomass sensitivity analysis
+    #################################################################################
+    def find_unproducible_biomass_compounds(self, target_rxn="bio1", ko_list=None):
+        # Cloning the model because we don't want to modify the original model with this analysis
+        tempmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        # Getting target reaction and making sure it exists
+        if target_rxn not in tempmodel.reactions:
+            logger.critical(target_rxn + " not in model!")
+        target_rxn_obj = tempmodel.reactions.get_by_id(target_rxn)
+        tempmodel.objective = target_rxn
+        original_objective = tempmodel.objective
+        pkgmgr = MSPackageManager.get_pkg_mgr(tempmodel)
+        rxn_list = [target_rxn, "rxn05294_c0", "rxn05295_c0", "rxn05296_c0"]
+        for rxn in rxn_list:
+            if rxn in tempmodel.reactions:
+                pkgmgr.getpkg("FlexibleBiomassPkg").build_package(
+                    {
+                        "bio_rxn_id": rxn,
+                        "flex_coefficient": [0, 1],
+                        "use_rna_class": None,
+                        "use_dna_class": None,
+                        "use_protein_class": None,
+                        "use_energy_class": [0, 1],
+                        "add_total_biomass_constraint": False,
+                    }
+                )
+
+        # Creating min flex objective
+        min_flex_obj = tempmodel.problem.Objective(Zero, direction="min")
+        obj_coef = dict()
+        for reaction in tempmodel.reactions:
+            if reaction.id[0:5] == "FLEX_" or reaction.id[0:6] == "energy":
+                obj_coef[reaction.forward_variable] = 1
+                obj_coef[reaction.reverse_variable] = 1
+        # Temporarily setting flex objective so I can set coefficients
+        tempmodel.objective = min_flex_obj
+        min_flex_obj.set_linear_coefficients(obj_coef)
+        if not ko_list:
+            return self.run_biomass_dependency_test(
+                target_rxn_obj, tempmodel, original_objective, min_flex_obj, rxn_list
+            )
+        else:
+            output = {}
+            for item in ko_list:
+                logger.debug("KO:" + item[0] + item[1])
+                rxnobj = tempmodel.reactions.get_by_id(item[0])
+                if item[1] == ">":
+                    original_bound = rxnobj.upper_bound
+                    rxnobj.upper_bound = 0
+                    if item[0] not in output:
+                        output[item[0]] = {}
+                    output[item[0]][item[1]] = self.run_biomass_dependency_test(
+                        target_rxn_obj,
+                        tempmodel,
+                        original_objective,
+                        min_flex_obj,
+                        rxn_list,
+                    )
+                    rxnobj.upper_bound = original_bound
+                else:
+                    original_bound = rxnobj.lower_bound
+                    rxnobj.lower_bound = 0
+                    if item[0] not in output:
+                        output[item[0]] = {}
+                    output[item[0]][item[1]] = self.run_biomass_dependency_test(
+                        target_rxn_obj,
+                        tempmodel,
+                        original_objective,
+                        min_flex_obj,
+                        rxn_list,
+                    )
+                    rxnobj.lower_bound = original_bound
+            return output
+
+    def run_biomass_dependency_test(
+        self, target_rxn, tempmodel, original_objective, min_flex_obj, rxn_list
+    ):
+        tempmodel.objective = original_objective
+        objective = tempmodel.slim_optimize()
+        with open("FlexBiomass2.lp", "w") as out:
+            out.write(str(tempmodel.solver))
+        if objective > 0:
+            target_rxn.lower_bound = 0.1
+            tempmodel.objective = min_flex_obj
+            solution = tempmodel.optimize()
+            with open("FlexBiomass3.lp", "w") as out:
+                out.write(str(tempmodel.solver))
+            biocpds = []
+            for reaction in tempmodel.reactions:
+                if reaction.id[0:5] == "FLEX_" and (
+                    reaction.forward_variable.primal > Zero
+                    or reaction.reverse_variable.primal > Zero
+                ):
+                    logger.debug("Depends on:" + reaction.id)
+                    label = reaction.id[5:]
+                    for item in rxn_list:
+                        if label[0 : len(item)] == item:
+                            biocpds.append(label[len(item) + 1 :])
+            target_rxn.lower_bound = 0
+            return biocpds
+        else:
+            logger.debug("Cannot grow")
+            return None
 
     def add_atp_hydrolysis(self, compartment):
         # Searching for ATP hydrolysis compounds
