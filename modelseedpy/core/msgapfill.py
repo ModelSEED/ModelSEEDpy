@@ -69,6 +69,7 @@ class MSGapfill:
         minimum_obj=0.01,
         binary_check=False,
         prefilter=True,
+        check_for_growth=True,
     ):
         if target:
             self.model.objective = self.model.problem.Objective(
@@ -96,15 +97,54 @@ class MSGapfill:
         )
         pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
 
+        # Testing if gapfilling can work before filtering
+        if (
+            check_for_growth
+            and not pkgmgr.getpkg("GapfillingPkg").test_gapfill_database()
+        ):
+            # save_json_model(self.model, "gfdebugmdl.json")
+            gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
+            if media.id not in gf_sensitivity:
+                gf_sensitivity[media.id] = {}
+            if target not in gf_sensitivity[media.id]:
+                gf_sensitivity[media.id][target] = {}
+            gf_sensitivity[media.id][target][
+                "FBF"
+            ] = self.mdlutl.find_unproducible_biomass_compounds(target)
+            self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
+            logger.warning("No solution found before filtering for %s", media)
+            return None
+
         # Filtering breaking reactions out of the database
         if prefilter and self.test_conditions:
             pkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
 
+        # Testing if gapfilling can work after filtering
+        if (
+            check_for_growth
+            and not pkgmgr.getpkg("GapfillingPkg").test_gapfill_database()
+        ):
+            # save_json_model(self.model, "gfdebugmdl.json")
+            gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
+            if media.id not in gf_sensitivity:
+                gf_sensitivity[media.id] = {}
+            if target not in gf_sensitivity[media.id]:
+                gf_sensitivity[media.id][target] = {}
+            gf_sensitivity[media.id][target][
+                "FAF"
+            ] = self.mdlutl.find_unproducible_biomass_compounds(target)
+            self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
+            logger.warning("No solution found after filtering for %s", media)
+            return None
+
+        # Printing the gapfilling LP file
         if self.lp_filename:
             with open(self.lp_filename, "w") as out:
                 out.write(str(self.gfmodel.solver))
+
+        # Running gapfilling and checking solution
         sol = self.gfmodel.optimize()
         logger.debug(
             "gapfill solution objective value %f (%s) for media %s",
@@ -112,11 +152,11 @@ class MSGapfill:
             sol.status,
             media,
         )
-
         if sol.status != "optimal":
             logger.warning("No solution found for %s", media)
             return None
 
+        # Computing solution and ensuring all tests still pass
         self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
         if self.test_conditions:
             self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(
@@ -129,18 +169,23 @@ class MSGapfill:
                     "no solution could be found that satisfied all specified test conditions in specified iterations!"
                 )
                 return None
+
+        # Running binary check to reduce solution to minimal reaction soltuion
         if binary_check:
             self.last_solution = pkgmgr.getpkg(
                 "GapfillingPkg"
             ).binary_check_gapfilling_solution()
 
+        # Setting last solution data
         self.last_solution["media"] = media
         self.last_solution["target"] = target
         self.last_solution["minobjective"] = minimum_obj
         self.last_solution["binary_check"] = binary_check
         return self.last_solution
 
-    def integrate_gapfill_solution(self, solution, cumulative_solution=[]):
+    def integrate_gapfill_solution(
+        self, solution, cumulative_solution=[], link_gaps_to_objective=True
+    ):
         """Integrating gapfilling solution into model
         Parameters
         ----------
@@ -191,83 +236,19 @@ class MSGapfill:
                     cumulative_solution.remove(oitem)
                     break
         self.mdlutl.add_gapfilling(solution)
+        if link_gaps_to_objective:
+            gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
+            if solution["media"] not in gf_sensitivity:
+                gf_sensitivity[solution["media"]] = {}
+            if solution["target"] not in gf_sensitivity[solution["media"]]:
+                gf_sensitivity[solution["media"]][solution["target"]] = {}
+            gf_sensitivity[solution["media"]][solution["target"]][
+                "success"
+            ] = self.mdlutl.find_unproducible_biomass_compounds(
+                solution["target"], cumulative_solution
+            )
+            self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)
-
-    def link_gapfilling_to_biomass(self, target="bio1"):
-        def find_dependency(
-            item, target_rxn, tempmodel, original_objective, min_flex_obj
-        ):
-            objective = tempmodel.slim_optimize()
-            logger.debug("Obj:" + str(objective))
-            with open("FlexBiomass2.lp", "w") as out:
-                out.write(str(tempmodel.solver))
-            if objective > 0:
-                target_rxn.lower_bound = 0.1
-                tempmodel.objective = min_flex_obj
-                solution = tempmodel.optimize()
-                with open("FlexBiomass3.lp", "w") as out:
-                    out.write(str(tempmodel.solver))
-                biocpds = []
-                for reaction in tempmodel.reactions:
-                    if (
-                        reaction.id[0:5] == "FLEX_"
-                        and reaction.forward_variable.primal > Zero
-                    ):
-                        biocpds.append(reaction.id[5:])
-                item.append(biocpds)
-                logger.debug(item[0] + ":" + ",".join(biocpds))
-                tempmodel.objective = original_objective
-                target_rxn.lower_bound = 0
-
-        # Copying model before manipulating it
-        tempmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.mdlutl.model))
-        # Getting target reaction and making sure it exists
-        target_rxn = tempmodel.reactions.get_by_id(target)
-        # Constraining objective to be greater than 0.1
-        pkgmgr = MSPackageManager.get_pkg_mgr(tempmodel)
-        # Adding biomass flexibility
-        pkgmgr.getpkg("FlexibleBiomassPkg").build_package(
-            {
-                "bio_rxn_id": target,
-                "flex_coefficient": [0, 1],
-                "use_rna_class": None,
-                "use_dna_class": None,
-                "use_protein_class": None,
-                "use_energy_class": [0, 1],
-                "add_total_biomass_constraint": False,
-            }
-        )
-        # Creating min flex objective
-        tempmodel.objective = target_rxn
-        original_objective = tempmodel.objective
-        min_flex_obj = tempmodel.problem.Objective(Zero, direction="min")
-        obj_coef = dict()
-        for reaction in tempmodel.reactions:
-            if reaction.id[0:5] == "FLEX_" or reaction.id[0:6] == "energy":
-                obj_coef[reaction.forward_variable] = 1
-        # Temporarily setting flex objective so I can set coefficients
-        tempmodel.objective = min_flex_obj
-        min_flex_obj.set_linear_coefficients(obj_coef)
-        # Restoring biomass object
-        tempmodel.objective = original_objective
-        # Knocking out gapfilled reactions one at a time
-        for item in self.cumulative_gapfilling:
-            logger.debug("KO:" + item[0] + item[1])
-            rxnobj = tempmodel.reactions.get_by_id(item[0])
-            if item[1] == ">":
-                original_bound = rxnobj.upper_bound
-                rxnobj.upper_bound = 0
-                find_dependency(
-                    item, target_rxn, tempmodel, original_objective, min_flex_obj
-                )
-                rxnobj.upper_bound = original_bound
-            else:
-                original_bound = rxnobj.lower_bound
-                rxnobj.lower_bound = 0
-                find_dependency(
-                    item, target_rxn, tempmodel, original_objective, min_flex_obj
-                )
-                rxnobj.lower_bound = original_bound
 
     @staticmethod
     def gapfill(

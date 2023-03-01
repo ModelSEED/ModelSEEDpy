@@ -19,6 +19,7 @@ from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
 
 base_blacklist = {
     "rxn10157": "<",
@@ -493,7 +494,6 @@ class GapfillingPkg(BaseFBAPkg):
                 "default_excretion": 100,
                 "default_uptake": 100,
                 "minimum_obj": 0.01,
-                "set_objective": 1,
                 "minimize_exchanges": False,
                 "blacklist": [],
             },
@@ -578,29 +578,27 @@ class GapfillingPkg(BaseFBAPkg):
                     )
 
         self.model.solver.update()
-        if self.parameters["set_objective"] == 1:
-            reaction_objective = self.model.problem.Objective(Zero, direction="min")
-            obj_coef = dict()
-            for reaction in self.model.reactions:
-                if reaction.id in self.gapfilling_penalties:
-                    if (
-                        self.parameters["minimize_exchanges"]
-                        or reaction.id[0:3] != "EX_"
-                    ):
-                        # Minimizing gapfilled reactions
-                        if "reverse" in self.gapfilling_penalties[reaction.id]:
-                            obj_coef[reaction.reverse_variable] = abs(
-                                self.gapfilling_penalties[reaction.id]["reverse"]
-                            )
-                        if "forward" in self.gapfilling_penalties[reaction.id]:
-                            obj_coef[reaction.forward_variable] = abs(
-                                self.gapfilling_penalties[reaction.id]["forward"]
-                            )
-                else:
-                    obj_coef[reaction.forward_variable] = 0
-                    obj_coef[reaction.reverse_variable] = 0
-            self.model.objective = reaction_objective
-            reaction_objective.set_linear_coefficients(obj_coef)
+
+        reaction_objective = self.model.problem.Objective(Zero, direction="min")
+        obj_coef = dict()
+        for reaction in self.model.reactions:
+            if reaction.id in self.gapfilling_penalties:
+                if self.parameters["minimize_exchanges"] or reaction.id[0:3] != "EX_":
+                    # Minimizing gapfilled reactions
+                    if "reverse" in self.gapfilling_penalties[reaction.id]:
+                        obj_coef[reaction.reverse_variable] = abs(
+                            self.gapfilling_penalties[reaction.id]["reverse"]
+                        )
+                    if "forward" in self.gapfilling_penalties[reaction.id]:
+                        obj_coef[reaction.forward_variable] = abs(
+                            self.gapfilling_penalties[reaction.id]["forward"]
+                        )
+            else:
+                obj_coef[reaction.forward_variable] = 0
+                obj_coef[reaction.reverse_variable] = 0
+        self.model.objective = reaction_objective
+        reaction_objective.set_linear_coefficients(obj_coef)
+        self.parameters["gfobj"] = self.model.objective
 
     def extend_model_with_model_for_gapfilling(self, source_model, index):
         new_metabolites = {}
@@ -1001,28 +999,27 @@ class GapfillingPkg(BaseFBAPkg):
             return None
         return solution
 
+    def test_gapfill_database(self):
+        self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+        self.model.objective = self.parameters["origobj"]
+        solution = self.model.optimize()
+        logger.info(
+            "Objective with gapfill database:"
+            + str(solution.objective_value)
+            + "; min objective:"
+            + str(self.parameters["minimum_obj"])
+        )
+        self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = self.parameters[
+            "minimum_obj"
+        ]
+        self.model.objective = self.parameters["gfobj"]
+        if solution.objective_value < self.parameters["minimum_obj"]:
+            return False
+        return True
+
     def filter_database_based_on_tests(self, test_conditions):
-        # Preserving the gapfilling objective function
-        gfobj = self.model.objective
         # Setting the minimal growth constraint to zero
         self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
-        # Setting the objective to the original default objective for the model
-        self.model.objective = self.parameters["origobj"]
-        # Testing if the minimal objective can be achieved before filtering
-        solution = self.model.optimize()
-        print(
-            "Objective before filtering:",
-            solution.objective_value,
-            "; min objective:",
-            self.parameters["minimum_obj"],
-        )
-        with open("debuggf.lp", "w") as out:
-            out.write(str(self.model.solver))
-        if solution.objective_value < self.parameters["minimum_obj"]:
-            save_json_model(self.model, "gfdebugmdl.json")
-            logger.critical(
-                "Model cannot achieve the minimum objective even before filtering!"
-            )
         # Filtering the database of any reactions that violate the specified tests
         filetered_list = []
         with self.model:
@@ -1039,21 +1036,14 @@ class GapfillingPkg(BaseFBAPkg):
             )
         # Now constraining filtered reactions to zero
         for item in filtered_list:
-            logger.debug("Filtering:", item[0].id, item[1])
+            logger.info("Filtering:" + item[0].id + item[1])
             if item[1] == ">":
                 self.model.reactions.get_by_id(item[0].id).upper_bound = 0
             else:
                 self.model.reactions.get_by_id(item[0].id).lower_bound = 0
         # Now testing if the gapfilling minimum objective can still be achieved
-        solution = self.model.optimize()
-        print(
-            "Objective after filtering:",
-            solution.objective_value,
-            "; min objective:",
-            self.parameters["minimum_obj"],
-        )
-        # Now we need to restore a minimal set of filtered reactions such that we permit the minimum objective to be reached
-        if solution.objective_value < self.parameters["minimum_obj"]:
+        if not self.test_gapfill_database():
+            # Now we need to restore a minimal set of filtered reactions such that we permit the minimum objective to be reached
             # Restoring the minimum objective constraint
             self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"][
                 "1"
@@ -1089,14 +1079,14 @@ class GapfillingPkg(BaseFBAPkg):
                     else:
                         count += -1
                         rxn.lower_bound = 0
-            print("Reactions unfiltered:", count)
+            logger.info("Reactions unfiltered:" + str(count))
             # Checking for model reactions that can be removed to enable all tests to pass
             self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
             filtered_list = self.modelutl.reaction_expansion_test(
                 self.parameters["original_reactions"], test_conditions
             )
             for item in filtered_list:
-                logger.debug("Filtering:", item[0].id, item[1])
+                logger.info("Filtering:" + item[0].id + item[1])
                 if item[1] == ">":
                     self.model.reactions.get_by_id(item[0].id).upper_bound = 0
                 else:
@@ -1105,7 +1095,8 @@ class GapfillingPkg(BaseFBAPkg):
         self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = self.parameters[
             "minimum_obj"
         ]
-        self.model.objective = gfobj
+        self.model.objective = self.parameters["gfobj"]
+        return True
 
     def compute_gapfilled_solution(self, flux_values=None):
         if flux_values is None:

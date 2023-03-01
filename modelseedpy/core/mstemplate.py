@@ -581,9 +581,13 @@ class MSTemplateBiomass:
         if isinstance(filename_or_df, str):
             filename_or_df = pd.read_table(filename_or_df)
         for index, row in filename_or_df.iterrows():
+            if "biomass_id" not in row:
+                row["biomass_id"] = "bio1"
             if row["biomass_id"] == bio_id:
+                if "compartment" not in row:
+                    row["compartment"] = "c"
                 metabolite = template.compcompounds.get_by_id(
-                    f'{row["id"]}_{row["compartment"]}'
+                    f'{row["id"]}_{lower(row["compartment"])}'
                 )
                 linked_mets = {}
                 if (
@@ -594,14 +598,14 @@ class MSTemplateBiomass:
                     for item in array:
                         sub_array = item.split(":")
                         l_met = template.compcompounds.get_by_id(
-                            f'{sub_array[0]}_{row["compartment"]}'
+                            f'{sub_array[0]}_{lower(row["compartment"])}'
                         )
                         linked_mets[l_met] = float(sub_array[1])
                 self.add_biomass_component(
                     metabolite,
-                    row["class"],
-                    row["coefficient"],
-                    row["coefficient_type"],
+                    lower(row["class"]),
+                    float(row["coefficient"]),
+                    upper(row["coefficient_type"]),
                     linked_mets,
                 )
         return self
