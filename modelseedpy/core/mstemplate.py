@@ -184,8 +184,8 @@ class MSTemplateSpecies(Metabolite):
     @property
     def name(self):
         if self._template_compound:
-            return self._template_compound.name
-        return ""
+            return f"{self._template_compound.name} [{self.compartment}]"
+        return f"{self.id} [{self.compartment}]"
 
     @name.setter
     def name(self, value):
