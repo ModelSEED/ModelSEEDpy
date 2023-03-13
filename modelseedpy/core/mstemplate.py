@@ -143,7 +143,7 @@ class MSTemplateSpecies(Metabolite):
     def __init__(
         self,
         comp_cpd_id: str,
-        charge: int,
+        charge: float,
         compartment: str,
         cpd_id,
         max_uptake=0,
