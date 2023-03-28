@@ -171,11 +171,13 @@ class MSTemplateSpecies(Metabolite):
             index = ""
         index = str(index)
 
-        if self.compartment == 'e' and index.isnumeric():
+        if self.compartment == "e" and index.isnumeric():
             if force:
-                logger.warning(f'Forcing numeric index [{index}] to extra cellular compartment not advised')
+                logger.warning(
+                    f"Forcing numeric index [{index}] to extra cellular compartment not advised"
+                )
             else:
-                index = '0'
+                index = "0"
 
         cpd_id = f"{self.id}{index}"
         compartment = f"{self.compartment}{index}"
