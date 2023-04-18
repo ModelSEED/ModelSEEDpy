@@ -598,7 +598,7 @@ class MSTemplateBiomass:
                 if "compartment" not in row:
                     row["compartment"] = "c"
                 metabolite = template.compcompounds.get_by_id(
-                    f'{row["id"]}_{lower(row["compartment"])}'
+                    f'{row["id"]}_{row["compartment"].lower()}'
                 )
                 linked_mets = {}
                 if (
@@ -609,14 +609,14 @@ class MSTemplateBiomass:
                     for item in array:
                         sub_array = item.split(":")
                         l_met = template.compcompounds.get_by_id(
-                            f'{sub_array[0]}_{lower(row["compartment"])}'
+                            f'{sub_array[0]}_{row["compartment"].lower()}'
                         )
                         linked_mets[l_met] = float(sub_array[1])
                 self.add_biomass_component(
                     metabolite,
-                    lower(row["class"]),
+                    row["class"].lower(),
                     float(row["coefficient"]),
-                    upper(row["coefficient_type"]),
+                    row["coefficient_type"].upper(),
                     linked_mets,
                 )
         return self
