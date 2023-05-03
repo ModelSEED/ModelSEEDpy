@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import itertools  # !!! the import is never used
-
-logger = logging.getLogger(__name__)
-
 import cobra
 import re
 from optlang.symbolics import Zero, add
@@ -11,6 +7,11 @@ from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.exceptions import GapfillingError
+
+logger = logging.getLogger(__name__)
+logger.setLevel(
+    logging.WARNING
+)  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 
 class MSGapfill:
@@ -32,6 +33,10 @@ class MSGapfill:
         reaction_scores={},
         blacklist=[],
         atp_gapfilling=False,
+        minimum_obj=0.01,
+        default_excretion=100,
+        default_uptake=100,
+        default_target=None,
     ):
         # Discerning input is model or mdlutl and setting internal links
         if isinstance(model_or_mdlutl, MSModelUtil):
@@ -49,7 +54,18 @@ class MSGapfill:
             "cpd15302",
             "cpd03091",
         ]  # the cpd11416 compound is filtered during model extension with templates
-        self.gfmodel = self.lp_filename = self.last_solution = None
+        # Cloning model to create gapfilling model
+        self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        # Getting package manager for gapfilling model
+        self.gfpkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
+        # Setting target from input
+        if default_target:
+            self.gfmodel.objective = self.gfmodel.problem.Objective(
+                self.gfmodel.reactions.get_by_id(default_target).flux_expression,
+                direction="max",
+            )
+        # Setting parameters for gapfilling
+        self.lp_filename = self.last_solution = None
         self.model_penalty = 1
         self.default_gapfill_models = default_gapfill_models
         self.default_gapfill_templates = default_gapfill_templates
@@ -61,23 +77,8 @@ class MSGapfill:
         self.test_conditions = test_conditions
         self.reaction_scores = reaction_scores
         self.cumulative_gapfilling = []
-
-    def run_gapfilling(
-        self,
-        media=None,
-        target=None,
-        minimum_obj=0.01,
-        binary_check=False,
-        prefilter=True,
-        check_for_growth=True,
-    ):
-        if target:
-            self.model.objective = self.model.problem.Objective(
-                self.model.reactions.get_by_id(target).flux_expression, direction="max"
-            )
-        self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
-        pkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
-        pkgmgr.getpkg("GapfillingPkg").build_package(
+        # Building gapfilling package
+        self.gfpkgmgr.getpkg("GapfillingPkg").build_package(
             {
                 "auto_sink": self.auto_sink,
                 "model_penalty": self.model_penalty,
@@ -87,57 +88,94 @@ class MSGapfill:
                 "gapfill_models_by_index": self.gapfill_models_by_index,
                 "gapfill_all_indecies_with_default_templates": self.gapfill_all_indecies_with_default_templates,
                 "gapfill_all_indecies_with_default_models": self.gapfill_all_indecies_with_default_models,
-                "default_excretion": 100,
-                "default_uptake": 100,
+                "default_excretion": default_excretion,
+                "default_uptake": default_uptake,
                 "minimum_obj": minimum_obj,
                 "blacklist": self.blacklist,
                 "reaction_scores": self.reaction_scores,
                 "set_objective": 1,
             }
         )
-        pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
 
+    def test_gapfill_database(self, media, target=None, before_filtering=True):
         # Testing if gapfilling can work before filtering
-        if (
-            check_for_growth
-            and not pkgmgr.getpkg("GapfillingPkg").test_gapfill_database()
-        ):
-            # save_json_model(self.model, "gfdebugmdl.json")
-            gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
-            if media.id not in gf_sensitivity:
-                gf_sensitivity[media.id] = {}
-            if target not in gf_sensitivity[media.id]:
-                gf_sensitivity[media.id][target] = {}
-            gf_sensitivity[media.id][target][
-                "FBF"
-            ] = self.mdlutl.find_unproducible_biomass_compounds(target)
-            self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
-            logger.warning("No solution found before filtering for %s", media)
-            return None
+        if target:
+            self.gfmodel.objective = self.gfmodel.problem.Objective(
+                self.gfmodel.reactions.get_by_id(target).flux_expression,
+                direction="max",
+            )
+            self.gfpkgmgr.getpkg("GapfillingPkg").reset_original_objective()
+        else:
+            target = str(self.gfmodel.objective)
+            target = target.split(" ")[0]
+            target = target[13:]
+        if self.gfpkgmgr.getpkg("GapfillingPkg").test_gapfill_database():
+            return True
+        gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
+        if media.id not in gf_sensitivity:
+            gf_sensitivity[media.id] = {}
+        if target not in gf_sensitivity[media.id]:
+            gf_sensitivity[media.id][target] = {}
+        filter_msg = " "
+        note = "FAF"
+        if before_filtering:
+            filter_msg = " before filtering "
+            note = "FBF"
+        gf_sensitivity[media.id][target][
+            note
+        ] = self.mdlutl.find_unproducible_biomass_compounds(target)
+        self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
+        logger.warning(
+            "No gapfilling solution found"
+            + filter_msg
+            + "for "
+            + media.id
+            + " activating "
+            + target
+        )
+        return False
 
+    def prefilter(self, media, target):
         # Filtering breaking reactions out of the database
-        if prefilter and self.test_conditions:
-            pkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
+        if self.test_conditions:
+            self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
 
         # Testing if gapfilling can work after filtering
-        if (
-            check_for_growth
-            and not pkgmgr.getpkg("GapfillingPkg").test_gapfill_database()
-        ):
-            # save_json_model(self.model, "gfdebugmdl.json")
-            gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
-            if media.id not in gf_sensitivity:
-                gf_sensitivity[media.id] = {}
-            if target not in gf_sensitivity[media.id]:
-                gf_sensitivity[media.id][target] = {}
-            gf_sensitivity[media.id][target][
-                "FAF"
-            ] = self.mdlutl.find_unproducible_biomass_compounds(target)
-            self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
-            logger.warning("No solution found after filtering for %s", media)
+        if not self.test_gapfill_database(media, target, before_filtering=False):
+            return False
+        return True
+
+    def run_gapfilling(
+        self,
+        media=None,
+        target=None,
+        minimum_obj=None,
+        binary_check=False,
+        prefilter=True,
+        check_for_growth=True,
+    ):
+        # Setting target and media if specified
+        if target:
+            self.gfmodel.objective = self.gfmodel.problem.Objective(
+                self.gfmodel.reactions.get_by_id(target).flux_expression,
+                direction="max",
+            )
+            self.gfpkgmgr.getpkg("GapfillingPkg").reset_original_objective()
+        if media:
+            self.gfpkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        if minimum_obj:
+            self.gfpkgmgr.getpkg("GapfillingPkg").set_min_objective(minimum_obj)
+
+        # Testing if gapfilling can work before filtering
+        if not self.test_gapfill_database(media, before_filtering=True):
             return None
+
+        # Filtering
+        if prefilter:
+            if not self.prefilter(media, target):
+                return None
 
         # Printing the gapfilling LP file
         if self.lp_filename:
@@ -157,9 +195,13 @@ class MSGapfill:
             return None
 
         # Computing solution and ensuring all tests still pass
-        self.last_solution = pkgmgr.getpkg("GapfillingPkg").compute_gapfilled_solution()
+        self.last_solution = self.gfpkgmgr.getpkg(
+            "GapfillingPkg"
+        ).compute_gapfilled_solution()
         if self.test_conditions:
-            self.last_solution = pkgmgr.getpkg("GapfillingPkg").run_test_conditions(
+            self.last_solution = self.gfpkgmgr.getpkg(
+                "GapfillingPkg"
+            ).run_test_conditions(
                 self.test_conditions,
                 self.last_solution,
                 self.test_condition_iteration_limit,
@@ -172,7 +214,7 @@ class MSGapfill:
 
         # Running binary check to reduce solution to minimal reaction soltuion
         if binary_check:
-            self.last_solution = pkgmgr.getpkg(
+            self.last_solution = self.gfpkgmgr.getpkg(
                 "GapfillingPkg"
             ).binary_check_gapfilling_solution()
 
@@ -182,6 +224,32 @@ class MSGapfill:
         self.last_solution["minobjective"] = minimum_obj
         self.last_solution["binary_check"] = binary_check
         return self.last_solution
+
+    def run_multi_gapfill(
+        self,
+        media_list,
+        target=None,
+        minimum_objectives={},
+        binary_check=False,
+        prefilter=True,
+        check_for_growth=True,
+    ):
+        first = True
+        solution_dictionary = {}
+        for item in media_list:
+            minimum_obj = None
+            if item in minimum_objectives:
+                minimum_obj = minimum_objectives[item]
+            if first:
+                solution_dictionary[item] = self.run_gapfilling(
+                    item, target, minimum_obj, binary_check, True, True
+                )
+            else:
+                solution_dictionary[item] = self.run_gapfilling(
+                    item, None, minimum_obj, binary_check, False, True
+                )
+            false = False
+        return solution_dictionary
 
     def integrate_gapfill_solution(
         self, solution, cumulative_solution=[], link_gaps_to_objective=True

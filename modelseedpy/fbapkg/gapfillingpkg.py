@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import logging
+import sys
 import re
 import json
 from optlang.symbolics import Zero, add
@@ -19,427 +20,11 @@ from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(
+    logging.WARNING
+)  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
-base_blacklist = {
-    "rxn10157": "<",
-    "rxn09295": "<",
-    "rxn05938": "<",
-    "rxn08628": ">",
-    "rxn10155": "<",
-    "rxn01353": "<",
-    "rxn05683": "<",
-    "rxn09193": "<",
-    "rxn09003": "<",
-    "rxn01128": ">",
-    "rxn08655": "<",
-    "rxn09272": "<",
-    "rxn05313": "<",
-    "rxn01510": ">",
-    "rxn05297": ">",
-    "rxn00507": "<",
-    "rxn05596": "<",
-    "rxn01674": "<",
-    "rxn01679": "<",
-    "rxn00778": ">",
-    "rxn05206": ">",
-    "rxn00239": "<",
-    "rxn05937": "<",
-    "rxn00715": "<",
-    "rxn05638": ">",
-    "rxn05289": ">",
-    "rxn00839": "<",
-    "rxn08866": "<",
-    "rxn10901": "<",
-    "rxn09331": "<",
-    "rxn05242": "<",
-    "rxn12549": "<",
-    "rxn13143": "<",
-    "rxn12498": "<",
-    "rxn08373": "<",
-    "rxn05208": "<",
-    "rxn09372": "<",
-    "rxn00571": ">",
-    "rxn08104": "<",
-    "rxn08704": "<",
-    "rxn07191": "<",
-    "rxn09672": "<",
-    "rxn01048": ">",
-    "rxn11267": ">",
-    "rxn08290": "<",
-    "rxn09307": "<",
-    "rxn05676": ">",
-    "rxn09653": "<",
-    "rxn11277": "<",
-    "rxn00976": "<",
-    "rxn02520": "<",
-    "rxn08275": "<",
-    "rxn09121": "<",
-    "rxn08999": "<",
-    "rxn08633": "<",
-    "rxn08610": "<",
-    "rxn09218": "<",
-    "rxn05626": "<",
-    "rxn11320": "<",
-    "rxn10058": ">",
-    "rxn08544": "<",
-    "rxn12539": "<",
-    "rxn08990": "<",
-    "rxn09348": "<",
-    "rxn00378": "<",
-    "rxn05243": "<",
-    "rxn02154": "<",
-    "rxn12587": "<",
-    "rxn00125": "<",
-    "rxn05648": "<",
-    "rxn13722": "<",
-    "rxn10910": ">",
-    "rxn05308": ">",
-    "rxn08585": "<",
-    "rxn14207": "<",
-    "rxn08682": "<",
-    "rxn10895": "<",
-    "rxn09655": "<",
-    "rxn11934": "<",
-    "rxn01742": ">",
-    "rxn05222": ">",
-    "rxn09942": "<",
-    "rxn13753": ">",
-    "rxn10857": "<",
-    "rxn03468": "<",
-    "rxn04942": "<",
-    "rxn10990": ">",
-    "rxn08639": "<",
-    "rxn09248": "<",
-    "rxn11935": ">",
-    "rxn00870": ">",
-    "rxn08314": "<",
-    "rxn09378": "<",
-    "rxn09269": "<",
-    "rxn10057": ">",
-    "rxn13702": ">",
-    "rxn00517": "<",
-    "rxn09221": ">",
-    "rxn01505": ">",
-    "rxn13692": ">",
-    "rxn05573": "<",
-    "rxn10123": ">",
-    "rxn09005": "<",
-    "rxn05244": "<",
-    "rxn05940": "<",
-    "rxn10124": ">",
-    "rxn06202": ">",
-    "rxn09660": "<",
-    "rxn02260": ">",
-    "rxn08912": "<",
-    "rxn05760": ">",
-    "rxn05580": ">",
-    "rxn02181": ">",
-    "rxn09339": "<",
-    "rxn00767": "<",
-    "rxn09118": "<",
-    "rxn05303": "<",
-    "rxn06110": "<",
-    "rxn12800": "<",
-    "rxn10966": "<",
-    "rxn12561": "<",
-    "rxn04678": ">",
-    "rxn10818": "<",
-    "rxn08166": "<",
-    "rxn02044": ">",
-    "rxn12623": "<",
-    "rxn13392": ">",
-    "rxn02283": "<",
-    "rxn13647": ">",
-    "rxn08653": "<",
-    "rxn05218": ">",
-    "rxn11676": ">",
-    "rxn00197": "<",
-    "rxn00697": "<",
-    "rxn12575": ">",
-    "rxn08188": "<",
-    "rxn01215": "<",
-    "rxn08730": ">",
-    "rxn08519": ">",
-    "rxn08642": "<",
-    "rxn05245": "<",
-    "rxn04042": "<",
-    "rxn01443": ">",
-    "rxn08535": "<",
-    "rxn03983": "<",
-    "rxn08317": "<",
-    "rxn14173": ">",
-    "rxn08868": "<",
-    "rxn05893": ">",
-    "rxn00435": ">",
-    "rxn13724": "<",
-    "rxn09681": "<",
-    "rxn00572": ">",
-    "rxn05942": "<",
-    "rxn11158": "<",
-    "rxn05562": "<",
-    "rxn10868": "<",
-    "rxn10426": "<",
-    "rxn00941": ">",
-    "rxn08240": "<",
-    "rxn05220": ">",
-    "rxn01228": ">",
-    "rxn12540": "<",
-    "rxn10618": ">",
-    "rxn09659": "<",
-    "rxn08985": ">",
-    "rxn05523": "<",
-    "rxn00421": "<",
-    "rxn09385": "<",
-    "rxn08542": "<",
-    "rxn09658": "<",
-    "rxn01173": "<",
-    "rxn10977": "<",
-    "rxn05216": "<",
-    "rxn13748": ">",
-    "rxn10769": ">",
-    "rxn00451": "<",
-    "rxn01639": "<",
-    "rxn08661": "<",
-    "rxn09308": "<",
-    "rxn09260": "<",
-    "rxn00253": "<",
-    "rxn05207": "<",
-    "rxn01667": "<",
-    "rxn08063": "<",
-    "rxn01508": ">",
-    "rxn09657": "<",
-    "rxn01209": ">",
-    "rxn00548": ">",
-    "rxn12617": "<",
-    "rxn08747": ">",
-    "rxn08096": "<",
-    "rxn11951": "<",
-    "rxn09061": "<",
-    "rxn10978": "<",
-    "rxn02748": ">",
-    "rxn09663": "<",
-    "rxn08737": "<",
-    "rxn13127": "<",
-    "rxn09366": "<",
-    "rxn05634": "<",
-    "rxn05554": "<",
-    "rxn09266": ">",
-    "rxn04676": ">",
-    "rxn11078": ">",
-    "rxn04932": "<",
-    "rxn00607": ">",
-    "rxn08856": "<",
-    "rxn12624": "<",
-    "rxn05215": "<",
-    "rxn13686": "<",
-    "rxn12529": "<",
-    "rxn00234": "<",
-    "rxn13689": ">",
-    "rxn08117": "<",
-    "rxn05315": ">",
-    "rxn08865": "<",
-    "rxn11678": ">",
-    "rxn00518": "<",
-    "rxn00195": "<",
-    "rxn10054": "<",
-    "rxn12532": "<",
-    "rxn05902": ">",
-    "rxn12777": "<",
-    "rxn12822": ">",
-    "rxn13735": ">",
-    "rxn00427": "<",
-    "rxn13196": "<",
-    "rxn08284": "<",
-    "rxn10576": ">",
-    "rxn00891": "<",
-    "rxn08293": "<",
-    "rxn00374": ">",
-    "rxn08795": "<",
-    "rxn12583": "<",
-    "rxn00918": ">",
-    "rxn08525": "<",
-    "rxn10427": ">",
-    "rxn09271": "<",
-    "rxn10860": "<",
-    "rxn10600": ">",
-    "rxn13729": ">",
-    "rxn01375": "<",
-    "rxn13726": ">",
-    "rxn10587": "<",
-    "rxn08672": "<",
-    "rxn10588": ">",
-    "rxn08152": ">",
-    "rxn09306": "<",
-    "rxn00635": "<",
-    "rxn08427": "<",
-    "rxn05225": ">",
-    "rxn00680": ">",
-    "rxn08786": ">",
-    "rxn08721": "<",
-    "rxn11339": "<",
-    "rxn05749": "<",
-    "rxn01187": ">",
-    "rxn08625": "<",
-    "rxn06677": "<",
-    "rxn12302": ">",
-    "rxn02770": "<",
-    "rxn05628": "<",
-    "rxn13706": ">",
-    "rxn12739": "<",
-    "rxn00177": "<",
-    "rxn09896": ">",
-    "rxn12574": "<",
-    "rxn12533": ">",
-    "rxn08537": ">",
-    "rxn05651": ">",
-    "rxn08170": "<",
-    "rxn05240": "<",
-    "rxn00663": ">",
-    "rxn12589": "<",
-    "rxn09299": "<",
-    "rxn02059": "<",
-    "rxn12217": ">",
-    "rxn06592": "<",
-    "rxn05939": ">",
-    "rxn08581": "<",
-    "rxn00430": "<",
-    "rxn09283": ">",
-    "rxn08919": "<",
-    "rxn13660": "<",
-    "rxn08065": "<",
-    "rxn08428": ">",
-    "rxn10936": ">",
-    "rxn05238": ">",
-    "rxn05685": "<",
-    "rxn08920": ">",
-    "rxn07193": "<",
-    "rxn08265": "<",
-    "rxn12554": "<",
-    "rxn08094": "<",
-    "rxn13727": ">",
-    "rxn04158": "<",
-    "rxn09839": "<",
-    "rxn10820": "<",
-    "rxn00869": ">",
-    "rxn00331": ">",
-    "rxn09034": "<",
-    "rxn01136": "<",
-    "rxn09247": "<",
-    "rxn08302": "<",
-    "rxn10594": "<",
-    "rxn08670": ">",
-    "rxn11334": "<",
-    "rxn09941": "<",
-    "rxn02919": "<",
-    "rxn09670": "<",
-    "rxn10892": "<",
-    "rxn09794": "<",
-    "rxn02332": ">",
-    "rxn00244": ">",
-    "rxn08030": "<",
-    "rxn12526": "<",
-    "rxn13150": ">",
-    "rxn05486": "<",
-    "rxn10852": ">",
-    "rxn13790": ">",
-    "rxn06348": ">",
-    "rxn09172": ">",
-    "rxn03653": ">",
-    "rxn05213": "<",
-    "rxn01869": "<",
-    "rxn08142": "<",
-    "rxn12606": "<",
-    "rxn11916": ">",
-    "rxn05748": "<",
-    "rxn08543": "<",
-    "rxn01107": ">",
-    "rxn05708": "<",
-    "rxn08169": "<",
-    "rxn06641": ">",
-    "rxn12578": "<",
-    "rxn01172": "<",
-    "rxn02120": ">",
-    "rxn05669": "<",
-    "rxn11322": "<",
-    "rxn12630": "<",
-    "rxn00698": "<",
-    "rxn05507": ">",
-    "rxn12530": "<",
-    "rxn09304": "<",
-    "rxn05532": ">",
-    "rxn03644": ">",
-    "rxn08733": "<",
-    "rxn13733": "<",
-    "rxn10044": ">",
-    "rxn00176": ">",
-    "rxn01364": ">",
-    "rxn02198": ">",
-    "rxn06990": "<",
-    "rxn08424": "<",
-    "rxn08069": "<",
-    "rxn05611": "<",
-    "rxn11973": "<",
-    "rxn12665": ">",
-    "rxn05241": "<",
-    "rxn08982": ">",
-    "rxn00542": ">",
-    "rxn12588": "<",
-    "rxn03517": ">",
-    "rxn01805": "<",
-    "rxn13203": ">",
-    "rxn08614": "<",
-    "rxn12200": ">",
-    "rxn13811": "<",
-    "rxn08377": "<",
-    "rxn11342": ">",
-    "rxn02976": "<",
-    "rxn08217": "<",
-    "rxn07921": ">",
-    "rxn09944": ">",
-    "rxn02401": "<",
-    "rxn08429": ">",
-    "rxn00905": "<",
-    "rxn08196": "<",
-    "rxn03054": "<",
-    "rxn08643": "<",
-    "rxn01874": "<",
-    "rxn08028": "<",
-    "rxn01641": ">",
-    "rxn03442": "<",
-    "rxn02172": "<",
-    "rxn10692": ">",
-    "rxn10613": ">",
-    "rxn12928": ">",
-    "rxn12994": ">",
-    "rxn13843": ">",
-    "rxn12942": ">",
-    "rxn12934": ">",
-    "rxn16827": ">",
-    "rxn12941": ">",
-    "rxn01736": ">",
-    "rxn14109": ">",
-    "rxn15060": ">",
-    "rxn15064": ">",
-    "rxn30685": ">",
-    "rxn10095": ">",
-    "rxn16143": ">",
-    "rxn25271": ">",
-    "rxn25160": ">",
-    "rxn30917": ">",
-    "rxn16843": ">",
-    "rxn08921": ">",
-    "rxn09390": ">",
-    "rxn27362": ">",
-    "rxn02664": ">",
-    "rxn24638": ">",
-    "rxn24613": ">",
-    "rxn24611": ">",
-    "rxn14428": ">",
-    "rxn03079": ">",
-    "rxn03020": ">",
-    "rxn10471": "<",
-}
+base_blacklist = {}
 
 
 class GapfillingPkg(BaseFBAPkg):
@@ -599,6 +184,9 @@ class GapfillingPkg(BaseFBAPkg):
         self.model.objective = reaction_objective
         reaction_objective.set_linear_coefficients(obj_coef)
         self.parameters["gfobj"] = self.model.objective
+
+    def reset_original_objective(self):
+        self.parameters["origobj"] = self.model.objective
 
     def extend_model_with_model_for_gapfilling(self, source_model, index):
         new_metabolites = {}
@@ -980,7 +568,7 @@ class GapfillingPkg(BaseFBAPkg):
                 condition["change"] = False
         if len(filtered_list) > 0:
             if max_iterations > 0:
-                print("Gapfilling test failed " + str(11 - max_iterations))
+                logger.warning("Gapfilling test failed " + str(11 - max_iterations))
                 # Forcing filtered reactions to zero
                 for item in filtered_list:
                     if item[1] == ">":
@@ -1003,7 +591,7 @@ class GapfillingPkg(BaseFBAPkg):
         self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
         self.model.objective = self.parameters["origobj"]
         solution = self.model.optimize()
-        logger.info(
+        logger.debug(
             "Objective with gapfill database:"
             + str(solution.objective_value)
             + "; min objective:"
@@ -1016,6 +604,12 @@ class GapfillingPkg(BaseFBAPkg):
         if solution.objective_value < self.parameters["minimum_obj"]:
             return False
         return True
+
+    def set_min_objective(self, min_objective):
+        self.parameters["minimum_obj"] = min_objective
+        self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = self.parameters[
+            "minimum_obj"
+        ]
 
     def filter_database_based_on_tests(self, test_conditions):
         # Setting the minimal growth constraint to zero
@@ -1036,7 +630,7 @@ class GapfillingPkg(BaseFBAPkg):
             )
         # Now constraining filtered reactions to zero
         for item in filtered_list:
-            logger.info("Filtering:" + item[0].id + item[1])
+            logger.debug("Filtering:" + item[0].id + item[1])
             if item[1] == ">":
                 self.model.reactions.get_by_id(item[0].id).upper_bound = 0
             else:
@@ -1079,14 +673,14 @@ class GapfillingPkg(BaseFBAPkg):
                     else:
                         count += -1
                         rxn.lower_bound = 0
-            logger.info("Reactions unfiltered:" + str(count))
+            logger.debug("Reactions unfiltered:" + str(count))
             # Checking for model reactions that can be removed to enable all tests to pass
             self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
             filtered_list = self.modelutl.reaction_expansion_test(
                 self.parameters["original_reactions"], test_conditions
             )
             for item in filtered_list:
-                logger.info("Filtering:" + item[0].id + item[1])
+                logger.debug("Filtering:" + item[0].id + item[1])
                 if item[1] == ">":
                     self.model.reactions.get_by_id(item[0].id).upper_bound = 0
                 else:
@@ -1109,15 +703,19 @@ class GapfillingPkg(BaseFBAPkg):
                     and "forward" in self.gapfilling_penalties[reaction.id]
                 ):
                     if "added" in self.gapfilling_penalties[reaction.id]:
+                        logger.debug(f"New gapfilled reaction: {reaction.id} >")
                         output["new"][reaction.id] = ">"
                     else:
+                        logger.debug(f"Reversed gapfilled reaction: {reaction.id} >")
                         output["reversed"][reaction.id] = ">"
                 elif (
                     flux_values[reaction.id]["reverse"] > Zero
                     and "reverse" in self.gapfilling_penalties[reaction.id]
                 ):
                     if "added" in self.gapfilling_penalties[reaction.id]:
+                        logger.debug(f"New gapfilled reaction: {reaction.id} <")
                         output["new"][reaction.id] = "<"
                     else:
+                        logger.debug(f"Reversed gapfilled reaction: {reaction.id} <")
                         output["reversed"][reaction.id] = "<"
         return output

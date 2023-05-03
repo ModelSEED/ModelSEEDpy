@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
-import itertools
 import cobra
+import copy
 import json
 import time
 import pandas as pd
@@ -22,7 +22,9 @@ from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.helpers import get_template
 
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(
+    logging.WARNING
+)  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 _path = _dirname(_abspath(__file__))
 
@@ -122,7 +124,9 @@ class MSATPCorrection:
             self.coretemplate = core_template
 
         self.msgapfill = MSGapfill(
-            self.modelutl, default_gapfill_templates=core_template
+            self.modelutl,
+            default_gapfill_templates=[core_template],
+            default_target=self.atp_hydrolysis.id,
         )
         # These should stay as None until atp correction is actually run
         self.cumulative_core_gapfilling = None
@@ -209,6 +213,7 @@ class MSATPCorrection:
         self.other_compartments = []
         # Iterating through reactions and disabling
         for reaction in self.model.reactions:
+            gfrxn = self.msgapfill.gfmodel.reactions.get_by_id(reaction.id)
             if reaction.id == self.atp_hydrolysis.id:
                 continue
             if FBAHelper.is_ex(reaction):
@@ -233,10 +238,12 @@ class MSATPCorrection:
                     logger.debug(reaction.id + " core but reversible")
                     self.noncore_reactions.append([reaction, "<"])
                     reaction.lower_bound = 0
+                    gfrxn.lower_bound = 0
                 if reaction.upper_bound > 0 and template_reaction.upper_bound <= 0:
                     logger.debug(reaction.id + " core but reversible")
                     self.noncore_reactions.append([reaction, ">"])
                     reaction.upper_bound = 0
+                    gfrxn.upper_bound = 0
             else:
                 logger.debug(f"{reaction.id} non core")
                 if FBAHelper.rxn_compartment(reaction) != self.compartment:
@@ -251,6 +258,8 @@ class MSATPCorrection:
                         self.noncore_reactions.append([reaction, ">"])
                 reaction.lower_bound = 0
                 reaction.upper_bound = 0
+                gfrxn.lower_bound = 0
+                gfrxn.upper_bound = 0
 
     def evaluate_growth_media(self):
         """
@@ -266,24 +275,22 @@ class MSATPCorrection:
         output = {}
         with self.model:
             self.model.objective = self.atp_hydrolysis.id
-            # self.model.objective = self.model.problem.Objective(Zero,direction="max")
-
-            logger.debug(
-                f"ATP bounds: ({self.atp_hydrolysis.lower_bound}, {self.atp_hydrolysis.upper_bound})"
-            )
-            # self.model.objective.set_linear_coefficients({self.atp_hydrolysis.forward_variable:1})
             pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
+            # First prescreening model for ATP production without gapfilling
+            media_list = []
+            min_objectives = {}
             for media, minimum_obj in self.atp_medias:
-                logger.debug("evaluate media %s", media)
+                logger.info("evaluate media %s", media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                logger.debug("model.medium %s", self.model.medium)
+                logger.info("model.medium %s", self.model.medium)
                 solution = self.model.optimize()
-                logger.debug(
+                logger.info(
                     "evaluate media %s - %f (%s)",
                     media.id,
                     solution.objective_value,
                     solution.status,
                 )
+
                 self.media_gapfill_stats[media] = None
                 output[media.id] = solution.objective_value
 
@@ -291,23 +298,29 @@ class MSATPCorrection:
                     solution.objective_value < minimum_obj
                     or solution.status != "optimal"
                 ):
-                    self.media_gapfill_stats[media] = self.msgapfill.run_gapfilling(
-                        media,
-                        self.atp_hydrolysis.id,
-                        minimum_obj,
-                        check_for_growth=False,
-                    )
-                    # IF gapfilling fails - need to activate and penalize the noncore and try again
+                    media_list.append(media)
+                    min_objectives[media] = minimum_obj
                 elif solution.objective_value >= minimum_obj:
                     self.media_gapfill_stats[media] = {"reversed": {}, "new": {}}
-                logger.debug(
-                    "gapfilling stats: %s",
-                    json.dumps(self.media_gapfill_stats[media], indent=2, default=vars),
-                )
+
+            # Now running gapfilling on all conditions where initially there was no growth
+            all_solutions = self.msgapfill.run_multi_gapfill(
+                media_list,
+                self.atp_hydrolysis.id,
+                min_objectives,
+                check_for_growth=False,
+            )
+
+            # Adding the new solutions to the media gapfill stats
+            for media in all_solutions:
+                self.media_gapfill_stats[media] = all_solutions[media]
 
         if MSATPCorrection.DEBUG:
+            export_data = {}
+            for media in self.media_gapfill_stats:
+                export_data[media.id] = self.media_gapfill_stats[media]
             with open("debug.json", "w") as outfile:
-                json.dump(self.media_gapfill_stats[media], outfile)
+                json.dump(export_data, outfile)
 
         return output
 
@@ -342,7 +355,7 @@ class MSATPCorrection:
         if self.max_gapfilling is None:
             self.max_gapfilling = best_score
 
-        logger.debug(f"max_gapfilling: {self.max_gapfilling}, best_score: {best_score}")
+        logger.info(f"max_gapfilling: {self.max_gapfilling}, best_score: {best_score}")
 
         for media in self.media_gapfill_stats:
             gfscore = 0
@@ -359,6 +372,9 @@ class MSATPCorrection:
                 atp_att["selected_media"][media.id] = 0
 
         self.modelutl.save_attributes(atp_att, "ATP_analysis")
+        if MSATPCorrection.DEBUG:
+            with open("atp_att_debug.json", "w") as outfile:
+                json.dump(atp_att, outfile)
 
     def determine_growth_media2(self, max_gapfilling=None):
         """
@@ -386,7 +402,7 @@ class MSATPCorrection:
             max_gapfilling = best_score + self.gapfilling_delta
         for media in media_scores:
             score = media_scores[media]
-            logger.debug(score, best_score, max_gapfilling)
+            logger.info(score, best_score, max_gapfilling)
             if score <= max_gapfilling:
                 self.selected_media.append(media)
 
@@ -435,7 +451,7 @@ class MSATPCorrection:
         )
         # Removing filtered reactions
         for item in self.filtered_noncore:
-            print("Removing " + item[0].id + " " + item[1])
+            logger.debug("Removing " + item[0].id + " " + item[1])
             if item[1] == ">":
                 item[0].upper_bound = 0
             else:
@@ -500,6 +516,7 @@ class MSATPCorrection:
             self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
             obj_value = self.model.slim_optimize()
             logger.debug(f"{media.name} = {obj_value};{multiplier}")
+            logger.debug("Test:" + media.id + ";" + str(multiplier * obj_value))
             tests.append(
                 {
                     "media": media,
@@ -527,7 +544,7 @@ class MSATPCorrection:
         self.evaluate_growth_media()
         self.determine_growth_media()
         self.apply_growth_media_gapfilling()
-        self.evaluate_growth_media()
+        # self.evaluate_growth_media()
         self.expand_model_to_genome_scale()
         return self.build_tests()
 
