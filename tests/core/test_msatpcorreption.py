@@ -251,7 +251,7 @@ def test_ms_atp_correction_and_gap_fill1(
     model = get_model_with_infinite_atp_loop(["GLCpts_c0", "GLUSy_c0", "GLUDy_c0"])
     model.reactions.ATPM_c0.lower_bound = 0
     model.reactions.ATPM_c0.upper_bound = 1000
-
+    model.objective = "ATPM_c0"
     atp_correction = MSATPCorrection(
         model,
         template,
@@ -260,7 +260,6 @@ def test_ms_atp_correction_and_gap_fill1(
         load_default_medias=False,
     )
     tests = atp_correction.run_atp_correction()
-
     # expected tests = [{'media': MSMedia object, 'is_max_threshold': True, 'threshold': 21.0, 'objective': 'ATPM_c0'}]
 
     assert tests
@@ -268,13 +267,13 @@ def test_ms_atp_correction_and_gap_fill1(
     assert tests[0]["threshold"] > 0
     assert tests[0]["objective"] == "ATPM_c0"
 
+    model.objective = "BIOMASS_Ecoli_core_w_GAM_c0"
     gap_fill = MSGapfill(model, [template_genome_scale], [], tests, {}, [])
     result = gap_fill.run_gapfilling(
         media_genome_scale_glucose_aerobic,
         "BIOMASS_Ecoli_core_w_GAM_c0",
         minimum_obj=0.1,
     )
-
     # either GLUSy_c0 or GLUDy_c0 should be gap filled for glutamate
 
     assert result
