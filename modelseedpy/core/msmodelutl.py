@@ -16,12 +16,9 @@ from multiprocessing import Value
 # from builtins import None
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-# handler = logging.StreamHandler(sys.stdout)
-# handler.setLevel(logging.DEBUG)
-# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# handler.setFormatter(formatter)
-# logger.addHandler(handler)
+logger.setLevel(
+    logging.INFO
+)  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 
 class MSModelUtil:
@@ -924,13 +921,15 @@ class MSModelUtil:
                         reaction_list, condition, currmodel
                     )
                     for item in new_filtered:
-                        filtered_list.append(item)
+                        if item not in filtered_list:
+                            filtered_list.append(item)
                 else:
                     new_filtered = self.linear_expansion_test(
                         reaction_list, condition, currmodel
                     )
                     for item in new_filtered:
-                        filtered_list.append(item)
+                        if item not in filtered_list:
+                            filtered_list.append(item)
             # Restoring knockout of newly filtered reactions, which expire after exiting the "with" block above
             for item in new_filtered:
                 if item[1] == ">":
@@ -938,10 +937,10 @@ class MSModelUtil:
                 else:
                     item[0].lower_bound = 0
             toc = time.perf_counter()
-            logger.debug(
+            logger.info(
                 "Expansion time:" + condition["media"].id + ":" + str((toc - tic))
             )
-            logger.debug(
+            logger.info(
                 "Filtered count:"
                 + str(len(filtered_list))
                 + " out of "
