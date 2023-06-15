@@ -23,28 +23,28 @@ from modelseedpy.helpers import get_template
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
-    logging.WARNING
+    logging.INFO
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 _path = _dirname(_abspath(__file__))
 
 min_gap = {
-    "Glc/O2": 5,
-    "Etho/O2": 0.01,
-    "Ac/O2": 1,
-    "Pyr/O2": 3,
-    "Glyc/O2": 2,
-    "Fum/O2": 3,
-    "Succ/O2": 2,
-    "Akg/O2": 2,
-    "LLac/O2": 2,
-    "Dlac/O2": 2,
-    "For/O2": 2,
-    "For/NO3": 1.5,
-    "Pyr/NO": 2.5,
-    "Pyr/NO2": 2.5,
-    "Pyr/NO3": 2.5,
-    "Pyr/SO4": 2.5,
+    "Glc.O2": 5,
+    "Etho.O2": 0.01,
+    "Ac.O2": 1,
+    "Pyr.O2": 3,
+    "Glyc.O2": 2,
+    "Fum.O2": 3,
+    "Succ.O2": 2,
+    "Akg.O2": 2,
+    "LLac.O2": 2,
+    "Dlac.O2": 2,
+    "For.O2": 2,
+    "For.NO3": 1.5,
+    "Pyr.NO": 2.5,
+    "Pyr.NO2": 2.5,
+    "Pyr.NO3": 2.5,
+    "Pyr.SO4": 2.5,
 }
 
 
@@ -451,7 +451,7 @@ class MSATPCorrection:
         )
         # Removing filtered reactions
         for item in self.filtered_noncore:
-            logger.debug("Removing " + item[0].id + " " + item[1])
+            logger.info("Removing " + item[0].id + " " + item[1])
             if item[1] == ">":
                 item[0].upper_bound = 0
             else:
