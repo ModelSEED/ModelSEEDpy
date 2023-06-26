@@ -315,6 +315,7 @@ class MSBuilder:
         self.reaction_to_complex_sets = None
         self.compartments = None
         self.base_model = None
+        self.compartments_index = None  # TODO: implement custom index by compartment
         self.index = index
 
     def build_drains(self):
