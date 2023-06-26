@@ -84,6 +84,14 @@ class RastClient:
 
         return genome, res
 
+    def annotate_protein_sequence(self, protein_id: str, protein_seq: str):
+        p_features = [{"id": protein_id, "protein_translation": protein_seq}]
+        return self.f(p_features)
+
+    def annotate_protein_sequences(self, protein_seqs: dict):
+        p_features = [{"id": protein_id, "protein_translation": protein_seq}]
+        return self.f(p_features)
+
     def f1(self, protein_id, protein_seq):
         p_features = [{"id": protein_id, "protein_translation": protein_seq}]
         return self.f(p_features)
