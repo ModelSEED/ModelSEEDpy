@@ -25,7 +25,7 @@ logger.setLevel(
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 base_blacklist = {}
-
+zero_threshold = 1e-8
 
 class GapfillingPkg(BaseFBAPkg):
     """ """
@@ -532,12 +532,12 @@ class GapfillingPkg(BaseFBAPkg):
             if rxnobj.id in self.gapfilling_penalties:
                 if (
                     "reverse" in self.gapfilling_penalties[rxnobj.id]
-                    and flux_values[rxnobj.id]["reverse"] <= Zero
+                    and flux_values[rxnobj.id]["reverse"] <= zero_threshold
                 ):
                     rxnobj.lower_bound = 0
                 if (
                     "forward" in self.gapfilling_penalties[rxnobj.id]
-                    and flux_values[rxnobj.id]["forward"] <= Zero
+                    and flux_values[rxnobj.id]["forward"] <= zero_threshold
                 ):
                     rxnobj.upper_bound = 0
                 rxnobj.update_variable_bounds()
@@ -699,7 +699,7 @@ class GapfillingPkg(BaseFBAPkg):
         for reaction in self.model.reactions:
             if reaction.id in self.gapfilling_penalties:
                 if (
-                    flux_values[reaction.id]["forward"] > Zero
+                    flux_values[reaction.id]["forward"] > zero_threshold
                     and "forward" in self.gapfilling_penalties[reaction.id]
                 ):
                     if "added" in self.gapfilling_penalties[reaction.id]:
@@ -709,7 +709,7 @@ class GapfillingPkg(BaseFBAPkg):
                         logger.debug(f"Reversed gapfilled reaction: {reaction.id} >")
                         output["reversed"][reaction.id] = ">"
                 elif (
-                    flux_values[reaction.id]["reverse"] > Zero
+                    flux_values[reaction.id]["reverse"] > zero_threshold
                     and "reverse" in self.gapfilling_penalties[reaction.id]
                 ):
                     if "added" in self.gapfilling_penalties[reaction.id]:

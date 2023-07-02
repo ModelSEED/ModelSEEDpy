@@ -67,6 +67,7 @@ class MSGapfill:
         # Setting parameters for gapfilling
         self.lp_filename = self.last_solution = None
         self.model_penalty = 1
+        self.default_minimum_objective = minimum_obj
         self.default_gapfill_models = default_gapfill_models
         self.default_gapfill_templates = default_gapfill_templates
         self.gapfill_templates_by_index, self.gapfill_models_by_index = {}, {}
@@ -165,6 +166,8 @@ class MSGapfill:
             self.gfpkgmgr.getpkg("GapfillingPkg").reset_original_objective()
         if media:
             self.gfpkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        if not minimum_obj:
+            minimum_obj = self.default_minimum_objective
         if minimum_obj:
             self.gfpkgmgr.getpkg("GapfillingPkg").set_min_objective(minimum_obj)
 
@@ -230,14 +233,17 @@ class MSGapfill:
         media_list,
         target=None,
         minimum_objectives={},
+        default_minimum_objective = None,
         binary_check=False,
         prefilter=True,
         check_for_growth=True,
     ):
+        if not default_minimum_objective:
+            default_minimum_objective = self.default_minimum_objective
         first = True
         solution_dictionary = {}
         for item in media_list:
-            minimum_obj = None
+            minimum_obj = default_minimum_objective
             if item in minimum_objectives:
                 minimum_obj = minimum_objectives[item]
             if first:
