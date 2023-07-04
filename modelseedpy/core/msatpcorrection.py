@@ -336,14 +336,15 @@ class MSATPCorrection:
         self.selected_media = []
         best_score = None
         for media in self.media_gapfill_stats:
-            gfscore = 0
             atp_att["core_atp_gapfilling"][media.id] = {
                 "score": 0,
                 "new": {},
                 "reversed": {},
             }
             if self.media_gapfill_stats[media]:
-                gfscore = len(
+                atp_att["core_atp_gapfilling"][media.id][
+                    "score"
+                ] = len(
                     self.media_gapfill_stats[media]["new"].keys()
                 ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
                 atp_att["core_atp_gapfilling"][media.id][
@@ -353,67 +354,26 @@ class MSATPCorrection:
                     "reversed"
                 ] = self.media_gapfill_stats[media]["reversed"]
             else:
-                gfscore = 1000
                 atp_att["core_atp_gapfilling"][media.id] = {
                     "score": 1000,
                     "failed":True
                 }
-            if best_score is None or gfscore < best_score:
-                best_score = gfscore
-            atp_att["core_atp_gapfilling"][media.id]["score"] = gfscore
+            if best_score is None or atp_att["core_atp_gapfilling"][media.id]["score"] < best_score:
+                best_score = atp_att["core_atp_gapfilling"][media.id]["score"]
+        
         if self.max_gapfilling is None:
             self.max_gapfilling = best_score
 
         logger.info(f"max_gapfilling: {self.max_gapfilling}, best_score: {best_score}")
 
         for media in self.media_gapfill_stats:
-            gfscore = 0
-            if self.media_gapfill_stats[media]:
-                gfscore = len(
-                    self.media_gapfill_stats[media]["new"].keys()
-                ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
-
-            logger.debug(f"media gapfilling score: {media.id}: {gfscore}")
-            if gfscore <= self.max_gapfilling and gfscore <= (
+            if atp_att["core_atp_gapfilling"][media.id]["score"] <= self.max_gapfilling and atp_att["core_atp_gapfilling"][media.id]["score"] <= (
                 best_score + self.gapfilling_delta
             ):
                 self.selected_media.append(media)
                 atp_att["selected_media"][media.id] = 0
 
         self.modelutl.save_attributes(atp_att, "ATP_analysis")
-        if MSATPCorrection.DEBUG:
-            with open("atp_att_debug.json", "w") as outfile:
-                json.dump(atp_att, outfile)
-
-    def determine_growth_media2(self, max_gapfilling=None):
-        """
-        Decides which of the test media to use as growth conditions for this model
-        :return:
-        """
-
-        def scoring_function(media):
-            return len(self.media_gapfill_stats[media]["new"].keys()) + 0.5 * len(
-                self.media_gapfill_stats[media]["reversed"].keys()
-            )
-
-        if not max_gapfilling:
-            max_gapfilling = self.max_gapfilling
-        self.selected_media = []
-        media_scores = dict(
-            (media, scoring_function(media))
-            for media in self.media_gapfill_stats
-            if self.media_gapfill_stats[media]
-        )
-        best_score = min(media_scores.values())
-        if max_gapfilling is None or max_gapfilling > (
-            best_score + self.gapfilling_delta
-        ):
-            max_gapfilling = best_score + self.gapfilling_delta
-        for media in media_scores:
-            score = media_scores[media]
-            logger.info(score, best_score, max_gapfilling)
-            if score <= max_gapfilling:
-                self.selected_media.append(media)
 
     def apply_growth_media_gapfilling(self):
         """
