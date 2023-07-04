@@ -25,7 +25,7 @@ logger.setLevel(
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 base_blacklist = {}
-zero_threshold = 1e-8
+zero_threshold = 0
 
 class GapfillingPkg(BaseFBAPkg):
     """ """
