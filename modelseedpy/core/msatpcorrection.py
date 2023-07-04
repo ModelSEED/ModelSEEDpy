@@ -294,7 +294,7 @@ class MSATPCorrection:
                 )
 
                 self.media_gapfill_stats[media] = None
-                
+
                 output[media.id] = solution.objective_value
 
                 if (
@@ -342,9 +342,7 @@ class MSATPCorrection:
                 "reversed": {},
             }
             if self.media_gapfill_stats[media]:
-                atp_att["core_atp_gapfilling"][media.id][
-                    "score"
-                ] = len(
+                atp_att["core_atp_gapfilling"][media.id]["score"] = len(
                     self.media_gapfill_stats[media]["new"].keys()
                 ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
                 atp_att["core_atp_gapfilling"][media.id][
@@ -356,18 +354,25 @@ class MSATPCorrection:
             else:
                 atp_att["core_atp_gapfilling"][media.id] = {
                     "score": 1000,
-                    "failed":True
+                    "failed": True,
                 }
-            if best_score is None or atp_att["core_atp_gapfilling"][media.id]["score"] < best_score:
+            if (
+                best_score is None
+                or atp_att["core_atp_gapfilling"][media.id]["score"] < best_score
+            ):
                 best_score = atp_att["core_atp_gapfilling"][media.id]["score"]
-        
+
         if self.max_gapfilling is None:
             self.max_gapfilling = best_score
 
         logger.info(f"max_gapfilling: {self.max_gapfilling}, best_score: {best_score}")
 
         for media in self.media_gapfill_stats:
-            if atp_att["core_atp_gapfilling"][media.id]["score"] <= self.max_gapfilling and atp_att["core_atp_gapfilling"][media.id]["score"] <= (
+            if atp_att["core_atp_gapfilling"][media.id][
+                "score"
+            ] <= self.max_gapfilling and atp_att["core_atp_gapfilling"][media.id][
+                "score"
+            ] <= (
                 best_score + self.gapfilling_delta
             ):
                 self.selected_media.append(media)

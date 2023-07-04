@@ -236,7 +236,7 @@ class MSGapfill:
         media_list,
         target=None,
         minimum_objectives={},
-        default_minimum_objective = None,
+        default_minimum_objective=None,
         binary_check=False,
         prefilter=True,
         check_for_growth=True,

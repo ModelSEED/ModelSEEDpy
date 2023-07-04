@@ -89,7 +89,7 @@ class MSModelUtil:
     @staticmethod
     def get(model, create_if_missing=True):
         if isinstance(model, MSModelUtil):
-           return model
+            return model
         if model in MSModelUtil.mdlutls:
             return MSModelUtil.mdlutls[model]
         elif create_if_missing:
