@@ -1,4 +1,4 @@
-seed	Glc/O2	Ac/O2	Etho/O2	Pyr/O2	Glyc/O2	Fum/O2	Succ/O2	Akg/O2	LLac/O2	Dlac/O2	For/O2	Glc	Ac	Etho	Pyr	Glyc	Fum	Succ	Akg	Llac	Dlac	For	mal-L	For/NO2	For/NO3	For/NO	Pyr/NO2	Pyr/NO3	Pyr/NO	Ac/NO2	Ac/NO3	Ac/NO	Glc/DMSO	Glc/TMAO	Pyr/DMSO	Pyr/TMAO	Pyr/SO4	Pyr/SO3	H2/CO2	H2/Ac	For/SO4/H2	LLac/SO4/H2	For/SO4	LLac/SO4	H2/SO4	empty	Light	ANME	Methane
+seed	Glc.O2	Ac.O2	Etho.O2	Pyr.O2	Glyc.O2	Fum.O2	Succ.O2	Akg.O2	LLac.O2	Dlac.O2	For.O2	Glc	Ac	Etho	Pyr	Glyc	Fum	Succ	Akg	Llac	Dlac	For	mal-L	For.NO2	For.NO3	For.NO	Pyr.NO2	Pyr.NO3	Pyr.NO	Ac.NO2	Ac.NO3	Ac.NO	Glc.DMSO	Glc.TMAO	Pyr.DMSO	Pyr.TMAO	Pyr.SO4	Pyr.SO3	H2.CO2	H2.Ac	For.SO4.H2	LLac.SO4.H2	For.SO4	LLac.SO4	H2.SO4	empty	Light	ANME	Methane
 EX_cpd00027_e0	1	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 EX_cpd00024_e0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 EX_cpd00106_e0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
