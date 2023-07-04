@@ -342,23 +342,22 @@ class MSATPCorrection:
                 "new": {},
                 "reversed": {},
             }
-            if media in self.media_gapfill_stats:
-                if self.media_gapfill_stats[media]:
-                    gfscore = len(
-                        self.media_gapfill_stats[media]["new"].keys()
-                    ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
-                    atp_att["core_atp_gapfilling"][media.id][
-                        "new"
-                    ] = self.media_gapfill_stats[media]["new"]
-                    atp_att["core_atp_gapfilling"][media.id][
-                        "reversed"
-                    ] = self.media_gapfill_stats[media]["reversed"]
-                else:
-                    gfscore = 1000
-                    atp_att["core_atp_gapfilling"][media.id] = {
-                        "score": 1000,
-                        "failed":True
-                    }
+            if self.media_gapfill_stats[media]:
+                gfscore = len(
+                    self.media_gapfill_stats[media]["new"].keys()
+                ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
+                atp_att["core_atp_gapfilling"][media.id][
+                    "new"
+                ] = self.media_gapfill_stats[media]["new"]
+                atp_att["core_atp_gapfilling"][media.id][
+                    "reversed"
+                ] = self.media_gapfill_stats[media]["reversed"]
+            else:
+                gfscore = 1000
+                atp_att["core_atp_gapfilling"][media.id] = {
+                    "score": 1000,
+                    "failed":True
+                }
             if best_score is None or gfscore < best_score:
                 best_score = gfscore
             atp_att["core_atp_gapfilling"][media.id]["score"] = gfscore
