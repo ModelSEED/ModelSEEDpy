@@ -99,6 +99,7 @@ class MSATPCorrection:
             output = self.modelutl.add_atp_hydrolysis(compartment)
             self.atp_hydrolysis = output["reaction"]
 
+        self.media_hash = {}
         self.atp_medias = []
         if load_default_medias:
             self.load_default_medias()
@@ -107,6 +108,7 @@ class MSATPCorrection:
                 self.atp_medias.append(media)
             else:
                 self.atp_medias.append([media, 0.01])
+            self.media_hash[media.id] = media
 
         self.forced_media = []
         for media_id in forced_media:
@@ -292,6 +294,7 @@ class MSATPCorrection:
                 )
 
                 self.media_gapfill_stats[media] = None
+                
                 output[media.id] = solution.objective_value
 
                 if (
@@ -339,16 +342,23 @@ class MSATPCorrection:
                 "new": {},
                 "reversed": {},
             }
-            if self.media_gapfill_stats[media]:
-                gfscore = len(
-                    self.media_gapfill_stats[media]["new"].keys()
-                ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
-                atp_att["core_atp_gapfilling"][media.id][
-                    "new"
-                ] = self.media_gapfill_stats[media]["new"]
-                atp_att["core_atp_gapfilling"][media.id][
-                    "reversed"
-                ] = self.media_gapfill_stats[media]["reversed"]
+            if media in self.media_gapfill_stats:
+                if self.media_gapfill_stats[media]:
+                    gfscore = len(
+                        self.media_gapfill_stats[media]["new"].keys()
+                    ) + 0.5 * len(self.media_gapfill_stats[media]["reversed"].keys())
+                    atp_att["core_atp_gapfilling"][media.id][
+                        "new"
+                    ] = self.media_gapfill_stats[media]["new"]
+                    atp_att["core_atp_gapfilling"][media.id][
+                        "reversed"
+                    ] = self.media_gapfill_stats[media]["reversed"]
+                else:
+                    gfscore = 1000
+                    atp_att["core_atp_gapfilling"][media.id] = {
+                        "score": 1000,
+                        "failed":True
+                    }
             if best_score is None or gfscore < best_score:
                 best_score = gfscore
             atp_att["core_atp_gapfilling"][media.id]["score"] = gfscore
@@ -511,6 +521,15 @@ class MSATPCorrection:
         if multiplier is None:
             multiplier = self.multiplier
         tests = []
+        if "empty" in self.media_hash:
+            tests.append(
+                {
+                    "media": self.media_hash["empty"],
+                    "is_max_threshold": True,
+                    "threshold": 0.00001,
+                    "objective": self.atp_hydrolysis.id,
+                }
+            )
         self.model.objective = self.atp_hydrolysis.id
         for media in self.selected_media:
             self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
