@@ -60,6 +60,7 @@ class MSGapfill:
         self.gfpkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
         # Setting target from input
         if default_target:
+            self.default_target = default_target
             self.gfmodel.objective = self.gfmodel.problem.Objective(
                 self.gfmodel.reactions.get_by_id(default_target).flux_expression,
                 direction="max",
@@ -164,6 +165,8 @@ class MSGapfill:
                 direction="max",
             )
             self.gfpkgmgr.getpkg("GapfillingPkg").reset_original_objective()
+        else:
+            target = self.default_target
         if media:
             self.gfpkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         if not minimum_obj:
