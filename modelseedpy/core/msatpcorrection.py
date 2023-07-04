@@ -413,15 +413,15 @@ class MSATPCorrection:
         """
         self.cumulative_core_gapfilling = (
             []
-        )  # TODO: In case someone runs ATP correction twice with different parameters, before resetting this, maybe check if any of these reactions are already in the model and remove them so we're starting fresh???
+        )
+        #  TODO: In case someone runs ATP correction twice with different parameters,
+        #   before resetting this, maybe check if any of these reactions are already in
+        #   the model and remove them so we're starting fresh???
         for media in self.selected_media:
-            if (
-                media in self.media_gapfill_stats
-                and self.media_gapfill_stats[media]
-                and MSGapfill.gapfill_count(self.media_gapfill_stats[media]) > 0
-            ):
+            stats = self.media_gapfill_stats.get(media, None)
+            if stats is not None and MSGapfill.gapfill_count(self.media_gapfill_stats[media]) > 0:
                 self.msgapfill.integrate_gapfill_solution(
-                    self.media_gapfill_stats[media],
+                    stats,
                     self.cumulative_core_gapfilling,
                     link_gaps_to_objective=False,
                 )

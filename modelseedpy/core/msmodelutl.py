@@ -538,55 +538,33 @@ class MSModelUtil:
         objective = tempmodel.slim_optimize()
         logger.debug("Starting objective:" + str(objective))
         types = ["new", "reversed"]
+
         for key in types:
             for rxn_id in solution[key]:
                 rxnobj = tempmodel.reactions.get_by_id(rxn_id)
-                if solution[key][rxn_id] == ">":
+                solution_key_rxn_id = solution[key][rxn_id]  # could call this direction instead but wasn't 100% sure
+                if solution_key_rxn_id == ">":
                     original_bound = rxnobj.upper_bound
                     rxnobj.upper_bound = 0
                     objective = tempmodel.slim_optimize()
                     if objective < solution["minobjective"]:
-                        logger.debug(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " needed:"
-                            + str(objective)
-                            + " with min obj:"
-                            + str(solution["minobjective"])
-                        )
+                        logger.debug(f'{rxn_id}{solution_key_rxn_id} needed:{objective} with min obj:{solution["minobjective"]}')
                         rxnobj.upper_bound = original_bound
                     else:
                         removed_rxns.append(rxnobj)
-                        unneeded.append([rxn_id, solution[key][rxn_id], key])
-                        logger.debug(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " not needed:"
-                            + str(objective)
-                        )
+                        unneeded.append([rxn_id, solution_key_rxn_id, key])
+                        logger.debug(f'{rxn_id}{solution_key_rxn_id} not needed:{objective}')
                 else:
                     original_bound = rxnobj.lower_bound
                     rxnobj.lower_bound = 0
                     objective = tempmodel.slim_optimize()
                     if objective < solution["minobjective"]:
-                        logger.debug(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " needed:"
-                            + str(objective)
-                            + " with min obj:"
-                            + str(solution["minobjective"])
-                        )
+                        logger.debug(f'{rxn_id}{solution_key_rxn_id} needed:{objective} with min obj:{solution["minobjective"]}')
                         rxnobj.lower_bound = original_bound
                     else:
                         removed_rxns.append(rxnobj)
-                        unneeded.append([rxn_id, solution[key][rxn_id], key])
-                        logger.debug(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " not needed:"
-                            + str(objective)
-                        )
+                        unneeded.append([rxn_id, solution_key_rxn_id, key])
+                        logger.debug(f'{rxn_id}{solution_key_rxn_id} not needed:{objective}')
         if keep_changes:
             tempmodel.remove_reactions(removed_rxns)
             for items in unneeded:
@@ -726,7 +704,7 @@ class MSModelUtil:
         if model.solver.status != "optimal":
             self.printlp(condition["media"].id + "-Testing-Infeasible.lp")
             logger.critical(
-                ondition["media"].id
+                condition["media"].id
                 + "testing leads to infeasible problem. LP file printed to debug!"
             )
             return False
