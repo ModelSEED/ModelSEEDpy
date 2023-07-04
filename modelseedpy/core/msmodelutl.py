@@ -88,6 +88,8 @@ class MSModelUtil:
 
     @staticmethod
     def get(model, create_if_missing=True):
+        if isinstance(model, MSModelUtil):
+            return model
         if model in MSModelUtil.mdlutls:
             return MSModelUtil.mdlutls[model]
         elif create_if_missing:
@@ -99,6 +101,7 @@ class MSModelUtil:
     def __init__(self, model):
         self.model = model
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        self.wsid = None
         self.atputl = None
         self.gfutl = None
         self.metabolite_hash = None
@@ -546,7 +549,7 @@ class MSModelUtil:
                     rxnobj.upper_bound = 0
                     objective = tempmodel.slim_optimize()
                     if objective < solution["minobjective"]:
-                        logger.debug(
+                        logger.info(
                             rxn_id
                             + solution[key][rxn_id]
                             + " needed:"
@@ -558,7 +561,7 @@ class MSModelUtil:
                     else:
                         removed_rxns.append(rxnobj)
                         unneeded.append([rxn_id, solution[key][rxn_id], key])
-                        logger.debug(
+                        logger.info(
                             rxn_id
                             + solution[key][rxn_id]
                             + " not needed:"
@@ -569,7 +572,7 @@ class MSModelUtil:
                     rxnobj.lower_bound = 0
                     objective = tempmodel.slim_optimize()
                     if objective < solution["minobjective"]:
-                        logger.debug(
+                        logger.info(
                             rxn_id
                             + solution[key][rxn_id]
                             + " needed:"
@@ -581,7 +584,7 @@ class MSModelUtil:
                     else:
                         removed_rxns.append(rxnobj)
                         unneeded.append([rxn_id, solution[key][rxn_id], key])
-                        logger.debug(
+                        logger.info(
                             rxn_id
                             + solution[key][rxn_id]
                             + " not needed:"
