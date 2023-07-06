@@ -15,7 +15,6 @@ logger.setLevel(
 
 
 class MSGapfill:
-
     @staticmethod
     def gapfill_count(solution):
         total = 0
@@ -191,7 +190,9 @@ class MSGapfill:
 
         # Running gapfilling and checking solution
         sol = self.gfmodel.optimize()
-        logger.debug(f"gapfill solution objective value {sol.objective_value} ({sol.status}) for media {media}")
+        logger.debug(
+            f"gapfill solution objective value {sol.objective_value} ({sol.status}) for media {media}"
+        )
         if sol.status != "optimal":
             logger.warning("No solution found for %s", media)
             return None
@@ -223,7 +224,9 @@ class MSGapfill:
         # Setting last solution data
         self.last_solution["media"] = media
         self.last_solution["target"] = target
-        self.last_solution["minobjective"] = self.gfpkgmgr.getpkg("GapfillingPkg").parameters['minimum_obj']
+        self.last_solution["minobjective"] = self.gfpkgmgr.getpkg(
+            "GapfillingPkg"
+        ).parameters["minimum_obj"]
         self.last_solution["binary_check"] = binary_check
         return self.last_solution
 

@@ -28,8 +28,8 @@ if sys.version_info[0] == 2:
         "still work but we will no longer actively maintain Python 2 support."
     )
 
-if 'e0' not in cobra.medium.annotations.compartment_shortlist['e']:
-    cobra.medium.annotations.compartment_shortlist['e'].append('e0')
+if "e0" not in cobra.medium.annotations.compartment_shortlist["e"]:
+    cobra.medium.annotations.compartment_shortlist["e"].append("e0")
 
 import modelseedpy
 from modelseedpy.core import (

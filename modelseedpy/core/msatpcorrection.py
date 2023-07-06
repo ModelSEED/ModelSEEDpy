@@ -385,15 +385,16 @@ class MSATPCorrection:
         Applies the gapfilling to all selected growth media
         :return:
         """
-        self.cumulative_core_gapfilling = (
-            []
-        )
+        self.cumulative_core_gapfilling = []
         #  TODO: In case someone runs ATP correction twice with different parameters,
         #   before resetting this, maybe check if any of these reactions are already in
         #   the model and remove them so we're starting fresh???
         for media in self.selected_media:
             stats = self.media_gapfill_stats.get(media, None)
-            if stats is not None and MSGapfill.gapfill_count(self.media_gapfill_stats[media]) > 0:
+            if (
+                stats is not None
+                and MSGapfill.gapfill_count(self.media_gapfill_stats[media]) > 0
+            ):
                 self.msgapfill.integrate_gapfill_solution(
                     stats,
                     self.cumulative_core_gapfilling,
