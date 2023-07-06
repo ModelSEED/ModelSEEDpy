@@ -191,10 +191,7 @@ class MSGapfill:
         # Running gapfilling and checking solution
         sol = self.gfmodel.optimize()
         logger.debug(
-            "gapfill solution objective value %f (%s) for media %s",
-            sol.objective_value,
-            sol.status,
-            media,
+            f"gapfill solution objective value {sol.objective_value} ({sol.status}) for media {media}"
         )
         if sol.status != "optimal":
             logger.warning("No solution found for %s", media)
@@ -218,7 +215,7 @@ class MSGapfill:
                 )
                 return None
 
-        # Running binary check to reduce solution to minimal reaction soltuion
+        # Running binary check to reduce solution to minimal reaction solution
         if binary_check:
             self.last_solution = self.gfpkgmgr.getpkg(
                 "GapfillingPkg"
@@ -227,7 +224,9 @@ class MSGapfill:
         # Setting last solution data
         self.last_solution["media"] = media
         self.last_solution["target"] = target
-        self.last_solution["minobjective"] = minimum_obj
+        self.last_solution["minobjective"] = self.gfpkgmgr.getpkg(
+            "GapfillingPkg"
+        ).parameters["minimum_obj"]
         self.last_solution["binary_check"] = binary_check
         return self.last_solution
 
