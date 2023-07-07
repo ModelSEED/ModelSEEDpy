@@ -39,7 +39,7 @@ min_gap = {
     "Akg.O2": 2,
     "LLac.O2": 2,
     "Dlac.O2": 2,
-    "For.O2": 2,
+    "For.O2": 1.875,
     "For.NO3": 1.5,
     "Pyr.NO": 2.5,
     "Pyr.NO2": 2.5,
@@ -109,7 +109,12 @@ class MSATPCorrection:
             else:
                 self.atp_medias.append([media, 0.01])
             self.media_hash[media.id] = media
-
+        if "empty" not in self.media_hash:
+            media = MSMedia.from_dict({})
+            media.id = "empty"
+            media.name = "empty"
+            self.media_hash[media.id] = media
+        
         self.forced_media = []
         for media_id in forced_media:
             for media in self.atp_medias:
@@ -500,11 +505,14 @@ class MSATPCorrection:
             obj_value = self.model.slim_optimize()
             logger.debug(f"{media.name} = {obj_value};{multiplier}")
             logger.debug("Test:" + media.id + ";" + str(multiplier * obj_value))
+            threshold = multiplier * obj_value
+            if threshold == 0:
+                threshold += 0.00001
             tests.append(
                 {
                     "media": media,
                     "is_max_threshold": True,
-                    "threshold": multiplier * obj_value,
+                    "threshold": threshold,
                     "objective": self.atp_hydrolysis.id,
                 }
             )
