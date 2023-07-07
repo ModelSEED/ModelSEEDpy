@@ -143,7 +143,7 @@ class MSTemplateSpecies(Metabolite):
     def __init__(
         self,
         comp_cpd_id: str,
-        charge: int,
+        charge: float,
         compartment: str,
         cpd_id,
         max_uptake=0,
@@ -160,19 +160,28 @@ class MSTemplateSpecies(Metabolite):
                     self.cpd_id
                 )
 
-    def to_metabolite(self, index="0"):
+    def to_metabolite(self, index="0", force=False):
         """
         Create cobra.core.Metabolite instance
         :param index: compartment index
+        :@param force: force index
         :return: cobra.core.Metabolite
         """
         if index is None:
             index = ""
+        index = str(index)
+
+        if self.compartment == "e" and index.isnumeric():
+            if force:
+                logger.warning(
+                    f"Forcing numeric index [{index}] to extra cellular compartment not advised"
+                )
+            else:
+                index = "0"
+
         cpd_id = f"{self.id}{index}"
         compartment = f"{self.compartment}{index}"
-        name = f"{self.name}"
-        if len(str(index)) > 0:
-            name = f"{self.name} [{compartment}]"
+        name = f"{self.compound.name} [{compartment}]"
         metabolite = Metabolite(cpd_id, self.formula, name, self.charge, compartment)
         metabolite.notes["modelseed_template_id"] = self.id
         return metabolite
@@ -184,8 +193,8 @@ class MSTemplateSpecies(Metabolite):
     @property
     def name(self):
         if self._template_compound:
-            return self._template_compound.name
-        return ""
+            return f"{self._template_compound.name} [{self.compartment}]"
+        return f"{self.id} [{self.compartment}]"
 
     @name.setter
     def name(self, value):
@@ -294,15 +303,17 @@ class MSTemplateReaction(Reaction):
     def to_reaction(self, model=None, index="0"):
         if index is None:
             index = ""
+        index = str(index)
         rxn_id = f"{self.id}{index}"
         compartment = f"{self.compartment}{index}"
         name = f"{self.name}"
         metabolites = {}
         for m, v in self.metabolites.items():
-            if model and m.id in model.metabolites:
-                metabolites[model.metabolites.get_by_id(m.id)] = v
+            _metabolite = m.to_metabolite(index)
+            if _metabolite.id in model.metabolites:
+                metabolites[model.metabolites.get_by_id(_metabolite.id)] = v
             else:
-                metabolites[m.to_metabolite(index)] = v
+                metabolites[_metabolite] = v
 
         if len(str(index)) > 0:
             name = f"{self.name} [{compartment}]"
@@ -587,7 +598,7 @@ class MSTemplateBiomass:
                 if "compartment" not in row:
                     row["compartment"] = "c"
                 metabolite = template.compcompounds.get_by_id(
-                    f'{row["id"]}_{lower(row["compartment"])}'
+                    f'{row["id"]}_{row["compartment"].lower()}'
                 )
                 linked_mets = {}
                 if (
@@ -598,14 +609,14 @@ class MSTemplateBiomass:
                     for item in array:
                         sub_array = item.split(":")
                         l_met = template.compcompounds.get_by_id(
-                            f'{sub_array[0]}_{lower(row["compartment"])}'
+                            f'{sub_array[0]}_{row["compartment"].lower()}'
                         )
                         linked_mets[l_met] = float(sub_array[1])
                 self.add_biomass_component(
                     metabolite,
-                    lower(row["class"]),
+                    row["class"].lower(),
                     float(row["coefficient"]),
-                    upper(row["coefficient_type"]),
+                    row["coefficient_type"].upper(),
                     linked_mets,
                 )
         return self

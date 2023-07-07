@@ -15,8 +15,14 @@ def normalize_role(s):
 
 
 def read_fasta(f, split=DEFAULT_SPLIT, h_func=None):
-    with open(f, "r") as fh:
-        return parse_fasta_str(fh.read(), split, h_func)
+    if f.endswith(".gz"):
+        import gzip
+
+        with gzip.open(f, "rb") as fh:
+            return parse_fasta_str(fh.read().decode("utf-8"), split, h_func)
+    else:
+        with open(f, "r") as fh:
+            return parse_fasta_str(fh.read(), split, h_func)
 
 
 def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):

@@ -315,6 +315,7 @@ class MSBuilder:
         self.reaction_to_complex_sets = None
         self.compartments = None
         self.base_model = None
+        self.compartments_index = None  # TODO: implement custom index by compartment
         self.index = index
 
     def build_drains(self):
@@ -955,7 +956,7 @@ class MSBuilder:
         else:
             for bio in template.biomasses:
                 bio.build_biomass(
-                    self, model, index, classic=False, GC=0.5, add_to_model=True
+                    model, index, classic=False, GC=0.5, add_to_model=True
                 )
             model.objective = "bio1"
 

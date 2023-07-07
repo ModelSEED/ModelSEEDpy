@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from modelseedpy.biochem.seed_object import ModelSEEDObject
-from modelseedpy.core.mstemplate import MSTemplateSpecies
+from modelseedpy.core.mstemplate import MSTemplateSpecies, MSTemplateMetabolite
 from cobra.core import Metabolite
 import pandas as pd
 
@@ -58,7 +58,23 @@ class ModelSEEDCompound2(Metabolite):
 
     def to_template_compartment_compound(self, compartment):
         cpd_id = f"{self.seed_id}_{compartment}"
-        res = MSTemplateSpecies(cpd_id, self.charge, compartment, self.id)
+        # build Template Compound
+        metabolite = MSTemplateMetabolite(
+            self.seed_id,
+            self.formula,
+            self.name,
+            self.charge,
+            self.mass,
+            self.delta_g,
+            self.delta_g_error,
+            self.is_cofactor,
+            self.abbr,
+        )
+        # build Template Compartment Compound
+        res = MSTemplateSpecies(cpd_id, self.charge, compartment, metabolite.id)
+
+        # assign Compound to Compartment Compound
+        res._template_compound = metabolite
         res.annotation.update(self.annotation)
         return res
 
