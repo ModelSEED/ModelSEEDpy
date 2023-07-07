@@ -499,6 +499,11 @@ class MSATPCorrection:
                     "objective": self.atp_hydrolysis.id,
                 }
             )
+            atp_att["tests"]["empty"] = {
+                "threshold": 0.00001,
+                "objective": self.atp_hydrolysis.id,
+            }
+            
         self.model.objective = self.atp_hydrolysis.id
         for media in self.selected_media:
             self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
