@@ -850,22 +850,15 @@ class MSBuilder:
         complex_groups = self.build_complex_groups(
             self.reaction_to_complex_sets.values()
         )
-        if "bio1" in cobra_model.reactions:
-            print("1:Biomass present!!")
         metabolic_reactions = self.build_metabolic_reactions()
         cobra_model.add_reactions(metabolic_reactions)
-        if "bio1" in cobra_model.reactions:
-            print("2:Biomass present!!")
         non_metabolic_reactions = self.build_non_metabolite_reactions(
             cobra_model, allow_all_non_grp_reactions
         )
         cobra_model.add_reactions(non_metabolic_reactions)
-        if "bio1" in cobra_model.reactions:
-            print("3:Biomass present!!")
         cobra_model.add_groups(list(complex_groups.values()))
         self.add_exchanges_to_model(cobra_model)
 
-        print("Adding biomass!!")
         biomass_reactions = []
         for rxn_biomass in self.template.biomasses:
             reaction = rxn_biomass.build_biomass(

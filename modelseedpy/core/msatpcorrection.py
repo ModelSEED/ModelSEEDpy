@@ -47,6 +47,11 @@ min_gap = {
     "Pyr.SO4": 2.5,
 }
 
+default_threshold_multipiers = {
+    "Glc": 2,
+    "default":1.2,
+}
+
 
 class MSATPCorrection:
 
@@ -287,11 +292,11 @@ class MSATPCorrection:
             media_list = []
             min_objectives = {}
             for media, minimum_obj in self.atp_medias:
-                logger.info("evaluate media %s", media)
+                logger.debug("evaluate media %s", media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                logger.info("model.medium %s", self.model.medium)
+                logger.debug("model.medium %s", self.model.medium)
                 solution = self.model.optimize()
-                logger.info(
+                logger.debug(
                     "evaluate media %s - %f (%s)",
                     media.id,
                     solution.objective_value,
@@ -467,7 +472,7 @@ class MSATPCorrection:
                     reaction.lower_bound = self.original_bounds[reaction.id][0]
                     reaction.upper_bound = self.original_bounds[reaction.id][1]
 
-    def build_tests(self, multiplier=None):
+    def build_tests(self,multiplier_hash_override={}):
         """Build tests based on ATP media evaluations
 
         Parameters
@@ -483,13 +488,16 @@ class MSATPCorrection:
         Raises
         ------
         """
+        #Applying threshold multiplier
+        for key in default_threshold_multipiers:
+            if key not in multiplier_hash_override:
+                multiplier_hash_override[key] = default_threshold_multipiers[key]
+        #Initialzing atp test attributes
         atp_att = self.modelutl.get_attributes(
             "ATP_analysis",
             {"tests": {}, "selected_media": {}, "core_atp_gapfilling": {}},
         )
-
-        if multiplier is None:
-            multiplier = self.multiplier
+        #Initializing tests and adding empty media every time
         tests = []
         if "empty" in self.media_hash:
             tests.append(
@@ -504,13 +512,18 @@ class MSATPCorrection:
                 "threshold": 0.00001,
                 "objective": self.atp_hydrolysis.id,
             }
-            
+        #Setting objective to ATP hydrolysis
         self.model.objective = self.atp_hydrolysis.id
         for media in self.selected_media:
+            #Setting multiplier for test threshold
+            multiplier = multiplier_hash_override["default"]
+            if media.id in multiplier_hash_override:
+                 multiplier = multiplier_hash_override[media.id]
+            #Constraining model exchanges for media
             self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+            #Computing core ATP production
             obj_value = self.model.slim_optimize()
             logger.debug(f"{media.name} = {obj_value};{multiplier}")
-            logger.debug("Test:" + media.id + ";" + str(multiplier * obj_value))
             threshold = multiplier * obj_value
             if threshold == 0:
                 threshold += 0.00001
@@ -527,9 +540,8 @@ class MSATPCorrection:
                 "threshold": multiplier * obj_value,
                 "objective": self.atp_hydrolysis.id,
             }
-
+        #Saving test attributes to the model
         self.modelutl.save_attributes(atp_att, "ATP_analysis")
-
         return tests
 
     def run_atp_correction(self):
