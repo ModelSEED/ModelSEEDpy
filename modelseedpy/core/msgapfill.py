@@ -352,7 +352,7 @@ class MSGapfill:
         self.mdlutl.add_gapfilling(solution)
         #Testing which gapfilled reactions are needed to produce each reactant in the objective function
         if link_gaps_to_objective:
-            logger.info("Gapfilling sensitivity analysis running on succesful run in "+solution["media"]+" for target "+solution["target"])
+            logger.info("Gapfilling sensitivity analysis running on succesful run in "+solution["media"].id+" for target "+solution["target"])
             gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
             if solution["media"] not in gf_sensitivity:
                 gf_sensitivity[solution["media"]] = {}
