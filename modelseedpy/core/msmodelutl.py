@@ -285,12 +285,13 @@ class MSModelUtil:
             self.attributes[key] = default
         return self.attributes[key]
 
-    def save_attributes(self, value, key=None):
+    def save_attributes(self, value=None, key=None):
         attributes = self.get_attributes()
-        if key:
-            attributes[key] = value
-        else:
-            self.attributes = value
+        if value:
+            if key:
+                attributes[key] = value
+            else:
+                self.attributes = value
         if hasattr(self.model, "attributes"):
             self.model.attributes = self.attributes
 

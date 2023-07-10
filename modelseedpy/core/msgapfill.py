@@ -10,7 +10,7 @@ from modelseedpy.core.exceptions import GapfillingError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
-    logging.WARNING
+    logging.INFO#WARNING
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 
@@ -158,6 +158,22 @@ class MSGapfill:
         prefilter=True,
         check_for_growth=True,
     ):
+        """Run gapfilling on a single media condition to force the model to achieve a nonzero specified objective
+        Parameters
+        ----------
+        media : MSMedia
+            Media in which the model should be gapfilled
+        target : string
+            Name or expression describing the reaction or combination of reactions to the optimized
+        minimum_obj : double
+            Value to use for the minimal objective threshold that the model must be gapfilled to achieve
+        binary_check : bool 
+            Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
+        prefilter : bool
+            Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
+        check_for_growth : bool
+            Indicates if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
+        """
         # Setting target and media if specified
         if target:
             self.gfmodel.objective = self.gfmodel.problem.Objective(
@@ -240,6 +256,25 @@ class MSGapfill:
         prefilter=True,
         check_for_growth=True,
     ):
+        """Run gapfilling across an array of media conditions ultimately using different integration policies: simultaneous gapfilling, independent gapfilling, cumulative gapfilling
+        Parameters
+        ----------
+        media_list : [MSMedia]
+            List of the medias in which the model should be gapfilled
+        target : string
+            Name or expression describing the reaction or combination of reactions to the optimized
+        minimum_objectives : {string - media ID : double - minimum objective value}
+            Media-specific minimal objective thresholds that the model must be gapfilled to achieve
+        default_minimum_objective : double
+            Default value to use for the minimal objective threshold that the model must be gapfilled to achieve
+        binary_check : bool 
+            Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
+        prefilter : bool
+            Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
+        check_for_growth : bool
+            Indicates if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
+        """
+        
         if not default_minimum_objective:
             default_minimum_objective = self.default_minimum_objective
         first = True
@@ -250,11 +285,11 @@ class MSGapfill:
                 minimum_obj = minimum_objectives[item]
             if first:
                 solution_dictionary[item] = self.run_gapfilling(
-                    item, target, minimum_obj, binary_check, True, True
+                    item, target, minimum_obj, binary_check, prefilter, check_for_growth
                 )
             else:
                 solution_dictionary[item] = self.run_gapfilling(
-                    item, None, minimum_obj, binary_check, False, True
+                    item, None, minimum_obj, binary_check, False, check_for_growth
                 )
             false = False
         return solution_dictionary
@@ -303,6 +338,8 @@ class MSGapfill:
                     cumulative_solution.append([rxn_id, "<"])
                     rxn.upper_bound = 0
                     rxn.lower_bound = -100
+        
+        #Sometimes for whatever reason, the solution includes useless reactions that should be stripped out before saving the final model
         unneeded = self.mdlutl.test_solution(
             solution, keep_changes=True
         )  # Strips out unneeded reactions - which undoes some of what is done above
@@ -311,8 +348,11 @@ class MSGapfill:
                 if item[0] == oitem[0] and item[1] == oitem[1]:
                     cumulative_solution.remove(oitem)
                     break
+        #Adding the gapfilling solution data to the model, which is needed for saving the model in KBase
         self.mdlutl.add_gapfilling(solution)
+        #Testing which gapfilled reactions are needed to produce each reactant in the objective function
         if link_gaps_to_objective:
+            logger.info("Gapfilling sensitivity analysis running on succesful run in "+solution["media"]+" for target "+solution["target"])
             gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
             if solution["media"] not in gf_sensitivity:
                 gf_sensitivity[solution["media"]] = {}

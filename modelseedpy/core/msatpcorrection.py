@@ -408,7 +408,7 @@ class MSATPCorrection:
                 self.msgapfill.integrate_gapfill_solution(
                     stats,
                     self.cumulative_core_gapfilling,
-                    link_gaps_to_objective=False,
+                    link_gaps_to_objective=False
                 )
         core_gf = {
             "count": len(self.cumulative_core_gapfilling),
