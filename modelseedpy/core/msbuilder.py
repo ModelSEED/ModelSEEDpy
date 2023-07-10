@@ -869,7 +869,7 @@ class MSBuilder:
         biomass_reactions = []
         for rxn_biomass in self.template.biomasses:
             reaction = rxn_biomass.build_biomass(
-                cobra_model, "0", biomass_classic, biomass_gc
+                cobra_model, index, biomass_classic, biomass_gc
             )
             for m in reaction.metabolites:
                 if "modelseed_template_id" in m.notes:
