@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 from cobra.core.dictlist import DictList
-from builtins import None
 
 logger = logging.getLogger(__name__)
 
