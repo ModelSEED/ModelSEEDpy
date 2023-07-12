@@ -1070,14 +1070,10 @@ class MSModelUtil:
     ):
         tempmodel.objective = original_objective
         objective = tempmodel.slim_optimize()
-        with open("FlexBiomass2.lp", "w") as out:
-            out.write(str(tempmodel.solver))
         if objective > 0:
             target_rxn.lower_bound = 0.1
             tempmodel.objective = min_flex_obj
             solution = tempmodel.optimize()
-            with open("FlexBiomass3.lp", "w") as out:
-                out.write(str(tempmodel.solver))
             biocpds = []
             for reaction in tempmodel.reactions:
                 if reaction.id[0:5] == "FLEX_" and (

@@ -33,8 +33,13 @@ class BaseFBAPkg:
     def __init__(
         self, model, name, variable_types={}, constraint_types={}, reaction_types={}
     ):
-        self.model = model
-        self.modelutl = MSModelUtil.get(model)
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.modelutl = model
+        else:
+            self.model = model
+            self.modelutl = MSModelUtil.get(model)
+
         self.name = name
 
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
