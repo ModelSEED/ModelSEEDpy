@@ -9,7 +9,9 @@ from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgapfill import MSGapfill
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(
+    logging.INFO
+)  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 class MSGrowthPhenotype:
     def __init__(
@@ -33,102 +35,186 @@ class MSGrowthPhenotype:
         self.additional_compounds = additional_compounds
         self.parent = parent
 
-    def build_media(self):
+    def build_media(self,include_base_media=True):
+        """Builds media object to use when simulating the phenotype
+        Parameters
+        ----------
+        include_base_media : bool
+            Indicates whether to include the base media for the phenotype set in the formulation
+        """
         cpd_hash = {}
         for cpd in self.additional_compounds:
             cpd_hash[cpd] = 100
         full_media = MSMedia.from_dict(cpd_hash)
-        if self.media != None:
+        if self.media:
             full_media.merge(self.media, overwrite_overlap=False)
-        if self.parent != None and self.parent.base_media != None:
-            full_media.merge(parent.base_media, overwrite_overlap=False)
+        if full_media:
+            if self.parent and self.parent.base_media:
+                full_media.merge(parent.base_media, overwrite_overlap=False)
         return full_media
 
     def simulate(
         self,
-        modelutl,
-        growth_threshold=0.001,
+        model_or_modelutl,
+        objective,
+        growth_multiplier=10,
         add_missing_exchanges=False,
         save_fluxes=False,
         pfba=False,
     ):
-        if not isinstance(modelutl, MSModelUtil):
-            modelutl = MSModelUtil(modelutl)
-        media = self.build_media()
-        output = {"growth": None, "class": None, "missing_transports": []}
+        """Simulates a single phenotype
+        Parameters
+        ----------
+        model_or_modelutl : Model | MSModelUtl
+            Model to use to run the simulations
+        add_missing_exchanges : bool
+            Boolean indicating if exchanges for compounds mentioned explicitly in phenotype media should be added to the model automatically
+        growth_multiplier : double
+            Indicates a multiplier to use for positive growth above the growth on baseline media
+        save_fluxes : bool
+            Indicates if the fluxes should be saved and returned with the results
+        pfba : bool
+            Runs pFBA to compute fluxes after initially solving for growth
+        """
+        modelutl = model_or_mdlutl
+        if not isinstance(model_or_mdlutl, MSModelUtil):
+            modelutl = MSModelUtil.get(model_or_mdlutl)
+        
+        #Setting objective
+        if objective:
+            modelutl.model.objective = objective
+        
+        #Building full media and adding missing exchanges
+        output = {"growth": None, "class": None, "missing_transports": [], "baseline_growth": None}
+        full_media = self.build_media()
         if add_missing_exchanges:
-            output["missing_transports"] = modelutl.add_missing_exchanges(media)
-        pkgmgr = MSPackageManager.get_pkg_mgr(modelutl.model)
-        pkgmgr.getpkg("KBaseMediaPkg").build_package(
-            media, self.parent.base_uptake, self.parent.base_excretion
-        )
-        for gene in self.gene_ko:
-            if gene in modelutl.model.genes:
-                geneobj = modelutl.model.genes.get_by_id(gene)
-                geneobj.knock_out()
-        solution = modelutl.model.optimize()
-        output["growth"] = solution.objective_value
-        if solution.objective_value > 0 and pfba:
-            solution = cobra.flux_analysis.pfba(modelutl.model)
-        if save_fluxes:
-            output["fluxes"] = solution.fluxes
-        if output["growth"] >= growth_threshold:
+            output["missing_transports"] = modelutl.add_missing_exchanges(full_media)
+        
+        #Getting basline growth
+        output["baseline_growth"] = 0.001
+        if self.parent:
+            output["baseline_growth"] = self.parent.baseline_growth(modelutl,True)
+        
+        #Building specific media and setting compound exception list
+        if self.parent and self.parent.atom_limits and len(self.parent.atom_limits) > 0:
+            reaction_exceptions = []
+            specific_media = self.build_media(False)
+            for mediacpd in specific_media.mediacompounds:
+                output = mediacpd.get_mdl_exchange_hash(self,modelutl)
+                for mdlcpd in output:
+                    reaction_exceptions.append(output[mdlcpd])
+            modelutl.pkgmgr.getpkg("ElementUptakePkg").build_package(self.parent.atom_limits,exception_reactions=reaction_exceptions)
+        
+        #Applying media
+        if self.parent:
+            modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(
+                full_media, self.parent.base_uptake, self.parent.base_excretion
+            )
+        else:
+            modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(
+                full_media,0,1000
+            )
+        
+        with modelutl.model:
+            #Applying gene knockouts
+            for gene in self.gene_ko:
+                if gene in modelutl.model.genes:
+                    geneobj = modelutl.model.genes.get_by_id(gene)
+                    geneobj.knock_out()
+            
+            #Optimizing model
+            solution = modelutl.model.optimize()
+            output["growth"] = solution.objective_value
+            if solution.objective_value > 0 and pfba:
+                solution = cobra.flux_analysis.pfba(modelutl.model)
+            if save_fluxes:
+                output["fluxes"] = solution.fluxes
+        
+        #Determining phenotype class
+        if output["growth"] >= output["baseline_growth"]*growth_multiplier:
             if self.growth > 0:
                 output["class"] = "CP"
-            else:
+            elif self.growth == 0:
                 output["class"] = "FP"
+            else:
+                output["class"] = "GROWTH"
         else:
             if self.growth > 0:
                 output["class"] = "FN"
-            else:
+            elif self.growth == 0:
                 output["class"] = "CN"
+            else:
+                output["class"] = "NOGROWTH"
         return output
 
     def gapfill_model_for_phenotype(
         self,
-        modelutl,
-        default_gapfill_templates,
+        msgapfill,
+        objective,
         test_conditions,
-        default_gapfill_models=[],
-        blacklist=[],
-        growth_threshold=0.001,
+        growth_multiplier=10,
         add_missing_exchanges=False,
     ):
-        if not isinstance(modelutl, MSModelUtil):
-            modelutl = MSModelUtil(modelutl)
-        self.gapfilling = MSGapfill(
-            modelutl.model,
-            default_gapfill_templates,
-            default_gapfill_models,
-            test_conditions,
-            modelutl.reaction_scores(),
-            blacklist,
-        )
-        media = self.build_media()
-        if add_missing_exchanges:
-            modelutl.add_missing_exchanges(media)
-        for gene in self.gene_ko:
-            if gene in modelutl.model.genes:
-                geneobj = modelutl.model.genes.get_by_id(gene)
-                geneobj.knock_out()
-        gfresults = self.gapfilling.run_gapfilling(media, None)
-        if gfresults is None:
+        """Gapfills the model to permit this single phenotype to be positive
+        Parameters
+        ----------
+        msgapfill : MSGapfill
+            Fully configured gapfilling object
+        add_missing_exchanges : bool
+            Boolean indicating if exchanges for compounds mentioned explicitly in phenotype media should be added to the model automatically
+        growth_multiplier : double
+            Indicates a multiplier to use for positive growth above the growth on baseline media
+        objective : string
+            Expression for objective to be activated by gapfilling
+        """
+        #First simulate model without gapfilling to assess ungapfilled growth
+        output = self.simulate(msgapfill.mdlutl,objective,growth_multiplier,add_missing_exchanges)
+        if output["growth"] >= output["baseline_growth"]*growth_multiplier:
+            #No gapfilling needed - original model grows without gapfilling
+            return {"reversed": {}, "new": {},"media": self.build_media(), "target":objective, "minobjective": output["baseline_growth"]*growth_multiplier, "binary_check":False}
+        
+        #Now pulling the gapfilling configured model from MSGapfill
+        gfmodelutl = MSModelUtil.get(msgapfill.gfmodel)
+        #Saving the gapfill objective because this will be replaced when the simulation runs
+        gfobj = gfmodelutl.model.objective
+        #Running simulate on gapfill model to add missing exchanges and set proper media and uptake limit constraints
+        output = self.simulate(modelutl,objective,growth_multiplier,add_missing_exchanges)
+        #If the gapfilling model fails to achieve the minimum growth, then no solution exists
+        if output["growth"] < output["baseline_growth"]*growth_multiplier:
             logger.warning(
                 "Gapfilling failed with the specified model, media, and target reaction."
             )
-        return self.gapfilling.integrate_gapfill_solution(gfresults)
-
+            return None
+        
+        #Running the gapfilling itself
+        full_media = self.build_media()
+        with modelutl.model:
+            #Applying gene knockouts
+            for gene in self.gene_ko:
+                if gene in modelutl.model.genes:
+                    geneobj = modelutl.model.genes.get_by_id(gene)
+                    geneobj.knock_out()
+    
+            gfresults = self.gapfilling.run_gapfilling(media,None,minimum_obj=output["baseline_growth"]*growth_multiplier)
+            if gfresults is None:
+                logger.warning(
+                    "Gapfilling failed with the specified model, media, and target reaction."
+                )
+                    
+        return gfresults
 
 class MSGrowthPhenotypes:
-    def __init__(self, base_media=None, base_uptake=0, base_excretion=1000):
+    def __init__(self, base_media=None, base_uptake=0, base_excretion=1000,global_atom_limits={}):
         self.base_media = base_media
         self.phenotypes = DictList()
         self.base_uptake = base_uptake
         self.base_excretion = base_excretion
+        self.atom_limits = global_atom_limits
+        self.baseline_growth_data = {}
 
     @staticmethod
-    def from_compound_hash(compounds, base_media, base_uptake=0, base_excretion=1000):
-        growthpheno = MSGrowthPhenotypes(base_media, base_uptake, base_excretion)
+    def from_compound_hash(compounds,base_media=None, base_uptake=0, base_excretion=1000,global_atom_limits={}):
+        growthpheno = MSGrowthPhenotypes(base_media, base_uptake, base_excretion,global_atom_limits)
         new_phenos = []
         for cpd in compounds:
             newpheno = MSGrowthPhenotype(cpd, None, compounds[cpd], [], [cpd])
@@ -137,8 +223,8 @@ class MSGrowthPhenotypes:
         return growthpheno
 
     @staticmethod
-    def from_kbase_object(data, kbase_api):
-        growthpheno = MSGrowthPhenotypes(None, 0, 1000)
+    def from_kbase_object(data, kbase_api,base_media=None, base_uptake=0, base_excretion=1000,global_atom_limits={}):
+        growthpheno = MSGrowthPhenotypes(base_media,base_uptake, base_excretion,global_atom_limits)
         new_phenos = []
         for pheno in data["phenotypes"]:
             media = kbase_api.get_from_ws(pheno["media_ref"], None)
@@ -156,9 +242,9 @@ class MSGrowthPhenotypes:
         return growthpheno
 
     @staticmethod
-    def from_kbase_file(filename, kbase_api):
+    def from_kbase_file(filename, kbase_api,base_media=None, base_uptake=0, base_excretion=1000,global_atom_limits={}):
         # TSV file with the following headers:media    mediaws    growth    geneko    addtlCpd
-        growthpheno = MSGrowthPhenotypes(base_media, 0, 1000)
+        growthpheno = MSGrowthPhenotypes(base_media,base_uptake, base_excretion,global_atom_limits)
         headings = []
         new_phenos = []
         with open(filename) as f:
@@ -190,8 +276,8 @@ class MSGrowthPhenotypes:
         return growthpheno
 
     @staticmethod
-    def from_ms_file(filename, basemedia, base_uptake=0, base_excretion=100):
-        growthpheno = MSGrowthPhenotypes(base_media, base_uptake, base_excretion)
+    def from_ms_file(filename,base_media=None, base_uptake=0, base_excretion=100,global_atom_limits={}):
+        growthpheno = MSGrowthPhenotypes(base_media,base_uptake, base_excretion,global_atom_limits)
         df = pd.read_csv(filename)
         required_headers = ["Compounds", "Growth"]
         for item in required_headers:
@@ -222,19 +308,40 @@ class MSGrowthPhenotypes:
 
     def simulate_phenotypes(
         self,
-        model,
-        biomass,
+        model_or_modelutl,
+        objective,
         add_missing_exchanges=False,
         correct_false_negatives=False,
         template=None,
-        growth_threshold=0.001,
-        save_fluxes=False,
+        growth_threshold=0.01,
+        save_fluxes=False
     ):
-        model.objective = biomass
-        modelutl = MSModelUtil(model)
+        """Simulates all the specified phenotype conditions and saves results
+        Parameters
+        ----------
+        model_or_modelutl : Model | MSModelUtl
+            Model to use to run the simulations
+        objective : string
+            Expression for objective to maximize in simulations
+        add_missing_exchanges : bool
+            Boolean indicating if exchanges for compounds mentioned explicitly in phenotype media should be added to the model automatically
+        growth_multiplier : double
+            Indicates a multiplier to use for positive growth above the growth on baseline media
+        save_fluxes : bool
+            Indicates if the fluxes should be saved and returned with the results
+        """
+        # Discerning input is model or mdlutl and setting internal links
+        modelutl = model_or_mdlutl
+        if not isinstance(model_or_mdlutl, MSModelUtil):
+            modelutl = MSModelUtil.get(model_or_mdlutl)
+        #Setting objective
+        modelutl.objective = objective
+        #Getting basline growth
+        if self.parent
+        
         summary = {
-            "Label": ["Accuracy", "CP", "CN", "FP", "FN"],
-            "Count": [0, 0, 0, 0, 0],
+            "Label": ["Accuracy", "CP", "CN", "FP", "FN","Growth","No growth"],
+            "Count": [0, 0, 0, 0, 0,0,0],
         }
         data = {
             "Phenotype": [],
@@ -293,3 +400,62 @@ class MSGrowthPhenotypes:
         df = pd.DataFrame(data)
         logger.info(df)
         return {"details": df, "summary": sdf}
+
+    def fit_model_to_phenotypes(
+        self,
+        model_or_mdlutl,
+        correct_false_negatives,
+        correct_false_positives,
+        minimize_new_false_positives,
+        core_template,
+        template,
+        integrate_results
+    ):
+        
+        """Simulates all the specified phenotype conditions and saves results
+        Parameters
+        ----------
+        model_or_mdlutl : Model | MSModelUtl
+            Model to use to run the simulations
+        correct_false_negatives : bool
+            Indicates if false negatives should be corrected
+        correct_false_positives : bool
+            Indicates if false positives should be corrected
+        minimize_new_false_positives : bool
+            Indicates if new false positivies should be avoided
+        core_template : MSTemplate
+            Core template to use for ATP safe gapfilling if tests aren't already computed (defaults to model core template if it has one)
+        template : MSTemplate
+            The template that should be used for gapfilling (will default to model template if it has one)
+        integrate_results : bool
+            Indicates if the resulting modifications to the model should be integrated
+        """
+        pass
+
+    def gapfill_all_phenotypes(
+        self,
+        model_or_mdlutl,
+        msgapfill=None,  # Needed if the gapfilling object in model utl is not initialized
+        growth_threshold=None,
+        add_missing_exchanges=False,
+    ):
+        mdlutl = MSModelUtil.get(model_or_mdlutl)
+        # if msgapfill:
+        #    mdlutl.gfutl = msgapfill
+        # if not mdlutl.gfutl:
+        #    logger.critical(
+        #        "Must either provide a gapfilling object or provide a model utl with an existing gapfilling object"
+        #    )
+        # media_list = []
+        # for pheno in self.phenotypes:
+        #
+        #
+        # output = mdlutl.gfutl.run_multi_gapfill(
+        #    media_list,
+        #    default_minimum_objective=growth_threshold
+        #    target=mdlutl.primary_biomass(),
+        #
+        #    binary_check=False,
+        #    prefilter=True,
+        #    check_for_growth=True,
+        # )
