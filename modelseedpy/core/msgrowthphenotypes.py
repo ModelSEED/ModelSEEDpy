@@ -337,7 +337,6 @@ class MSGrowthPhenotypes:
         #Setting objective
         modelutl.objective = objective
         #Getting basline growth
-        if self.parent
         
         summary = {
             "Label": ["Accuracy", "CP", "CN", "FP", "FN","Growth","No growth"],
