@@ -55,7 +55,7 @@ class MSGrowthPhenotype:
 
     def simulate(
         self,
-        model_or_modelutl,
+        model_or_mdlutl,
         objective,
         growth_multiplier=10,
         add_missing_exchanges=False,
