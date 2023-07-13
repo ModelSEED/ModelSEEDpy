@@ -38,6 +38,7 @@ from modelseedpy.core import (
     MSBuilder,
     MSMedia,
     MSGrowthPhenotypes,
+    MSGrowthPhenotype,
     MSModelUtil,
     FBAHelper,
     MSEditorAPI,
