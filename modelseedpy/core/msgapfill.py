@@ -2,6 +2,7 @@
 import logging
 import cobra
 import re
+import json
 from optlang.symbolics import Zero, add
 from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
@@ -354,11 +355,11 @@ class MSGapfill:
         if link_gaps_to_objective:
             logger.info("Gapfilling sensitivity analysis running on succesful run in "+solution["media"].id+" for target "+solution["target"])
             gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
-            if solution["media"] not in gf_sensitivity:
-                gf_sensitivity[solution["media"]] = {}
-            if solution["target"] not in gf_sensitivity[solution["media"]]:
-                gf_sensitivity[solution["media"]][solution["target"]] = {}
-            gf_sensitivity[solution["media"]][solution["target"]][
+            if solution["media"].id not in gf_sensitivity:
+                gf_sensitivity[solution["media"].id] = {}
+            if solution["target"] not in gf_sensitivity[solution["media"].id]:
+                gf_sensitivity[solution["media"].id][solution["target"]] = {}
+            gf_sensitivity[solution["media"].id][solution["target"]][
                 "success"
             ] = self.mdlutl.find_unproducible_biomass_compounds(
                 solution["target"], cumulative_solution

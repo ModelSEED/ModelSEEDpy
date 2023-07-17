@@ -113,6 +113,12 @@ class MSModelUtil:
         self.attributes = {}
         if hasattr(self.model, "attributes"):
             self.attributes = self.model
+        if "pathways" not in self.attributes:
+            self.attributes["pathways"] = {}
+        if "auxotrophy" not in self.attributes:
+            self.attributes["auxotrophy"] = {}
+        if "fbas" not in self.attributes:
+            self.attributes["fbas"] = {}   
 
     def compute_automated_reaction_scores(self):
         """
@@ -286,14 +292,17 @@ class MSModelUtil:
         return self.attributes[key]
 
     def save_attributes(self, value=None, key=None):
-        attributes = self.get_attributes()
         if value:
             if key:
-                attributes[key] = value
+                self.attributes[key] = value
             else:
                 self.attributes = value
-        if hasattr(self.model, "attributes"):
-            self.model.attributes = self.attributes
+        if hasattr(self.model, "computed_attributes"):
+            logger.info(
+                "Setting FBAModel computed_attributes to mdlutl attributes"
+            )
+            self.attributes["gene_count"] = len(self.model.genes)
+            self.model.computed_attributes = self.attributes
 
     def add_ms_reaction(self, rxn_dict, compartment_trans=["c0", "e0"]):
         modelseed = ModelSEEDBiochem.get()

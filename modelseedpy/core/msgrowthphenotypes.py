@@ -297,6 +297,15 @@ class MSGrowthPhenotypes:
         growthpheno.add_phenotypes(new_phenos)
         return growthpheno
 
+    def build_super_media(self):
+        super_media = None
+        for pheno in self.phenotypes:
+            if not super_media:
+                super_media = pheno.build_media()
+            else:
+                super_media.merge(pheno.build_media(), overwrite_overlap=False)
+        return super_media
+    
     def add_phenotypes(self, new_phenotypes):
         keep_phenos = []
         for pheno in new_phenotypes:
@@ -402,34 +411,50 @@ class MSGrowthPhenotypes:
 
     def fit_model_to_phenotypes(
         self,
-        model_or_mdlutl,
-        correct_false_negatives,
-        correct_false_positives,
-        minimize_new_false_positives,
-        core_template,
-        template,
-        integrate_results
+        msgapfill,
+        objective,
+        grow_multiplier,
+        correct_false_positives=False,
+        minimize_new_false_positives=True,
+        atp_safe=True,
+        integrate_results=True,
+        global_gapfilling=True
     ):
         
         """Simulates all the specified phenotype conditions and saves results
         Parameters
         ----------
-        model_or_mdlutl : Model | MSModelUtl
-            Model to use to run the simulations
-        correct_false_negatives : bool
-            Indicates if false negatives should be corrected
+        msgapfill : MSGapfill
+            Gapfilling object used for the gapfilling process
         correct_false_positives : bool
             Indicates if false positives should be corrected
         minimize_new_false_positives : bool
             Indicates if new false positivies should be avoided
-        core_template : MSTemplate
-            Core template to use for ATP safe gapfilling if tests aren't already computed (defaults to model core template if it has one)
-        template : MSTemplate
-            The template that should be used for gapfilling (will default to model template if it has one)
         integrate_results : bool
             Indicates if the resulting modifications to the model should be integrated
         """
-        pass
+        #Create super media for all 
+        super_media = self.build_super_media()
+        #Adding missing exchanges
+        msgapfill.gfmodel.add_missing_exchanges(super_media)
+        #Adding elemental constraints
+        self.add_elemental_constraints()
+        #Getting ATP tests
+        
+        #Filtering database for ATP tests
+        
+        #Penalizing database to avoid creating false positives
+        
+        #Building additional tests from current correct negatives
+        
+        #Computing base-line growth
+        
+        #Computing growth threshold
+        
+        #Running global gapfill
+        
+        #Integrating solution
+        
 
     def gapfill_all_phenotypes(
         self,
