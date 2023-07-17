@@ -414,7 +414,7 @@ class MSATPCorrection:
             "count": len(self.cumulative_core_gapfilling),
             "reactions": self.cumulative_core_gapfilling,
         }
-        self.modelutl.save_attributes(core_gf, "core_gapfilling")
+        self.modelutl.save_attributes(core_gf, "core_gapfilling_details")
 
     def expand_model_to_genome_scale(self):
         """Restores noncore reactions to model while filtering out reactions that break ATP

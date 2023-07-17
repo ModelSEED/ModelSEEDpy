@@ -132,19 +132,19 @@ class MSGrowthPhenotype:
         
         #Determining phenotype class
         if output["growth"] >= output["baseline_growth"]*growth_multiplier:
-            if self.growth > 0:
+            if not self.growth:
+                output["class"] = "GROWTH"
+            elif self.growth > 0:
                 output["class"] = "CP"
             elif self.growth == 0:
                 output["class"] = "FP"
-            else:
-                output["class"] = "GROWTH"
         else:
-            if self.growth > 0:
+            if not self.growth:
+                output["class"] = "NOGROWTH"
+            elif self.growth > 0:
                 output["class"] = "FN"
             elif self.growth == 0:
                 output["class"] = "CN"
-            else:
-                output["class"] = "NOGROWTH"
         return output
 
     def gapfill_model_for_phenotype(
