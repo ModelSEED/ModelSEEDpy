@@ -112,7 +112,8 @@ class MSModelUtil:
         self.integrated_gapfillings = []
         self.attributes = {}
         if hasattr(self.model, "computed_attributes"):
-            self.attributes = self.model.computed_attributes
+            if self.model.computed_attributes:
+                self.attributes = self.model.computed_attributes
         if "pathways" not in self.attributes:
             self.attributes["pathways"] = {}
         if "auxotrophy" not in self.attributes:
