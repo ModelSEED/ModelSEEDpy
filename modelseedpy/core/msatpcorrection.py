@@ -161,9 +161,10 @@ class MSATPCorrection:
             media.id = media_id
             media.name = media_id
             min_obj = 0.01
-            if media_id in min_gap:
-                min_obj = min_gap[media_id]
-            self.atp_medias.append([media, min_obj])
+            self.atp_medias.append([
+                media,
+                min_gap.get(media_d, min_obj)
+            ])
 
     @staticmethod
     def find_reaction_in_template(model_reaction, template, compartment):
