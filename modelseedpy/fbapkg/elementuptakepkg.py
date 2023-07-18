@@ -18,6 +18,11 @@ class ElementUptakePkg(BaseFBAPkg):
 
     def build_package(self, element_limits,exception_compounds=[],exception_reactions=[]):
         #Converting exception compounds list into exception reaction list
+        self.parameters = {
+            "element_limits" : element_limits,
+            "exception_compounds" : exception_compounds,
+            "exception_reactions" : exception_reactions
+        }
         exchange_hash = self.modelutl.exchange_hash()
         for met in exception_compounds:
             if met in exchange_hash:

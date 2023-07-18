@@ -57,7 +57,7 @@ class MSGrowthPhenotype:
         self,
         model_or_mdlutl,
         objective,
-        growth_multiplier=10,
+        growth_multiplier=3,
         add_missing_exchanges=False,
         save_fluxes=False,
         pfba=False,
