@@ -111,14 +111,14 @@ class MSModelUtil:
         self.score = None
         self.integrated_gapfillings = []
         self.attributes = {}
-        if hasattr(self.model, "attributes"):
-            self.attributes = self.model
+        if hasattr(self.model, "computed_attributes"):
+            self.attributes = self.model.computed_attributes
         if "pathways" not in self.attributes:
             self.attributes["pathways"] = {}
         if "auxotrophy" not in self.attributes:
             self.attributes["auxotrophy"] = {}
         if "fbas" not in self.attributes:
-            self.attributes["fbas"] = {}   
+            self.attributes["fbas"] = {}
 
     def compute_automated_reaction_scores(self):
         """

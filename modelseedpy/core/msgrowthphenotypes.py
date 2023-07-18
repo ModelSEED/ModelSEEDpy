@@ -48,9 +48,9 @@ class MSGrowthPhenotype:
         full_media = MSMedia.from_dict(cpd_hash)
         if self.media:
             full_media.merge(self.media, overwrite_overlap=False)
-        if full_media:
+        if include_base_media:
             if self.parent and self.parent.base_media:
-                full_media.merge(parent.base_media, overwrite_overlap=False)
+                full_media.merge(self.parent.base_media, overwrite_overlap=False)
         return full_media
 
     def simulate(
@@ -91,18 +91,18 @@ class MSGrowthPhenotype:
             output["missing_transports"] = modelutl.add_missing_exchanges(full_media)
         
         #Getting basline growth
-        output["baseline_growth"] = 0.001
+        output["baseline_growth"] = 0.01
         if self.parent:
-            output["baseline_growth"] = self.parent.baseline_growth(modelutl,True)
+            output["baseline_growth"] = self.parent.baseline_growth(modelutl,objective)
         
         #Building specific media and setting compound exception list
         if self.parent and self.parent.atom_limits and len(self.parent.atom_limits) > 0:
             reaction_exceptions = []
             specific_media = self.build_media(False)
             for mediacpd in specific_media.mediacompounds:
-                output = mediacpd.get_mdl_exchange_hash(self,modelutl)
-                for mdlcpd in output:
-                    reaction_exceptions.append(output[mdlcpd])
+                ex_hash = mediacpd.get_mdl_exchange_hash(modelutl)
+                for mdlcpd in ex_hash:
+                    reaction_exceptions.append(ex_hash[mdlcpd])
             modelutl.pkgmgr.getpkg("ElementUptakePkg").build_package(self.parent.atom_limits,exception_reactions=reaction_exceptions)
         
         #Applying media
@@ -211,6 +211,7 @@ class MSGrowthPhenotypes:
         self.base_excretion = base_excretion
         self.atom_limits = global_atom_limits
         self.baseline_growth_data = {}
+        self.cached_based_growth = {}
 
     @staticmethod
     def from_compound_hash(compounds,base_media=None, base_uptake=0, base_excretion=1000,global_atom_limits={}):
@@ -314,6 +315,40 @@ class MSGrowthPhenotypes:
                 keep_phenos.append(pheno)
         additions = DictList(keep_phenos)
         self.phenotypes += additions
+
+    def baseline_growth(
+        self,
+        model_or_mdlutl,
+        objective
+    ):
+        """Simulates all the specified phenotype conditions and saves results
+        Parameters
+        ----------
+        model_or_modelutl : Model | MSModelUtl
+            Model to use to run the simulations
+        """
+        # Discerning input is model or mdlutl and setting internal links
+        modelutl = model_or_mdlutl
+        if not isinstance(model_or_mdlutl, MSModelUtil):
+            modelutl = MSModelUtil.get(model_or_mdlutl)
+        #Checking if base growth already computed
+        if modelutl in self.cached_based_growth:
+            if objective in self.cached_based_growth[modelutl]:
+                return self.cached_based_growth[modelutl][objective]
+        else:
+            self.cached_based_growth[modelutl] = {}
+        #Setting objective
+        modelutl.objective = objective
+        #Setting media
+        modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(
+            self.base_media, self.base_uptake, self.base_excretion
+        )
+        #Adding uptake limits
+        if len(self.atom_limits) > 0:
+            modelutl.pkgmgr.getpkg("ElementUptakePkg").build_package(self.atom_limits)
+        #Simulating
+        self.cached_based_growth[modelutl][objective] = modelutl.model.slim_optimize()
+        return self.cached_based_growth[modelutl][objective]
 
     def simulate_phenotypes(
         self,

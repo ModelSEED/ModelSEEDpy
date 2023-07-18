@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from cobra.core.dictlist import DictList
+from modelseedpy.core.msmodelutl import MSModelUtil
 
 logger = logging.getLogger(__name__)
 
