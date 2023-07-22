@@ -352,25 +352,26 @@ class MSGrowthPhenotypes:
 
     def simulate_phenotypes(
         self,
-        model_or_modelutl,
+        model_or_mdlutl,
         objective,
+        growth_multiplier=3,
         add_missing_exchanges=False,
-        correct_false_negatives=False,
-        template=None,
-        growth_threshold=0.01,
-        save_fluxes=False
+        save_fluxes=False,
+        gapfill_negatives=False,
+        msgapfill=None,
+        test_conditions=None
     ):
         """Simulates all the specified phenotype conditions and saves results
         Parameters
         ----------
-        model_or_modelutl : Model | MSModelUtl
+        model_or_mdlutl : Model | MSModelUtl
             Model to use to run the simulations
         objective : string
             Expression for objective to maximize in simulations
-        add_missing_exchanges : bool
-            Boolean indicating if exchanges for compounds mentioned explicitly in phenotype media should be added to the model automatically
         growth_multiplier : double
             Indicates a multiplier to use for positive growth above the growth on baseline media
+        add_missing_exchanges : bool
+            Boolean indicating if exchanges for compounds mentioned explicitly in phenotype media should be added to the model automatically
         save_fluxes : bool
             Indicates if the fluxes should be saved and returned with the results
         """
@@ -381,7 +382,8 @@ class MSGrowthPhenotypes:
         #Setting objective
         modelutl.objective = objective
         #Getting basline growth
-        
+        baseline_growth = self.baseline_growth(modelutl,objective)
+        #Establishing output of the simulation method
         summary = {
             "Label": ["Accuracy", "CP", "CN", "FP", "FN","Growth","No growth"],
             "Count": [0, 0, 0, 0, 0,0,0],
@@ -393,51 +395,53 @@ class MSGrowthPhenotypes:
             "Class": [],
             "Transports missing": [],
             "Gapfilled reactions": [],
+            "Gapfilling score":None
         }
+        #Running simulations
+        gapfilling_solutions = {}
         for pheno in self.phenotypes:
-            with model:
-                result = pheno.simulate(
-                    modelutl, growth_threshold, add_missing_exchanges, save_fluxes
-                )  # Result should have "growth" and "class"
-                if result["class"] == "FN" and correct_false_negatives:
-                    pheno.gapfill_model_for_phenotype(modelutl, [template], None)
-                    if pheno.gapfilling.last_solution != None:
-                        list = []
-                        for rxn_id in pheno.gapfilling.last_solution["reversed"]:
-                            list.append(
-                                pheno.gapfilling.last_solution["reversed"][rxn_id]
-                                + rxn_id
-                            )
-                        for rxn_id in pheno.gapfilling.last_solution["new"]:
-                            list.append(
-                                pheno.gapfilling.last_solution["new"][rxn_id] + rxn_id
-                            )
-                        data["Gapfilled reactions"].append(";".join(list))
-                    else:
-                        data["Gapfilled reactions"].append(None)
+            result = pheno.simulate(
+                modelutl,objective,growth_multiplier,add_missing_exchanges,save_fluxes
+            )
+            data["Class"].append(result["class"])
+            data["Phenotype"].append(pheno.id)
+            data["Observed growth"].append(pheno.growth)
+            data["Simulated growth"].append(result["growth"])
+            data["Transports missing"].append(
+                ";".join(result["missing_transports"])
+            )
+            if result["class"] == "CP":
+                summary["Count"][1] += 1
+                summary["Count"][0] += 1
+            if result["class"] == "CN":
+                summary["Count"][2] += 1
+                summary["Count"][0] += 1
+            if result["class"] == "FP":
+                summary["Count"][3] += 1
+            if result["class"] == "FN":
+                summary["Count"][4] += 1
+            #Gapfilling negative growth conditions
+            if gapfill_negatives and output["class"] in ["NOGROWTH","FN","CN"]:
+                gapfilling_solutions[pheno] = pheno.gapfill_model_for_phenotype(msgapfill,objective,test_conditions,growth_multiplier,add_missing_exchanges)
+                if gapfilling_solutions[pheno] != None:
+                    data["Gapfilling score"] = 0
+                    list = []
+                    for rxn_id in gapfilling_solutions[pheno]["reversed"]:
+                        list.append(
+                            gapfilling_solutions[pheno]["reversed"][rxn_id]
+                            + rxn_id
+                        )
+                        data["Gapfilling score"] += 0.5
+                    for rxn_id in gapfilling_solutions[pheno]["new"]:
+                        list.append(
+                            gapfilling_solutions[pheno]["new"][rxn_id] + rxn_id
+                        )
+                        data["Gapfilling score"] += 1
+                    data["Gapfilled reactions"].append(";".join(list))
                 else:
                     data["Gapfilled reactions"].append(None)
-                result = pheno.simulate(
-                    modelutl, growth_threshold, add_missing_exchanges, save_fluxes
-                )  # Result should have "growth" and "class"
-                data["Class"].append(result["class"])
-                data["Phenotype"].append(pheno.id)
-                data["Observed growth"].append(pheno.growth)
-                data["Simulated growth"].append(result["growth"])
-                data["Transports missing"].append(
-                    ";".join(result["missing_transports"])
-                )
-                if result["class"] == "CP":
-                    summary["Count"][1] += 1
-                    summary["Count"][0] += 1
-                if result["class"] == "CN":
-                    summary["Count"][2] += 1
-                    summary["Count"][0] += 1
-                if result["class"] == "FP":
-                    summary["Count"][3] += 1
-                if result["class"] == "FN":
-                    summary["Count"][4] += 1
-
+            else:
+                data["Gapfilled reactions"].append(None)
         summary["Count"][0] = summary["Count"][0] / len(self.phenotypes)
         sdf = pd.DataFrame(summary)
         df = pd.DataFrame(data)
@@ -468,6 +472,24 @@ class MSGrowthPhenotypes:
         integrate_results : bool
             Indicates if the resulting modifications to the model should be integrated
         """
+        
+        
+        
+         #Running simulations
+        positive_growth = []
+        negative_growth = []
+        for pheno in self.phenotypes:
+            with model:
+                result = pheno.simulate(
+                    modelutl,objective,growth_multiplier,add_missing_exchanges,save_fluxes
+                )
+                #Gapfilling negative growth conditions
+                if gapfill_negatives and output["class"] in ["NOGROWTH","FN","CN"]:
+                    negative_growth.append(pheno.build_media())
+                elif gapfill_negatives and output["class"] in ["GROWTH","FP","CP"]:
+                    positive_growth.append(pheno.build_media())
+        
+        
         #Create super media for all 
         super_media = self.build_super_media()
         #Adding missing exchanges
