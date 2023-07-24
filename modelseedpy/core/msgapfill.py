@@ -114,7 +114,9 @@ class MSGapfill:
             target = target[13:]
         if self.gfpkgmgr.getpkg("GapfillingPkg").test_gapfill_database():
             return True
-        gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
+        gf_sensitivity = {}
+        if target != "rxn00062_c0":
+            gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
         if media.id not in gf_sensitivity:
             gf_sensitivity[media.id] = {}
         if target not in gf_sensitivity[media.id]:
@@ -127,7 +129,8 @@ class MSGapfill:
         gf_sensitivity[media.id][target][
             note
         ] = self.mdlutl.find_unproducible_biomass_compounds(target)
-        self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
+        if target != "rxn00062_c0":
+            self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         logger.warning(
             "No gapfilling solution found"
             + filter_msg
