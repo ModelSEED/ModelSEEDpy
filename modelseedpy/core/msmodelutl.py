@@ -1009,6 +1009,7 @@ class MSModelUtil:
         # Getting target reaction and making sure it exists
         if target_rxn not in tempmodel.reactions:
             logger.critical(target_rxn + " not in model!")
+            return None
         target_rxn_obj = tempmodel.reactions.get_by_id(target_rxn)
         tempmodel.objective = target_rxn
         original_objective = tempmodel.objective
