@@ -122,9 +122,9 @@ class MSATPCorrection:
         
         self.forced_media = []
         for media_id in forced_media:
-            for media in self.atp_medias:
-                if media.id == media_id:
-                    self.forced_media.append(media)
+            for item in self.atp_medias:
+                if item[0].id == media_id:
+                    self.forced_media.append(item[0])
                     break
 
         self.max_gapfilling = max_gapfilling
