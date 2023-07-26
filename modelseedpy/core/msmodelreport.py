@@ -39,6 +39,9 @@ class MSModelReport:
         core_atp_gapfilling_data = attributes['ATP_analysis']['core_atp_gapfilling']
         gf_filter_data = attributes['gf_filter']
         gf_sensitivity_data = attributes.get('gf_sensitivity')  # Get 'gf_sensitivity_data' if available, otherwise it will be None
+        number_gapfills = 0
+        if gf_sensitivity_data:
+            number_gapfills = len(gf_sensitivity_data)
         
         # Get the names of 'Core Gapfilling Media' and 'Gapfilling Media'
         core_gapfilling_media = [media for media, media_data in (gf_sensitivity_data or {}).items() if 'rxn00062_c0' in media_data]
@@ -65,7 +68,7 @@ class MSModelReport:
             ('<b>Number compounds</b>', str(len(modelutl.model.metabolites))),
             ('<b>Number compartments</b>', str(len(modelutl.model.compartments))),
             ('<b>Number biomass</b>', str(bio_count)),
-            ('<b>Number gapfills</b>', str(len(gf_sensitivity_data))),
+            ('<b>Number gapfills</b>', str(number_gapfills)),
         ]
         
         # Create the DataFrame for Model Summary
