@@ -12,4 +12,5 @@ from modelseedpy.core.msatpcorrection import MSATPCorrection
 from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes, MSGrowthPhenotype
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.mstemplate import MSTemplateBuilder
+from modelseedpy.core.msmodelreport import MSModelReport
 from modelseedpy.core.exceptions import *

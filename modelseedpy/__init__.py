@@ -45,6 +45,7 @@ from modelseedpy.core import (
     MSATPCorrection,
     MSGapfill,
     MSEquation,
+    MSModelReport
 )
 from modelseedpy.core.exceptions import *
 
