@@ -411,7 +411,7 @@ class MSATPCorrection:
                     link_gaps_to_objective=False
                 )
                 #Adding reactions to gapfilling sensitivity structure so we can track all gapfilled reactions
-                gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
+                gf_sensitivity = self.modelutl.get_attributes("gf_sensitivity", {})
                 if media.id not in gf_sensitivity:
                     gf_sensitivity[media.id] = {}
                 if self.atp_hydrolysis.id not in gf_sensitivity[media.id]:
@@ -425,7 +425,7 @@ class MSATPCorrection:
                     gf_sensitivity[media.id][self.atp_hydrolysis.id]["success"][item] = {
                         stats["reversed"][item] : []
                     }
-                self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")  
+                self.modelutl.save_attributes(gf_sensitivity, "gf_sensitivity")  
         self.modelutl.save_attributes(len(self.cumulative_core_gapfilling), "total_core_gapfilling")
 
     def expand_model_to_genome_scale(self):
