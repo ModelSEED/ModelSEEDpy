@@ -2,6 +2,8 @@
 import pandas as pd
 import logging
 import matplotlib.cm as cm
+import os
+from os.path import dirname, exists
 from modelseedpy.core.msmodelutl import MSModelUtil
 
 logger = logging.getLogger(__name__)
@@ -17,7 +19,8 @@ class MSModelReport:
 
     def build_report(
         self,
-        model_or_mdlutl
+        model_or_mdlutl,
+        output_path
     ):
         """Builds model HTML report
         Parameters
@@ -255,7 +258,9 @@ class MSModelReport:
             </ul>
         """
         # Save the data to HTML with the styled DataFrames and the legends
-        with open('testt.html', 'w') as f:
+        directory = dirname(output_path)
+        os.makedirs(directory, exist_ok=True)
+        with open(output_path, 'w') as f:
             f.write('<h1>Model Summary</h1>')
             f.write(model_summary_df_styled.render(escape=False))
             f.write('<br><br>')
