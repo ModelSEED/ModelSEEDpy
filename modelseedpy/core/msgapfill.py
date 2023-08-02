@@ -57,8 +57,9 @@ class MSGapfill:
         ]  # the cpd11416 compound is filtered during model extension with templates
         # Cloning model to create gapfilling model
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        self.gfmodelutl = MSModelUtil.get(self.gfmodel)
         # Getting package manager for gapfilling model
-        self.gfpkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
+        self.gfpkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodelutl)
         # Setting target from input
         if default_target:
             self.default_target = default_target
@@ -147,6 +148,9 @@ class MSGapfill:
             self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
+            base_filter = self.mdlutl.get_attributes("gf_filter")
+            gf_filter = self.gfmodelutl.get_attributes("gf_filter")
+            base_filter[media.id] = gf_filter[media.id]
 
         # Testing if gapfilling can work after filtering
         if not self.test_gapfill_database(media, target, before_filtering=False):
