@@ -94,7 +94,9 @@ class MSGrowthPhenotype:
         output["baseline_growth"] = 0.01
         if self.parent:
             output["baseline_growth"] = self.parent.baseline_growth(modelutl,objective)
-        
+        if output["baseline_growth"] < 1e-5:
+            output["baseline_growth"] = 0.01
+            
         #Building specific media and setting compound exception list
         if self.parent and self.parent.atom_limits and len(self.parent.atom_limits) > 0:
             reaction_exceptions = []
@@ -131,7 +133,9 @@ class MSGrowthPhenotype:
                 output["fluxes"] = solution.fluxes
         
         #Determining phenotype class
+        
         if output["growth"] >= output["baseline_growth"]*growth_multiplier:
+            output["GROWING"] = True
             if not self.growth:
                 output["class"] = "GROWTH"
             elif self.growth > 0:
@@ -139,6 +143,7 @@ class MSGrowthPhenotype:
             elif self.growth == 0:
                 output["class"] = "FP"
         else:
+            output["GROWING"] = False
             if not self.growth:
                 output["class"] = "NOGROWTH"
             elif self.growth > 0:
@@ -399,6 +404,7 @@ class MSGrowthPhenotypes:
         }
         #Running simulations
         gapfilling_solutions = {}
+        totalcount = 0
         for pheno in self.phenotypes:
             result = pheno.simulate(
                 modelutl,objective,growth_multiplier,add_missing_exchanges,save_fluxes
@@ -413,13 +419,21 @@ class MSGrowthPhenotypes:
             if result["class"] == "CP":
                 summary["Count"][1] += 1
                 summary["Count"][0] += 1
-            if result["class"] == "CN":
+                totalcount += 1
+            elif result["class"] == "CN":
                 summary["Count"][2] += 1
                 summary["Count"][0] += 1
-            if result["class"] == "FP":
+                totalcount += 1
+            elif result["class"] == "FP":
                 summary["Count"][3] += 1
-            if result["class"] == "FN":
+                totalcount += 1
+            elif result["class"] == "FN":
                 summary["Count"][4] += 1
+                totalcount += 1
+            elif result["class"] == "GROWTH":
+                summary["Count"][5] += 1
+            elif result["class"] == "NOGROWTH":
+                summary["Count"][6] += 1
             #Gapfilling negative growth conditions
             if gapfill_negatives and output["class"] in ["NOGROWTH","FN","CN"]:
                 gapfilling_solutions[pheno] = pheno.gapfill_model_for_phenotype(msgapfill,objective,test_conditions,growth_multiplier,add_missing_exchanges)
@@ -442,10 +456,9 @@ class MSGrowthPhenotypes:
                     data["Gapfilled reactions"].append(None)
             else:
                 data["Gapfilled reactions"].append(None)
-        summary["Count"][0] = summary["Count"][0] / len(self.phenotypes)
+        summary["Count"][0] = summary["Count"][0] / totalcount
         sdf = pd.DataFrame(summary)
         df = pd.DataFrame(data)
-        logger.info(df)
         return {"details": df, "summary": sdf}
 
     def fit_model_to_phenotypes(
