@@ -148,9 +148,11 @@ class MSGapfill:
             self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
-            base_filter = self.mdlutl.get_attributes("gf_filter")
-            gf_filter = self.gfmodelutl.get_attributes("gf_filter")
-            base_filter[media.id] = gf_filter[media.id]
+            gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes("gf_filter", {})
+            base_filter = self.mdlutl.get_attributes("gf_filter", {})
+            for media_id in gf_filter:
+                base_filter[media_id] = gf_filter[media_id]
+            base_filter = self.save_attributes(base_filter, "gf_filter")
 
         # Testing if gapfilling can work after filtering
         if not self.test_gapfill_database(media, target, before_filtering=False):
