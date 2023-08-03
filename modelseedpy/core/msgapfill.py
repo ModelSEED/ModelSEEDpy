@@ -152,7 +152,7 @@ class MSGapfill:
             base_filter = self.mdlutl.get_attributes("gf_filter", {})
             for media_id in gf_filter:
                 base_filter[media_id] = gf_filter[media_id]
-            base_filter = self.save_attributes(base_filter, "gf_filter")
+            base_filter = self.mdlutl.save_attributes(base_filter, "gf_filter")
 
         # Testing if gapfilling can work after filtering
         if not self.test_gapfill_database(media, target, before_filtering=False):
