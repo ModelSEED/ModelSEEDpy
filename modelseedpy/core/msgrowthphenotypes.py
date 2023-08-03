@@ -456,7 +456,10 @@ class MSGrowthPhenotypes:
                     data["Gapfilled reactions"].append(None)
             else:
                 data["Gapfilled reactions"].append(None)
-        summary["Count"][0] = summary["Count"][0] / totalcount
+        if totalcount == 0:
+            summary["Count"][0] = None
+        else:
+            summary["Count"][0] = summary["Count"][0] / totalcount
         sdf = pd.DataFrame(summary)
         df = pd.DataFrame(data)
         return {"details": df, "summary": sdf}
