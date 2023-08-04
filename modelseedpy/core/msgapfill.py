@@ -148,17 +148,11 @@ class MSGapfill:
             self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
-            with open("OriginalAttributes.json", 'w') as f:
-                json.dump(self.mdlutl.get_attributes(), f,indent=4,skipkeys=True)
-            with open("GapfillingAttributes.json", 'w') as f:
-                json.dump(self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes(), f,indent=4,skipkeys=True)
             gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes("gf_filter", {})
             base_filter = self.mdlutl.get_attributes("gf_filter", {})
             for media_id in gf_filter:
                 base_filter[media_id] = gf_filter[media_id]
-            with open("FinalAttributes.json", 'w') as f:
-                json.dump(self.mdlutl.get_attributes(), f,indent=4,skipkeys=True)
-
+            
         # Testing if gapfilling can work after filtering
         if not self.test_gapfill_database(media, target, before_filtering=False):
             return False
