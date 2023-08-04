@@ -902,7 +902,7 @@ class MSModelUtil:
         return filtered_list
 
     def reaction_expansion_test(
-        self, reaction_list, condition_list, binary_search=True,atp_expansion=False
+        self, reaction_list, condition_list, binary_search=True,attribute_label="gf_filter"
     ):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
 
@@ -961,11 +961,7 @@ class MSModelUtil:
                 + str(len(reaction_list))
             )
             # Adding filter results to attributes
-            gf_filter_att = self.get_attributes("gf_filter", {})
-            if atp_expansion:
-                atp_analysis = self.get_attributes("ATP_analysis", {})
-                atp_analysis["atp_expansion_filter"] = {}
-                gf_filter_att = atp_analysis["atp_expansion_filter"]
+            gf_filter_att = self.get_attributes(attribute_label, {})
             if condition["media"].id not in gf_filter_att:
                 gf_filter_att[condition["media"].id] = {}
             if condition["objective"] not in gf_filter_att[condition["media"].id]:
@@ -1001,10 +997,6 @@ class MSModelUtil:
                         gf_filter_att[condition["media"].id][condition["objective"]][
                             condition["threshold"]
                         ][item[0].id][item[1]] = item[2]
-            if atp_expansion:
-                atp_analysis = self.save_attributes(atp_analysis, "ATP_analysis")
-            else:
-                gf_filter_att = self.save_attributes(gf_filter_att, "gf_filter")
         return filtered_list
 
     #################################################################################

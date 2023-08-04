@@ -444,7 +444,7 @@ class MSATPCorrection:
         self.restore_noncore_reactions(noncore=True, othercompartment=False)
         # Extending model with non core reactions while retaining ATP accuracy
         self.filtered_noncore = self.modelutl.reaction_expansion_test(
-            self.noncore_reactions, tests,atp_expansion=True
+            self.noncore_reactions, tests,attribute_label="atp_expansion_filter"
         )
         # Removing filtered reactions
         for item in self.filtered_noncore:
