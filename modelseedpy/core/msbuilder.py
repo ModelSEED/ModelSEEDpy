@@ -774,7 +774,7 @@ class MSBuilder:
             if rxn_id+"_c" in self.template.reactions:
                 template_reaction = self.template.reactions.get_by_id(rxn_id+"_c")
             elif rxn_id in modelseeddb.reactions:
-                msrxn = modelseeddb.reactions.get_by_id(rxn_id)
+                msrxn = modelseeddb.reactions[rxn_id]
                 template_reaction = msrxn.to_template_reaction({0:"c",1:"e"})
             if template_reaction:
                 for m in template_reaction.metabolites:
