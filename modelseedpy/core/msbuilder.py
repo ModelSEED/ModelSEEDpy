@@ -13,6 +13,8 @@ from modelseedpy.core.msmodel import (
 from cobra.core import Gene, Metabolite, Model, Reaction, Group
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
+from modelseedpy.biochem.modelseed_to_cobra import modelseed_to_cobra_reaction
 
 SBO_ANNOTATION = "sbo"
 
@@ -728,6 +730,75 @@ class MSBuilder:
             reactions.append(reaction)
 
         return reactions
+    
+    def build_from_annotaton_ontology(
+            self,
+            model_or_id,
+            anno_ont,
+            index="0",
+            allow_all_non_grp_reactions=False,
+            annotate_with_rast=True,
+            biomass_classic=False,
+            biomass_gc=0.5,
+            add_non_template_reactions=True,
+            prioritized_event_list=None,
+            ontologies=None,
+            merge_all=False
+        ):
+        #Build base model without annotation
+        model_or_id = self.build(model_or_id,index,allow_all_non_grp_reactions,annotate_with_rast,biomass_classic,biomass_gc)
+        
+        gene_associated_reactions = self.build_reactions_from_annotaton_ontology(anno_ont,add_non_template_reactions,prioritized_event_list,ontologies,merge_all)
+        cobra_model.add_reactions(gene_associated_reactions)
+        return cobra_model
+        
+    def build_reactions_from_annotaton_ontology(
+            self,
+            anno_ont,
+            add_non_template_reactions=True,
+            prioritized_event_list=None,
+            ontologies=None,
+            merge_all=False
+        ):
+        if self.base_model is None:
+            raise ModelSEEDError(
+                "unable to generate metabolic reactions without base model"
+            )
+        
+        reactions = []
+        rxn_gene_hash = anno_ont.get_reaction_gene_hash(prioritized_event_list,ontologies,merge_all)
+        modelseeddb = ModelSEEDBiochem.get()
+        for rxn_id in rxn_gene_hash:
+            reaction = None
+            template_reaction = None
+            if rxn_id+"_c" in self.template.reactions:
+                template_reaction = self.template.reactions.get_by_id(rxn_id+"_c")
+            elif rxn_id in modelseeddb.reactions:
+                msrxn = modelseeddb.reactions.get_by_id(rxn_id)
+                template_reaction = msrxn.to_template_reaction({0:"c",1:"e"})
+            if template_reaction:
+                for m in template_reaction.metabolites:
+                    if m.compartment not in self.compartments:
+                        self.compartments[
+                            m.compartment
+                        ] = self.template.compartments.get_by_id(m.compartment)
+                    if m.id not in self.template_species_to_model_species:
+                        model_metabolite = m.to_metabolite(self.index)
+                        self.template_species_to_model_species[m.id] = model_metabolite
+                        self.base_model.add_metabolites([model_metabolite])
+                    reaction = template_reaction.to_reaction(self.base_model, self.index)
+                gpr = ""
+                for gene_id in rxn_gene_hash[rxn_id]:
+                    if len(gpr) > 0:
+                        gpr += " or "
+                    gpr += gene_id
+                reaction.gpr(gpr)
+                reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
+                reactions.append(reaction)
+            else:
+                print("Reaction ",rxn_id," not found in template or database!")
+
+        return reactions
 
     def build_non_metabolite_reactions(
         self, cobra_model, allow_all_non_grp_reactions=False
@@ -813,6 +884,7 @@ class MSBuilder:
         annotate_with_rast=True,
         biomass_classic=False,
         biomass_gc=0.5,
+        add_reaction_from_rast_annotation=True
     ):
         """
 
@@ -850,8 +922,11 @@ class MSBuilder:
         complex_groups = self.build_complex_groups(
             self.reaction_to_complex_sets.values()
         )
-        metabolic_reactions = self.build_metabolic_reactions()
-        cobra_model.add_reactions(metabolic_reactions)
+        
+        if add_reaction_from_rast_annotation:
+            metabolic_reactions = self.build_metabolic_reactions()
+            cobra_model.add_reactions(metabolic_reactions)
+            
         non_metabolic_reactions = self.build_non_metabolite_reactions(
             cobra_model, allow_all_non_grp_reactions
         )
