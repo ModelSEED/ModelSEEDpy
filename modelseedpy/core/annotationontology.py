@@ -273,8 +273,6 @@ class AnnotationOntology:
                 feature_or_id = AnnotationOntologyFeature(self,feature_or_id)
         if not feature_hash:
             feature_hash = self.get_feature_hash(feature_or_id.id)
-        if feature_or_id.id in feature_hash:
-            logger.critical("Feature with id "+feature_or_id.id+" already in annotation!")
-        else:
+        if feature_or_id.id not in feature_hash:
             feature_hash[feature_or_id.id] = feature_or_id
         return feature_hash[feature_or_id.id]
