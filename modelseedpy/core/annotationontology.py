@@ -215,14 +215,19 @@ class AnnotationOntology:
         self.noncodings = {}
         self.feature_types = {}
     
-    def get_reaction_gene_hash(self,prioritized_event_list=None,ontologies=None,merge_all=False,type="genes"):
+    def get_reaction_gene_hash(self,prioritized_event_list=None,ontologies=None,merge_all=False,cds_features=False):
         output = {}
-        if type == "genes" and len(self.genes) > 0:
-            for feature_id in self.genes:
-                output[feature_id] = self.genes[feature_id].get_associated_reactions(prioritized_event_list,ontologies,merge_all)
-        elif len(self.cdss) > 0:
-            for feature_id in self.cdss:
-                output[feature_id] = self.cdss[feature_id].get_associated_reactions(prioritized_event_list,ontologies,merge_all)
+        feature_hash = self.genes
+        if len(self.genes) == 0 or (cds_features and len(self.cdss) == 0):
+            feature_hash = self.cdss
+        for feature_id in feature_hash:
+            reactions = feature_hash[feature_id].get_associated_reactions(prioritized_event_list,ontologies,merge_all)
+            for rxn_id in reactions:
+                if rxn_id not in output:
+                    output[rxn_id] = {}
+                if feature_id not in output[rxn_id]:
+                    output[rxn_id][feature_id] = []
+                output[rxn_id][feature_id].append(reactions[rxn_id])
         return output
         
     def add_term(self,term_or_id,ontology=None):
