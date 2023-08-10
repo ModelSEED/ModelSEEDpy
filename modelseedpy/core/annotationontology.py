@@ -94,17 +94,28 @@ class AnnotationOntologyFeature:
             self.term_events[term.id] = {}
         self.term_events[term.id][event.id] = self.event_terms[event.id][term.id]
     
-    def get_associated_terms(self,event_list=None,ontologies=None):
+    def get_associated_terms(self,prioritized_event_list=None,ontologies=None,merge_all=False,translate_to_rast=False):
         output = {}
-        for term in self.term_events:
+        for term_id in self.term_events:
+            term = self.parent.terms[term_id]
             if not ontologies or term.ontology.id in ontologies:
-                for event in self.term_events[term]:
-                    if not event_list or event.id in event_list:
-                        if term.id not in output:
-                            output[term.id] = []
-                        output[term.id].append(self.term_events[term][event].to_data())
+                if merge_all or not prioritized_event_list:
+                    for event_id in self.term_events[term_id]:
+                        if not prioritized_event_list or event_id in prioritized_event_list:
+                            if term not in output:
+                                output[term] = []
+                            output[term].append(self.term_events[term_id][event_id].to_data())
+                else:
+                    for event_id in prioritized_event_list:
+                        if event_id in self.term_events[term_id]:
+                            rxns = self.parent.terms[term_id].msrxns;
+                            if len(rxns) > 0:
+                                if term not in output:
+                                    output[term] = []
+                                output[term].append(self.term_events[term_id][event_id].to_data())
+                                break
         return output
-    
+     
     def get_associated_reactions(self,prioritized_event_list=None,ontologies=None,merge_all=False):
         output = {}
         for term_id in self.term_events:
@@ -196,8 +207,8 @@ class AnnotationOntology:
     mdlutls = {}
 
     @staticmethod
-    def from_kbase_data(data,genome_ref=None):
-        self = AnnotationOntology(genome_ref)
+    def from_kbase_data(data,genome_ref=None,data_dir=None):
+        self = AnnotationOntology(genome_ref,data_dir)
         if "feature_types" in data:
             self.feature_types = data["feature_types"]
         if "events" in data:
@@ -205,15 +216,41 @@ class AnnotationOntology:
                 self.events += [AnnotationOntologyEvent.from_data(event,self)]
         return self
     
-    def __init__(self,genome_ref):
+    def __init__(self,genome_ref,data_dir):
         self.genome_ref = genome_ref
         self.events = DictList()
         self.terms = {}
         self.ontologies = {}
         self.genes = {}
         self.cdss = {}
+        self.data_dir = data_dir
         self.noncodings = {}
         self.feature_types = {}
+        self.term_names = {}
+    
+    def get_term_name(self,term):
+        if term.ontology.id not in self.term_names:
+            self.term_names[term.ontology.id] = {}
+            if term.ontology.id in ["SSO","AntiSmash","EC","TC","META","RO","KO","GO"]:
+                with open(self.data_dir + "/"+term.ontology.id+"_dictionary.json") as json_file:
+                    ontology = json.load(json_file)
+                    for item in ontology["term_hash"]:
+                        self.term_names[term.ontology.id][item] = ontology["term_hash"][item]["name"]
+        if term.id not in self.term_names[term.ontology.id]:
+            return "Unknown"
+        return self.term_names[term.ontology.id][term.id]
+    
+    def get_gene_term_hash(self,prioritized_event_list=None,ontologies=None,merge_all=False,cds_features=False,translate_to_rast=True):
+        output = {}
+        feature_hash = self.genes
+        if len(self.genes) == 0 or (cds_features and len(self.cdss) == 0):
+            feature_hash = self.cdss
+        for feature_id in feature_hash:
+            feature = feature_hash[feature_id]
+            if feature not in output:
+                output[feature] = {}
+            output[feature] = feature.get_associated_terms(prioritized_event_list,ontologies,merge_all,translate_to_rast) 
+        return output
     
     def get_reaction_gene_hash(self,prioritized_event_list=None,ontologies=None,merge_all=False,cds_features=False):
         output = {}
