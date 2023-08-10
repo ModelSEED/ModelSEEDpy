@@ -800,8 +800,8 @@ class MSBuilder:
                     reaction.gene_reaction_rule = gpr
                     reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
                     reactions.append(reaction)
-            else:
-                print("Reaction ",rxn_id," not found in template or database!")
+                if not reaction:
+                    print("Reaction ",rxn_id," not found in template or database!")
 
         model_or_id.add_reactions(reactions)
         return model_or_id
