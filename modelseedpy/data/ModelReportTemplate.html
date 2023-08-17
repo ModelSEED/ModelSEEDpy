@@ -88,49 +88,47 @@ div.tab button.active {
 <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 <script>
-	const dataSet = [
-    	{"Model":'ecolimodel',"Genome":'ecoli'},
-	]
+	const reactions = {{reactions}}
 	$(document).ready(function() {
 		$('#selection').DataTable( {
 			"data": dataSet,
-			"columns": [{'data': 'Model'}, {'data': 'Genome'} ]
+			"columns": [{'data': 'id'}, {'data': 'name'} ]
 		} );
 	} );
 	$(document).ready(function() {
 		$('#reactions').DataTable( {
 			"data": dataSet,
-			"columns": [{'data': 'Model'}, {'data': 'Genome'} ]
+			"columns": [{'data': 'id'}, {'data': 'name'} ]
 		} );
 	} );
 	$(document).ready(function() {
 		$('#compounds').DataTable( {
 			"data": dataSet,
-			"columns": [{'data': 'Model'}, {'data': 'Genome'} ]
+			"columns": [{'data': 'id'}, {'data': 'name'} ]
 		} );
 	} );
 	$(document).ready(function() {
 		$('#genes').DataTable( {
 			"data": dataSet,
-			"columns": [{'data': 'Model'}, {'data': 'Genome'} ]
+			"columns": [{'data': 'id'}, {'data': 'name'} ]
 		} );
 	} );
 	$(document).ready(function() {
 		$('#biomass').DataTable( {
 			"data": dataSet,
-			"columns": [{'data': 'Model'}, {'data': 'Genome'} ]
+			"columns": [{'data': 'id'}, {'data': 'name'} ]
 		} );
 	} );
 	$(document).ready(function() {
 		$('#gapfilling').DataTable( {
 			"data": dataSet,
-			"columns": [{'data': 'Model'}, {'data': 'Genome'} ]
+			"columns": [{'data': 'id'}, {'data': 'name'} ]
 		} );
 	} );
 	$(document).ready(function() {
 		$('#atpanalysis').DataTable( {
 			"data": dataSet,
-			"columns": [{'data': 'Model'}, {'data': 'Genome'} ]
+			"columns": [{'data': 'id'}, {'data': 'name'} ]
 		} );
 	} );
 </script>
