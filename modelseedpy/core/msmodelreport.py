@@ -3,8 +3,10 @@ import pandas as pd
 import logging
 import matplotlib.cm as cm
 import os
+import jinja2
 from os.path import dirname, exists
 from modelseedpy.core.msmodelutl import MSModelUtil
+module_path = dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
@@ -17,6 +19,143 @@ class MSModelReport:
     ):
         pass
 
+    def build_multitab_report(self, model_or_mdlutl, output_path):
+
+        # Helper function for extracting gapfilling data
+        def extract_gapfilling_data(gf_sensitivity, model):
+            gapfilling_entries = []
+
+            if not gf_sensitivity:
+                return []
+
+            for media, media_data in gf_sensitivity.items():
+                for target, target_data in media_data.items():
+                    for reaction_id, reaction_data in target_data.get('success', {}).items():
+                        for direction, metabolites in reaction_data.items():
+                            entry = {
+                                "reaction_id": reaction_id,
+                                "reaction_name": model.reactions.get_by_id(reaction_id).name if reaction_id in model.reactions else reaction_id,
+                                "media": media,
+                                "direction": direction,
+                                "target": target,
+                                "gapfilling_sensitivity": "; ".join(metabolites) if isinstance(metabolites, (list, tuple)) else str(metabolites)
+                            }
+                            gapfilling_entries.append(entry)
+
+            return gapfilling_entries
+
+        context = {
+            "overview": [{"Model": "Model 3", "Genome": "Genome C"}, {"Model": "Model 4", "Genome": "Genome D"}],
+            "reactions": [],
+            "compounds": [],
+            "genes": [],
+            "biomass": [],
+            "gapfilling": [],
+            "atpanalysis": [{'no_of_gapfilled_reactions': 5, 'media': 'LB', 'atp_production': 'High', 'gapfilled_reactions': 'R005; R006', 'reversed_reaction_by_gapfilling': 'R007', 'filtered_reactions': 'R008; R009'}],
+        }
+
+        print("Module Path:", module_path + "/../data/")
+
+        exchanges = {r.id for r in model_or_mdlutl.exchanges}
+
+        # Identify biomass reactions using SBO annotation
+        biomass_reactions_ids = {rxn.id for rxn in model_or_mdlutl.reactions if rxn.annotation.get('sbo') == 'SBO:0000629'}
+
+        # Reactions Tab
+        for rxn in model_or_mdlutl.reactions:
+            if rxn.id not in exchanges and rxn.id not in biomass_reactions_ids:
+                equation = rxn.build_reaction_string(use_metabolite_names=True)
+                rxn_data = {
+                    "id": rxn.id,
+                    "name": rxn.name,
+                    "equation": equation,
+                    "genes": rxn.gene_reaction_rule,
+                    "gapfilling": "TBD"
+                }
+                context["reactions"].append(rxn_data)
+
+        # Compounds Tab
+        for cpd in model_or_mdlutl.metabolites:
+            cpd_data = {
+                "id": cpd.id,
+                "name": cpd.name,
+                "formula": cpd.formula,
+                "charge": cpd.charge,
+                "compartment": cpd.compartment
+            }
+            context["compounds"].append(cpd_data)
+
+        # Genes Tab
+        for gene in model_or_mdlutl.genes:
+            gene_data = {
+                "gene": gene.id,
+                "reactions": "; ".join([rxn.id for rxn in gene.reactions])
+            }
+            context["genes"].append(gene_data)
+
+        # Biomass Tab
+        if biomass_reactions_ids:
+            for biomass_rxn_id in biomass_reactions_ids:
+                biomass_rxn = model_or_mdlutl.reactions.get_by_id(biomass_rxn_id)
+                for metabolite, coefficient in biomass_rxn.metabolites.items():
+                    compound_id = metabolite.id
+                    compound_name = metabolite.name.split('_')[0]
+                    compartment = compound_id.split('_')[-1]
+
+                    biomass_data = {
+                        "biomass_reaction_id": biomass_rxn.id,
+                        "biomass_compound_id": compound_id,
+                        "name": compound_name,
+                        "coefficient": coefficient,
+                        "compartment": compartment
+                    }
+                    context["biomass"].append(biomass_data)
+        else:
+            print("No biomass reactions found in the model.")
+
+        # Gapfilling Tab
+        gf_sensitivity = model_or_mdlutl.attributes.get('gf_sensitivity', None)
+        gapfilling_data = extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
+        context["gapfilling"] = gapfilling_data
+
+        # Diagnostics
+        unique_biomass_rxns = biomass_reactions_ids
+        print(f"Unique biomass reactions identified: {len(unique_biomass_rxns)}")
+        print(f"Biomass Reaction IDs: {', '.join(unique_biomass_rxns)}")
+
+        print("\nFirst 2 reactions:")
+        for rxn in context["reactions"][:2]:
+            print(rxn)
+
+        print("\nFirst 2 compounds:")
+        for cpd in context["compounds"][:2]:
+            print(cpd)
+
+        print("\nFirst 2 genes:")
+        for gene in context["genes"][:2]:
+            print(gene)
+
+        print("\nFirst 2 biomass compounds:")
+        for bm in context["biomass"][:2]:
+            print(bm)
+
+        print("\nFirst 2 gapfilling entries:")
+        for gf in context["gapfilling"][:2]:
+            print(gf)
+
+        # Render with template
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(module_path + "/../data/"),
+            autoescape=jinja2.select_autoescape(['html', 'xml'])
+        )
+        html = env.get_template("ModelReportTemplate.html").render(context)
+        directory = dirname(output_path)
+        os.makedirs(directory, exist_ok=True)
+        with open(output_path, 'w') as f:
+            f.write(html)
+
+
+       
     def build_report(
         self,
         model_or_mdlutl,
