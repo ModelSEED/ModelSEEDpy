@@ -811,7 +811,7 @@ class MSBuilder:
                     for gene in residual_reaction_gene_hash[rxn_id]:
                         for item in residual_reaction_gene_hash[rxn_id][gene]:
                             if "probability" in item["scores"]:
-                                if not probability or item["scores"]["probability"] > probability
+                                if not probability or item["scores"]["probability"] > probability:
                                     probability = item["scores"]["probability"]
                         if len(gpr) > 0:
                             gpr += " or "
