@@ -173,14 +173,22 @@ class MSModelReport:
         
         # Process the data
         attributes = modelutl.get_attributes()
+        gf_filter_data = {}
+        selected_media_data = {}
+        core_atp_gapfilling_data = {}
         
-        selected_media_data = attributes['ATP_analysis']['selected_media']
-        core_atp_gapfilling_data = attributes['ATP_analysis']['core_atp_gapfilling']
-        gf_filter_data = attributes['gf_filter']
         gf_sensitivity_data = attributes.get('gf_sensitivity')  # Get 'gf_sensitivity_data' if available, otherwise it will be None
         number_gapfills = 0
         if gf_sensitivity_data:
             number_gapfills = len(gf_sensitivity_data)
+        if 'ATP_analysis' in attributes:
+            if 'selected_media' in attributes['ATP_analysis']:
+                selected_media_data = attributes['ATP_analysis']['selected_media']
+            if 'core_atp_gapfilling' in attributes['ATP_analysis']:
+                core_atp_gapfilling_data = attributes['ATP_analysis']['core_atp_gapfilling']
+            gf_filter_data = attributes['gf_filter']
+        if 'gf_filter' in attributes:
+            gf_filter_data = attributes['gf_filter']
         
         # Get the names of 'Core Gapfilling Media' and 'Gapfilling Media'
         core_gapfilling_media = [media for media, media_data in (gf_sensitivity_data or {}).items() if 'rxn00062_c0' in media_data]
