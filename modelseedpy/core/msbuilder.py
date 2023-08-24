@@ -770,6 +770,20 @@ class MSBuilder:
                         residual_reaction_gene_hash[rxn_id][gene] = gene_term_hash[gene][term]
         
         model_or_id = self.build(model_or_id,index,allow_all_non_grp_reactions,annotate_with_rast,biomass_classic,biomass_gc)
+        for rxn in model_or_id.reactions:
+            probability = None
+            for gene in rxn.genes():
+                annoont_gene = anno_ont.get_feature(gene.id)
+                if annoont_gene and annoont_gene in gene_term_hash:
+                    for term in gene_term_hash[annoont_gene]:
+                        if rxn.id[0:-3] in term.msrxns:
+                            for item in gene_term_hash[gene][term]:
+                                if "probability" in item.scores:
+                                    if not probability or item.scores["probability"] > probability:
+                                        probability = item.scores["probability"]
+            if hasattr(rxn, "probability"):
+                rxn.probability = probability     
+        
         reactions = []
         modelseeddb = ModelSEEDBiochem.get()
         for rxn_id in residual_reaction_gene_hash:
@@ -793,10 +807,17 @@ class MSBuilder:
                             self.base_model.add_metabolites([model_metabolite])
                     reaction = template_reaction.to_reaction(self.base_model, self.index)
                     gpr = ""
+                    probability = None
                     for gene in residual_reaction_gene_hash[rxn_id]:
+                        for item in residual_reaction_gene_hash[rxn_id][gene]:
+                            if "probability" in item["scores"]:
+                                if not probability or item["scores"]["probability"] > probability
+                                    probability = item["scores"]["probability"]
                         if len(gpr) > 0:
                             gpr += " or "
                         gpr += gene.id
+                    if hasattr(rxn, "probability"):
+                        reaction.probability = probability
                     reaction.gene_reaction_rule = gpr
                     reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
                     reactions.append(reaction)
