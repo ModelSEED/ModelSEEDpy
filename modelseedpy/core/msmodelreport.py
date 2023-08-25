@@ -23,35 +23,135 @@ class MSModelReport:
 
         # Helper function for extracting gapfilling data
         def extract_gapfilling_data(gf_sensitivity, model):
-            gapfilling_entries = []
+            if gf_sensitivity is None:
+                return [], {}
 
-            if not gf_sensitivity:
-                return []
+            gapfilling_dict = {}
+            gapfilling_summary = {}
 
             for media, media_data in gf_sensitivity.items():
                 for target, target_data in media_data.items():
                     for reaction_id, reaction_data in target_data.get('success', {}).items():
                         for direction, metabolites in reaction_data.items():
+                            # If metabolites is None, set to empty string
+                            if metabolites is None:
+                                metabolites = ""
+
+                            # Extract both IDs and Names for Gapfilling Sensitivity
+                            sensitivity_ids = []
+                            sensitivity_names = []
+                            if isinstance(metabolites, (list, tuple)):
+                                for met_id in metabolites:
+                                    sensitivity_ids.append(met_id)
+                                    met_name = model.metabolites.get_by_id(met_id).name if met_id in model.metabolites else met_id
+                                    sensitivity_names.append(met_name)
+                            else:
+                                metabolites = str(metabolites)                        
                             entry = {
                                 "reaction_id": reaction_id,
                                 "reaction_name": model.reactions.get_by_id(reaction_id).name if reaction_id in model.reactions else reaction_id,
                                 "media": media,
                                 "direction": direction,
                                 "target": target,
-                                "gapfilling_sensitivity": "; ".join(metabolites) if isinstance(metabolites, (list, tuple)) else str(metabolites)
+                                "gapfilling_sensitivity_id": "; ".join(sensitivity_ids) if sensitivity_ids else metabolites,
+                                "gapfilling_sensitivity_name": "; ".join(sensitivity_names) if sensitivity_names else metabolites
                             }
-                            gapfilling_entries.append(entry)
+                            
+                            # Update the summary dictionary
+                            if reaction_id not in gapfilling_summary:
+                                gapfilling_summary[reaction_id] = []
+                            gapfilling_summary[reaction_id].append(f"{media}: {direction}")
 
-            return gapfilling_entries
+                            # Check if reaction_id is already in dictionary
+                            if reaction_id in gapfilling_dict:
+                                # Update the media
+                                existing_entry = gapfilling_dict[reaction_id]
+                                existing_media = existing_entry["media"].split("; ")
+                                if media not in existing_media:
+                                    existing_media.append(media)
+                                    existing_entry["media"] = "; ".join(existing_media)
+                            else:
+                                gapfilling_dict[reaction_id] = entry
 
+            return list(gapfilling_dict.values()), gapfilling_summary
+
+        # Extract ATP analysis data
+        def extract_atp_analysis_data(atp_analysis, atp_expansion_filter):
+            entries = []
+            if atp_analysis and 'core_atp_gapfilling' in atp_analysis:
+                for media, data in atp_analysis['core_atp_gapfilling'].items():
+                    score = data.get('score', None)
+                    new_reactions = ["{}: {}".format(k, v) for k, v in data.get('new', {}).items()]
+                    reversed_reactions = ["{}: {}".format(k, v) for k, v in data.get('reversed', {}).items()]
+
+                    # Extracting the "Filtered Reactions" in the required format
+                    filtered_reactions = []
+                    for k, v in atp_expansion_filter.get(media, {}).items():
+                        if isinstance(v, dict):
+                            for sub_k, sub_v in v.items():
+                                if isinstance(sub_v, dict):
+                                    for reaction, direction_dict in sub_v.items():
+                                        direction = list(direction_dict.keys())[0]
+                                        filtered_reactions.append(f"{reaction}: {direction}")
+                    filtered_reactions_str = "; ".join(filtered_reactions)
+
+                    if score is not None:
+                        entries.append({
+                            'media': media,
+                            'no_of_gapfilled_reactions': score,
+                            'gapfilled_reactions': "; ".join(new_reactions),
+                            'reversed_reaction_by_gapfilling': "; ".join(reversed_reactions),
+                            'filtered_reactions': filtered_reactions_str
+                        })
+            # Sorting the entries based on the 'no_of_gapfilled_reactions' column
+            entries.sort(key=lambda x: x['no_of_gapfilled_reactions'])
+            return entries
+
+        # Extract ATP production data for the ATP Analysis tab
+        def extract_atp_production_data(atp_analysis):
+            atp_production_dict = {}
+            if atp_analysis:
+                selected_media = atp_analysis.get('selected_media', {})
+                core_atp_gapfilling = atp_analysis.get('core_atp_gapfilling', {})
+
+                # First, process selected_media
+                for media, value in selected_media.items():
+                    atp_production_dict[media] = round(value, 2)
+
+                # Next, process core_atp_gapfilling for media not in selected_media
+                for media, data in core_atp_gapfilling.items():
+                    if media not in atp_production_dict:
+                        if data.get('failed'):
+                            atp_production_dict[media] = 'failed'
+                        else:
+                            # If the media was not processed in selected_media and it's not failed, set as 'Not Integrated'
+                            atp_production_dict[media] = 'Not Integrated'
+
+            return atp_production_dict     
+        
+        # Get gf_sensitivity attribute from the model
+        gf_sensitivity = model_or_mdlutl.attributes.get('gf_sensitivity', None)
+
+        # Extract gapfilling data
+        gapfilling_entries, gapfilling_reaction_summary = extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
+
+        # Check if ATP_analysis attribute is present in the model
+        atp_analysis = model_or_mdlutl.attributes.get('ATP_analysis', None)
+        if atp_analysis:
+            atp_expansion_filter = model_or_mdlutl.attributes.get('atp_expansion_filter', {})
+            atp_analysis_entries = extract_atp_analysis_data(atp_analysis, atp_expansion_filter)
+        else:
+            atp_analysis_entries = []
+
+        # Initialize context dictionary
         context = {
-            "overview": [{"Model": "Model 3", "Genome": "Genome C"}, {"Model": "Model 4", "Genome": "Genome D"}],
+            "overview": [{"Model": "Model 5", "Genome": "Genome C"}, {"Model": "Model 5", "Genome": "Genome D"}],
             "reactions": [],
             "compounds": [],
             "genes": [],
             "biomass": [],
-            "gapfilling": [],
-            "atpanalysis": [{'no_of_gapfilled_reactions': 5, 'media': 'LB', 'atp_production': 'High', 'gapfilled_reactions': 'R005; R006', 'reversed_reaction_by_gapfilling': 'R007', 'filtered_reactions': 'R008; R009'}],
+            "gapfilling": gapfilling_entries,  # Populated with gapfilling data
+            "atpanalysis": atp_analysis_entries  # Populated with ATP analysis data
         }
 
         print("Module Path:", module_path + "/../data/")
@@ -70,9 +170,10 @@ class MSModelReport:
                     "name": rxn.name,
                     "equation": equation,
                     "genes": rxn.gene_reaction_rule,
-                    "gapfilling": "TBD"
+                    "gapfilling": "; ".join(gapfilling_reaction_summary.get(rxn.id, []))  # Empty list results in an empty string
                 }
                 context["reactions"].append(rxn_data)
+
 
         # Compounds Tab
         for cpd in model_or_mdlutl.metabolites:
@@ -116,7 +217,15 @@ class MSModelReport:
         # Gapfilling Tab
         gf_sensitivity = model_or_mdlutl.attributes.get('gf_sensitivity', None)
         gapfilling_data = extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
-        context["gapfilling"] = gapfilling_data
+        context["gapfilling"] = gapfilling_entries
+
+        # Extract ATP Production Data
+        atp_production_data = extract_atp_production_data(atp_analysis)
+
+        # Populate the 'atpanalysis' context with ATP production data
+        for entry in context["atpanalysis"]:
+            media = entry['media']
+            entry['atp_production'] = atp_production_data.get(media, None)
 
         # Diagnostics
         unique_biomass_rxns = biomass_reactions_ids
@@ -142,6 +251,10 @@ class MSModelReport:
         print("\nFirst 2 gapfilling entries:")
         for gf in context["gapfilling"][:2]:
             print(gf)
+            
+        print("\nFirst 2 ATP Analysis entries:")
+        for entry in context["atpanalysis"][:2]:
+            print(entry)
 
         # Render with template
         env = jinja2.Environment(
@@ -153,8 +266,6 @@ class MSModelReport:
         os.makedirs(directory, exist_ok=True)
         with open(output_path, 'w') as f:
             f.write(html)
-
-
        
     def build_report(
         self,
