@@ -13,6 +13,8 @@ from modelseedpy.core.msmodel import (
 from cobra.core import Gene, Metabolite, Model, Reaction, Group
 from modelseedpy.core import FBAHelper
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
+from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
+from modelseedpy.biochem.modelseed_to_cobra import modelseed_to_cobra_reaction
 
 SBO_ANNOTATION = "sbo"
 
@@ -728,6 +730,102 @@ class MSBuilder:
             reactions.append(reaction)
 
         return reactions
+    
+    def build_from_annotaton_ontology(
+            self,
+            model_or_id,
+            anno_ont,
+            index="0",
+            allow_all_non_grp_reactions=False,
+            annotate_with_rast=False,
+            biomass_classic=False,
+            biomass_gc=0.5,
+            add_non_template_reactions=True,
+            prioritized_event_list=None,
+            ontologies=None,
+            merge_all=True,
+            convert_to_sso=True
+        ):
+        #Build base model without annotation
+        self.search_name_to_orginal = {}
+        self.search_name_to_genes = {}
+        gene_term_hash = anno_ont.get_gene_term_hash(prioritized_event_list,ontologies,merge_all,convert_to_sso)
+        residual_reaction_gene_hash = {}
+        for gene in gene_term_hash:
+            for term in gene_term_hash[gene]:
+                if term.ontology.id == "SSO":
+                    name = anno_ont.get_term_name(term)
+                    f_norm = normalize_role(name)
+                    if f_norm not in self.search_name_to_genes:
+                        self.search_name_to_genes[f_norm] = set()
+                        self.search_name_to_orginal[f_norm] = set()
+                    self.search_name_to_orginal[f_norm].add(name)
+                    self.search_name_to_genes[f_norm].add(gene.id)
+                else:
+                    for rxn_id in term.msrxns:
+                        if rxn_id not in residual_reaction_gene_hash:
+                            residual_reaction_gene_hash[rxn_id] = {}
+                        if gene not in residual_reaction_gene_hash[rxn_id]:
+                            residual_reaction_gene_hash[rxn_id][gene] = []
+                        residual_reaction_gene_hash[rxn_id][gene] = gene_term_hash[gene][term]
+        
+        model_or_id = self.build(model_or_id,index,allow_all_non_grp_reactions,annotate_with_rast,biomass_classic,biomass_gc)
+        for rxn in model_or_id.reactions:
+            probability = None
+            for gene in rxn.genes():
+                annoont_gene = anno_ont.get_feature(gene.id)
+                if annoont_gene and annoont_gene in gene_term_hash:
+                    for term in gene_term_hash[annoont_gene]:
+                        if rxn.id[0:-3] in term.msrxns:
+                            for item in gene_term_hash[gene][term]:
+                                if "probability" in item.scores:
+                                    if not probability or item.scores["probability"] > probability:
+                                        probability = item.scores["probability"]
+            if hasattr(rxn, "probability"):
+                rxn.probability = probability     
+        
+        reactions = []
+        modelseeddb = ModelSEEDBiochem.get()
+        for rxn_id in residual_reaction_gene_hash:
+            if rxn_id+"_c0" not in model_or_id.reactions:
+                reaction = None
+                template_reaction = None
+                if rxn_id+"_c" in self.template.reactions:
+                    template_reaction = self.template.reactions.get_by_id(rxn_id+"_c")
+                elif rxn_id in modelseeddb.reactions:
+                    msrxn = modelseeddb.reactions.get_by_id(rxn_id)
+                    template_reaction = msrxn.to_template_reaction({0:"c",1:"e"})
+                if template_reaction:
+                    for m in template_reaction.metabolites:
+                        if m.compartment not in self.compartments:
+                            self.compartments[
+                                m.compartment
+                            ] = self.template.compartments.get_by_id(m.compartment)
+                        if m.id not in self.template_species_to_model_species:
+                            model_metabolite = m.to_metabolite(self.index)
+                            self.template_species_to_model_species[m.id] = model_metabolite
+                            self.base_model.add_metabolites([model_metabolite])
+                    reaction = template_reaction.to_reaction(self.base_model, self.index)
+                    gpr = ""
+                    probability = None
+                    for gene in residual_reaction_gene_hash[rxn_id]:
+                        for item in residual_reaction_gene_hash[rxn_id][gene]:
+                            if "probability" in item["scores"]:
+                                if not probability or item["scores"]["probability"] > probability:
+                                    probability = item["scores"]["probability"]
+                        if len(gpr) > 0:
+                            gpr += " or "
+                        gpr += gene.id
+                    if hasattr(rxn, "probability"):
+                        reaction.probability = probability
+                    reaction.gene_reaction_rule = gpr
+                    reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
+                    reactions.append(reaction)
+                if not reaction:
+                    print("Reaction ",rxn_id," not found in template or database!")
+
+        model_or_id.add_reactions(reactions)
+        return model_or_id
 
     def build_non_metabolite_reactions(
         self, cobra_model, allow_all_non_grp_reactions=False
@@ -813,6 +911,7 @@ class MSBuilder:
         annotate_with_rast=True,
         biomass_classic=False,
         biomass_gc=0.5,
+        add_reaction_from_rast_annotation=True
     ):
         """
 
@@ -850,22 +949,18 @@ class MSBuilder:
         complex_groups = self.build_complex_groups(
             self.reaction_to_complex_sets.values()
         )
-        if "bio1" in cobra_model.reactions:
-            print("1:Biomass present!!")
-        metabolic_reactions = self.build_metabolic_reactions()
-        cobra_model.add_reactions(metabolic_reactions)
-        if "bio1" in cobra_model.reactions:
-            print("2:Biomass present!!")
+        
+        if add_reaction_from_rast_annotation:
+            metabolic_reactions = self.build_metabolic_reactions()
+            cobra_model.add_reactions(metabolic_reactions)
+            
         non_metabolic_reactions = self.build_non_metabolite_reactions(
             cobra_model, allow_all_non_grp_reactions
         )
         cobra_model.add_reactions(non_metabolic_reactions)
-        if "bio1" in cobra_model.reactions:
-            print("3:Biomass present!!")
         cobra_model.add_groups(list(complex_groups.values()))
         self.add_exchanges_to_model(cobra_model)
 
-        print("Adding biomass!!")
         biomass_reactions = []
         for rxn_biomass in self.template.biomasses:
             reaction = rxn_biomass.build_biomass(

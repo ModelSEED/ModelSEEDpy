@@ -111,8 +111,15 @@ class MSModelUtil:
         self.score = None
         self.integrated_gapfillings = []
         self.attributes = {}
-        if hasattr(self.model, "attributes"):
-            self.attributes = self.model
+        if hasattr(self.model, "computed_attributes"):
+            if self.model.computed_attributes:
+                self.attributes = self.model.computed_attributes
+        if "pathways" not in self.attributes:
+            self.attributes["pathways"] = {}
+        if "auxotrophy" not in self.attributes:
+            self.attributes["auxotrophy"] = {}
+        if "fbas" not in self.attributes:
+            self.attributes["fbas"] = {}
 
     def compute_automated_reaction_scores(self):
         """
@@ -285,14 +292,18 @@ class MSModelUtil:
             self.attributes[key] = default
         return self.attributes[key]
 
-    def save_attributes(self, value, key=None):
-        attributes = self.get_attributes()
-        if key:
-            attributes[key] = value
-        else:
-            self.attributes = value
-        if hasattr(self.model, "attributes"):
-            self.model.attributes = self.attributes
+    def save_attributes(self, value=None, key=None):
+        if value:
+            if key:
+                self.attributes[key] = value
+            else:
+                self.attributes = value
+        if hasattr(self.model, "computed_attributes"):
+            logger.info(
+                "Setting FBAModel computed_attributes to mdlutl attributes"
+            )
+            self.attributes["gene_count"] = len(self.model.genes)
+            self.model.computed_attributes = self.attributes
 
     def add_ms_reaction(self, rxn_dict, compartment_trans=["c0", "e0"]):
         modelseed = ModelSEEDBiochem.get()
@@ -891,7 +902,7 @@ class MSModelUtil:
         return filtered_list
 
     def reaction_expansion_test(
-        self, reaction_list, condition_list, binary_search=True
+        self, reaction_list, condition_list, binary_search=True,attribute_label="gf_filter"
     ):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
 
@@ -950,7 +961,7 @@ class MSModelUtil:
                 + str(len(reaction_list))
             )
             # Adding filter results to attributes
-            gf_filter_att = self.get_attributes("gf_filter", {})
+            gf_filter_att = self.get_attributes(attribute_label, {})
             if condition["media"].id not in gf_filter_att:
                 gf_filter_att[condition["media"].id] = {}
             if condition["objective"] not in gf_filter_att[condition["media"].id]:
@@ -986,7 +997,6 @@ class MSModelUtil:
                         gf_filter_att[condition["media"].id][condition["objective"]][
                             condition["threshold"]
                         ][item[0].id][item[1]] = item[2]
-            gf_filter_att = self.save_attributes(gf_filter_att, "gf_filter")
         return filtered_list
 
     #################################################################################
@@ -998,6 +1008,7 @@ class MSModelUtil:
         # Getting target reaction and making sure it exists
         if target_rxn not in tempmodel.reactions:
             logger.critical(target_rxn + " not in model!")
+            return None
         target_rxn_obj = tempmodel.reactions.get_by_id(target_rxn)
         tempmodel.objective = target_rxn
         original_objective = tempmodel.objective
@@ -1069,14 +1080,10 @@ class MSModelUtil:
     ):
         tempmodel.objective = original_objective
         objective = tempmodel.slim_optimize()
-        with open("FlexBiomass2.lp", "w") as out:
-            out.write(str(tempmodel.solver))
         if objective > 0:
             target_rxn.lower_bound = 0.1
             tempmodel.objective = min_flex_obj
             solution = tempmodel.optimize()
-            with open("FlexBiomass3.lp", "w") as out:
-                out.write(str(tempmodel.solver))
             biocpds = []
             for reaction in tempmodel.reactions:
                 if reaction.id[0:5] == "FLEX_" and (

@@ -2,6 +2,7 @@
 import logging
 import cobra
 import re
+import json
 from optlang.symbolics import Zero, add
 from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
@@ -10,7 +11,7 @@ from modelseedpy.core.exceptions import GapfillingError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
-    logging.WARNING
+    logging.INFO#WARNING
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 
@@ -56,8 +57,9 @@ class MSGapfill:
         ]  # the cpd11416 compound is filtered during model extension with templates
         # Cloning model to create gapfilling model
         self.gfmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
+        self.gfmodelutl = MSModelUtil.get(self.gfmodel)
         # Getting package manager for gapfilling model
-        self.gfpkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodel)
+        self.gfpkgmgr = MSPackageManager.get_pkg_mgr(self.gfmodelutl)
         # Setting target from input
         if default_target:
             self.default_target = default_target
@@ -113,7 +115,9 @@ class MSGapfill:
             target = target[13:]
         if self.gfpkgmgr.getpkg("GapfillingPkg").test_gapfill_database():
             return True
-        gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
+        gf_sensitivity = {}
+        if target != "rxn00062_c0":
+            gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
         if media.id not in gf_sensitivity:
             gf_sensitivity[media.id] = {}
         if target not in gf_sensitivity[media.id]:
@@ -126,7 +130,8 @@ class MSGapfill:
         gf_sensitivity[media.id][target][
             note
         ] = self.mdlutl.find_unproducible_biomass_compounds(target)
-        self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
+        if target != "rxn00062_c0":
+            self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         logger.warning(
             "No gapfilling solution found"
             + filter_msg
@@ -143,7 +148,11 @@ class MSGapfill:
             self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
-
+            gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes("gf_filter", {})
+            base_filter = self.mdlutl.get_attributes("gf_filter", {})
+            for media_id in gf_filter:
+                base_filter[media_id] = gf_filter[media_id]
+            
         # Testing if gapfilling can work after filtering
         if not self.test_gapfill_database(media, target, before_filtering=False):
             return False
@@ -158,6 +167,22 @@ class MSGapfill:
         prefilter=True,
         check_for_growth=True,
     ):
+        """Run gapfilling on a single media condition to force the model to achieve a nonzero specified objective
+        Parameters
+        ----------
+        media : MSMedia
+            Media in which the model should be gapfilled
+        target : string
+            Name or expression describing the reaction or combination of reactions to the optimized
+        minimum_obj : double
+            Value to use for the minimal objective threshold that the model must be gapfilled to achieve
+        binary_check : bool 
+            Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
+        prefilter : bool
+            Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
+        check_for_growth : bool
+            Indicates if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
+        """
         # Setting target and media if specified
         if target:
             self.gfmodel.objective = self.gfmodel.problem.Objective(
@@ -240,6 +265,25 @@ class MSGapfill:
         prefilter=True,
         check_for_growth=True,
     ):
+        """Run gapfilling across an array of media conditions ultimately using different integration policies: simultaneous gapfilling, independent gapfilling, cumulative gapfilling
+        Parameters
+        ----------
+        media_list : [MSMedia]
+            List of the medias in which the model should be gapfilled
+        target : string
+            Name or expression describing the reaction or combination of reactions to the optimized
+        minimum_objectives : {string - media ID : double - minimum objective value}
+            Media-specific minimal objective thresholds that the model must be gapfilled to achieve
+        default_minimum_objective : double
+            Default value to use for the minimal objective threshold that the model must be gapfilled to achieve
+        binary_check : bool 
+            Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
+        prefilter : bool
+            Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
+        check_for_growth : bool
+            Indicates if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
+        """
+        
         if not default_minimum_objective:
             default_minimum_objective = self.default_minimum_objective
         first = True
@@ -250,11 +294,11 @@ class MSGapfill:
                 minimum_obj = minimum_objectives[item]
             if first:
                 solution_dictionary[item] = self.run_gapfilling(
-                    item, target, minimum_obj, binary_check, True, True
+                    item, target, minimum_obj, binary_check, prefilter, check_for_growth
                 )
             else:
                 solution_dictionary[item] = self.run_gapfilling(
-                    item, None, minimum_obj, binary_check, False, True
+                    item, None, minimum_obj, binary_check, False, check_for_growth
                 )
             false = False
         return solution_dictionary
@@ -303,6 +347,8 @@ class MSGapfill:
                     cumulative_solution.append([rxn_id, "<"])
                     rxn.upper_bound = 0
                     rxn.lower_bound = -100
+        
+        #Sometimes for whatever reason, the solution includes useless reactions that should be stripped out before saving the final model
         unneeded = self.mdlutl.test_solution(
             solution, keep_changes=True
         )  # Strips out unneeded reactions - which undoes some of what is done above
@@ -311,14 +357,17 @@ class MSGapfill:
                 if item[0] == oitem[0] and item[1] == oitem[1]:
                     cumulative_solution.remove(oitem)
                     break
+        #Adding the gapfilling solution data to the model, which is needed for saving the model in KBase
         self.mdlutl.add_gapfilling(solution)
+        #Testing which gapfilled reactions are needed to produce each reactant in the objective function
         if link_gaps_to_objective:
+            logger.info("Gapfilling sensitivity analysis running on succesful run in "+solution["media"].id+" for target "+solution["target"])
             gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
-            if solution["media"] not in gf_sensitivity:
-                gf_sensitivity[solution["media"]] = {}
-            if solution["target"] not in gf_sensitivity[solution["media"]]:
-                gf_sensitivity[solution["media"]][solution["target"]] = {}
-            gf_sensitivity[solution["media"]][solution["target"]][
+            if solution["media"].id not in gf_sensitivity:
+                gf_sensitivity[solution["media"].id] = {}
+            if solution["target"] not in gf_sensitivity[solution["media"].id]:
+                gf_sensitivity[solution["media"].id][solution["target"]] = {}
+            gf_sensitivity[solution["media"].id][solution["target"]][
                 "success"
             ] = self.mdlutl.find_unproducible_biomass_compounds(
                 solution["target"], cumulative_solution

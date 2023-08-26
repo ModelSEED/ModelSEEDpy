@@ -38,12 +38,14 @@ from modelseedpy.core import (
     MSBuilder,
     MSMedia,
     MSGrowthPhenotypes,
+    MSGrowthPhenotype,
     MSModelUtil,
     FBAHelper,
     MSEditorAPI,
     MSATPCorrection,
     MSGapfill,
     MSEquation,
+    MSModelReport
 )
 from modelseedpy.core.exceptions import *
 

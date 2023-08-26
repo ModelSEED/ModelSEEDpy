@@ -495,7 +495,7 @@ class ModelSEEDBiochem:
     @staticmethod
     def get(create_if_missing=True):
         if not ModelSEEDBiochem.default_biochemistry:
-            ModelSEEDBiochem.default_biochemistry = from_local2(
+            ModelSEEDBiochem.default_biochemistry = from_local(
                 config.get("biochem", "path")
             )
         return ModelSEEDBiochem.default_biochemistry
