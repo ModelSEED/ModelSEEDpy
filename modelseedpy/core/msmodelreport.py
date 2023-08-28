@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import logging
-import matplotlib.cm as cm
 import os
+import re
 import jinja2
-from os.path import dirname, exists
+from os.path import dirname
+from pandas.io.formats.style import Styler
 from modelseedpy.core.msmodelutl import MSModelUtil
+
 module_path = dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger(__name__)
@@ -19,133 +21,202 @@ class MSModelReport:
     ):
         pass
 
-    def build_multitab_report(self, model_or_mdlutl, output_path):
+    def generate_reports(self, model, report_path, multi_tab_report_path):
+        self.build_report(model, report_path)
+        self.build_multitab_report(model, multi_tab_report_path)
+ 
+    # Helper function to build overview data
+    def build_overview_data(self, model):
+        # Get the number of compartments
+        number_compartments = len(set([metabolite.compartment for metabolite in model.metabolites]))
 
-        # Helper function for extracting gapfilling data
-        def extract_gapfilling_data(gf_sensitivity, model):
-            if gf_sensitivity is None:
-                return [], {}
+        # Extract gapfilling information
+        gapfillings_str = model.notes.get('kbase_gapfillings', '[]')
+        pattern = r"\{.*?\}"
+        gapfilling_matches = re.findall(pattern, gapfillings_str)
+        gapfillings = [eval(gapfilling.replace('false', 'False').replace('true', 'True').replace('null', 'None')) for gapfilling in gapfilling_matches]
 
-            gapfilling_dict = {}
-            gapfilling_summary = {}
+        core_gapfilling_media = []
+        gapfilling_media = []
 
-            for media, media_data in gf_sensitivity.items():
-                for target, target_data in media_data.items():
-                    for reaction_id, reaction_data in target_data.get('success', {}).items():
-                        for direction, metabolites in reaction_data.items():
-                            # If metabolites is None, set to empty string
-                            if metabolites is None:
-                                metabolites = ""
+        for gapfilling in gapfillings:
+            media_name = gapfilling.get('id', '').replace('ATP-', '')
+            target = gapfilling.get('target', '')
 
-                            # Extract both IDs and Names for Gapfilling Sensitivity
-                            sensitivity_ids = []
-                            sensitivity_names = []
-                            if isinstance(metabolites, (list, tuple)):
-                                for met_id in metabolites:
-                                    sensitivity_ids.append(met_id)
-                                    met_name = model.metabolites.get_by_id(met_id).name if met_id in model.metabolites else met_id
-                                    sensitivity_names.append(met_name)
-                            else:
-                                metabolites = str(metabolites)                        
-                            entry = {
-                                "reaction_id": reaction_id,
-                                "reaction_name": model.reactions.get_by_id(reaction_id).name if reaction_id in model.reactions else reaction_id,
-                                "media": media,
-                                "direction": direction,
-                                "target": target,
-                                "gapfilling_sensitivity_id": "; ".join(sensitivity_ids) if sensitivity_ids else metabolites,
-                                "gapfilling_sensitivity_name": "; ".join(sensitivity_names) if sensitivity_names else metabolites
-                            }
-                            
-                            # Update the summary dictionary
-                            if reaction_id not in gapfilling_summary:
-                                gapfilling_summary[reaction_id] = []
-                            gapfilling_summary[reaction_id].append(f"{media}: {direction}")
+            if target == "rxn00062_c0":
+                core_gapfilling_media.append(media_name)
+            elif target.startswith('bio'):
+                gapfilling_media.append(media_name)
 
-                            # Check if reaction_id is already in dictionary
-                            if reaction_id in gapfilling_dict:
-                                # Update the media
-                                existing_entry = gapfilling_dict[reaction_id]
-                                existing_media = existing_entry["media"].split("; ")
-                                if media not in existing_media:
-                                    existing_media.append(media)
-                                    existing_entry["media"] = "; ".join(existing_media)
-                            else:
-                                gapfilling_dict[reaction_id] = entry
+        # Count the number of gapfills
+        number_gapfills = gapfillings_str.count('"media_ref"')
 
-            return list(gapfilling_dict.values()), gapfilling_summary
+        # Convert the lists to strings
+        core_gapfilling_str = "; ".join(core_gapfilling_media) if core_gapfilling_media else "No core gapfilling data found!"
+        gapfilling_media_str = "; ".join(gapfilling_media) if gapfilling_media else "No genome-scale gapfilling data found!"
 
-        # Extract ATP analysis data
-        def extract_atp_analysis_data(atp_analysis, atp_expansion_filter):
-            entries = []
-            if atp_analysis and 'core_atp_gapfilling' in atp_analysis:
-                for media, data in atp_analysis['core_atp_gapfilling'].items():
-                    score = data.get('score', None)
-                    new_reactions = ["{}: {}".format(k, v) for k, v in data.get('new', {}).items()]
-                    reversed_reactions = ["{}: {}".format(k, v) for k, v in data.get('reversed', {}).items()]
+        overview = {
+            'Model ID': model.id,
+            'Full Gapfilling and ATP Analysis Report': 'TBD',  # You may replace 'TBD' with actual data when available
+            'Genome Scale Template': model.notes.get('kbase_template_refs', 'Data Not Available'),
+            'Core Gapfilling Media': core_gapfilling_str,
+            'Gapfilling Media': gapfilling_media_str,
+            'Source Genome': model.notes.get('kbase_genome_ref', 'Data Not Available'),
+            'Total Number of reactions': len(model.reactions),
+            'Number compounds': len(model.metabolites),
+            'Number compartments': number_compartments,
+            'Number biomass': len([rxn for rxn in model.reactions if rxn.annotation.get('sbo') == 'SBO:0000629']),
+            'Number gapfills': number_gapfills
+        }
+        return overview
 
-                    # Extracting the "Filtered Reactions" in the required format
-                    filtered_reactions = []
-                    for k, v in atp_expansion_filter.get(media, {}).items():
-                        if isinstance(v, dict):
-                            for sub_k, sub_v in v.items():
-                                if isinstance(sub_v, dict):
-                                    for reaction, direction_dict in sub_v.items():
-                                        direction = list(direction_dict.keys())[0]
-                                        filtered_reactions.append(f"{reaction}: {direction}")
-                    filtered_reactions_str = "; ".join(filtered_reactions)
+    # Helper function for extracting gapfilling data
+    def extract_gapfilling_data(self, gf_sensitivity, model):
+        if gf_sensitivity is None:
+            return [], {}
 
-                    if score is not None:
-                        entries.append({
-                            'media': media,
-                            'no_of_gapfilled_reactions': score,
-                            'gapfilled_reactions': "; ".join(new_reactions),
-                            'reversed_reaction_by_gapfilling': "; ".join(reversed_reactions),
-                            'filtered_reactions': filtered_reactions_str
-                        })
-            # Sorting the entries based on the 'no_of_gapfilled_reactions' column
-            entries.sort(key=lambda x: x['no_of_gapfilled_reactions'])
-            return entries
+        gapfilling_dict = {}
+        gapfilling_summary = {}
 
-        # Extract ATP production data for the ATP Analysis tab
-        def extract_atp_production_data(atp_analysis):
-            atp_production_dict = {}
-            if atp_analysis:
-                selected_media = atp_analysis.get('selected_media', {})
-                core_atp_gapfilling = atp_analysis.get('core_atp_gapfilling', {})
+        for media, media_data in gf_sensitivity.items():
+            for target, target_data in media_data.items():
+                for reaction_id, reaction_data in target_data.get('success', {}).items():
+                    for direction, metabolites in reaction_data.items():
+                        # If metabolites is None, set to empty string
+                        if metabolites is None:
+                            metabolites = ""
 
-                # First, process selected_media
-                for media, value in selected_media.items():
-                    atp_production_dict[media] = round(value, 2)
-
-                # Next, process core_atp_gapfilling for media not in selected_media
-                for media, data in core_atp_gapfilling.items():
-                    if media not in atp_production_dict:
-                        if data.get('failed'):
-                            atp_production_dict[media] = 'failed'
+                        # Extract both IDs and Names for Gapfilling Sensitivity
+                        sensitivity_ids = []
+                        sensitivity_names = []
+                        if isinstance(metabolites, (list, tuple)):
+                            for met_id in metabolites:
+                                sensitivity_ids.append(met_id)
+                                met_name = model.metabolites.get_by_id(met_id).name if met_id in model.metabolites else met_id
+                                sensitivity_names.append(met_name)
                         else:
-                            # If the media was not processed in selected_media and it's not failed, set as 'Not Integrated'
-                            atp_production_dict[media] = 'Not Integrated'
+                            metabolites = str(metabolites)                        
+                        entry = {
+                            "reaction_id": reaction_id,
+                            "reaction_name": model.reactions.get_by_id(reaction_id).name if reaction_id in model.reactions else reaction_id,
+                            "media": media,
+                            "direction": direction,
+                            "target": target,
+                            "gapfilling_sensitivity_id": "; ".join(sensitivity_ids) if sensitivity_ids else metabolites,
+                            "gapfilling_sensitivity_name": "; ".join(sensitivity_names) if sensitivity_names else metabolites
+                        }
 
-            return atp_production_dict     
+                        # Update the summary dictionary
+                        if reaction_id not in gapfilling_summary:
+                            gapfilling_summary[reaction_id] = []
+                        gapfilling_summary[reaction_id].append(f"{media}: {direction}")
+
+                        # Check if reaction_id is already in dictionary
+                        if reaction_id in gapfilling_dict:
+                            # Update the media
+                            existing_entry = gapfilling_dict[reaction_id]
+                            existing_media = existing_entry["media"].split("; ")
+                            if media not in existing_media:
+                                existing_media.append(media)
+                                existing_entry["media"] = "; ".join(existing_media)
+                        else:
+                            gapfilling_dict[reaction_id] = entry
+
+        return list(gapfilling_dict.values()), gapfilling_summary    
+
+    #transform data to be used in tabular format to use in build_model_report
+    def transform_gapfilling_data(self, gapfilling_data):
+        transformed_data = []
+        for entry in gapfilling_data:
+            row = [
+                entry["reaction_id"],
+                entry["reaction_name"],
+                entry["media"],
+                entry["direction"],
+                entry["target"],
+                entry["gapfilling_sensitivity_id"],
+                entry["gapfilling_sensitivity_name"]
+            ]
+            transformed_data.append(row)
+        return transformed_data
+    
+    
+    # Extract ATP analysis data
+    def extract_atp_analysis_data(self, atp_analysis, atp_expansion_filter):
+        entries = []
+        if atp_analysis and 'core_atp_gapfilling' in atp_analysis:
+            for media, data in atp_analysis['core_atp_gapfilling'].items():
+                score = data.get('score', None)
+                new_reactions = ["{}: {}".format(k, v) for k, v in data.get('new', {}).items()]
+                reversed_reactions = ["{}: {}".format(k, v) for k, v in data.get('reversed', {}).items()]
+
+                # Extracting the "Filtered Reactions" in the required format
+                filtered_reactions = []
+                for k, v in atp_expansion_filter.get(media, {}).items():
+                    if isinstance(v, dict):
+                        for sub_k, sub_v in v.items():
+                            if isinstance(sub_v, dict):
+                                for reaction, direction_dict in sub_v.items():
+                                    direction = list(direction_dict.keys())[0]
+                                    filtered_reactions.append(f"{reaction}: {direction}")
+                filtered_reactions_str = "; ".join(filtered_reactions)
+
+                if score is not None:
+                    entries.append({
+                        'media': media,
+                        'no_of_gapfilled_reactions': score,
+                        'gapfilled_reactions': "; ".join(new_reactions),
+                        'reversed_reaction_by_gapfilling': "; ".join(reversed_reactions),
+                        'filtered_reactions': filtered_reactions_str
+                    })
+        # Sorting the entries based on the 'no_of_gapfilled_reactions' column
+        entries.sort(key=lambda x: x['no_of_gapfilled_reactions'])
+        return entries
+
+    # Extract ATP production data for the ATP Analysis tab
+    def extract_atp_production_data(self, atp_analysis):
+        atp_production_dict = {}
+        if atp_analysis:
+            selected_media = atp_analysis.get('selected_media', {})
+            core_atp_gapfilling = atp_analysis.get('core_atp_gapfilling', {})
+
+            # First, process selected_media
+            for media, value in selected_media.items():
+                atp_production_dict[media] = round(value, 2)
+
+            # Next, process core_atp_gapfilling for media not in selected_media
+            for media, data in core_atp_gapfilling.items():
+                if media not in atp_production_dict:
+                    if data.get('failed'):
+                        atp_production_dict[media] = 'failed'
+                    else:
+                        # If the media was not processed in selected_media and it's not failed, set as 'Not Integrated'
+                        atp_production_dict[media] = 'Not Integrated'
+
+        return atp_production_dict   
+    
+    def build_multitab_report(self, model_or_mdlutl, output_path):
+                
+        # Build overview data
+        overview_data = self.build_overview_data(model_or_mdlutl)
         
         # Get gf_sensitivity attribute from the model
         gf_sensitivity = model_or_mdlutl.attributes.get('gf_sensitivity', None)
 
         # Extract gapfilling data
-        gapfilling_entries, gapfilling_reaction_summary = extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
+        gapfilling_entries, gapfilling_reaction_summary = self.extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
 
         # Check if ATP_analysis attribute is present in the model
         atp_analysis = model_or_mdlutl.attributes.get('ATP_analysis', None)
         if atp_analysis:
             atp_expansion_filter = model_or_mdlutl.attributes.get('atp_expansion_filter', {})
-            atp_analysis_entries = extract_atp_analysis_data(atp_analysis, atp_expansion_filter)
+            atp_analysis_entries = self.extract_atp_analysis_data(atp_analysis, atp_expansion_filter)
         else:
             atp_analysis_entries = []
 
         # Initialize context dictionary
         context = {
-            "overview": [{"Model": "Model 5", "Genome": "Genome C"}, {"Model": "Model 5", "Genome": "Genome D"}],
+            "overview": overview_data,
             "reactions": [],
             "compounds": [],
             "genes": [],
@@ -216,11 +287,11 @@ class MSModelReport:
 
         # Gapfilling Tab
         gf_sensitivity = model_or_mdlutl.attributes.get('gf_sensitivity', None)
-        gapfilling_data = extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
+        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
         context["gapfilling"] = gapfilling_entries
 
         # Extract ATP Production Data
-        atp_production_data = extract_atp_production_data(atp_analysis)
+        atp_production_data = self.extract_atp_production_data(atp_analysis)
 
         # Populate the 'atpanalysis' context with ATP production data
         for entry in context["atpanalysis"]:
@@ -267,171 +338,27 @@ class MSModelReport:
         with open(output_path, 'w') as f:
             f.write(html)
        
-    def build_report(
-        self,
-        model_or_mdlutl,
-        output_path
-    ):
-        """Builds model HTML report
+    
+    def build_report(self, model, output_path):
+        """Builds model HTML report for the Model Summary table
         Parameters
         ----------
-        model_or_modelutl : Model | MSModelUtl
-            Model to use to run the simulations
+        model : cobra.Model
+            Model to use to build the report
         """
-        modelutl = model_or_mdlutl
-        if not isinstance(model_or_mdlutl, MSModelUtil):
-            modelutl = MSModelUtil.get(model_or_mdlutl)
-        
-        # Process the data
-        attributes = modelutl.get_attributes()
-        gf_filter_data = {}
-        selected_media_data = {}
-        core_atp_gapfilling_data = {}
-        
-        gf_sensitivity_data = attributes.get('gf_sensitivity')  # Get 'gf_sensitivity_data' if available, otherwise it will be None
-        number_gapfills = 0
-        if gf_sensitivity_data:
-            number_gapfills = len(gf_sensitivity_data)
-        if 'ATP_analysis' in attributes:
-            if 'selected_media' in attributes['ATP_analysis']:
-                selected_media_data = attributes['ATP_analysis']['selected_media']
-            if 'core_atp_gapfilling' in attributes['ATP_analysis']:
-                core_atp_gapfilling_data = attributes['ATP_analysis']['core_atp_gapfilling']
-            gf_filter_data = attributes['gf_filter']
-        if 'gf_filter' in attributes:
-            gf_filter_data = attributes['gf_filter']
-        
-        # Get the names of 'Core Gapfilling Media' and 'Gapfilling Media'
-        core_gapfilling_media = [media for media, media_data in (gf_sensitivity_data or {}).items() if 'rxn00062_c0' in media_data]
-        gapfilling_media = [media for media, media_data in (gf_sensitivity_data or {}).items() if 'bio1' in media_data]
-        core_gapfilling_media_text = ', '.join(core_gapfilling_media)
-        gapfilling_media_text = ', '.join(gapfilling_media)
-        
-        bio_count = 0
-        for rxn in modelutl.model.reactions:
-            if rxn.id[0:3] == "bio":
-                bio_count += 1
-        
-        # Create the Model Summary table data
-        model_summary_data = [
-            ('<b>Model ID</b>', modelutl.wsid),
-            ('<b>Genome Scale Template</b>',  modelutl.model.template_ref),
-            #('<b>Core Template</b>', modelutl.model.core_template_ref),
-            ('<b>Core Gapfilling Media</b>', core_gapfilling_media_text),
-            ('<b>Gapfilling Media</b>', gapfilling_media_text),
-            ('<b>Source Genome</b>',modelutl.model.name),
-            ('<b>Total Number of reactions</b>', str(len(modelutl.model.reactions))),
-        #    ('<b>Number of reactions in Core</b>', 'TBD - attributes require changes things to support this'),
-        #    ('<b>Number of reactions in Genome Scale</b>', 'TBD - attributes require changes things to support this'),
-            ('<b>Number compounds</b>', str(len(modelutl.model.metabolites))),
-            ('<b>Number compartments</b>', str(len(modelutl.model.compartments))),
-            ('<b>Number biomass</b>', str(bio_count)),
-            ('<b>Number gapfills</b>', str(number_gapfills)),
-        ]
-        
-        # Create the DataFrame for Model Summary
-        model_summary_df = pd.DataFrame(model_summary_data, columns=['', ''])
-        
-        # Process core_atp_gapfilling_data and gf_filter_data into a list of dictionaries
-        gapfilling_list = []
-        for media in core_atp_gapfilling_data:
-            core_atp_gapfilling_media = core_atp_gapfilling_data[media]
-            row = {
-                'no of gapfilled reactions': int(core_atp_gapfilling_media['score']),
-                'media': media,
-                'ATP Production': f"{round(selected_media_data.get(media, 0), 2):.2f}" if media in selected_media_data else '',
-                'gapfilled reactions': '',
-                'reversed reaction by gapfilling': '',
-                'Filtered Reactions': '',
-            }
-            if 'new' in core_atp_gapfilling_media:
-                gapfilled_reactions = core_atp_gapfilling_media['new']
-                if gapfilled_reactions:
-                    reactions = [f'<a href="https://modelseed.org/biochem/reactions/{rxn[:-3]}">{rxn}</a> : {direction}' if not rxn.startswith("EX") else f'EX_<a href="https://modelseed.org/biochem/compounds/{rxn[3:-3]}">{rxn}</a> : {direction}' for rxn, direction in gapfilled_reactions.items()]
-                    row['gapfilled reactions'] = ' | '.join(reactions)
-            if 'failed' in core_atp_gapfilling_media and core_atp_gapfilling_media['failed']:
-                row['gapfilled reactions'] = 'Failed'
-            if 'reversed' in core_atp_gapfilling_media:
-                reversed_reactions = core_atp_gapfilling_media['reversed']
-                if reversed_reactions:
-                    reactions = [f'<a href="https://modelseed.org/biochem/reactions/{rxn[:-3]}">{rxn}</a> : {direction}' if not rxn.startswith("EX") else f'EX_<a href="https://modelseed.org/biochem/compounds/{rxn[3:-3]}">{rxn}</a> : {direction}' for rxn, direction in reversed_reactions.items()]
-                    row['reversed reaction by gapfilling'] = ' | '.join(reactions)
-            if media in gf_filter_data:
-                gf_filter_media_data = gf_filter_data[media]
-                atp_production_values = list(gf_filter_media_data.values())
-                if atp_production_values:
-                    atp_prod_reaction_pairs = list(atp_production_values[0].items())
-                    if atp_prod_reaction_pairs:
-                        _, reactions = atp_prod_reaction_pairs[0]
-                        if reactions:
-                            filtered_reactions = ' | '.join([f'<a href="https://modelseed.org/biochem/reactions/{rxn.split("_")[0]}">{rxn}</a> : {list(value.keys())[0]}' if not rxn.startswith("EX") else f'EX_<a href="https://modelseed.org/biochem/compounds/{rxn[3:-3]}">{rxn}</a> : {list(value.keys())[0]}' for rxn, value in reactions.items()])
-                            row['Filtered Reactions'] = filtered_reactions if filtered_reactions else ''
-                        if not row['reversed reaction by gapfilling']:
-                            row['reversed reaction by gapfilling'] = ''
-            gapfilling_list.append(row)
-        
-        
-        
-        gapfilling_df = pd.DataFrame(gapfilling_list, columns=['no of gapfilled reactions', 'media', 'ATP Production', 'gapfilled reactions', 'reversed reaction by gapfilling', 'Filtered Reactions'])
-        gapfilling_df['no of gapfilled reactions'] = pd.to_numeric(gapfilling_df['no of gapfilled reactions'])
-        gapfilling_df = gapfilling_df.sort_values('no of gapfilled reactions')
-        
-        
-        reaction_names = {}
-        for rxn in modelutl.model.reactions:
-            reaction_id = rxn.id
-            reaction_name = rxn.name
-            reaction_names[reaction_id] = reaction_name
-        
-        # Gapfillings Analysis DataFrame
-        gapfillings_list = []
-        if gf_sensitivity_data:
-            for media, media_data in gf_sensitivity_data.items():
-                for target, target_data in media_data.items():  # Iterate through each target for the current media
-                    for status, status_data in target_data.items():
-                        if isinstance(status_data, dict):
-                            for reaction_id, reaction_directions in status_data.items():
-                                for direction, gapfilling_sensitivity in reaction_directions.items():
-                                    if status == 'success':
-                                        if isinstance(gapfilling_sensitivity, list):
-                                            gapfilling_sensitivity = ', '.join(gapfilling_sensitivity)
-                                        gapfillings_list.append({
-                                            'Reaction ID': reaction_id,
-                                            'Reaction Name': reaction_names.get(reaction_id, ''),  # Get reaction name from the dictionary
-                                            'Media': media,
-                                            'Direction': direction,
-                                            'Target': target,
-                                            'Gapfilling Sensitivity': gapfilling_sensitivity
-                                        })
-                        else:
-                            # Handle cases where status_data is null
-                            gapfillings_list.append({
-                                'Reaction ID': '',  # No data available for Reaction ID
-                                'Reaction Name': '',  # No data available for Reaction Name
-                                'Media': media,
-                                'Direction': '',  # No data available for Direction
-                                'Target': target,
-                                'Gapfilling Sensitivity': 'Failed Before Filtering' if status == 'FBF' else 'Failed After Filtering' if status == 'FAF' else status  # Status is the 'FBF' or other labels in this case
-                            })
-        
-        gapfillings_analysis_df = pd.DataFrame(gapfillings_list, columns=['Reaction ID', 'Reaction Name', 'Media', 'Direction', 'Target', 'Gapfilling Sensitivity'])
-        
-        
-        # Define the custom color mapping function
-        def color_gradient(val):
-            if val == 0:
-                return 'background-color: green'
-            else:
-                color_map = cm.get_cmap('YlOrRd')  # Choose the color map
-                norm_val = val / gapfilling_df['no of gapfilled reactions'].max()  # Normalize the value between 0 and 1
-                color = color_map(norm_val)
-                r, g, b, _ = color
-                return f'background-color: rgb({int(r * 255)}, {int(g * 255)}, {int(b * 255)})'
-        
-        # Apply the default style to the Model Summary DataFrame
+
+        # 1. Utilize the build_overview_data method
+        model_summary_data = self.build_overview_data(model)
+        # Remove the unwanted entry
+        model_summary_data.pop("Full Gapfilling and ATP Analysis Report", None)
+        # 2. Transform the dictionary into a list of tuples
+        model_summary_list = [(key, value) for key, value in model_summary_data.items()]
+        # 3. Convert to DataFrame
+        model_summary_df = pd.DataFrame(model_summary_list, columns=['', ''])
+
+        # Style the DataFrame (as was done previously)
         model_summary_df_styled = (
-            model_summary_df.style
-            .hide_index()
+            model_summary_df.style.hide(axis="index")
             .set_table_styles([
                 {'selector': 'th', 'props': [('border', 'none'), ('background-color', 'white'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
                 {'selector': 'td', 'props': [('border', 'none'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
@@ -439,17 +366,22 @@ class MSModelReport:
                 {'selector': 'tr:nth-child(odd)', 'props': [('background-color', '#f2f2f2')]},
             ])
         )
-        
-            
-        # Apply the default style to the Gapfillings Analysis DataFrame
-        # Apply the default style to the Gapfillings Analysis DataFrame
+
+        # Fetching the gapfilling sensitivity data
+        gf_sensitivity = model.attributes.get('gf_sensitivity', None)
+        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity, model)
+        gapfilling_list = self.transform_gapfilling_data(gapfilling_data[0])
+
+        # Convert the gapfilling_list to a DataFrame
+        gapfillings_analysis_df = pd.DataFrame(
+            gapfilling_list, 
+            columns=[
+                "Reaction ID", "Reaction Name", "Media", "Direction", "Target", "Gapfilling Sensitivity ID", "Gapfilling Sensitivity Name"]
+        )
+
+        # Apply style to Gapfillings Analysis DataFrame
         gapfillings_analysis_df_styled = (
-            gapfillings_analysis_df.style
-            .hide_index()
-            .format({
-                'Reaction ID': lambda x: f'<a href="https://modelseed.org/biochem/reactions/{x[:-3]}">{x}</a>' if not x.startswith("EX") else f'<a href="https://modelseed.org/biochem/compounds/{x[3:-3]}">{x}</a>',  # Add hyperlink to Reaction ID
-                'Gapfilling Sensitivity': lambda x: ', '.join([f'<a href="https://modelseed.org/biochem/compounds/{i[:-3]}">{i}</a>' for i in x.split(', ')]) if x and not x.startswith('Failed') else x  # Add hyperlinks to Gapfilling Sensitivity
-            })
+            gapfillings_analysis_df.style.hide(axis="index")
             .set_table_styles([
                 {'selector': 'th', 'props': [('border', 'none'), ('background-color', 'white'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
                 {'selector': 'td', 'props': [('border', 'none'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
@@ -457,27 +389,9 @@ class MSModelReport:
                 {'selector': 'tr:nth-child(odd)', 'props': [('background-color', '#f2f2f2')]},
             ])
         )
-        
-        
-        # Apply the default style with alternating row colors, Oxygen font, adjusted font size and line height,
-        # and switched order of light grey and white backgrounds in the header column for Core ATP Gapfilling Analysis
-        gapfilling_df_styled = (
-            gapfilling_df.style
-            .applymap(color_gradient, subset=['no of gapfilled reactions'])
-            .hide_index()
-            .format({'Filtered Reactions': lambda x: f'{x}'})
-            .format({'gapfilled reactions': lambda x: f'{x}'})
-            .set_table_styles([
-                {'selector': 'th', 'props': [('border', 'none'), ('background-color', 'white'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
-                {'selector': 'td', 'props': [('border', 'none'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
-                {'selector': 'tr:nth-child(even)', 'props': [('background-color', 'white')]},
-                {'selector': 'tr:nth-child(odd)', 'props': [('background-color', '#f2f2f2')]},
-            ])
-        )
-        
-        
-        # Legend text for Table 1
-        annotations_text_1 = """
+
+        # Legend for Gapfillings Analysis
+        annotations_text_gapfillings = """
             <ul>
                 <li><b>Reaction ID:</b> The identifier of the reaction.</li>
                 <li><b>Reaction Name:</b> The name of the reaction.</li>
@@ -485,30 +399,36 @@ class MSModelReport:
                 <li><b>Direction:</b> The direction of the reaction. Can be ">" for forward, "<" for reverse, or "=" for both directions.</li>
                 <li><b>Target:</b> The reaction selected as the objective function target for the gapfilling optimization problem. Targets here can be the model’s biomass reaction, commonly named “bio1” for models created by this app. 
                 Alternatively, “rxn00062” (ATP Production) reaction is shown for cases where gapfilling was applied to guarantee ATP production in a given media. 
-                When reactions are gapfilled for ATP production, we recommend checking the full Core ATP Analysis in Table 2 below. </li>
-                <li><b>Gapfilling Sensitivity:</b> Gapfilling is necessary when compounds in the biomass objective function can not be produced by the model. 
+                When reactions are gapfilled for ATP production, we recommend checking the full Core ATP Analysis in the table below. </li>
+                <li><b>Gapfilling Sensitivity ID and Name:</b> Gapfilling is necessary when compounds in the biomass objective function can not be produced by the model. 
                 For each reaction we list the biomass compound(s) that can not be synthesized by the model without gapfilling.
                 In cases where gap filling fails there are two possible scenarios:
                 1) FBF (failed before filtering) : the gapfilling immediately failed, even before we filtered out the ATP breaking reactions. This means this objective CANNOT be satisfied with the entire current database. 
                 2) FAF (failed after filtering): the gapfilling succeeded before filtering, but failed after filtering out reactions that break ATP. This tells you definitively if the ATP filtering caused the gapfilling to fail</li>
             </ul>
         """
-        #table 2 intro text
-        introductory_text = """
-        <p>During model reconstruction, we analyze the genome’s core metabolism draft model (model without gapfilling) to assess energy biosynthesis capabilities. 
-        The goal of this analysis is to ensure the core metabolism model is able to produce ATP before we expand the model to the genome-scale. 
-        This step is designed to prevent gapfilling from introducing reactions that create energy-generating loops. 
-        The tests are conducted on a large collection of minimal conditions, with the goal of simulating the model’s capability to produce energy with different electron donor, electron acceptor, and carbon source combinations.</p>
-        <p><u>When the draft model of the core metabolism is capable of producing ATP in at least one of the test media, no gapfilling reactions part of this analysis will be added to the model.</u> While we still report the gapfilling requirements for the test media formulations that fail to produce ATP with that draft core model, we only integrate these solutions in the model when no test media succeeds in producing ATP. 
-        In this case, the integrated gap-filling solution(s) will be displayed in “Table 1 - Gapfilling Analysis” above, with the “Target” “rxn00062” (ATP Production) objective function.</p> 
-        <p>The goal is to display the test results for all media to provide clues for the metabolic capabilities of the genome(s). When many reactions are required for growth on the SO4 testing media conditions, this could be a good indicator that the organism is not capable of performing sulfate reduction. 
-        On the other hand, when only one gapfill reaction is required  for ATP production in a given media, multiple scenarios can be considered. 
-        1) Organism(s) can’t grow on test condition, and we correctly did not add the reaction to the model.  2) Possible issue with the source genome annotation missing a specific gene function 3) Possible issue with the model reconstruction database. We hope this data helps make more informed decisions on reactions that may need to be manually curated in the model. 
-        In cases where is known from the literature or unpublished experimental results that an organism is capable of producing ATP in a given media condition that requires gapfilling in this analysis, you can use the parameter “Force ATP media” in the reconstruction app to ensure those reactions are integrated into the model.
-        .</p>
-        """
-        # Legend text for Table 2
-        annotations_text_2 = """
+
+        # Extract ATP analysis data
+        atp_analysis = model.attributes.get('ATP_analysis', None)
+        atp_expansion_filter = model.attributes.get('atp_expansion_filter', {})
+        atp_analysis_entries = self.extract_atp_analysis_data(atp_analysis, atp_expansion_filter)
+
+        # Convert the atp_analysis_entries list to a DataFrame
+        atp_analysis_df = pd.DataFrame(atp_analysis_entries)
+
+        # Apply style to ATP Analysis DataFrame
+        atp_analysis_df_styled = (
+            atp_analysis_df.style.hide(axis="index")
+            .set_table_styles([
+                {'selector': 'th', 'props': [('border', 'none'), ('background-color', 'white'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
+                {'selector': 'td', 'props': [('border', 'none'), ('font-family', 'Oxygen'), ('font-size', '14px'), ('line-height', '20px')]},
+                {'selector': 'tr:nth-child(even)', 'props': [('background-color', 'white')]},
+                {'selector': 'tr:nth-child(odd)', 'props': [('background-color', '#f2f2f2')]},
+            ])
+        )
+
+        # Legend for ATP Analysis
+        annotations_text_atp_analysis = """
             <ul>
                 <li><b>No. of gapfilled reactions:</b> The number of reactions filled by the gapfilling process.</li>
                 <li><b>Media:</b> The media in which the reaction takes place.</li>
@@ -517,22 +437,45 @@ class MSModelReport:
                 <li><b>Reversed Reaction by Gapfilling:</b> Reactions that have been reversed during the gapfilling process.</li>
                 <li><b>Filtered Reactions:</b> Reactions that have been filtered out during the analysis. When a reaction addition would lead to a large increase in ATP production or an infinite energy loop, we filter that reaction out of the gapfilling database and prevent it from being added to the model.</li>
             </ul>
+        """        
+               
+        #ATP analysis explanation text
+        explanation_text_atp_analysis = """
+        <p>During model reconstruction, we analyze the genome’s core metabolism draft model (model without gapfilling) to assess energy biosynthesis capabilities. 
+        The goal of this analysis is to ensure the core metabolism model is able to produce ATP before we expand the model to the genome-scale. 
+        This step is designed to prevent gapfilling from introducing reactions that create energy-generating loops. 
+        The tests are conducted on a large collection of minimal conditions, with the goal of simulating the model’s capability to produce energy with different electron donor, electron acceptor, and carbon source combinations.</p>
+        <p><u>When the draft model of the core metabolism is capable of producing ATP in at least one of the test media, no gapfilling reactions part of this analysis will be added to the model.</u> While we still report the gapfilling requirements for the test media formulations that fail to produce ATP with that draft core model, we only integrate these solutions in the model when no test media succeeds in producing ATP. 
+        In this case, the integrated gap-filling solution(s) will be displayed in the “Gapfilling Analysis” table above, with the “Target” “rxn00062” (ATP Production) objective function.</p> 
+        <p>The goal is to display the test results for all media to provide clues for the metabolic capabilities of the genome(s). When many reactions are required for growth on the SO4 testing media conditions, this could be a good indicator that the organism is not capable of performing sulfate reduction. 
+        On the other hand, when only one gapfill reaction is required  for ATP production in a given media, multiple scenarios can be considered. 
+        1) Organism(s) can’t grow on test condition, and we correctly did not add the reaction to the model.  2) Possible issue with the source genome annotation missing a specific gene function 3) Possible issue with the model reconstruction database. We hope this data helps make more informed decisions on reactions that may need to be manually curated in the model. 
+        In cases where is known from the literature or unpublished experimental results that an organism is capable of producing ATP in a given media condition that requires gapfilling in this analysis, you can use the parameter “Force ATP media” in the reconstruction app to ensure those reactions are integrated into the model.
+        .</p>
         """
+            
         # Save the data to HTML with the styled DataFrames and the legends
-        directory = dirname(output_path)
+        directory = os.path.dirname(output_path)
         os.makedirs(directory, exist_ok=True)
-        with open(output_path, 'w') as f:
+        with open(output_path, 'w', encoding='utf-8') as f:
             f.write('<h1>Model Summary</h1>')
             f.write(model_summary_df_styled.render(escape=False))
             f.write('<br><br>')
-            if gf_sensitivity_data:
-                f.write('<h1>Table 1 - Gapfillings Analysis</h1>')
+            f.write('<h1>Gapfillings Analysis</h1>')
+
+            # Check for Gapfillings Analysis data
+            if not gapfillings_analysis_df.empty:
                 f.write(gapfillings_analysis_df_styled.render(escape=False))
-                f.write(f'<br><br><h3>Legend:</h3>{annotations_text_1}')
+                f.write(f'<br><br><h3>Legend:</h3>{annotations_text_gapfillings}')
             else:
-                f.write('Gapfilling was not selected as a parameter during reconstruction of the model. As a result your model may not grow on your media object when running Flux Balance Analysis. You can gapfill your model after reconstruction by using the bew Gapiflling Metabolic Model app curently in beta')
-            f.write('<br><br>')
-            f.write('<h1>Table 2 - Core ATP Analysis</h1>')
-            f.write(gapfilling_df_styled.render(escape=False))
-            f.write(f'<br><br><h3>Legend:</h3>{annotations_text_2}')
-            f.write(introductory_text)
+                f.write('<p><b>Warning:</b> No Gapfillings Analysis data available for this model.</p>')
+
+            f.write('<h1>Core ATP Analysis</h1>')
+
+            # Check for ATP Analysis data
+            if not atp_analysis_df.empty:
+                f.write(atp_analysis_df_styled.render(escape=False))
+                f.write(f'<br><br><h3>Legend:</h3>{annotations_text_atp_analysis}')
+                f.write(explanation_text_atp_analysis)
+            else:
+                f.write('<p><b>Warning:</b> No Core ATP Analysis data available for this model.</p>')
