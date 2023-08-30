@@ -369,7 +369,7 @@ class MSModelReport:
 
         # Fetching the gapfilling sensitivity data
         gf_sensitivity = model.attributes.get('gf_sensitivity', None)
-        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity, model)
+        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity, model.model)
         gapfilling_list = self.transform_gapfilling_data(gapfilling_data[0])
 
         # Convert the gapfilling_list to a DataFrame
