@@ -348,7 +348,7 @@ class MSModelReport:
         """
 
         # 1. Utilize the build_overview_data method
-        model_summary_data = self.build_overview_data(model)
+        model_summary_data = self.build_overview_data(model.model)
         # Remove the unwanted entry
         model_summary_data.pop("Full Gapfilling and ATP Analysis Report", None)
         # 2. Transform the dictionary into a list of tuples
