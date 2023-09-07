@@ -173,7 +173,6 @@ class MSATPCorrection:
             min_obj = 0.01
             if media_id in min_gap:
                 min_obj = min_gap[media_id]
-            print(media.id)
             self.atp_medias.append([media, min_obj])
 
     @staticmethod
