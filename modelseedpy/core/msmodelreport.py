@@ -225,7 +225,7 @@ class MSModelReport:
 
         print("Module Path:", module_path + "/../data/")
 
-        exchanges = {r.id for r in self.modelutl.exchanges}
+        exchanges = {r.id for r in self.model.exchanges}
 
         # Identify biomass reactions using SBO annotation
         biomass_reactions_ids = {rxn.id for rxn in self.model.reactions if rxn.annotation.get('sbo') == 'SBO:0000629'}
