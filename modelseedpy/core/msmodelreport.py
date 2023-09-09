@@ -42,7 +42,7 @@ class MSModelReport:
         gf_sensitivity = self.modelutl.attributes.get('gf_sensitivity', None)
         for media in gf_sensitivity:
             if "bio1" in self.modelutl.attributes["gf_sensitivity"][media] and "success" in self.modelutl.attributes["gf_sensitivity"][media]["bio1"]:
-                gapfilling_media.append(media_name)
+                gapfilling_media.append(media)
             if "rxn00062_c0" in self.modelutl.attributes["gf_sensitivity"][media] and "success" in self.modelutl.attributes["gf_sensitivity"][media]["rxn00062_c0"]:
                 core_gapfilling_media.append(media)
                 
