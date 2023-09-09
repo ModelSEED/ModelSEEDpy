@@ -50,8 +50,8 @@ class MSModelReport:
         number_gapfills = len(gapfilling_media)
 
         # Convert the lists to strings
-        core_gapfilling_str = "; ".join(core_gapfilling_media) if core_gapfilling_media else "No core gapfilling data found!"
-        gapfilling_media_str = "; ".join(gapfilling_media) if gapfilling_media else "No genome-scale gapfilling data found!"
+        core_gapfilling_str = "; ".join(core_gapfilling_media) if core_gapfilling_media else "No core gapfilling needed."
+        gapfilling_media_str = "; ".join(gapfilling_media) if gapfilling_media else "No genome-scale gapfilling."
 
         overview = {
             'Model ID': self.model.id,
