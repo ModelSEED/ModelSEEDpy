@@ -60,7 +60,7 @@ class MSModelReport:
             'Core Gapfilling Media': core_gapfilling_str,
             'Gapfilling Media': gapfilling_media_str,
             'Source Genome': self.model.notes.get('kbase_genome_ref', 'Data Not Available'),
-            'Total Number of reactions': len(self.model.reactions),
+            'Total Number of reactions': self.modelutl.nonexchange_reaction_count(),
             'Number compounds': len(self.model.metabolites),
             'Number compartments': number_compartments,
             'Number biomass': len([rxn for rxn in self.model.reactions if rxn.annotation.get('sbo') == 'SBO:0000629']),
@@ -147,6 +147,9 @@ class MSModelReport:
                 score = data.get('score', None)
                 new_reactions = ["{}: {}".format(k, v) for k, v in data.get('new', {}).items()]
                 reversed_reactions = ["{}: {}".format(k, v) for k, v in data.get('reversed', {}).items()]
+                atp_production = "Not integrated"
+                if "selected_media" in atp_analysis and media in atp_analysis["selected_media"]:
+                    atp_production = atp_analysis["selected_media"][media]
 
                 # Extracting the "Filtered Reactions" in the required format
                 filtered_reactions = []
@@ -163,6 +166,7 @@ class MSModelReport:
                     entries.append({
                         'media': media,
                         'no_of_gapfilled_reactions': score,
+                        'atp_production': atp_production,
                         'gapfilled_reactions': "; ".join(new_reactions),
                         'reversed_reaction_by_gapfilling': "; ".join(reversed_reactions),
                         'filtered_reactions': filtered_reactions_str
