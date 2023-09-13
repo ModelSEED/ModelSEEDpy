@@ -40,11 +40,12 @@ class MSModelReport:
         core_gapfilling_media = []
         gapfilling_media = []
         gf_sensitivity = self.modelutl.attributes.get('gf_sensitivity', None)
-        for media in gf_sensitivity:
-            if "bio1" in self.modelutl.attributes["gf_sensitivity"][media] and "success" in self.modelutl.attributes["gf_sensitivity"][media]["bio1"]:
-                gapfilling_media.append(media)
-            if "rxn00062_c0" in self.modelutl.attributes["gf_sensitivity"][media] and "success" in self.modelutl.attributes["gf_sensitivity"][media]["rxn00062_c0"]:
-                core_gapfilling_media.append(media)
+        if gf_sensitivity:
+            for media in gf_sensitivity:
+                if "bio1" in self.modelutl.attributes["gf_sensitivity"][media] and "success" in self.modelutl.attributes["gf_sensitivity"][media]["bio1"]:
+                    gapfilling_media.append(media)
+                if "rxn00062_c0" in self.modelutl.attributes["gf_sensitivity"][media] and "success" in self.modelutl.attributes["gf_sensitivity"][media]["rxn00062_c0"]:
+                    core_gapfilling_media.append(media)
                 
         # Count the number of gapfills
         number_gapfills = len(gapfilling_media)
