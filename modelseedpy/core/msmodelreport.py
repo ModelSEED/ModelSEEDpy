@@ -79,47 +79,49 @@ class MSModelReport:
 
         for media, media_data in gf_sensitivity.items():
             for target, target_data in media_data.items():
-                for reaction_id, reaction_data in target_data.get('success', {}).items():
-                    for direction, metabolites in reaction_data.items():
-                        # If metabolites is None, set to empty string
-                        if metabolites is None:
-                            metabolites = ""
-
-                        # Extract both IDs and Names for Gapfilling Sensitivity
-                        sensitivity_ids = []
-                        sensitivity_names = []
-                        if isinstance(metabolites, (list, tuple)):
-                            for met_id in metabolites:
-                                sensitivity_ids.append(met_id)
-                                met_name = self.model.metabolites.get_by_id(met_id).name if met_id in self.model.metabolites else met_id
-                                sensitivity_names.append(met_name)
-                        else:
-                            metabolites = str(metabolites)                        
-                        entry = {
-                            "reaction_id": reaction_id,
-                            "reaction_name": self.model.reactions.get_by_id(reaction_id).name if reaction_id in self.model.reactions else reaction_id,
-                            "media": media,
-                            "direction": direction,
-                            "target": target,
-                            "gapfilling_sensitivity_id": "; ".join(sensitivity_ids) if sensitivity_ids else metabolites,
-                            "gapfilling_sensitivity_name": "; ".join(sensitivity_names) if sensitivity_names else metabolites
-                        }
-
-                        # Update the summary dictionary
-                        if reaction_id not in gapfilling_summary:
-                            gapfilling_summary[reaction_id] = []
-                        gapfilling_summary[reaction_id].append(f"{media}: {direction}")
-
-                        # Check if reaction_id is already in dictionary
-                        if reaction_id in gapfilling_dict:
-                            # Update the media
-                            existing_entry = gapfilling_dict[reaction_id]
-                            existing_media = existing_entry["media"].split("; ")
-                            if media not in existing_media:
-                                existing_media.append(media)
-                                existing_entry["media"] = "; ".join(existing_media)
-                        else:
-                            gapfilling_dict[reaction_id] = entry
+                gf_data = target_data.get('success', {})
+                if isinstance(gf_data, dict):
+                    for reaction_id, reaction_data in gf_data.items():
+                        for direction, metabolites in reaction_data.items():
+                            # If metabolites is None, set to empty string
+                            if metabolites is None:
+                                metabolites = ""
+    
+                            # Extract both IDs and Names for Gapfilling Sensitivity
+                            sensitivity_ids = []
+                            sensitivity_names = []
+                            if isinstance(metabolites, (list, tuple)):
+                                for met_id in metabolites:
+                                    sensitivity_ids.append(met_id)
+                                    met_name = self.model.metabolites.get_by_id(met_id).name if met_id in self.model.metabolites else met_id
+                                    sensitivity_names.append(met_name)
+                            else:
+                                metabolites = str(metabolites)                        
+                            entry = {
+                                "reaction_id": reaction_id,
+                                "reaction_name": self.model.reactions.get_by_id(reaction_id).name if reaction_id in self.model.reactions else reaction_id,
+                                "media": media,
+                                "direction": direction,
+                                "target": target,
+                                "gapfilling_sensitivity_id": "; ".join(sensitivity_ids) if sensitivity_ids else metabolites,
+                                "gapfilling_sensitivity_name": "; ".join(sensitivity_names) if sensitivity_names else metabolites
+                            }
+    
+                            # Update the summary dictionary
+                            if reaction_id not in gapfilling_summary:
+                                gapfilling_summary[reaction_id] = []
+                            gapfilling_summary[reaction_id].append(f"{media}: {direction}")
+    
+                            # Check if reaction_id is already in dictionary
+                            if reaction_id in gapfilling_dict:
+                                # Update the media
+                                existing_entry = gapfilling_dict[reaction_id]
+                                existing_media = existing_entry["media"].split("; ")
+                                if media not in existing_media:
+                                    existing_media.append(media)
+                                    existing_entry["media"] = "; ".join(existing_media)
+                            else:
+                                gapfilling_dict[reaction_id] = entry
 
         return list(gapfilling_dict.values()), gapfilling_summary    
 
