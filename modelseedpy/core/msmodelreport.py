@@ -460,6 +460,7 @@ class MSModelReport:
         directory = os.path.dirname(output_path)
         os.makedirs(directory, exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:
+            f.write('<meta charset="UTF-8">')
             f.write('<h1>Model Summary</h1>')
             f.write(model_summary_df_styled.render(escape=False))
             f.write('<br><br>')
