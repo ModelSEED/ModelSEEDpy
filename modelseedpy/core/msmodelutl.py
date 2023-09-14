@@ -299,9 +299,7 @@ class MSModelUtil:
             else:
                 self.attributes = value
         if hasattr(self.model, "computed_attributes"):
-            logger.info(
-                "Setting FBAModel computed_attributes to mdlutl attributes"
-            )
+            logger.info("Setting FBAModel computed_attributes to mdlutl attributes")
             self.attributes["gene_count"] = len(self.model.genes)
             self.model.computed_attributes = self.attributes
 
@@ -902,7 +900,11 @@ class MSModelUtil:
         return filtered_list
 
     def reaction_expansion_test(
-        self, reaction_list, condition_list, binary_search=True,attribute_label="gf_filter"
+        self,
+        reaction_list,
+        condition_list,
+        binary_search=True,
+        attribute_label="gf_filter",
     ):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
 

@@ -11,7 +11,7 @@ from modelseedpy.core.exceptions import GapfillingError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
-    logging.INFO#WARNING
+    logging.INFO  # WARNING
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 
@@ -148,11 +148,13 @@ class MSGapfill:
             self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
-            gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes("gf_filter", {})
+            gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes(
+                "gf_filter", {}
+            )
             base_filter = self.mdlutl.get_attributes("gf_filter", {})
             for media_id in gf_filter:
                 base_filter[media_id] = gf_filter[media_id]
-            
+
         # Testing if gapfilling can work after filtering
         if not self.test_gapfill_database(media, target, before_filtering=False):
             return False
@@ -176,7 +178,7 @@ class MSGapfill:
             Name or expression describing the reaction or combination of reactions to the optimized
         minimum_obj : double
             Value to use for the minimal objective threshold that the model must be gapfilled to achieve
-        binary_check : bool 
+        binary_check : bool
             Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
         prefilter : bool
             Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
@@ -276,14 +278,14 @@ class MSGapfill:
             Media-specific minimal objective thresholds that the model must be gapfilled to achieve
         default_minimum_objective : double
             Default value to use for the minimal objective threshold that the model must be gapfilled to achieve
-        binary_check : bool 
+        binary_check : bool
             Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
         prefilter : bool
             Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
         check_for_growth : bool
             Indicates if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
         """
-        
+
         if not default_minimum_objective:
             default_minimum_objective = self.default_minimum_objective
         first = True
@@ -347,8 +349,8 @@ class MSGapfill:
                     cumulative_solution.append([rxn_id, "<"])
                     rxn.upper_bound = 0
                     rxn.lower_bound = -100
-        
-        #Sometimes for whatever reason, the solution includes useless reactions that should be stripped out before saving the final model
+
+        # Sometimes for whatever reason, the solution includes useless reactions that should be stripped out before saving the final model
         unneeded = self.mdlutl.test_solution(
             solution, keep_changes=True
         )  # Strips out unneeded reactions - which undoes some of what is done above
@@ -357,11 +359,16 @@ class MSGapfill:
                 if item[0] == oitem[0] and item[1] == oitem[1]:
                     cumulative_solution.remove(oitem)
                     break
-        #Adding the gapfilling solution data to the model, which is needed for saving the model in KBase
+        # Adding the gapfilling solution data to the model, which is needed for saving the model in KBase
         self.mdlutl.add_gapfilling(solution)
-        #Testing which gapfilled reactions are needed to produce each reactant in the objective function
+        # Testing which gapfilled reactions are needed to produce each reactant in the objective function
         if link_gaps_to_objective:
-            logger.info("Gapfilling sensitivity analysis running on succesful run in "+solution["media"].id+" for target "+solution["target"])
+            logger.info(
+                "Gapfilling sensitivity analysis running on succesful run in "
+                + solution["media"].id
+                + " for target "
+                + solution["target"]
+            )
             gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
             if solution["media"].id not in gf_sensitivity:
                 gf_sensitivity[solution["media"].id] = {}
