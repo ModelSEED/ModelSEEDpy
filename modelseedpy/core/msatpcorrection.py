@@ -39,12 +39,17 @@ min_gap = {
     "Akg.O2": 2,
     "LLac.O2": 2,
     "Dlac.O2": 2,
-    "For.O2": 2,
+    "For.O2": 1.875,
     "For.NO3": 1.5,
     "Pyr.NO": 2.5,
     "Pyr.NO2": 2.5,
     "Pyr.NO3": 2.5,
     "Pyr.SO4": 2.5,
+}
+
+default_threshold_multipiers = {
+    "Glc": 2,
+    "default":1.2,
 }
 
 
@@ -109,12 +114,17 @@ class MSATPCorrection:
             else:
                 self.atp_medias.append([media, 0.01])
             self.media_hash[media.id] = media
-
+        if "empty" not in self.media_hash:
+            media = MSMedia.from_dict({})
+            media.id = "empty"
+            media.name = "empty"
+            self.media_hash[media.id] = media
+        
         self.forced_media = []
         for media_id in forced_media:
-            for media in self.atp_medias:
-                if media.id == media_id:
-                    self.forced_media.append(media)
+            for item in self.atp_medias:
+                if item[0].id == media_id:
+                    self.forced_media.append(item[0])
                     break
 
         self.max_gapfilling = max_gapfilling
@@ -283,11 +293,11 @@ class MSATPCorrection:
             media_list = []
             min_objectives = {}
             for media, minimum_obj in self.atp_medias:
-                logger.info("evaluate media %s", media)
+                logger.debug("evaluate media %s", media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                logger.info("model.medium %s", self.model.medium)
+                logger.debug("model.medium %s", self.model.medium)
                 solution = self.model.optimize()
-                logger.info(
+                logger.debug(
                     "evaluate media %s - %f (%s)",
                     media.id,
                     solution.objective_value,
@@ -399,13 +409,25 @@ class MSATPCorrection:
                 self.msgapfill.integrate_gapfill_solution(
                     stats,
                     self.cumulative_core_gapfilling,
-                    link_gaps_to_objective=False,
+                    link_gaps_to_objective=False
                 )
-        core_gf = {
-            "count": len(self.cumulative_core_gapfilling),
-            "reactions": self.cumulative_core_gapfilling,
-        }
-        self.modelutl.save_attributes(core_gf, "core_gapfilling")
+                #Adding reactions to gapfilling sensitivity structure so we can track all gapfilled reactions
+                gf_sensitivity = self.modelutl.get_attributes("gf_sensitivity", {})
+                if media.id not in gf_sensitivity:
+                    gf_sensitivity[media.id] = {}
+                if self.atp_hydrolysis.id not in gf_sensitivity[media.id]:
+                    gf_sensitivity[media.id][self.atp_hydrolysis.id] = {}
+                gf_sensitivity[media.id][self.atp_hydrolysis.id]["success"] = {}
+                for item in stats["new"]:
+                    gf_sensitivity[media.id][self.atp_hydrolysis.id]["success"][item] = {
+                        stats["new"][item] : []
+                    }
+                for item in stats["reversed"]:
+                    gf_sensitivity[media.id][self.atp_hydrolysis.id]["success"][item] = {
+                        stats["reversed"][item] : []
+                    }
+                self.modelutl.save_attributes(gf_sensitivity, "gf_sensitivity")  
+        self.modelutl.save_attributes(len(self.cumulative_core_gapfilling), "total_core_gapfilling")
 
     def expand_model_to_genome_scale(self):
         """Restores noncore reactions to model while filtering out reactions that break ATP
@@ -423,7 +445,7 @@ class MSATPCorrection:
         self.restore_noncore_reactions(noncore=True, othercompartment=False)
         # Extending model with non core reactions while retaining ATP accuracy
         self.filtered_noncore = self.modelutl.reaction_expansion_test(
-            self.noncore_reactions, tests
+            self.noncore_reactions, tests,attribute_label="atp_expansion_filter"
         )
         # Removing filtered reactions
         for item in self.filtered_noncore:
@@ -463,7 +485,7 @@ class MSATPCorrection:
                     reaction.lower_bound = self.original_bounds[reaction.id][0]
                     reaction.upper_bound = self.original_bounds[reaction.id][1]
 
-    def build_tests(self, multiplier=None):
+    def build_tests(self,multiplier_hash_override={}):
         """Build tests based on ATP media evaluations
 
         Parameters
@@ -479,13 +501,16 @@ class MSATPCorrection:
         Raises
         ------
         """
+        #Applying threshold multiplier
+        for key in default_threshold_multipiers:
+            if key not in multiplier_hash_override:
+                multiplier_hash_override[key] = default_threshold_multipiers[key]
+        #Initialzing atp test attributes
         atp_att = self.modelutl.get_attributes(
             "ATP_analysis",
             {"tests": {}, "selected_media": {}, "core_atp_gapfilling": {}},
         )
-
-        if multiplier is None:
-            multiplier = self.multiplier
+        #Initializing tests and adding empty media every time
         tests = []
         if "empty" in self.media_hash:
             tests.append(
@@ -496,17 +521,30 @@ class MSATPCorrection:
                     "objective": self.atp_hydrolysis.id,
                 }
             )
+            atp_att["tests"]["empty"] = {
+                "threshold": 0.00001,
+                "objective": self.atp_hydrolysis.id,
+            }
+        #Setting objective to ATP hydrolysis
         self.model.objective = self.atp_hydrolysis.id
         for media in self.selected_media:
+            #Setting multiplier for test threshold
+            multiplier = multiplier_hash_override["default"]
+            if media.id in multiplier_hash_override:
+                 multiplier = multiplier_hash_override[media.id]
+            #Constraining model exchanges for media
             self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+            #Computing core ATP production
             obj_value = self.model.slim_optimize()
             logger.debug(f"{media.name} = {obj_value};{multiplier}")
-            logger.debug("Test:" + media.id + ";" + str(multiplier * obj_value))
+            threshold = multiplier * obj_value
+            if threshold == 0:
+                threshold += 0.00001
             tests.append(
                 {
                     "media": media,
                     "is_max_threshold": True,
-                    "threshold": multiplier * obj_value,
+                    "threshold": threshold,
                     "objective": self.atp_hydrolysis.id,
                 }
             )
@@ -515,9 +553,8 @@ class MSATPCorrection:
                 "threshold": multiplier * obj_value,
                 "objective": self.atp_hydrolysis.id,
             }
-
+        #Saving test attributes to the model
         self.modelutl.save_attributes(atp_att, "ATP_analysis")
-
         return tests
 
     def run_atp_correction(self):

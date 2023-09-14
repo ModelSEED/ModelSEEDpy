@@ -132,4 +132,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+.pydevproject
+.settings/*
+*data/*
 *.lp
