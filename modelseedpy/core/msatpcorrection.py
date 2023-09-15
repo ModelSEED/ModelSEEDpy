@@ -113,12 +113,12 @@ class MSATPCorrection:
         for media in atp_medias:
             if isinstance(media, list):
                 if media[0].id in media_ids:
-                    raise ValueError('media ids not unique')
+                    raise ValueError("media ids not unique")
                 media_ids.add(media[0].id)
                 self.atp_medias.append(media)
             else:
                 if media.id in media_ids:
-                    raise ValueError('media ids not unique')
+                    raise ValueError("media ids not unique")
                 media_ids.add(media.id)
                 self.atp_medias.append([media, 0.01])
             self.media_hash[media.id] = media

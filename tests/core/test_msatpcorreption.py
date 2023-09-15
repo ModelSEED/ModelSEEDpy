@@ -205,7 +205,7 @@ def test_infinite_atp_model_growth_boost(
 
 
 def test_ms_atp_correction1(get_model, template, media_all_aerobic):
-    atp_hydrolysis_id = 'ATPM_c0'
+    atp_hydrolysis_id = "ATPM_c0"
     model = get_model(["GLCpts_c0", "NADH16_c0", "CYTBD_c0", "O2t_c0"])
     atp_correction = MSATPCorrection(
         model,
@@ -237,7 +237,7 @@ def test_ms_atp_correction1(get_model, template, media_all_aerobic):
     assert tests
     assert len(tests) == 2  # glucose and empty
     for t in tests:
-        if t['media'].id == 'empty':
+        if t["media"].id == "empty":
             assert t["threshold"] <= 1e-05
         else:
             assert t["threshold"] > 1e-05
@@ -254,7 +254,7 @@ def test_ms_atp_correction_and_gap_fill1(
 ):
     from modelseedpy import MSGapfill
 
-    atp_hydrolysis_id = 'ATPM_c0'
+    atp_hydrolysis_id = "ATPM_c0"
 
     model = get_model_with_infinite_atp_loop(["GLCpts_c0", "GLUSy_c0", "GLUDy_c0"])
     model.reactions.ATPM_c0.lower_bound = 0
@@ -273,7 +273,7 @@ def test_ms_atp_correction_and_gap_fill1(
     assert tests
     assert len(tests) == 2
     for t in tests:
-        if t['media'].id == 'empty':
+        if t["media"].id == "empty":
             assert t["threshold"] <= 1e-05
         else:
             assert t["threshold"] > 1e-05
