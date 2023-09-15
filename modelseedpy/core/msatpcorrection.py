@@ -108,10 +108,18 @@ class MSATPCorrection:
         self.atp_medias = []
         if load_default_medias:
             self.load_default_medias()
+
+        media_ids = set()
         for media in atp_medias:
             if isinstance(media, list):
+                if media[0].id in media_ids:
+                    raise ValueError('media ids not unique')
+                media_ids.add(media[0].id)
                 self.atp_medias.append(media)
             else:
+                if media.id in media_ids:
+                    raise ValueError('media ids not unique')
+                media_ids.add(media.id)
                 self.atp_medias.append([media, 0.01])
             self.media_hash[media.id] = media
         if "empty" not in self.media_hash:
@@ -290,6 +298,7 @@ class MSATPCorrection:
             media_list = []
             min_objectives = {}
             for media, minimum_obj in self.atp_medias:
+
                 logger.debug("evaluate media %s", media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
                 logger.debug("model.medium %s", self.model.medium)
@@ -300,7 +309,6 @@ class MSATPCorrection:
                     solution.objective_value,
                     solution.status,
                 )
-
                 self.media_gapfill_stats[media] = None
 
                 output[media.id] = solution.objective_value

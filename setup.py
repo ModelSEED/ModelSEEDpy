@@ -10,7 +10,7 @@ with open("LICENSE") as f:
 
 setup(
     name="ModelSEEDpy",
-    version="0.3.1",
+    version="0.3.3",
     description="Python package for building and analyzing models using ModelSEED",
     long_description_content_type="text/x-rst",
     long_description=readme,
