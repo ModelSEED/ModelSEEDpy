@@ -108,7 +108,7 @@ def media_acetate_aerobic():
             "h2o": (-1000, 1000),
         }
     )
-    media.id = "glc/o2"
+    media.id = "ac/o2"
     return media
 
 
@@ -205,12 +205,13 @@ def test_infinite_atp_model_growth_boost(
 
 
 def test_ms_atp_correction1(get_model, template, media_all_aerobic):
+    atp_hydrolysis_id = "ATPM_c0"
     model = get_model(["GLCpts_c0", "NADH16_c0", "CYTBD_c0", "O2t_c0"])
     atp_correction = MSATPCorrection(
         model,
         template,
         media_all_aerobic,
-        atp_hydrolysis_id="ATPM_c0",
+        atp_hydrolysis_id=atp_hydrolysis_id,
         load_default_medias=False,
     )
     atp_correction.evaluate_growth_media()
@@ -234,9 +235,14 @@ def test_ms_atp_correction1(get_model, template, media_all_aerobic):
     tests = atp_correction.build_tests()
 
     assert tests
-    assert len(tests) == 1
-    assert tests[0]["threshold"] > 0
-    assert tests[0]["objective"] == "ATPM_c0"
+    assert len(tests) == 2  # glucose and empty
+    for t in tests:
+        if t["media"].id == "empty":
+            assert t["threshold"] <= 1e-05
+        else:
+            assert t["threshold"] > 1e-05
+        assert t["objective"] == atp_hydrolysis_id
+        assert t["is_max_threshold"] is True
 
 
 def test_ms_atp_correction_and_gap_fill1(
@@ -248,24 +254,31 @@ def test_ms_atp_correction_and_gap_fill1(
 ):
     from modelseedpy import MSGapfill
 
+    atp_hydrolysis_id = "ATPM_c0"
+
     model = get_model_with_infinite_atp_loop(["GLCpts_c0", "GLUSy_c0", "GLUDy_c0"])
     model.reactions.ATPM_c0.lower_bound = 0
     model.reactions.ATPM_c0.upper_bound = 1000
-    model.objective = "ATPM_c0"
+    model.objective = atp_hydrolysis_id
     atp_correction = MSATPCorrection(
         model,
         template,
         [media_glucose_aerobic],
-        atp_hydrolysis_id="ATPM_c0",
+        atp_hydrolysis_id=atp_hydrolysis_id,
         load_default_medias=False,
     )
     tests = atp_correction.run_atp_correction()
     # expected tests = [{'media': MSMedia object, 'is_max_threshold': True, 'threshold': 21.0, 'objective': 'ATPM_c0'}]
 
     assert tests
-    assert len(tests) == 1
-    assert tests[0]["threshold"] > 0
-    assert tests[0]["objective"] == "ATPM_c0"
+    assert len(tests) == 2
+    for t in tests:
+        if t["media"].id == "empty":
+            assert t["threshold"] <= 1e-05
+        else:
+            assert t["threshold"] > 1e-05
+        assert t["objective"] == atp_hydrolysis_id
+        assert t["is_max_threshold"] is True
 
     model.objective = "BIOMASS_Ecoli_core_w_GAM_c0"
     gap_fill = MSGapfill(model, [template_genome_scale], [], tests, {}, [])

@@ -3,6 +3,8 @@ name: Run Pre-Commit
 on:
   pull_request: {}
   push:
+    paths-ignore:
+      - 'examples/**'
     branches:
       - dev
       - main
