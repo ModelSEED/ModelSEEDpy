@@ -375,6 +375,27 @@ class MSGapfill:
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)
 
+    def compute_reaction_weights_from_expression_data(
+        self, omics_data, conditions=[]
+    ):
+        """Computing reaction weights based on input gene-level omics data
+        Parameters
+        ----------
+        omics_data : pandas dataframe with genes as rows and conditions as columns
+            Specifies the reactions to be added to the model to implement the gapfilling solution
+        conditions : list
+            Optional array containing the IDs of the columns in omics_data from which data should be used. 
+            If an empty array (or no array) is supplied, data from all columns will be used. When multiple columns are
+            used, the data from those columns should be normalized first, then added together
+        """
+        #Validitions:
+        #1.) An conditions listed in the conditions argument should match the columns in the omics_data dataframe
+        #2.) Most (~80%) of the genes in the model should match genes in the omics_data dataframe
+        #3.) The omics_data dataframe should have at least 2 columns
+        #4.) The omics_data dataframe should have at least 2 rows
+        #5.) Logging should be used to report out which genes in the model don't match any genes in the omics_data dataframe
+        pass
+
     @staticmethod
     def gapfill(
         model,
