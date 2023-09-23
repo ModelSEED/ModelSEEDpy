@@ -11,7 +11,7 @@ from modelseedpy.core.exceptions import GapfillingError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
-    logging.INFO#WARNING
+    logging.INFO  # WARNING
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
 
@@ -148,11 +148,13 @@ class MSGapfill:
             self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
                 self.test_conditions
             )
-            gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes("gf_filter", {})
+            gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes(
+                "gf_filter", {}
+            )
             base_filter = self.mdlutl.get_attributes("gf_filter", {})
             for media_id in gf_filter:
                 base_filter[media_id] = gf_filter[media_id]
-            
+
         # Testing if gapfilling can work after filtering
         if not self.test_gapfill_database(media, target, before_filtering=False):
             return False
@@ -176,7 +178,7 @@ class MSGapfill:
             Name or expression describing the reaction or combination of reactions to the optimized
         minimum_obj : double
             Value to use for the minimal objective threshold that the model must be gapfilled to achieve
-        binary_check : bool 
+        binary_check : bool
             Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
         prefilter : bool
             Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
@@ -264,6 +266,7 @@ class MSGapfill:
         binary_check=False,
         prefilter=True,
         check_for_growth=True,
+        simultaneous_gapfilling=False,
     ):
         """Run gapfilling across an array of media conditions ultimately using different integration policies: simultaneous gapfilling, independent gapfilling, cumulative gapfilling
         Parameters
@@ -276,32 +279,41 @@ class MSGapfill:
             Media-specific minimal objective thresholds that the model must be gapfilled to achieve
         default_minimum_objective : double
             Default value to use for the minimal objective threshold that the model must be gapfilled to achieve
-        binary_check : bool 
+        binary_check : bool
             Indicates if the solution should be checked to ensure it is minimal in the number of reactions involved
         prefilter : bool
             Indicates if the gapfilling database should be prefiltered using the tests provided in the MSGapfill constructor before running gapfilling
         check_for_growth : bool
             Indicates if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
         """
-        
+
         if not default_minimum_objective:
             default_minimum_objective = self.default_minimum_objective
-        first = True
         solution_dictionary = {}
-        for item in media_list:
-            minimum_obj = default_minimum_objective
-            if item in minimum_objectives:
-                minimum_obj = minimum_objectives[item]
-            if first:
-                solution_dictionary[item] = self.run_gapfilling(
-                    item, target, minimum_obj, binary_check, prefilter, check_for_growth
-                )
-            else:
-                solution_dictionary[item] = self.run_gapfilling(
-                    item, None, minimum_obj, binary_check, False, check_for_growth
-                )
-            false = False
-        return solution_dictionary
+        if simultaneous_gapfilling:
+            for item in media_list:
+                pass
+        else:
+            first = True
+            for item in media_list:
+                minimum_obj = default_minimum_objective
+                if item in minimum_objectives:
+                    minimum_obj = minimum_objectives[item]
+                if first:
+                    solution_dictionary[item] = self.run_gapfilling(
+                        item,
+                        target,
+                        minimum_obj,
+                        binary_check,
+                        prefilter,
+                        check_for_growth,
+                    )
+                else:
+                    solution_dictionary[item] = self.run_gapfilling(
+                        item, None, minimum_obj, binary_check, False, check_for_growth
+                    )
+                false = False
+            return solution_dictionary
 
     def integrate_gapfill_solution(
         self, solution, cumulative_solution=[], link_gaps_to_objective=True
@@ -347,8 +359,8 @@ class MSGapfill:
                     cumulative_solution.append([rxn_id, "<"])
                     rxn.upper_bound = 0
                     rxn.lower_bound = -100
-        
-        #Sometimes for whatever reason, the solution includes useless reactions that should be stripped out before saving the final model
+
+        # Sometimes for whatever reason, the solution includes useless reactions that should be stripped out before saving the final model
         unneeded = self.mdlutl.test_solution(
             solution, keep_changes=True
         )  # Strips out unneeded reactions - which undoes some of what is done above
@@ -357,11 +369,16 @@ class MSGapfill:
                 if item[0] == oitem[0] and item[1] == oitem[1]:
                     cumulative_solution.remove(oitem)
                     break
-        #Adding the gapfilling solution data to the model, which is needed for saving the model in KBase
+        # Adding the gapfilling solution data to the model, which is needed for saving the model in KBase
         self.mdlutl.add_gapfilling(solution)
-        #Testing which gapfilled reactions are needed to produce each reactant in the objective function
+        # Testing which gapfilled reactions are needed to produce each reactant in the objective function
         if link_gaps_to_objective:
-            logger.info("Gapfilling sensitivity analysis running on succesful run in "+solution["media"].id+" for target "+solution["target"])
+            logger.info(
+                "Gapfilling sensitivity analysis running on succesful run in "
+                + solution["media"].id
+                + " for target "
+                + solution["target"]
+            )
             gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
             if solution["media"].id not in gf_sensitivity:
                 gf_sensitivity[solution["media"].id] = {}
@@ -375,25 +392,23 @@ class MSGapfill:
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)
 
-    def compute_reaction_weights_from_expression_data(
-        self, omics_data, conditions=[]
-    ):
+    def compute_reaction_weights_from_expression_data(self, omics_data, conditions=[]):
         """Computing reaction weights based on input gene-level omics data
         Parameters
         ----------
         omics_data : pandas dataframe with genes as rows and conditions as columns
             Specifies the reactions to be added to the model to implement the gapfilling solution
         conditions : list
-            Optional array containing the IDs of the columns in omics_data from which data should be used. 
+            Optional array containing the IDs of the columns in omics_data from which data should be used.
             If an empty array (or no array) is supplied, data from all columns will be used. When multiple columns are
             used, the data from those columns should be normalized first, then added together
         """
-        #Validitions:
-        #1.) An conditions listed in the conditions argument should match the columns in the omics_data dataframe
-        #2.) Most (~80%) of the genes in the model should match genes in the omics_data dataframe
-        #3.) The omics_data dataframe should have at least 2 columns
-        #4.) The omics_data dataframe should have at least 2 rows
-        #5.) Logging should be used to report out which genes in the model don't match any genes in the omics_data dataframe
+        # Validitions:
+        # 1.) An conditions listed in the conditions argument should match the columns in the omics_data dataframe
+        # 2.) Most (~80%) of the genes in the model should match genes in the omics_data dataframe
+        # 3.) The omics_data dataframe should have at least 2 columns
+        # 4.) The omics_data dataframe should have at least 2 rows
+        # 5.) Logging should be used to report out which genes in the model don't match any genes in the omics_data dataframe
         pass
 
     @staticmethod
