@@ -108,10 +108,18 @@ class MSATPCorrection:
         self.atp_medias = []
         if load_default_medias:
             self.load_default_medias()
+
+        media_ids = set()
         for media in atp_medias:
             if isinstance(media, list):
+                if media[0].id in media_ids:
+                    raise ValueError("media ids not unique")
+                media_ids.add(media[0].id)
                 self.atp_medias.append(media)
             else:
+                if media.id in media_ids:
+                    raise ValueError("media ids not unique")
+                media_ids.add(media.id)
                 self.atp_medias.append([media, 0.01])
             self.media_hash[media.id] = media
         if "empty" not in self.media_hash:
@@ -171,9 +179,7 @@ class MSATPCorrection:
             media.id = media_id
             media.name = media_id
             min_obj = 0.01
-            if media_id in min_gap:
-                min_obj = min_gap[media_id]
-            self.atp_medias.append([media, min_obj])
+            self.atp_medias.append([media, min_gap.get(media_d, min_obj)])
 
     @staticmethod
     def find_reaction_in_template(model_reaction, template, compartment):
@@ -292,6 +298,7 @@ class MSATPCorrection:
             media_list = []
             min_objectives = {}
             for media, minimum_obj in self.atp_medias:
+
                 logger.debug("evaluate media %s", media)
                 pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
                 logger.debug("model.medium %s", self.model.medium)
@@ -302,7 +309,6 @@ class MSATPCorrection:
                     solution.objective_value,
                     solution.status,
                 )
-
                 self.media_gapfill_stats[media] = None
 
                 output[media.id] = solution.objective_value

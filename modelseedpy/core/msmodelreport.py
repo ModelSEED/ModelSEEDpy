@@ -521,13 +521,13 @@ class MSModelReport:
                 <li><b>Reaction Name:</b> The name of the reaction.</li>
                 <li><b>Media:</b> The media used by gap filling.</li>
                 <li><b>Direction:</b> The direction of the reaction. Can be ">" for forward, "<" for reverse, or "=" for both directions.</li>
-                <li><b>Target:</b> The reaction selected as the objective function target for the gapfilling optimization problem. Targets here can be the model’s biomass reaction, commonly named “bio1” for models created by this app. 
-                Alternatively, “rxn00062” (ATP Production) reaction is shown for cases where gapfilling was applied to guarantee ATP production in a given media. 
+                <li><b>Target:</b> The reaction selected as the objective function target for the gapfilling optimization problem. Targets here can be the model’s biomass reaction, commonly named “bio1” for models created by this app.
+                Alternatively, “rxn00062” (ATP Production) reaction is shown for cases where gapfilling was applied to guarantee ATP production in a given media.
                 When reactions are gapfilled for ATP production, we recommend checking the full Core ATP Analysis in the table below. </li>
-                <li><b>Gapfilling Sensitivity ID and Name:</b> Gapfilling is necessary when compounds in the biomass objective function can not be produced by the model. 
+                <li><b>Gapfilling Sensitivity ID and Name:</b> Gapfilling is necessary when compounds in the biomass objective function can not be produced by the model.
                 For each reaction we list the biomass compound(s) that can not be synthesized by the model without gapfilling.
                 In cases where gap filling fails there are two possible scenarios:
-                1) FBF (failed before filtering) : the gapfilling immediately failed, even before we filtered out the ATP breaking reactions. This means this objective CANNOT be satisfied with the entire current database. 
+                1) FBF (failed before filtering) : the gapfilling immediately failed, even before we filtered out the ATP breaking reactions. This means this objective CANNOT be satisfied with the entire current database.
                 2) FAF (failed after filtering): the gapfilling succeeded before filtering, but failed after filtering out reactions that break ATP. This tells you definitively if the ATP filtering caused the gapfilling to fail</li>
             </ul>
         """
@@ -591,15 +591,15 @@ class MSModelReport:
 
         # ATP analysis explanation text
         explanation_text_atp_analysis = """
-        <p>During model reconstruction, we analyze the genome’s core metabolism draft model (model without gapfilling) to assess energy biosynthesis capabilities. 
-        The goal of this analysis is to ensure the core metabolism model is able to produce ATP before we expand the model to the genome-scale. 
-        This step is designed to prevent gapfilling from introducing reactions that create energy-generating loops. 
+        <p>During model reconstruction, we analyze the genome’s core metabolism draft model (model without gapfilling) to assess energy biosynthesis capabilities.
+        The goal of this analysis is to ensure the core metabolism model is able to produce ATP before we expand the model to the genome-scale.
+        This step is designed to prevent gapfilling from introducing reactions that create energy-generating loops.
         The tests are conducted on a large collection of minimal conditions, with the goal of simulating the model’s capability to produce energy with different electron donor, electron acceptor, and carbon source combinations.</p>
-        <p><u>When the draft model of the core metabolism is capable of producing ATP in at least one of the test media, no gapfilling reactions part of this analysis will be added to the model.</u> While we still report the gapfilling requirements for the test media formulations that fail to produce ATP with that draft core model, we only integrate these solutions in the model when no test media succeeds in producing ATP. 
-        In this case, the integrated gap-filling solution(s) will be displayed in the “Gapfilling Analysis” table above, with the “Target” “rxn00062” (ATP Production) objective function.</p> 
-        <p>The goal is to display the test results for all media to provide clues for the metabolic capabilities of the genome(s). When many reactions are required for growth on the SO4 testing media conditions, this could be a good indicator that the organism is not capable of performing sulfate reduction. 
-        On the other hand, when only one gapfill reaction is required  for ATP production in a given media, multiple scenarios can be considered. 
-        1) Organism(s) can’t grow on test condition, and we correctly did not add the reaction to the model.  2) Possible issue with the source genome annotation missing a specific gene function 3) Possible issue with the model reconstruction database. We hope this data helps make more informed decisions on reactions that may need to be manually curated in the model. 
+        <p><u>When the draft model of the core metabolism is capable of producing ATP in at least one of the test media, no gapfilling reactions part of this analysis will be added to the model.</u> While we still report the gapfilling requirements for the test media formulations that fail to produce ATP with that draft core model, we only integrate these solutions in the model when no test media succeeds in producing ATP.
+        In this case, the integrated gap-filling solution(s) will be displayed in the “Gapfilling Analysis” table above, with the “Target” “rxn00062” (ATP Production) objective function.</p>
+        <p>The goal is to display the test results for all media to provide clues for the metabolic capabilities of the genome(s). When many reactions are required for growth on the SO4 testing media conditions, this could be a good indicator that the organism is not capable of performing sulfate reduction.
+        On the other hand, when only one gapfill reaction is required  for ATP production in a given media, multiple scenarios can be considered.
+        1) Organism(s) can’t grow on test condition, and we correctly did not add the reaction to the model.  2) Possible issue with the source genome annotation missing a specific gene function 3) Possible issue with the model reconstruction database. We hope this data helps make more informed decisions on reactions that may need to be manually curated in the model.
         In cases where is known from the literature or unpublished experimental results that an organism is capable of producing ATP in a given media condition that requires gapfilling in this analysis, you can use the parameter “Force ATP media” in the reconstruction app to ensure those reactions are integrated into the model.
         .</p>
         """

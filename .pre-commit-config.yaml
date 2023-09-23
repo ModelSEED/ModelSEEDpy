@@ -21,7 +21,9 @@ repos:
         args:
           - --pytest-test-first
       - id: check-json
+        exclude: examples/
       - id: pretty-format-json
+        exclude: examples/
         args:
           - --autofix
           - --top-keys=_id

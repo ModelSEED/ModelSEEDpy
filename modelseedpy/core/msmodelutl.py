@@ -738,7 +738,7 @@ class MSModelUtil:
         if model.solver.status != "optimal":
             self.printlp(condition["media"].id + "-Testing-Infeasible.lp")
             logger.critical(
-                ondition["media"].id
+                condition["media"].id
                 + "testing leads to infeasible problem. LP file printed to debug!"
             )
             return False
