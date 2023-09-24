@@ -62,6 +62,7 @@ class MSGrowthPhenotype:
         add_missing_exchanges=False,
         save_fluxes=False,
         pfba=False,
+        ignore_growth_data=False,
     ):
         """Simulates a single phenotype
         Parameters
@@ -76,6 +77,8 @@ class MSGrowthPhenotype:
             Indicates if the fluxes should be saved and returned with the results
         pfba : bool
             Runs pFBA to compute fluxes after initially solving for growth
+        ignore_growth_data : bool
+            Indicates if existing growth data in the phenotype should be ignored when computing the class of the simulated phenotype
         """
         modelutl = model_or_mdlutl
         if not isinstance(model_or_mdlutl, MSModelUtil):
@@ -142,7 +145,7 @@ class MSGrowthPhenotype:
 
         if output["growth"] >= output["baseline_growth"] * growth_multiplier:
             output["GROWING"] = True
-            if not self.growth:
+            if not self.growth or ignore_growth_data:
                 output["class"] = "GROWTH"
             elif self.growth > 0:
                 output["class"] = "CP"
@@ -150,7 +153,7 @@ class MSGrowthPhenotype:
                 output["class"] = "FP"
         else:
             output["GROWING"] = False
-            if not self.growth:
+            if not self.growth or ignore_growth_data:
                 output["class"] = "NOGROWTH"
             elif self.growth > 0:
                 output["class"] = "FN"
@@ -417,6 +420,7 @@ class MSGrowthPhenotypes:
         gapfill_negatives=False,
         msgapfill=None,
         test_conditions=None,
+        ignore_growth_data=False
     ):
         """Simulates all the specified phenotype conditions and saves results
         Parameters
@@ -431,6 +435,8 @@ class MSGrowthPhenotypes:
             Boolean indicating if exchanges for compounds mentioned explicitly in phenotype media should be added to the model automatically
         save_fluxes : bool
             Indicates if the fluxes should be saved and returned with the results
+        ignore_growth_data : bool
+            Indicates if existing growth data in the phenotype set should be ignored when computing the class of a simulated phenotype
         """
         # Discerning input is model or mdlutl and setting internal links
         modelutl = model_or_mdlutl
@@ -464,6 +470,7 @@ class MSGrowthPhenotypes:
                 growth_multiplier,
                 add_missing_exchanges,
                 save_fluxes,
+                ignore_growth_data=ignore_growth_data,
             )
             data["Class"].append(result["class"])
             data["Phenotype"].append(pheno.id)
