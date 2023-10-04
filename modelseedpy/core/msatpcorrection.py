@@ -178,8 +178,7 @@ class MSATPCorrection:
             media = MSMedia.from_dict(media_d)
             media.id = media_id
             media.name = media_id
-            min_obj = 0.01
-            self.atp_medias.append([media, min_gap.get(media_d, min_obj)])
+            self.atp_medias.append([media, min_gap.get(media_id, 0.01)])
 
     @staticmethod
     def find_reaction_in_template(model_reaction, template, compartment):
