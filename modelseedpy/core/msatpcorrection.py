@@ -48,6 +48,7 @@ min_gap = {
 }
 
 default_threshold_multipiers = {
+    "Pyr": 2,
     "Glc": 2,
     "default": 1.2,
 }

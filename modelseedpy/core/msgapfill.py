@@ -312,7 +312,7 @@ class MSGapfill:
                     solution_dictionary[item] = self.run_gapfilling(
                         item, None, minimum_obj, binary_check, False, check_for_growth
                     )
-                false = False
+                first = False
             return solution_dictionary
 
     def integrate_gapfill_solution(
