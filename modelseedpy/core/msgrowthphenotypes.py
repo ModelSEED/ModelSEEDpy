@@ -283,7 +283,7 @@ class MSGrowthPhenotypes:
             for added_cpd in pheno["additionalcompound_refs"]:
                 added_compounds.append(added_cpd.split("/").pop())
             newpheno = MSGrowthPhenotype(
-                media.info[1], media, pheno["normalizedGrowth"], geneko, added_compounds
+                media.info.id, media, pheno["normalizedGrowth"], geneko, added_compounds
             )
             new_phenos.append(newpheno)
         growthpheno.add_phenotypes(new_phenos)
