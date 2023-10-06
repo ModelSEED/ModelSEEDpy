@@ -1047,7 +1047,7 @@ class MSModelUtil:
         else:
             output = {}
             for item in ko_list:
-                logger.debug("KO:" + item[0] + item[1])
+                logger.info("KO:" + item[0] + item[1])
                 if item[0] not in output:
                     output[item[0]] = {}
                 if item[0] in tempmodel.reactions:
@@ -1086,6 +1086,7 @@ class MSModelUtil:
         if objective > 0:
             target_rxn.lower_bound = 0.1
             tempmodel.objective = min_flex_obj
+            logger.info("Optimizing with min flex objective")
             solution = tempmodel.optimize()
             biocpds = []
             for reaction in tempmodel.reactions:
@@ -1093,7 +1094,7 @@ class MSModelUtil:
                     reaction.forward_variable.primal > Zero
                     or reaction.reverse_variable.primal > Zero
                 ):
-                    logger.debug("Depends on:" + reaction.id)
+                    logger.info("Depends on:" + reaction.id)
                     label = reaction.id[5:]
                     for item in rxn_list:
                         if label[0 : len(item)] == item:
