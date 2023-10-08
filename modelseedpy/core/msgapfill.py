@@ -325,7 +325,12 @@ class MSGapfill:
             Specifies the reactions to be added to the model to implement the gapfilling solution
         cumulative_solution : list
             Optional array to cumulatively track all reactions added to the model when integrating multiple solutions
+        link_gaps_to_objective : bool
+            Indicates if biomass sensitivity analysis should be run on the specified gapfilling solution
         """
+        #Computing the initial length of cumulative solution before integrating current solution
+        starting_length = len(cumulative_solution)
+        #Reversing reactions reported by gapfilling solution in the model
         for rxn_id in solution["reversed"]:
             rxn = self.model.reactions.get_by_id(rxn_id)
             if solution["reversed"][rxn_id] == ">" and rxn.upper_bound <= 0:
@@ -334,6 +339,8 @@ class MSGapfill:
             elif solution["reversed"][rxn_id] == "<" and rxn.lower_bound >= 0:
                 cumulative_solution.append([rxn_id, "<"])
                 rxn.lower_bound = -100
+        
+        #Adding new reactions from the gapfilling solution into the model
         for rxn_id in solution["new"]:
             if rxn_id not in self.model.reactions:
                 rxn = self.gfmodel.reactions.get_by_id(rxn_id)
@@ -362,11 +369,12 @@ class MSGapfill:
 
         # Sometimes for whatever reason, the solution includes useless reactions that should be stripped out before saving the final model
         unneeded = self.mdlutl.test_solution(
-            solution, keep_changes=True
+            solution, keep_changes=True, cumulative_solution=cumulative_solution, starting_cumulative_solution_length=starting_length
         )  # Strips out unneeded reactions - which undoes some of what is done above
         for item in unneeded:
-            for oitem in cumulative_solution:
-                if item[0] == oitem[0] and item[1] == oitem[1]:
+            for i,oitem in enumerate(cumulative_solution):
+                #Only remove unneeded from cumulative solution if it was added in this specific solution
+                if i >= starting_length and item[0] == oitem[0] and item[1] == oitem[1]:
                     cumulative_solution.remove(oitem)
                     break
         # Adding the gapfilling solution data to the model, which is needed for saving the model in KBase
@@ -379,6 +387,11 @@ class MSGapfill:
                 + " for target "
                 + solution["target"]
             )
+            test_solution = []
+            for rxn_id in solution["reversed"]:
+                test_solution.append([rxn_id, solution["reversed"][rxn_id]])
+            for rxn_id in solution["new"]:
+                test_solution.append([rxn_id, solution["new"][rxn_id]])
             gf_sensitivity = self.mdlutl.get_attributes("gf_sensitivity", {})
             if solution["media"].id not in gf_sensitivity:
                 gf_sensitivity[solution["media"].id] = {}
@@ -387,7 +400,7 @@ class MSGapfill:
             gf_sensitivity[solution["media"].id][solution["target"]][
                 "success"
             ] = self.mdlutl.find_unproducible_biomass_compounds(
-                solution["target"], cumulative_solution
+                solution["target"], test_solution
             )
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)

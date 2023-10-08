@@ -519,16 +519,22 @@ class MSModelUtil:
     #################################################################################
     # Functions related to gapfilling of models
     #################################################################################
-    """Tests if every reaction in a given gapfilling solution is actually needed for growth
+    def test_solution(self, solution, keep_changes=False,cumulative_solution=[], starting_cumulative_solution_length=0):
+        """Tests if every reaction in a given gapfilling solution is actually needed for growth
         Optionally can remove unneeded reactions from the model AND the solution object.
         Note, this code assumes the gapfilling solution is already integrated.
 
         Parameters
         ----------
-        {"new":{string reaction_id: string direction},"reversed":{string reaction_id: string direction}} - solution
+        solution : {"new":{string reaction_id: string direction},"reversed":{string reaction_id: string direction}}
             Data for gapfilling solution to be tested
-        bool - keep_changes
+        keep_changes : bool 
             Set this bool to True to remove the unneeded reactions from the solution and model
+        cumulative_solution : 
+            List of reactions already loaded into the model across multiple gapfilling runs
+        starting_cumulative_solution_length : int
+            Position in the cumulative solution where the current solution starts (should not remove previously integrated reactions)
+
         Returns
         -------
         list<tuple<string - reaction id, string direction>>
@@ -537,8 +543,6 @@ class MSModelUtil:
         Raises
         ------
         """
-
-    def test_solution(self, solution, keep_changes=False):
         unneeded = []
         removed_rxns = []
         tempmodel = self.model
@@ -568,8 +572,7 @@ class MSModelUtil:
                         )
                         rxnobj.upper_bound = original_bound
                     else:
-                        removed_rxns.append(rxnobj)
-                        unneeded.append([rxn_id, solution[key][rxn_id], key])
+                        unneeded.append([rxn_id, solution[key][rxn_id], key,original_bound])
                         logger.info(
                             rxn_id
                             + solution[key][rxn_id]
@@ -591,14 +594,27 @@ class MSModelUtil:
                         )
                         rxnobj.lower_bound = original_bound
                     else:
-                        removed_rxns.append(rxnobj)
-                        unneeded.append([rxn_id, solution[key][rxn_id], key])
+                        unneeded.append([rxn_id, solution[key][rxn_id], key,original_bound])
                         logger.info(
                             rxn_id
                             + solution[key][rxn_id]
                             + " not needed:"
                             + str(objective)
                         )
+        #Iterating over unneeded reactions, and if they are not in the previous cumulative solution, then we add them to the remove list
+        for item in unneeded:
+            rxnobj = tempmodel.reactions.get_by_id(item[0])
+            found = False
+            for i in range(0,starting_cumulative_solution_length):
+                if item[0] in cumulative_solution[i][0] and item[1] in cumulative_solution[i][1]:
+                    found = True
+                    if item[1] == ">":
+                        rxnobj.upper_bound = item[3]
+                    else:
+                        rxnobj.lower_bound = item[3]
+                    break
+            if not found and rxnobj.lower_bound == 0 and rxnobj.upper_bound == 0:
+                removed_rxns.append(rxnobj)
         if keep_changes:
             tempmodel.remove_reactions(removed_rxns)
             for items in unneeded:
@@ -1047,7 +1063,7 @@ class MSModelUtil:
         else:
             output = {}
             for item in ko_list:
-                logger.info("KO:" + item[0] + item[1])
+                logger.debug("KO:" + item[0] + item[1])
                 if item[0] not in output:
                     output[item[0]] = {}
                 if item[0] in tempmodel.reactions:
@@ -1075,6 +1091,7 @@ class MSModelUtil:
                         )
                         rxnobj.lower_bound = original_bound
                 else:
+                    logger.info("Reaction "+item[0]+" not in model during sensitivity analysis!")
                     output[item[0]][item[1]] = []
             return output
 
@@ -1086,7 +1103,6 @@ class MSModelUtil:
         if objective > 0:
             target_rxn.lower_bound = 0.1
             tempmodel.objective = min_flex_obj
-            logger.info("Optimizing with min flex objective")
             solution = tempmodel.optimize()
             biocpds = []
             for reaction in tempmodel.reactions:
@@ -1094,7 +1110,7 @@ class MSModelUtil:
                     reaction.forward_variable.primal > Zero
                     or reaction.reverse_variable.primal > Zero
                 ):
-                    logger.info("Depends on:" + reaction.id)
+                    logger.debug("Depends on:" + reaction.id)
                     label = reaction.id[5:]
                     for item in rxn_list:
                         if label[0 : len(item)] == item:
