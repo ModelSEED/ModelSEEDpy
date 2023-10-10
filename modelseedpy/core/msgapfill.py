@@ -266,6 +266,7 @@ class MSGapfill:
         binary_check=False,
         prefilter=True,
         check_for_growth=True,
+        simultaneous_gapfilling=False,
     ):
         """Run gapfilling across an array of media conditions ultimately using different integration policies: simultaneous gapfilling, independent gapfilling, cumulative gapfilling
         Parameters
@@ -288,22 +289,31 @@ class MSGapfill:
 
         if not default_minimum_objective:
             default_minimum_objective = self.default_minimum_objective
-        first = True
         solution_dictionary = {}
-        for item in media_list:
-            minimum_obj = default_minimum_objective
-            if item in minimum_objectives:
-                minimum_obj = minimum_objectives[item]
-            if first:
-                solution_dictionary[item] = self.run_gapfilling(
-                    item, target, minimum_obj, binary_check, prefilter, check_for_growth
-                )
-            else:
-                solution_dictionary[item] = self.run_gapfilling(
-                    item, None, minimum_obj, binary_check, False, check_for_growth
-                )
-            false = False
-        return solution_dictionary
+        if simultaneous_gapfilling:
+            for item in media_list:
+                pass
+        else:
+            first = True
+            for item in media_list:
+                minimum_obj = default_minimum_objective
+                if item in minimum_objectives:
+                    minimum_obj = minimum_objectives[item]
+                if first:
+                    solution_dictionary[item] = self.run_gapfilling(
+                        item,
+                        target,
+                        minimum_obj,
+                        binary_check,
+                        prefilter,
+                        check_for_growth,
+                    )
+                else:
+                    solution_dictionary[item] = self.run_gapfilling(
+                        item, None, minimum_obj, binary_check, False, check_for_growth
+                    )
+                false = False
+            return solution_dictionary
 
     def integrate_gapfill_solution(
         self, solution, cumulative_solution=[], link_gaps_to_objective=True
@@ -381,6 +391,25 @@ class MSGapfill:
             )
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)
+
+    def compute_reaction_weights_from_expression_data(self, omics_data, conditions=[]):
+        """Computing reaction weights based on input gene-level omics data
+        Parameters
+        ----------
+        omics_data : pandas dataframe with genes as rows and conditions as columns
+            Specifies the reactions to be added to the model to implement the gapfilling solution
+        conditions : list
+            Optional array containing the IDs of the columns in omics_data from which data should be used.
+            If an empty array (or no array) is supplied, data from all columns will be used. When multiple columns are
+            used, the data from those columns should be normalized first, then added together
+        """
+        # Validitions:
+        # 1.) An conditions listed in the conditions argument should match the columns in the omics_data dataframe
+        # 2.) Most (~80%) of the genes in the model should match genes in the omics_data dataframe
+        # 3.) The omics_data dataframe should have at least 2 columns
+        # 4.) The omics_data dataframe should have at least 2 rows
+        # 5.) Logging should be used to report out which genes in the model don't match any genes in the omics_data dataframe
+        pass
 
     @staticmethod
     def gapfill(

@@ -17,76 +17,77 @@ logger.setLevel(
 
 
 class MSModelReport:
-    def __init__(self):
-        pass
+    def __init__(self, model_or_mdlutl):
+        if isinstance(model_or_mdlutl, MSModelUtil):
+            self.model = model_or_mdlutl.model
+            self.modelutl = model_or_mdlutl
+        else:
+            self.model = model_or_mdlutl
+            self.modelutl = MSModelUtil.get(model_or_mdlutl)
 
-    def generate_reports(self, model, report_path, multi_tab_report_path):
-        self.build_report(model, report_path)
-        self.build_multitab_report(model, multi_tab_report_path)
+    def generate_reports(self, report_path, multi_tab_report_path):
+        self.build_report(report_path)
+        self.build_multitab_report(multi_tab_report_path)
 
     # Helper function to build overview data
-    def build_overview_data(self, model):
+    def build_overview_data(self):
         # Get the number of compartments
         number_compartments = len(
-            set([metabolite.compartment for metabolite in model.metabolites])
+            set([metabolite.compartment for metabolite in self.model.metabolites])
         )
 
         # Extract gapfilling information
-        gapfillings_str = model.notes.get("kbase_gapfillings", "[]")
-        pattern = r"\{.*?\}"
-        gapfilling_matches = re.findall(pattern, gapfillings_str)
-        gapfillings = [
-            eval(
-                gapfilling.replace("false", "False")
-                .replace("true", "True")
-                .replace("null", "None")
-            )
-            for gapfilling in gapfilling_matches
-        ]
-
         core_gapfilling_media = []
         gapfilling_media = []
-
-        for gapfilling in gapfillings:
-            media_name = gapfilling.get("id", "").replace("ATP-", "")
-            target = gapfilling.get("target", "")
-
-            if target == "rxn00062_c0":
-                core_gapfilling_media.append(media_name)
-            elif target.startswith("bio"):
-                gapfilling_media.append(media_name)
+        gf_sensitivity = self.modelutl.attributes.get("gf_sensitivity", None)
+        if gf_sensitivity:
+            for media in gf_sensitivity:
+                if (
+                    "bio1" in self.modelutl.attributes["gf_sensitivity"][media]
+                    and "success"
+                    in self.modelutl.attributes["gf_sensitivity"][media]["bio1"]
+                ):
+                    gapfilling_media.append(media)
+                if (
+                    "rxn00062_c0" in self.modelutl.attributes["gf_sensitivity"][media]
+                    and "success"
+                    in self.modelutl.attributes["gf_sensitivity"][media]["rxn00062_c0"]
+                ):
+                    core_gapfilling_media.append(media)
 
         # Count the number of gapfills
-        number_gapfills = gapfillings_str.count('"media_ref"')
+        number_gapfills = len(gapfilling_media)
 
         # Convert the lists to strings
         core_gapfilling_str = (
             "; ".join(core_gapfilling_media)
             if core_gapfilling_media
-            else "No core gapfilling data found!"
+            else "No core gapfilling needed."
         )
         gapfilling_media_str = (
             "; ".join(gapfilling_media)
             if gapfilling_media
-            else "No genome-scale gapfilling data found!"
+            else "No genome-scale gapfilling."
         )
 
         overview = {
-            "Model ID": model.id,
+            "Model ID": self.model.id,
             "Full Gapfilling and ATP Analysis Report": "TBD",  # You may replace 'TBD' with actual data when available
-            "Genome Scale Template": model.notes.get(
+            "Genome Scale Template": self.model.notes.get(
                 "kbase_template_refs", "Data Not Available"
             ),
             "Core Gapfilling Media": core_gapfilling_str,
             "Gapfilling Media": gapfilling_media_str,
-            "Source Genome": model.notes.get("kbase_genome_ref", "Data Not Available"),
-            "Total Number of reactions": len(model.reactions),
-            "Number compounds": len(model.metabolites),
+            "Source Genome": self.model.notes.get(
+                "kbase_genome_ref", "Data Not Available"
+            ),
+            "Total Number of reactions": self.modelutl.nonexchange_reaction_count(),
+            "Number compounds": len(self.model.metabolites),
             "Number compartments": number_compartments,
             "Number biomass": len(
                 [
                     rxn
-                    for rxn in model.reactions
+                    for rxn in self.model.reactions
                     if rxn.annotation.get("sbo") == "SBO:0000629"
                 ]
             ),
@@ -95,7 +96,7 @@ class MSModelReport:
         return overview
 
     # Helper function for extracting gapfilling data
-    def extract_gapfilling_data(self, gf_sensitivity, model):
+    def extract_gapfilling_data(self, gf_sensitivity):
         if gf_sensitivity is None:
             return [], {}
 
@@ -104,59 +105,65 @@ class MSModelReport:
 
         for media, media_data in gf_sensitivity.items():
             for target, target_data in media_data.items():
-                for reaction_id, reaction_data in target_data.get(
-                    "success", {}
-                ).items():
-                    for direction, metabolites in reaction_data.items():
-                        # If metabolites is None, set to empty string
-                        if metabolites is None:
-                            metabolites = ""
+                gf_data = target_data.get("success", {})
+                if isinstance(gf_data, dict):
+                    for reaction_id, reaction_data in gf_data.items():
+                        for direction, metabolites in reaction_data.items():
+                            # If metabolites is None, set to empty string
+                            if metabolites is None:
+                                metabolites = ""
 
-                        # Extract both IDs and Names for Gapfilling Sensitivity
-                        sensitivity_ids = []
-                        sensitivity_names = []
-                        if isinstance(metabolites, (list, tuple)):
-                            for met_id in metabolites:
-                                sensitivity_ids.append(met_id)
-                                met_name = (
-                                    model.metabolites.get_by_id(met_id).name
-                                    if met_id in model.metabolites
-                                    else met_id
+                            # Extract both IDs and Names for Gapfilling Sensitivity
+                            sensitivity_ids = []
+                            sensitivity_names = []
+                            if isinstance(metabolites, (list, tuple)):
+                                for met_id in metabolites:
+                                    sensitivity_ids.append(met_id)
+                                    met_name = (
+                                        self.model.metabolites.get_by_id(met_id).name
+                                        if met_id in self.model.metabolites
+                                        else met_id
+                                    )
+                                    sensitivity_names.append(met_name)
+                            else:
+                                metabolites = str(metabolites)
+                            entry = {
+                                "reaction_id": reaction_id,
+                                "reaction_name": self.model.reactions.get_by_id(
+                                    reaction_id
+                                ).name
+                                if reaction_id in self.model.reactions
+                                else reaction_id,
+                                "media": media,
+                                "direction": direction,
+                                "target": target,
+                                "gapfilling_sensitivity_id": "; ".join(sensitivity_ids)
+                                if sensitivity_ids
+                                else metabolites,
+                                "gapfilling_sensitivity_name": "; ".join(
+                                    sensitivity_names
                                 )
-                                sensitivity_names.append(met_name)
-                        else:
-                            metabolites = str(metabolites)
-                        entry = {
-                            "reaction_id": reaction_id,
-                            "reaction_name": model.reactions.get_by_id(reaction_id).name
-                            if reaction_id in model.reactions
-                            else reaction_id,
-                            "media": media,
-                            "direction": direction,
-                            "target": target,
-                            "gapfilling_sensitivity_id": "; ".join(sensitivity_ids)
-                            if sensitivity_ids
-                            else metabolites,
-                            "gapfilling_sensitivity_name": "; ".join(sensitivity_names)
-                            if sensitivity_names
-                            else metabolites,
-                        }
+                                if sensitivity_names
+                                else metabolites,
+                            }
 
-                        # Update the summary dictionary
-                        if reaction_id not in gapfilling_summary:
-                            gapfilling_summary[reaction_id] = []
-                        gapfilling_summary[reaction_id].append(f"{media}: {direction}")
+                            # Update the summary dictionary
+                            if reaction_id not in gapfilling_summary:
+                                gapfilling_summary[reaction_id] = []
+                            gapfilling_summary[reaction_id].append(
+                                f"{media}: {direction}"
+                            )
 
-                        # Check if reaction_id is already in dictionary
-                        if reaction_id in gapfilling_dict:
-                            # Update the media
-                            existing_entry = gapfilling_dict[reaction_id]
-                            existing_media = existing_entry["media"].split("; ")
-                            if media not in existing_media:
-                                existing_media.append(media)
-                                existing_entry["media"] = "; ".join(existing_media)
-                        else:
-                            gapfilling_dict[reaction_id] = entry
+                            # Check if reaction_id is already in dictionary
+                            if reaction_id in gapfilling_dict:
+                                # Update the media
+                                existing_entry = gapfilling_dict[reaction_id]
+                                existing_media = existing_entry["media"].split("; ")
+                                if media not in existing_media:
+                                    existing_media.append(media)
+                                    existing_entry["media"] = "; ".join(existing_media)
+                            else:
+                                gapfilling_dict[reaction_id] = entry
 
         return list(gapfilling_dict.values()), gapfilling_summary
 
@@ -188,6 +195,12 @@ class MSModelReport:
                 reversed_reactions = [
                     "{}: {}".format(k, v) for k, v in data.get("reversed", {}).items()
                 ]
+                atp_production = "Not integrated"
+                if (
+                    "selected_media" in atp_analysis
+                    and media in atp_analysis["selected_media"]
+                ):
+                    atp_production = atp_analysis["selected_media"][media]
 
                 # Extracting the "Filtered Reactions" in the required format
                 filtered_reactions = []
@@ -207,6 +220,7 @@ class MSModelReport:
                         {
                             "media": media,
                             "no_of_gapfilled_reactions": score,
+                            "atp_production": atp_production,
                             "gapfilled_reactions": "; ".join(new_reactions),
                             "reversed_reaction_by_gapfilling": "; ".join(
                                 reversed_reactions
@@ -240,23 +254,23 @@ class MSModelReport:
 
         return atp_production_dict
 
-    def build_multitab_report(self, model_or_mdlutl, output_path):
+    def build_multitab_report(self, output_path):
 
         # Build overview data
-        overview_data = self.build_overview_data(model_or_mdlutl)
+        overview_data = self.build_overview_data()
 
         # Get gf_sensitivity attribute from the model
-        gf_sensitivity = model_or_mdlutl.attributes.get("gf_sensitivity", None)
+        gf_sensitivity = self.modelutl.attributes.get("gf_sensitivity", None)
 
         # Extract gapfilling data
         gapfilling_entries, gapfilling_reaction_summary = self.extract_gapfilling_data(
-            gf_sensitivity, model_or_mdlutl
+            gf_sensitivity
         )
 
         # Check if ATP_analysis attribute is present in the model
-        atp_analysis = model_or_mdlutl.attributes.get("ATP_analysis", None)
+        atp_analysis = self.modelutl.attributes.get("ATP_analysis", None)
         if atp_analysis:
-            atp_expansion_filter = model_or_mdlutl.attributes.get(
+            atp_expansion_filter = self.modelutl.attributes.get(
                 "atp_expansion_filter", {}
             )
             atp_analysis_entries = self.extract_atp_analysis_data(
@@ -278,17 +292,17 @@ class MSModelReport:
 
         print("Module Path:", module_path + "/../data/")
 
-        exchanges = {r.id for r in model_or_mdlutl.exchanges}
+        exchanges = {r.id for r in self.model.exchanges}
 
         # Identify biomass reactions using SBO annotation
         biomass_reactions_ids = {
             rxn.id
-            for rxn in model_or_mdlutl.reactions
+            for rxn in self.model.reactions
             if rxn.annotation.get("sbo") == "SBO:0000629"
         }
 
         # Reactions Tab
-        for rxn in model_or_mdlutl.reactions:
+        for rxn in self.model.reactions:
             if rxn.id not in exchanges and rxn.id not in biomass_reactions_ids:
                 equation = rxn.build_reaction_string(use_metabolite_names=True)
                 rxn_data = {
@@ -303,7 +317,7 @@ class MSModelReport:
                 context["reactions"].append(rxn_data)
 
         # Compounds Tab
-        for cpd in model_or_mdlutl.metabolites:
+        for cpd in self.model.metabolites:
             cpd_data = {
                 "id": cpd.id,
                 "name": cpd.name,
@@ -314,7 +328,7 @@ class MSModelReport:
             context["compounds"].append(cpd_data)
 
         # Genes Tab
-        for gene in model_or_mdlutl.genes:
+        for gene in self.model.genes:
             gene_data = {
                 "gene": gene.id,
                 "reactions": "; ".join([rxn.id for rxn in gene.reactions]),
@@ -324,7 +338,7 @@ class MSModelReport:
         # Biomass Tab
         if biomass_reactions_ids:
             for biomass_rxn_id in biomass_reactions_ids:
-                biomass_rxn = model_or_mdlutl.reactions.get_by_id(biomass_rxn_id)
+                biomass_rxn = self.model.reactions.get_by_id(biomass_rxn_id)
                 for metabolite, coefficient in biomass_rxn.metabolites.items():
                     compound_id = metabolite.id
                     compound_name = metabolite.name.split("_")[0]
@@ -342,8 +356,8 @@ class MSModelReport:
             print("No biomass reactions found in the model.")
 
         # Gapfilling Tab
-        gf_sensitivity = model_or_mdlutl.attributes.get("gf_sensitivity", None)
-        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity, model_or_mdlutl)
+        gf_sensitivity = self.modelutl.attributes.get("gf_sensitivity", None)
+        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity)
         context["gapfilling"] = gapfilling_entries
 
         # Extract ATP Production Data
@@ -394,7 +408,7 @@ class MSModelReport:
         with open(output_path, "w") as f:
             f.write(html)
 
-    def build_report(self, model, output_path):
+    def build_report(self, output_path):
         """Builds model HTML report for the Model Summary table
         Parameters
         ----------
@@ -403,7 +417,7 @@ class MSModelReport:
         """
 
         # 1. Utilize the build_overview_data method
-        model_summary_data = self.build_overview_data(model)
+        model_summary_data = self.build_overview_data()
         # Remove the unwanted entry
         model_summary_data.pop("Full Gapfilling and ATP Analysis Report", None)
         # 2. Transform the dictionary into a list of tuples
@@ -447,8 +461,8 @@ class MSModelReport:
         )
 
         # Fetching the gapfilling sensitivity data
-        gf_sensitivity = model.attributes.get("gf_sensitivity", None)
-        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity, model)
+        gf_sensitivity = self.modelutl.attributes.get("gf_sensitivity", None)
+        gapfilling_data = self.extract_gapfilling_data(gf_sensitivity)
         gapfilling_list = self.transform_gapfilling_data(gapfilling_data[0])
 
         # Convert the gapfilling_list to a DataFrame
@@ -519,8 +533,8 @@ class MSModelReport:
         """
 
         # Extract ATP analysis data
-        atp_analysis = model.attributes.get("ATP_analysis", None)
-        atp_expansion_filter = model.attributes.get("atp_expansion_filter", {})
+        atp_analysis = self.modelutl.attributes.get("ATP_analysis", None)
+        atp_expansion_filter = self.modelutl.attributes.get("atp_expansion_filter", {})
         atp_analysis_entries = self.extract_atp_analysis_data(
             atp_analysis, atp_expansion_filter
         )
@@ -594,6 +608,7 @@ class MSModelReport:
         directory = os.path.dirname(output_path)
         os.makedirs(directory, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
+            f.write('<meta charset="UTF-8">')
             f.write("<h1>Model Summary</h1>")
             f.write(model_summary_df_styled.render(escape=False))
             f.write("<br><br>")
