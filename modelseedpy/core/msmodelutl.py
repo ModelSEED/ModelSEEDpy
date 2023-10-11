@@ -98,6 +98,22 @@ class MSModelUtil:
         else:
             return None
 
+    @staticmethod
+    def build_from_kbase_json_file(filename, kbaseapi):
+        """
+        Builds an MSModelUtil object from a KBase JSON file.
+        
+        Args:
+            filename (str): The path to the KBase JSON file.
+            kbaseapi (KBaseAPI): An instance of the KBase API.
+
+        Returns:
+            An MSModelUtil object representing the contents of the KBase JSON file.
+        """
+        factory = kbaseapi.KBaseObjectFactory()
+        model = factory.build_object_from_file(filename, "KBaseFBA.FBAModel")
+        return MSModelUtil(model)
+
     def __init__(self, model):
         self.model = model
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
