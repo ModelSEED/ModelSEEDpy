@@ -47,6 +47,9 @@ def convert_to_search_role(role):
     role = re.sub("[\(\)\[\],-]","",role)
     return role
 
+def split_role(role):
+    return re.split("\s*;\s+|\s+[\@\/]\s+",role)
+
 class AnnotationOntologyEvidence:
     def __init__(self, scores={}, ref_entity=None, entity_type=None):
         self.ref_entity = ref_entity
