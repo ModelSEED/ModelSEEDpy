@@ -331,7 +331,7 @@ def _load_reactions(
                             o.get("status"),
                             o.get("source"),
                         )
-                        if "linked_reaction" in o:
+                        if "linked_reaction" in o and o.get("linked_reaction"):
                             ids = o.get("linked_reaction").split(";")
                             rxn.annotation["modelseed"] = ids[0]
                         rxn.add_metabolites(reaction_metabolites)
