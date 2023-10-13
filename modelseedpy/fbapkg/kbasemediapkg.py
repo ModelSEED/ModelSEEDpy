@@ -16,6 +16,7 @@ class KBaseMediaPkg(BaseFBAPkg):
 
     def __init__(self, model):
         BaseFBAPkg.__init__(self, model, "kbase media", {}, {})
+        self.current_media = None
 
     def build_package(
         self, media_or_parameters, default_uptake=None, default_excretion=None
@@ -40,6 +41,7 @@ class KBaseMediaPkg(BaseFBAPkg):
                 self.parameters["default_uptake"] = 0
             if self.parameters["default_excretion"] is None:
                 self.parameters["default_excretion"] = 100
+        self.current_media = self.parameters["media"]
         if (
             self.parameters["media"] and self.parameters["media"].name == "Complete"
         ) and self.parameters["default_uptake"] == 0:

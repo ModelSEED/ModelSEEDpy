@@ -38,6 +38,14 @@ allowable_score_types = [
     "hmmscore",
 ]
 
+def convert_to_search_role(role):
+    role = role.lower()
+    role = re.sub("\s","",role)
+    role = re.sub("[\d\-]+\.[\d\-]+\.[\d\-]+\.[\d\-]*","",role)
+    role = re.sub("\#.*$","",role)
+    role = re.sub("\(ec:*\)","",role)
+    role = re.sub("[\(\)\[\],-]","",role)
+    return role
 
 class AnnotationOntologyEvidence:
     def __init__(self, scores={}, ref_entity=None, entity_type=None):
