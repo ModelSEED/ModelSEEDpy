@@ -331,6 +331,9 @@ def _load_reactions(
                             o.get("status"),
                             o.get("source"),
                         )
+                        if "linked_reaction" in o:
+                            ids = o.get("linked_reaction").split(";")
+                            rxn.annotation["modelseed"] = ids[0]
                         rxn.add_metabolites(reaction_metabolites)
                         if rxn.id in aliases:
                             rxn.annotation.update(aliases[rxn.id])
