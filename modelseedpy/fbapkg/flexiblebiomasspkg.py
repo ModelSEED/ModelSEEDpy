@@ -77,11 +77,11 @@ class FlexibleBiomassPkg(BaseFBAPkg):
         newrxns = []
         class_coef = {"rna": {}, "dna": {}, "protein": {}, "energy": {}}
         refcpd = {
-            "cpd00001": None,
-            "cpd00009": None,
-            "cpd00012": None,
-            "cpd00067": None,
-            "cpd00002": None,
+            "cpd00001": None, # Water
+            "cpd00009": None, # OrthoPhosphate
+            "cpd00012": None, # Pyrophosphate
+            "cpd00067": None, # Proton
+            "cpd00002": None, # ATP
         }
         # Finding all reference compounds in the model
         msid_hash = self.modelutl.msid_hash()
@@ -94,10 +94,10 @@ class FlexibleBiomassPkg(BaseFBAPkg):
             met_class[metabolite] = None
             msid = MSModelUtil.metabolite_msid(metabolite)
             if (
-                msid != "cpd11416"
-                and msid != "cpd11463"
-                and msid != "cpd11462"
-                and msid != "cpd11461"
+                msid != "cpd11416" # Biomass
+                and msid != "cpd11463" # Protein
+                and msid != "cpd11462" # RNA
+                and msid != "cpd11461" # DNA
                 and msid != None
             ):
                 if msid in refcpd:
@@ -209,7 +209,7 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                     self.build_constraint(
                         self.new_reactions[met_class + "_flex"], "flxcls"
                     )
-        if parameters["add_total_biomass_constraint"]:
+        if self.parameters["add_total_biomass_constraint"]:
             self.build_constraint(self.parameters["bio_rxn"], "flxbio")
 
     def build_variable(self, object, type):  # !!! can the function be removed?
@@ -293,7 +293,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 # If the value is positive, lock in the forward variable and set the reverse to zero
                 if first_entry > 0:
                     if product:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "f" + obj_type,
                             0,
                             0,
@@ -302,7 +303,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                         )
                         object.lower_bound = 0
                     else:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "f" + obj_type,
                             0,
                             0,
@@ -313,7 +315,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                 # If the value is negative, lock in the reverse variable and set the forward to zero
                 elif first_entry < 0:
                     if product:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "r" + obj_type,
                             0,
                             0,
@@ -322,7 +325,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                         )
                         object.upper_bound = 0
                     else:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "r" + obj_type,
                             0,
                             0,
@@ -376,14 +380,16 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                             )
                 else:
                     if product:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "f" + obj_type,
                             0,
                             None,
                             {biovar: second_entry, object.forward_variable: -1},
                             cobra_obj,
                         )
-                        self.build_constraint(
+                        BaseFBAPkg.build_constraint(
+                            self,
                             "r" + obj_type,
                             0,
                             None,
@@ -391,14 +397,16 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                             cobra_obj,
                         )
                     else:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "f" + obj_type,
                             0,
                             None,
                             {biovar: second_entry, object.reverse_variable: -1},
                             cobra_obj,
                         )
-                        self.build_constraint(
+                        BaseFBAPkg.build_constraint(
+                            self,
                             "r" + obj_type,
                             0,
                             None,
@@ -408,7 +416,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
             else:
                 if second_entry < 0:
                     if product:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "f" + obj_type,
                             0,
                             None,
@@ -416,7 +425,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                             cobra_obj,
                         )
                     else:
-                        const = self.build_constraint(
+                        const = BaseFBAPkg.build_constraint(
+                            self,
                             "f" + obj_type,
                             0,
                             None,
@@ -424,7 +434,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                             cobra_obj,
                         )
                 if product:
-                    self.build_constraint(
+                    BaseFBAPkg.build_constraint(
+                        self,
                         "r" + obj_type,
                         0,
                         None,
@@ -433,7 +444,8 @@ class FlexibleBiomassPkg(BaseFBAPkg):
                     )
                     object.lower_bound = 0
                 else:
-                    self.build_constraint(
+                    BaseFBAPkg.build_constraint(
+                        self,
                         "r" + obj_type,
                         0,
                         None,
