@@ -325,9 +325,13 @@ class MSATPCorrection:
             # Now running gapfilling on all conditions where initially there was no growth
             all_solutions = self.msgapfill.run_multi_gapfill(
                 media_list,
-                self.atp_hydrolysis.id,
-                min_objectives,
+                target=self.atp_hydrolysis.id,
+                minimum_objectives=min_objectives,
+                prefilter=False,
                 check_for_growth=False,
+                gapfilling_mode="Independent",
+                run_sensitivity_analysis=False,
+                integrate_solutions=False,
             )
 
             # Adding the new solutions to the media gapfill stats

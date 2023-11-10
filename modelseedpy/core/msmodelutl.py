@@ -535,21 +535,18 @@ class MSModelUtil:
     #################################################################################
     # Functions related to gapfilling of models
     #################################################################################
-    def test_solution(self, solution, keep_changes=False,cumulative_solution=[], starting_cumulative_solution_length=0):
-        """Tests if every reaction in a given gapfilling solution is actually needed for growth
-        Optionally can remove unneeded reactions from the model AND the solution object.
-        Note, this code assumes the gapfilling solution is already integrated.
+    def test_solution(self,solution,targets,medias,thresholds=[0.1],remove_unneeded_reactions=False,do_not_remove_list=[]):
+        """Tests if every reaction in a given gapfilling solution is actually needed for growth. Note, this code assumes the gapfilling solution is already integrated.
 
         Parameters
         ----------
         solution : {"new":{string reaction_id: string direction},"reversed":{string reaction_id: string direction}}
+                    or 
+                    list<tuple<string - reaction id, string direction>>
             Data for gapfilling solution to be tested
-        keep_changes : bool 
-            Set this bool to True to remove the unneeded reactions from the solution and model
-        cumulative_solution : 
-            List of reactions already loaded into the model across multiple gapfilling runs
-        starting_cumulative_solution_length : int
-            Position in the cumulative solution where the current solution starts (should not remove previously integrated reactions)
+        target : string,
+        media : MSMedia,
+        threshold : float, default 0.1
 
         Returns
         -------
@@ -559,82 +556,112 @@ class MSModelUtil:
         Raises
         ------
         """
+        #Saving the current objective
+        current_objective = self.model.objective
+        #Saving the current media
+        current_media = self.pkgmgr.getpkg("KBaseMediaPkg").current_media
+        #Computing the initial objective values
+        initial_objectives = []
+        for (i,target) in enumerate(targets):
+            #Setting the media
+            self.pkgmgr.getpkg("KBaseMediaPkg").build_package(medias[i])
+            #Setting the objective
+            self.model.objective = target
+            #Computing the objective value
+            objective = self.model.slim_optimize()
+            initial_objectives.append(objective)
+            logger.debug("Starting objective for " + medias[i].id + "/"+target+" = " + str(objective))
+        #Iterating through solution reactions and flagging them if they are unneeded to achieve the specified minimum objective
         unneeded = []
-        removed_rxns = []
-        tempmodel = self.model
-        if not keep_changes:
-            tempmodel = cobra.io.json.from_json(cobra.io.json.to_json(self.model))
-        tempmodel.objective = solution["target"]
-        pkgmgr = MSPackageManager.get_pkg_mgr(tempmodel)
-        pkgmgr.getpkg("KBaseMediaPkg").build_package(solution["media"])
-        objective = tempmodel.slim_optimize()
-        logger.debug("Starting objective:" + str(objective))
-        types = ["new", "reversed"]
-        for key in types:
-            for rxn_id in solution[key]:
-                rxnobj = tempmodel.reactions.get_by_id(rxn_id)
-                if solution[key][rxn_id] == ">":
-                    original_bound = rxnobj.upper_bound
-                    rxnobj.upper_bound = 0
-                    objective = tempmodel.slim_optimize()
-                    if objective < solution["minobjective"]:
-                        logger.info(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " needed:"
-                            + str(objective)
-                            + " with min obj:"
-                            + str(solution["minobjective"])
-                        )
-                        rxnobj.upper_bound = original_bound
-                    else:
-                        unneeded.append([rxn_id, solution[key][rxn_id], key,original_bound])
-                        logger.info(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " not needed:"
-                            + str(objective)
-                        )
+        #If object is a dictionary, convert to a list
+        if isinstance(solution,dict):
+            converted_solution = []
+            types = ["new", "reversed"]
+            for key in types:
+                for rxn_id in solution[key]:
+                    converted_solution.append([rxn_id, solution[key][rxn_id], key])
+            solution = converted_solution
+        #Processing solution in standardized format
+        for item in solution:
+            rxn_id = item[0]    
+            rxnobj = self.model.reactions.get_by_id(rxn_id)
+            #Knocking out the reaction to test for the impact on the objective
+            if item[1] == ">":
+                original_bound = rxnobj.upper_bound
+                rxnobj.upper_bound = 0
+            else:
+                original_bound = rxnobj.lower_bound
+                rxnobj.lower_bound = 0
+            #Testing all media and target and threshold combinations to see if the reaction is needed
+            needed = False
+            for (i,target) in enumerate(targets):
+                if len(targets) > 1:#If there's only one target, then these steps were done earlier already
+                    #Setting the media
+                    self.pkgmgr.getpkg("KBaseMediaPkg").build_package(medias[i])
+                    #Setting the objective
+                    self.model.objective = target
+                #Computing the objective value
+                objective = self.model.slim_optimize()
+                if objective < thresholds[i]:
+                    needed = True
+                    logger.info(
+                        medias[i].id + "/" + target + ":" +rxn_id
+                        + item[1]
+                        + " needed:"
+                        + str(objective)
+                        + " with min obj:"
+                        + str(thresholds[i])
+                    )
+            #If the reaction isn't needed for any media and target combinations, add it to the unneeded list
+            if not needed:
+                unneeded.append([rxn_id, item[1], item[2],original_bound])
+                logger.info(
+                    rxn_id
+                    + item[1]
+                    + " not needed:"
+                    + str(objective)
+                )
+                #VERY IMPORTANT: Leave the reaction knocked out for now so we screen for combinatorial effects
+            else:
+                #Restore the reaction if it is needed
+                if item[1] == ">":
+                    rxnobj.upper_bound = original_bound
                 else:
-                    original_bound = rxnobj.lower_bound
-                    rxnobj.lower_bound = 0
-                    objective = tempmodel.slim_optimize()
-                    if objective < solution["minobjective"]:
-                        logger.info(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " needed:"
-                            + str(objective)
-                            + " with min obj:"
-                            + str(solution["minobjective"])
-                        )
-                        rxnobj.lower_bound = original_bound
-                    else:
-                        unneeded.append([rxn_id, solution[key][rxn_id], key,original_bound])
-                        logger.info(
-                            rxn_id
-                            + solution[key][rxn_id]
-                            + " not needed:"
-                            + str(objective)
-                        )
-        #Iterating over unneeded reactions, and if they are not in the previous cumulative solution, then we add them to the remove list
-        for item in unneeded:
-            rxnobj = tempmodel.reactions.get_by_id(item[0])
-            found = False
-            for i in range(0,starting_cumulative_solution_length):
-                if item[0] in cumulative_solution[i][0] and item[1] in cumulative_solution[i][1]:
-                    found = True
-                    if item[1] == ">":
-                        rxnobj.upper_bound = item[3]
-                    else:
-                        rxnobj.lower_bound = item[3]
-                    break
-            if not found and rxnobj.lower_bound == 0 and rxnobj.upper_bound == 0:
-                removed_rxns.append(rxnobj)
-        if keep_changes:
-            tempmodel.remove_reactions(removed_rxns)
-            for items in unneeded:
-                del solution[items[2]][items[0]]
+                    rxnobj.lower_bound = original_bound
+        if not remove_unneeded_reactions:
+            #Restoring the bounds on the unneeded reactions
+            for item in unneeded:
+                rxnobj = self.model.reactions.get_by_id(item[0])
+                if item[1] == ">":
+                    rxnobj.upper_bound = item[3]
+                else:
+                    rxnobj.lower_bound = item[3]
+        else:
+            #Do not restore bounds on unneeded reactions and remove reactions from model if their bounds are zero
+            removed_rxns = []
+            for item in unneeded:
+                dnr = False
+                for dnr_item in do_not_remove_list:
+                    if item[0] == dnr_item[0] and item[1] == dnr_item[1]:
+                        #Restoring bounds on reactions that should not be removed
+                        dnr = True
+                        rxnobj = self.model.reactions.get_by_id(item[0])
+                        if item[1] == ">":
+                            rxnobj.upper_bound = item[3]
+                        else:
+                            rxnobj.lower_bound = item[3]
+                if not dnr:
+                    rxnobj = self.model.reactions.get_by_id(item[0])
+                    if rxnobj.lower_bound == 0 and rxnobj.upper_bound == 0:
+                        removed_rxns.append(rxnobj)
+            if len(removed_rxns) > 0:
+                self.model.remove_reactions(removed_rxns)
+        #Restoring the original objective
+        self.model.objective = current_objective
+        #Restoring the original media
+        if current_media:
+            self.pkgmgr.getpkg("KBaseMediaPkg").build_package(current_media)
+        #Returning the unneeded list
         return unneeded
 
     def add_gapfilling(self, solution):
