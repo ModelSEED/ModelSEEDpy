@@ -416,7 +416,7 @@ class MSATPCorrection:
                 and MSGapfill.gapfill_count(self.media_gapfill_stats[media]) > 0
             ):
                 self.msgapfill.integrate_gapfill_solution(
-                    stats, self.cumulative_core_gapfilling, link_gaps_to_objective=False
+                    stats, self.cumulative_core_gapfilling,check_for_growth=False
                 )
                 # Adding reactions to gapfilling sensitivity structure so we can track all gapfilled reactions
                 gf_sensitivity = self.modelutl.get_attributes("gf_sensitivity", {})
