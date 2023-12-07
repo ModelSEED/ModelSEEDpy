@@ -82,7 +82,6 @@ class MSFeature:
 
 
 class MSGenome:
-
     def __init__(self):
         self.features = DictList()
 
