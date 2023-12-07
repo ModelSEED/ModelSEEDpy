@@ -438,7 +438,7 @@ class MSTemplateReaction(Reaction):
                 map(lambda x: "~/complexes/id/" + x.id, self.complexes)
             ),
             # 'status': self.status,
-            "type": self.type,
+            "type": self.type if type(self.type) is str else self.type.value,
         }
 
     # def build_reaction_string(self, use_metabolite_names=False, use_compartment_names=None):
