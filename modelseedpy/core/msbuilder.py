@@ -6,6 +6,7 @@ import cobra
 from modelseedpy.core.exceptions import ModelSEEDError
 from modelseedpy.core.rast_client import RastClient
 from modelseedpy.core.msgenome import normalize_role
+from modelseedpy.core.mstemplate import TemplateReactionType
 from modelseedpy.core.msmodel import (
     get_gpr_string,
     get_reaction_constraints_from_direction,
@@ -867,9 +868,12 @@ class MSBuilder:
 
         reactions = []
         for template_reaction in self.template.reactions:
+            rxn_type = template_reaction.type
             if (
-                template_reaction.type == "universal"
-                or template_reaction.type == "spontaneous"
+                rxn_type == "universal"
+                or rxn_type == "spontaneous"
+                or rxn_type == TemplateReactionType.UNIVERSAL
+                or rxn_type == TemplateReactionType.SPONTANEOUS
             ):
                 reaction_metabolite_ids = {m.id for m in template_reaction.metabolites}
                 if (
