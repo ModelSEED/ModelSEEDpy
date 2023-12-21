@@ -75,6 +75,12 @@ class MSMedia:
             media[met_id] = (compound.lower_bound, compound.upper_bound)
         return media
 
+    def find_mediacpd(self, cpd_id):
+        for cpd in self.mediacompounds:
+            if cpd.id == cpd_id:
+                return cpd
+        return None
+
     def merge(self, media, overwrite_overlap=False):
         new_cpds = []
         for cpd in media.mediacompounds:

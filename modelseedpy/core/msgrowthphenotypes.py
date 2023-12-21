@@ -142,7 +142,6 @@ class MSGrowthPhenotype:
                 output["fluxes"] = solution.fluxes
 
         # Determining phenotype class
-
         if output["growth"] >= output["baseline_growth"] * growth_multiplier:
             output["GROWING"] = True
             if not self.growth or ignore_growth_data:
@@ -526,7 +525,41 @@ class MSGrowthPhenotypes:
             summary["Count"][0] = summary["Count"][0] / totalcount
         sdf = pd.DataFrame(summary)
         df = pd.DataFrame(data)
+        self.adjust_phenotype_calls(df)
         return {"details": df, "summary": sdf}
+
+    def adjust_phenotype_calls(self,data):
+        lowest = data["Simulated growth"].min()
+        highest = data["Simulated growth"].max()
+        threshold = (highest-lowest)/2+lowest
+        if highest/(lowest+0.000001) < 1.5:
+            threshold = highest
+        grow = 0
+        nogrow = 0
+        change = 0
+        for (i,item) in data.iterrows():
+            if item["Simulated growth"] >= threshold:
+                grow += 1
+                if item["Class"] == "NOGROWTH":
+                    data.loc[i, 'Class'] = "GROWTH"
+                    change += 1
+                elif item["Class"] == "FN":
+                    data.loc[i, 'Class'] = "TP"
+                    change += 1
+                elif item["Class"] == "CN":
+                    data.loc[i, 'Class'] = "FP"
+                    change += 1   
+            else:
+                nogrow += 1
+                if item["Class"] == "GROWTH":
+                    data.loc[i, 'Class'] = "NOGROWTH"
+                    change += 1
+                elif item["Class"] == "TP":
+                    data.loc[i, 'Class'] = "FN"
+                    change += 1
+                elif item["Class"] == "FP":
+                    data.loc[i, 'Class'] = "CN"
+                    change += 1
 
     def fit_model_to_phenotypes(
         self,
