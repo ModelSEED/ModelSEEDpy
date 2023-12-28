@@ -73,12 +73,12 @@ class BaseFBAPkg:
         for obj_type in self.variables:
             for cobra_obj in self.variables[obj_type]:
                 cobra_objs.append(self.variables[obj_type][cobra_obj])
+            self.variables[obj_type] = {}
         for obj_type in self.constraints:
             for cobra_obj in self.constraints[obj_type]:
                 cobra_objs.append(self.constraints[obj_type][cobra_obj])
+            self.constraints[obj_type] = {}
         self.model.remove_cons_vars(cobra_objs)
-        self.variables = {}
-        self.constraints = {}
 
     def build_variable(
         self, obj_type, lower_bound, upper_bound, vartype, cobra_obj=None
@@ -153,3 +153,6 @@ class BaseFBAPkg:
             self.constraints[name] = dict()
         if name not in self.constraint_types:
             self.constraint_types[name] = type
+
+    def current_media(self):
+        return self.pkgmgr.getpkg("KBaseMediaPkg").current_media

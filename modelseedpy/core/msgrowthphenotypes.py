@@ -152,7 +152,7 @@ class MSGrowthPhenotype:
                 output["class"] = "FP"
         else:
             output["GROWING"] = False
-            if not self.growth or ignore_growth_data:
+            if self.growth == None or ignore_growth_data:
                 output["class"] = "NOGROWTH"
             elif self.growth > 0:
                 output["class"] = "FN"
