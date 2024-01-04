@@ -1,9 +1,10 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
 import cobra
 import re
 import json
-import numpy as np 
+import numpy as np
 import pandas as pd
 from optlang.symbolics import Zero, add
 from modelseedpy.core import FBAHelper  # !!! the import is never used
@@ -405,7 +406,7 @@ class MSGapfill:
             If an empty array (or no array) is supplied, data from all columns will be used. When multiple columns are
             used, the data from those columns should be normalized first, then added together
         Returns :
-            A dictionary with Rxns as the keys and calculated result as the value. 
+            A dictionary with Rxns as the keys and calculated result as the value.
         """
         # Validitions:
         # 1.) An conditions listed in the conditions argument should match the columns in the omics_data dataframe
@@ -413,85 +414,93 @@ class MSGapfill:
         # 3.) The omics_data dataframe should have at least 2 columns
         # 4.) The omics_data dataframe should have at least 2 rows
         # 5.) Logging should be used to report out which genes in the model don't match any genes in the omics_data dataframe
-        
-        # Assumptions: 
+
+        # Assumptions:
         # omics_data is an input with the following columns:
-            # Col 1: Gene
-            # Col 2: Reactions
-            # Cols 3-9: Annotations
+        # Col 1: Gene
+        # Col 2: Reactions
+        # Cols 3-9: Annotations
         # Unlike with the MATLAB code, this will not check if rxn is not in draft - this is only making calculations based on the columns in omics_data.
-        
-        
+
         # Notes:
         # This has only been tested on dummy data and in this case python performs the same as MATLAB. However, this needs to be tested with an example input.
         # Two outputs are currently created.
-            # A table that matches with t in the MATLAB code.
-            # The requested hash (dictionary) with Rxns and floats.
+        # A table that matches with t in the MATLAB code.
+        # The requested hash (dictionary) with Rxns and floats.
         # Many more inputs were required with the MATLAB code, this has attempted to condense everything to handle the single input.
         # Conditions has not been added yet. I think as other questions are answered, the use for this will be more clear.
-        
-        #Questions
+
+        # Questions
         # When might the example data be updated?
         # Are other inputs required?
         # Is this output (Dictionary with RXN: Value), correct?
         # When will the next steps for setting up the kbase jupyter notebook be ready?
-        
-        measuredGeneScore = np.zeros((omics_data.shape[0], len(omics_data.columns[3:10])))
+
+        measuredGeneScore = np.zeros(
+            (omics_data.shape[0], len(omics_data.columns[3:10]))
+        )
         num_cols = len(omics_data.columns[3:10])
-        w = np.full((num_cols, 1), 1/num_cols)
+        w = np.full((num_cols, 1), 1 / num_cols)
         p = np.zeros(len(omics_data["Reactions"]))
 
-        # t is table to match and check against MatLab code. 
+        # t is table to match and check against MatLab code.
         t = pd.DataFrame()
         # rxn_hash is the desired output
         rxn_hash = {}
 
-        for rxn in range(0,len(omics_data)):
+        for rxn in range(0, len(omics_data)):
             substr_rxns = [rxn for rxn in omics_data["Reactions"][[rxn]]]
             # Get the indices of the rows where the condition is True
-            mask = omics_data['Reactions'].apply(lambda x: any(substr in x for substr in substr_rxns))
+            mask = omics_data["Reactions"].apply(
+                lambda x: any(substr in x for substr in substr_rxns)
+            )
             idx_gene = mask[mask].index
             nAG = 0
             nMG = 0
             nCG = 0
-            
+
             if len(idx_gene) > 0:
-                #number of genes that map to a reaction
+                # number of genes that map to a reaction
                 nAG = len(idx_gene)
-                for iGene in range(0,nAG):
+                for iGene in range(0, nAG):
                     subset = omics_data.iloc[idx_gene[iGene], 3:9].to_numpy()
                     # Checking for non-empty elements in the subset
-                    non_empty_check = np.vectorize(lambda x: x is not None and x == x)(subset)  # x == x checks for NaN
+                    non_empty_check = np.vectorize(lambda x: x is not None and x == x)(
+                        subset
+                    )  # x == x checks for NaN
                     # Finding the maximum value between the non-empty check and the corresponding row in measuredGeneScore
-                    max_value = np.maximum(non_empty_check, measuredGeneScore[idx_gene[iGene], :])
+                    max_value = np.maximum(
+                        non_empty_check, measuredGeneScore[idx_gene[iGene], :]
+                    )
                     # Multiplying by the weight and adding to nMG
                     nMG += max(sum((max_value * w)))
-                    selected_gene = omics_data['Gene'].iloc[idx_gene[iGene]]
+                    selected_gene = omics_data["Gene"].iloc[idx_gene[iGene]]
 
                     # Finding reactions associated with genes that contain the selected gene
-                    associated_reactions = omics_data['Reactions'][omics_data['Gene'].str.contains(selected_gene)]
+                    associated_reactions = omics_data["Reactions"][
+                        omics_data["Gene"].str.contains(selected_gene)
+                    ]
                     # Checking if there are more than one unique reactions
                     if len(associated_reactions.unique()) > 1:
-                        nCG +=1
-                
-                p[rxn] = (nMG/nAG) * (1 / (1 + (nCG/nAG)))
-            
-            #format table
+                        nCG += 1
+
+                p[rxn] = (nMG / nAG) * (1 / (1 + (nCG / nAG)))
+
+            # format table
             new_row = {
-            'iRxn': rxn,
-            'nMG': nMG,
-            'nCG': nCG,
-            'nAG': nAG,
-            'Values': p[rxn]  #Values is equivalent to Var5 in the MatLab Code
+                "iRxn": rxn,
+                "nMG": nMG,
+                "nCG": nCG,
+                "nAG": nAG,
+                "Values": p[rxn],  # Values is equivalent to Var5 in the MatLab Code
             }
-            
+
             # Append the new row to the table
             t = t.append(new_row, ignore_index=True)
             # Add item to output rxn dictionary
             rxn_hash[omics_data.iloc[rxn, 0]] = p[rxn]
-                
+
         return rxn_hash
-    
 
     @staticmethod
     def gapfill(
