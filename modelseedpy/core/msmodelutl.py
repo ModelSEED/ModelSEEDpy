@@ -352,8 +352,6 @@ class MSModelUtil:
                 metabolites_to_add[cobramet] = stoich
             cobra_reaction.add_metabolites(metabolites_to_add)
             cobra_reaction.reaction
-            print(cobra_reaction.id)
-        print(len(output))
         self.model.add_reactions(output)
         return output
 
@@ -535,6 +533,27 @@ class MSModelUtil:
     #################################################################################
     # Functions related to gapfilling of models
     #################################################################################
+    def convert_solution_to_list(self,solution):
+        """Converting solution to list format, which is easier to work with
+        Parameters
+        ----------
+        solution : dict
+            Specifies the reactions to be added to the model to implement the gapfilling solution
+        """
+        output = []
+        for label in ["new","reversed"]:
+            for rxn_id in solution[label]:
+                output.append([rxn_id, solution[label][rxn_id],label])
+        return output
+
+    def find_item_in_solution(self,input_list,input,ignore_dir=False):
+        for item in input_list:
+            if input[0] == item[0] and input[1] == item[1]:
+                return True
+            elif ignore_dir and input[0] == item[0]:
+                return True
+        return False
+    
     def test_solution(self,solution,targets,medias,thresholds=[0.1],remove_unneeded_reactions=False,do_not_remove_list=[]):
         """Tests if every reaction in a given gapfilling solution is actually needed for growth. Note, this code assumes the gapfilling solution is already integrated.
 
@@ -575,23 +594,11 @@ class MSModelUtil:
         unneeded = []
         #If object is a dictionary, convert to a list
         if isinstance(solution,dict):
-            converted_solution = []
-            types = ["new", "reversed"]
-            for key in types:
-                for rxn_id in solution[key]:
-                    converted_solution.append([rxn_id, solution[key][rxn_id], key])
-            solution = converted_solution
+            solution = self.convert_solution_to_list(solution)
         #Processing solution in standardized format
         for item in solution:
             rxn_id = item[0]    
             rxnobj = self.model.reactions.get_by_id(rxn_id)
-            #Knocking out the reaction to test for the impact on the objective
-            if item[1] == ">":
-                original_bound = rxnobj.upper_bound
-                rxnobj.upper_bound = 0
-            else:
-                original_bound = rxnobj.lower_bound
-                rxnobj.lower_bound = 0
             #Testing all media and target and threshold combinations to see if the reaction is needed
             needed = False
             for (i,target) in enumerate(targets):
@@ -600,6 +607,14 @@ class MSModelUtil:
                     self.pkgmgr.getpkg("KBaseMediaPkg").build_package(medias[i])
                     #Setting the objective
                     self.model.objective = target
+                #Knocking out the reaction to test for the impact on the objective
+                #This has to happen after media is applied in case the reaction is an exchange
+                if item[1] == ">":
+                    original_bound = rxnobj.upper_bound
+                    rxnobj.upper_bound = 0
+                else:
+                    original_bound = rxnobj.lower_bound
+                    rxnobj.lower_bound = 0
                 #Computing the objective value
                 objective = self.model.slim_optimize()
                 if objective < thresholds[i]:
@@ -640,20 +655,14 @@ class MSModelUtil:
             #Do not restore bounds on unneeded reactions and remove reactions from model if their bounds are zero
             removed_rxns = []
             for item in unneeded:
-                dnr = False
-                for dnr_item in do_not_remove_list:
-                    if item[0] == dnr_item[0] and item[1] == dnr_item[1]:
-                        #Restoring bounds on reactions that should not be removed
-                        dnr = True
-                        rxnobj = self.model.reactions.get_by_id(item[0])
-                        if item[1] == ">":
-                            rxnobj.upper_bound = item[3]
-                        else:
-                            rxnobj.lower_bound = item[3]
-                if not dnr:
-                    rxnobj = self.model.reactions.get_by_id(item[0])
-                    if rxnobj.lower_bound == 0 and rxnobj.upper_bound == 0:
-                        removed_rxns.append(rxnobj)
+                rxnobj = self.model.reactions.get_by_id(item[0])
+                if self.find_item_in_solution(do_not_remove_list,item):
+                    if item[1] == ">":
+                        rxnobj.upper_bound = item[3]
+                    else:
+                        rxnobj.lower_bound = item[3]
+                elif rxnobj.lower_bound == 0 and rxnobj.upper_bound == 0 and not self.find_item_in_solution(do_not_remove_list,item,ignore_dir=True):
+                    removed_rxns.append(rxnobj)
             if len(removed_rxns) > 0:
                 self.model.remove_reactions(removed_rxns)
         #Restoring the original objective
@@ -665,6 +674,7 @@ class MSModelUtil:
         return unneeded
 
     def add_gapfilling(self, solution):
+        print("Adding gapfilling",str(solution))
         self.integrated_gapfillings.append(solution)
 
     def create_kb_gapfilling_data(self, kbmodel, atpmedia_ws="94026"):

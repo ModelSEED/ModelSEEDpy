@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import re
+import traceback
 from cobra.core import Model
 from pyeda.inter import (
     expr,
