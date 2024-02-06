@@ -51,7 +51,11 @@ def split_role(role):
     return re.split("\s*;\s+|\s+[\@\/]\s+",role)
 
 class AnnotationOntologyEvidence:
-    def __init__(self, scores={}, ref_entity=None, entity_type=None):
+    def __init__(self, parent, event, term, probability=1, scores={}, ref_entity=None, entity_type=None):
+        self.parent = parent
+        self.event = event
+        self.term = term
+        self.probability = probability
         self.ref_entity = ref_entity
         self.entity_type = entity_type
         self.scores = scores
@@ -60,11 +64,19 @@ class AnnotationOntologyEvidence:
                 logger.warning(item + " not an allowable score type!")
 
     def to_data(self):
-        return {
-            "ref_entity": self.ref_entity,
-            "entity_type": self.entity_type,
-            "scores": self.scores,
+        output = {
+            "event":self.event.method,
+            "term":self.term.id,
+            "ontology":self.term.ontology.id,
+            "probability":self.probability
         }
+        if self.ref_entity:
+            output["ref_entity"] = self.ref_entity
+        if self.entity_type:
+            output["entity_type"] = self.entity_type
+        if self.scores:
+            output["scores"] = self.scores
+        return output
 
 
 class AnnotationOntologyTerm:
@@ -114,11 +126,11 @@ class AnnotationOntologyFeature:
         self.event_terms = {}
         self.term_events = {}
 
-    def add_event_term(self, event, term, scores={}, ref_entity=None, entity_type=None):
+    def add_event_term(self, event, term, scores={}, ref_entity=None, entity_type=None,probability=1):
         if event.id not in self.event_terms:
             self.event_terms[event.id] = {}
         self.event_terms[event.id][term.id] = AnnotationOntologyEvidence(
-            scores, ref_entity, entity_type
+            self,event,term,probability=probability,scores=scores,ref_entity=ref_entity,entity_type=entity_type
         )
         if term.id not in self.term_events:
             self.term_events[term.id] = {}
@@ -250,7 +262,8 @@ class AnnotationOntologyEvent:
                         if "reference" in item["evidence"]:
                             ref_entity = item["evidence"]["reference"][1]
                             entity_type = item["evidence"]["reference"][0]
-                    feature.add_event_term(self, term, scores, ref_entity, entity_type)
+                    probability = 1/len(data["ontology_terms"][feature_id])
+                    feature.add_event_term(self, term, scores, ref_entity, entity_type,probability)
                     if "modelseed_ids" in item:
                         term.add_msrxns(item["modelseed_ids"])
         return self
@@ -349,21 +362,36 @@ class AnnotationOntology:
         ontologies=None,
         merge_all=False,
         cds_features=False,
+        feature_type=None
     ):
         output = {}
         feature_hash = self.genes
         if len(self.genes) == 0 or (cds_features and len(self.cdss) == 0):
             feature_hash = self.cdss
         for feature_id in feature_hash:
-            reactions = feature_hash[feature_id].get_associated_reactions(
-                prioritized_event_list, ontologies, merge_all
-            )
-            for rxn_id in reactions:
-                if rxn_id not in output:
-                    output[rxn_id] = {}
-                if feature_id not in output[rxn_id]:
-                    output[rxn_id][feature_id] = []
-                output[rxn_id][feature_id].append(reactions[rxn_id])
+            if not feature_type or feature_type == self.feature_types[feature_id]:
+                reactions = feature_hash[feature_id].get_associated_reactions(
+                    prioritized_event_list, ontologies, merge_all
+                )
+                for rxn_id in reactions:
+                    if rxn_id not in output:
+                        output[rxn_id] = {}
+                    if feature_id not in output[rxn_id]:
+                        output[rxn_id][feature_id] = {"probability": 0, "evidence": []}
+                    for item in reactions[rxn_id]:
+                        output[rxn_id][feature_id]["evidence"].append(item)
+        for rxn_id in output:
+            total_prob = 0
+            for feature_id in output[rxn_id]:
+                sub_total_prob = 0
+                for evidence in output[rxn_id][feature_id]["evidence"]:
+                    sub_total_prob += evidence["probability"]
+                output[rxn_id][feature_id]["probability"] = sub_total_prob
+                total_prob += sub_total_prob
+            for feature_id in output[rxn_id]:
+                output[rxn_id][feature_id]["probability"] = (
+                    output[rxn_id][feature_id]["probability"] / total_prob
+                )
         return output
 
     def add_term(self, term_or_id, ontology=None):

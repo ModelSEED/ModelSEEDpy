@@ -15,6 +15,7 @@ from modelseedpy.core.msmodel import (
     get_cmp_token,
 )
 from cobra.core.dictlist import DictList
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Tuple, Union
 
 # from gevent.libev.corecext import self
 
@@ -1453,6 +1454,63 @@ class MSTemplate:
             num_roles=len(self.roles),
             num_complexes=len(self.complexes),
         )
+    
+    def remove_reactions(
+        self,
+        reactions: Union[str, Reaction, List[Union[str, Reaction]]],
+        remove_orphans: bool = False,
+    ) -> None:
+        """Remove reactions from the template.
+
+        The change is reverted upon exit when using the model as a context.
+
+        Parameters
+        ----------
+        reactions : list or reaction or str
+            A list with reactions (`cobra.Reaction`), or their id's, to remove.
+            Reaction will be placed in a list. Str will be placed in a list and used to
+            find the reaction in the model.
+        remove_orphans : bool, optional
+            Remove orphaned genes and metabolites from the model as
+            well (default False).
+        """
+        if isinstance(reactions, str) or hasattr(reactions, "id"):
+            warn("need to pass in a list")
+            reactions = [reactions]
+
+        for reaction in reactions:
+            # Make sure the reaction is in the model
+            try:
+                reaction = self.reactions[self.reactions.index(reaction)]
+            except ValueError:
+                warn(f"{reaction} not in {self}")
+
+            else:
+                self.reactions.remove(reaction)
+                
+                """ for met in reaction._metabolites:
+                    if reaction in met._reaction:
+                        met._reaction.remove(reaction)
+                        if context:
+                            context(partial(met._reaction.add, reaction))
+                        if remove_orphans and len(met._reaction) == 0:
+                            self.remove_metabolites(met)
+
+                for gene in reaction._genes:
+                    if reaction in gene._reaction:
+                        gene._reaction.remove(reaction)
+                        if context:
+                            context(partial(gene._reaction.add, reaction))
+
+                        if remove_orphans and len(gene._reaction) == 0:
+                            self.genes.remove(gene)
+                            if context:
+                                context(partial(self.genes.add, gene))
+
+                # remove reference to the reaction in all groups
+                associated_groups = self.get_associated_groups(reaction)
+                for group in associated_groups:
+                    group.remove_members(reaction) """
 
 
 class MSTemplateBuilder:

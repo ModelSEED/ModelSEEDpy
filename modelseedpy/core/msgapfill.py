@@ -142,7 +142,7 @@ class MSGapfill:
         )
         return False
 
-    def prefilter(self,test_conditions=None):
+    def prefilter(self,test_conditions=None,growth_conditions=[]):
         """Prefilters the database by removing any reactions that break specified ATP tests
         Parameters
         ----------
@@ -152,8 +152,10 @@ class MSGapfill:
         if not test_conditions:
             test_conditions = self.test_conditions
         if self.test_conditions:
+            print("PREFILTERING WITH "+str(len(growth_conditions))+" GROWTH CONDITIONS")
             self.gfpkgmgr.getpkg("GapfillingPkg").filter_database_based_on_tests(
-                self.test_conditions
+                self.test_conditions,
+                growth_conditions
             )
             gf_filter = self.gfpkgmgr.getpkg("GapfillingPkg").modelutl.get_attributes(
                 "gf_filter", {}
@@ -199,7 +201,12 @@ class MSGapfill:
 
         # Filtering
         if prefilter:
-            self.prefilter()
+            self.prefilter(growth_conditions=[{
+                "media": media,
+                "is_max_threshold": False,
+                "threshold": minimum_obj,
+                "objective": target,
+            }])
             if not self.test_gapfill_database(media,target,before_filtering=False):
                 return None
 
@@ -276,14 +283,21 @@ class MSGapfill:
         final_media = []
         final_targets = []
         final_thresholds = []
+        growth_conditions = []
         for i,media in enumerate(medias):
             if self.test_gapfill_database(media,targets[i],before_filtering=True):
                 final_media.append(media)
                 final_targets.append(targets[i])
                 final_thresholds.append(thresholds[i])
+                growth_conditions.append({
+                    "media": media,
+                    "is_max_threshold": False,
+                    "threshold": thresholds[i],
+                    "objective": targets[i],
+                })
         # Filtering
         if prefilter:
-            self.prefilter()
+            self.prefilter(growth_conditions=growth_conditions)
             medias = []
             targets = []
             thresholds = []
@@ -412,7 +426,18 @@ class MSGapfill:
             default_minimum_objective = self.default_minimum_objective
         #Running prefiltering once for all media if specified. Rememeber - filtering does not care about the target or media - it is just a set of tests that are run on the database
         if prefilter:
-            self.prefilter()
+            growth_conditions=[]
+            for media in media_list:
+                minimum_obj = default_minimum_objective
+                if media in minimum_objectives:
+                    minimum_obj = minimum_objectives[media]
+                growth_conditions.append({
+                    "media": media,
+                    "is_max_threshold": False,
+                    "threshold": minimum_obj,
+                    "objective": target,
+                })
+            self.prefilter(growth_conditions=growth_conditions)
         #Iterating over all media and running gapfilling
         solution_dictionary = {}
         cumulative_solution = []

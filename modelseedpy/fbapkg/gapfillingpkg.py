@@ -740,7 +740,7 @@ class GapfillingPkg(BaseFBAPkg):
             if min_objective < 0:
                 self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].ub = min_objective
 
-    def filter_database_based_on_tests(self, test_conditions):
+    def filter_database_based_on_tests(self, test_conditions,growth_conditions=[]):
         #Saving the current media
         current_media = self.current_media()
         #Clearing element uptake constraints
@@ -808,7 +808,7 @@ class GapfillingPkg(BaseFBAPkg):
             # Checking for model reactions that can be removed to enable all tests to pass
             self.reset_objective_minimum(0,False)
             filtered_list = self.modelutl.reaction_expansion_test(
-                self.parameters["original_reactions"], test_conditions
+                self.parameters["original_reactions"], test_conditions,positive_growth=growth_conditions
             )
             for item in filtered_list:
                 logger.debug("Filtering:" + item[0].id + item[1])

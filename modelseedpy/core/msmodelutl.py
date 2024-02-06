@@ -125,8 +125,10 @@ class MSModelUtil:
         self.test_objective = None
         self.reaction_scores = None
         self.score = None
+        self.breaking_reaction = None
         self.integrated_gapfillings = []
         self.attributes = {}
+        self.atp_tests = None
         if hasattr(self.model, "computed_attributes"):
             if self.model.computed_attributes:
                 self.attributes = self.model.computed_attributes
@@ -136,6 +138,88 @@ class MSModelUtil:
             self.attributes["auxotrophy"] = {}
         if "fbas" not in self.attributes:
             self.attributes["fbas"] = {}
+
+    ########Functions related to ATP gapfilling method
+    def get_atputl(self,atp_media_filename=None,core_template=None,gapfilling_delta=0,max_gapfilling=0,forced_media=[],remake_atputil=False):
+        """
+        Returns and creates, if needed, an atp correction object for the model
+
+        Parameters
+        ----------
+        core_template (optional) : MSTemplate object with core reactions
+        atp_media_filename (optional) : string to tsv file with ATP media formulations
+        gapfilling_delta (optional) : maximum difference in gapfilling to accept ATP condition
+        max_gapfilling (optional) : maximum gapfilling allowable to accept an ATP growth condition
+        forced_media (optional) : list of media in which model MUST make ATP
+        
+        Returns
+        -------
+        MSATPCorrection : Object for ATP correction
+
+        Raises
+        ------
+        """
+        if not self.atputl or remake_atputil:
+            from modelseedpy.core.msatpcorrection import MSATPCorrection 
+            self.atputl = MSATPCorrection(
+                self,core_template,[],
+                load_default_medias=True,
+                max_gapfilling=max_gapfilling,
+                gapfilling_delta=gapfilling_delta,
+                forced_media=forced_media,
+                default_media_path=atp_media_filename
+            )
+            self.atputl = MSATPCorrection(self.model)
+        return self.atputl
+    
+    def get_atp_tests(self,core_template=None,atp_media_filename=None,recompute=False,remake_atputil=False):
+        """
+        Attempts to get ATP tests from attributes and failing that compute denovo using MSATPCorrection
+
+        Parameters
+        ----------
+        core_template (optional) : MSTemplate object with core reactions
+        atp_media_filename (optional) : string to tsv file with ATP media formulations
+
+        Returns
+        -------
+        list<{"media":obj media,"is_max_threshold":bool,"threshold":float,"objective":string}>
+            List of test specifications
+
+        Raises
+        ------
+        """
+        #Creating MSATPCorrection object which we need regardless
+        atpcorrection = self.get_atputl(core_template=core_template,atp_media_filename=atp_media_filename,remake_atputil=remake_atputil)
+        #Returning cached tests if available
+        if self.atp_tests and not recompute:
+            return self.atp_tests
+        #Attempting to pull ATP tests from attributes
+        if not recompute:
+            print("Getting tests from attributes")
+            atp_analysis = self.get_attributes("ATP_analysis",None)
+            if atp_analysis:
+                if "tests" in atp_analysis:
+                    self.atp_tests = []
+                    for item in atp_analysis["tests"]:
+                        if item in atpcorrection.media_hash:
+                            self.atp_tests.append({
+                                "media":atpcorrection.media_hash[item],
+                                "is_max_threshold":True,
+                                "threshold":atp_analysis["tests"][item]["threshold"],
+                                "objective":atp_analysis["tests"][item]["objective"]
+                            })
+                    return self.atp_tests
+                else:
+                    logger.warning("tests attribute missing in ATP analysis. Must recalculate ATP tests!")
+            else:
+                logger.warning("ATP analysis attributes missing. Must recalculate ATP tests!")
+        #If recompute called for or if attributes are missing, recompute tests
+        if not core_template:
+            logger.warning("Cannot recompute ATP tests without a core template!")
+            return None
+        self.atp_tests = atpcorrection.build_tests()
+        return self.atp_tests   
 
     def compute_automated_reaction_scores(self):
         """
@@ -758,10 +842,10 @@ class MSModelUtil:
         else:
             pkgmgr = MSPackageManager.get_pkg_mgr(model)
         model.objective = condition["objective"]
-        if condition["is_max_threshold"]:
-            model.objective.direction = "max"
-        else:
-            model.objective.direction = "min"
+        #if condition["is_max_threshold"]:
+        model.objective.direction = "max"
+        #else: TODO - need to revisit this
+        #    model.objective.direction = "min"
         pkgmgr.getpkg("KBaseMediaPkg").build_package(condition["media"])
 
     def test_single_condition(self, condition, apply_condition=True, model=None):
@@ -787,7 +871,6 @@ class MSModelUtil:
         if model is None:
             model = self.model
         if apply_condition:
-            print("applying - bad")
             self.apply_test_condition(condition, model)
         new_objective = model.slim_optimize()
         value = new_objective
@@ -812,15 +895,16 @@ class MSModelUtil:
             )
             return False
         if value >= condition["threshold"] and condition["is_max_threshold"]:
-            # logger.debug("Failed high:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
+            logger.debug("Failed high:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
             return False
         elif value <= condition["threshold"] and not condition["is_max_threshold"]:
-            # logger.debug("Failed low:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
+            logger.info("Failed low:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
             return False
         self.test_objective = new_objective
+        logger.debug("Passed:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
         return True
 
-    def test_condition_list(self, condition_list, model=None):
+    def test_condition_list(self, condition_list, model=None,positive_growth=[]):
         """Runs a set of test conditions to determine if objective values on set medias exceed thresholds
 
         Parameters
@@ -841,11 +925,11 @@ class MSModelUtil:
         if model == None:
             model = self.model
         for condition in condition_list:
-            if not self.test_single_condition(condition, True, model):
+            if not self.test_single_condition(condition,apply_condition=True,model=model):
                 return False
         return True
 
-    def linear_expansion_test(self, reaction_list, condition, currmodel):
+    def linear_expansion_test(self, reaction_list, condition, currmodel,positive_growth=[]):
         """Tests addition of reactions one at a time
 
         Parameters
@@ -862,7 +946,7 @@ class MSModelUtil:
         ------
         """
         # First run the full test
-        if self.test_single_condition(condition, False, currmodel):
+        if self.test_single_condition(condition, apply_condition=False, model=currmodel,positive_growth=positive_growth):
             return []
         # First knockout all reactions in the input list and save original bounds
         filtered_list = []
@@ -879,7 +963,7 @@ class MSModelUtil:
         for item in reaction_list:
             if item[1] == ">":
                 item[0].upper_bound = original_bound[count]
-                if not self.test_single_condition(condition, False, currmodel):
+                if not self.test_single_condition(condition, apply_condition=False, model=currmodel):
                     # logger.debug(item[0].id+":"+item[1])
                     item[0].upper_bound = 0
                     if item not in filtered_list:
@@ -888,7 +972,7 @@ class MSModelUtil:
                         filtered_list.append(item)
             else:
                 item[0].lower_bound = original_bound[count]
-                if not self.test_single_condition(condition, False, currmodel):
+                if not self.test_single_condition(condition, apply_condition=False, model=currmodel):
                     # logger.debug(item[0].id+":"+item[1])
                     item[0].lower_bound = 0
                     if item not in filtered_list:
@@ -898,7 +982,7 @@ class MSModelUtil:
             count += 1
         return filtered_list
 
-    def binary_expansion_test(self, reaction_list, condition, currmodel, depth=0):
+    def binary_expansion_test(self, reaction_list, condition, currmodel, depth=0,positive_growth=[]):
         """Conducts a binary search for bad reaction combinations
         Parameters
         ----------
@@ -918,18 +1002,38 @@ class MSModelUtil:
         newdepth = depth + 1
         filtered_list = []
         # First run the full test
-        if self.test_single_condition(condition, False, currmodel):
+        if self.test_single_condition(condition,apply_condition=False,model=currmodel):
             return []
         # Check if input list contains only one reaction:
         if len(reaction_list) == 1:
+            print("Failed:"+reaction_list[0][1]+reaction_list[0][0].id)
             if reaction_list[0][1] == ">":
                 reaction_list[0].append(reaction_list[0][0].upper_bound)
                 reaction_list[0][0].upper_bound = 0
             else:
                 reaction_list[0].append(reaction_list[0][0].lower_bound)
                 reaction_list[0][0].lower_bound = 0
-            reaction_list[0].append(self.score)
-            filtered_list.append(reaction_list[0])
+            #Check if the reaction passes the positive growth test
+            success = True
+            if len(positive_growth) > 0:
+                #Testing positive growth conditions
+                for pos_condition in positive_growth:
+                    if not self.test_single_condition(pos_condition,apply_condition=True,model=currmodel):
+                        print("Does not pass positive growth tests:"+reaction_list[0][1]+reaction_list[0][0].id)
+                        success = False
+                        break
+                #Restoring current test condition
+                self.apply_test_condition(condition)
+            if success:
+                reaction_list[0].append(self.score)
+                filtered_list.append(reaction_list[0])
+            else:
+                #Restoring reaction
+                if reaction_list[0][1] == ">":
+                    reaction_list[0][0].upper_bound = reaction_list[0][2]
+                else:
+                    reaction_list[0][0].lower_bound = reaction_list[0][2]
+                self.breaking_reaction = reaction_list[0][0]
             return filtered_list
         # Break reaction list into two
         original_bound = []
@@ -950,10 +1054,13 @@ class MSModelUtil:
                     item[0].lower_bound = 0
         # Submitting first half of reactions for testing
         new_filter = self.binary_expansion_test(
-            sub_lists[0], condition, currmodel, newdepth
+            sub_lists[0], condition, currmodel,depth=newdepth,positive_growth=positive_growth
         )
         for item in new_filter:
             filtered_list.append(item)
+        if self.breaking_reaction != None:
+            print("Ending early due to breaking reaction:"+self.breaking_reaction.id)
+            return filtered_list
         # Submitting second half of reactions for testing - now only breaking reactions are removed from the first list
         for i, item in enumerate(reaction_list):
             if i >= midway_point:
@@ -962,18 +1069,36 @@ class MSModelUtil:
                 else:
                     item[0].lower_bound = original_bound[i]
         new_filter = self.binary_expansion_test(
-            sub_lists[1], condition, currmodel, newdepth
+            sub_lists[1], condition, currmodel,depth=newdepth,positive_growth=positive_growth
         )
         for item in new_filter:
             filtered_list.append(item)
         return filtered_list
 
+    def check_if_solution_exists(self, reaction_list, condition, model):
+        original_bound = []
+        for i, item in enumerate(reaction_list):
+            if item[1] == ">":
+                original_bound.append(item[0].upper_bound)
+                item[0].upper_bound = 0
+            else:
+                original_bound.append(item[0].lower_bound)
+                item[0].lower_bound = 0
+        result = self.test_single_condition(condition,model=model)
+        for i, item in enumerate(reaction_list):
+            if item[1] == ">":
+                item[0].upper_bound = original_bound[i]
+            else:
+                item[0].lower_bound = original_bound[i]
+        return result          
+    
     def reaction_expansion_test(
         self,
         reaction_list,
         condition_list,
         binary_search=True,
         attribute_label="gf_filter",
+        positive_growth=[]
     ):
         """Adds reactions in reaction list one by one and appplies tests, filtering reactions that fail
 
@@ -993,24 +1118,43 @@ class MSModelUtil:
         ------
         """
         logger.debug(f"Expansion started! Binary = {binary_search}")
+        self.breaking_reaction = None
         filtered_list = []
         for condition in condition_list:
             logger.debug(f"testing condition {condition}")
             currmodel = self.model
             tic = time.perf_counter()
             new_filtered = []
+            if not self.check_if_solution_exists(reaction_list, condition, currmodel):
+                print("No solution exists that passes tests for condition "+condition["media"].id)
+                return None
             with currmodel:
                 self.apply_test_condition(condition)
                 if binary_search:
-                    new_filtered = self.binary_expansion_test(
-                        reaction_list, condition, currmodel
-                    )
-                    for item in new_filtered:
-                        if item not in filtered_list:
-                            filtered_list.append(item)
+                    done = False
+                    while not done:
+                        new_filtered = self.binary_expansion_test(
+                            reaction_list, condition, currmodel,positive_growth=positive_growth
+                        )
+                        for item in new_filtered:
+                            if item not in filtered_list:
+                                filtered_list.append(item)
+                        if self.breaking_reaction == None:
+                            done = True
+                        else:
+                            #Remove breaking reaction from reaction_list
+                            print("Keeping breaking reaction:"+self.breaking_reaction.id)
+                            for i in range(len(reaction_list)):
+                                if reaction_list[i][0] == self.breaking_reaction:
+                                    del reaction_list[i]
+                                    break
+                            self.breaking_reaction = None
+                            if not self.check_if_solution_exists(reaction_list, condition, currmodel):
+                                print("No solution exists after retaining breaking reaction:"+self.breaking_reaction.id)
+                                return None
                 else:
                     new_filtered = self.linear_expansion_test(
-                        reaction_list, condition, currmodel
+                        reaction_list, condition, currmodel,positive_growth=positive_growth
                     )
                     for item in new_filtered:
                         if item not in filtered_list:
