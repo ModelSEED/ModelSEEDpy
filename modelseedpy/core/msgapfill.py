@@ -130,9 +130,9 @@ class MSGapfill:
         if before_filtering:
             filter_msg = " before filtering "
             note = "FBF"
-        gf_sensitivity[media.id][target][
-            note
-        ] = self.mdlutl.find_unproducible_biomass_compounds(target)
+        gf_sensitivity[media.id][target][note] = (
+            self.mdlutl.find_unproducible_biomass_compounds(target)
+        )
         if target != "rxn00062_c0":
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         logger.warning(
@@ -387,71 +387,70 @@ class MSGapfill:
                 gf_sensitivity[solution["media"].id] = {}
             if solution["target"] not in gf_sensitivity[solution["media"].id]:
                 gf_sensitivity[solution["media"].id][solution["target"]] = {}
-            gf_sensitivity[solution["media"].id][solution["target"]][
-                "success"
-            ] = self.mdlutl.find_unproducible_biomass_compounds(
-                solution["target"], cumulative_solution
+            gf_sensitivity[solution["media"].id][solution["target"]]["success"] = (
+                self.mdlutl.find_unproducible_biomass_compounds(
+                    solution["target"], cumulative_solution
+                )
             )
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)
 
-    def compute_reaction_weights_from_expression_data(self, omics_data, conditions=[]):
+    def compute_reaction_weights_from_expression_data(self, omics_data, annoont):
         """Computing reaction weights based on input gene-level omics data
         Parameters
         ----------
         omics_data : pandas dataframe with genes as rows and conditions as columns
             Specifies the reactions to be added to the model to implement the gapfilling solution
-        conditions : list
-            Optional array containing the IDs of the columns in omics_data from which data should be used.
-            If an empty array (or no array) is supplied, data from all columns will be used. When multiple columns are
-            used, the data from those columns should be normalized first, then added together
+        annoont : annoont object
+            Contains reaction, feature id, ontologies, probabilities. Restructured into dataframe in function
         Returns :
             A dictionary with Rxns as the keys and calculated result as the value.
         """
-        # Validitions:
-        # 1.) An conditions listed in the conditions argument should match the columns in the omics_data dataframe
-        # 2.) Most (~80%) of the genes in the model should match genes in the omics_data dataframe
-        # 3.) The omics_data dataframe should have at least 2 columns
-        # 4.) The omics_data dataframe should have at least 2 rows
-        # 5.) Logging should be used to report out which genes in the model don't match any genes in the omics_data dataframe
 
-        # Assumptions:
-        # omics_data is an input with the following columns:
-        # Col 1: Gene
-        # Col 2: Reactions
-        # Cols 3-9: Annotations
-        # Unlike with the MATLAB code, this will not check if rxn is not in draft - this is only making calculations based on the columns in omics_data.
+        ### Restructure annoont into Dataframe
+        rows_list = []
+        for reaction, genes in annoont.get_reaction_gene_hash().items():
+            for gene, gene_info in genes.items():
+                # Initialize the row with 'Gene' and 'Reactions'
+                row = {"Gene": gene, "Reactions": reaction}
+                # Loop through each evidence in the gene's evidence list
+                for evidence in gene_info["evidence"]:
+                    # Construct column name from the event and ontology for uniqueness
+                    column_name = f"{evidence['ontology']}"
+                    if column_name in row:
+                        row[column_name] = f"{row[column_name]}, {evidence['term']}"
+                    else:
+                        row[column_name] = evidence["term"]
+                rows_list.append(row)
+        restructured_anoot = pd.DataFrame(rows_list)
 
-        # Notes:
-        # This has only been tested on dummy data and in this case python performs the same as MATLAB. However, this needs to be tested with an example input.
-        # Two outputs are currently created.
-        # A table that matches with t in the MATLAB code.
-        # The requested hash (dictionary) with Rxns and floats.
-        # Many more inputs were required with the MATLAB code, this has attempted to condense everything to handle the single input.
-        # Conditions has not been added yet. I think as other questions are answered, the use for this will be more clear.
+        ### Integrate Omics, set weights, find indexes for features
+        feature_ids_set = set(omics_data["feature_ids"])
 
-        # Questions
-        # When might the example data be updated?
-        # Are other inputs required?
-        # Is this output (Dictionary with RXN: Value), correct?
-        # When will the next steps for setting up the kbase jupyter notebook be ready?
+        # Find indices where 'Gene' values are in 'feature_ids'
+        # isin method returns a boolean series that is True where tbl_supAno['Gene'] is in feature_ids_set
+        mask = restructured_anoot["Gene"].isin(feature_ids_set)
+        # Get the indices of True values in the mask
+        idx_measuredGene = mask[mask].index.tolist()
+        # Calculate the dimensions for the measuredGeneScore array
+        num_genes = len(restructured_anoot["Gene"])
+        num_columns = len(restructured_anoot.columns[2:])
+        # Initialize the measuredGeneScore array with zeros
+        measuredGeneScore = np.zeros((num_genes, num_columns))
+        measuredGeneScore[idx_measuredGene, :] = 1
+        num_weights = len(restructured_anoot.columns[3:])
+        w = np.repeat(1 / num_weights, num_weights)
 
-        measuredGeneScore = np.zeros(
-            (omics_data.shape[0], len(omics_data.columns[3:10]))
-        )
-        num_cols = len(omics_data.columns[3:10])
+        ### Calculate Weights and generate the reaction/weight hash
+        num_cols = len(restructured_anoot.columns[2:])
         w = np.full((num_cols, 1), 1 / num_cols)
-        p = np.zeros(len(omics_data["Reactions"]))
-
-        # t is table to match and check against MatLab code.
-        t = pd.DataFrame()
-        # rxn_hash is the desired output
-        rxn_hash = {}
-
-        for rxn in range(0, len(omics_data)):
-            substr_rxns = [rxn for rxn in omics_data["Reactions"][[rxn]]]
+        p = np.zeros(len(restructured_anoot["Reactions"]))
+        # computed_weights is the rxn_hash ({rxn: weight, ...})
+        computed_weights = {}
+        for rxn in range(0, len(restructured_anoot)):
+            substr_rxns = [rxn for rxn in restructured_anoot["Reactions"][[rxn]]]
             # Get the indices of the rows where the condition is True
-            mask = omics_data["Reactions"].apply(
+            mask = restructured_anoot["Reactions"].apply(
                 lambda x: any(substr in x for substr in substr_rxns)
             )
             idx_gene = mask[mask].index
@@ -463,22 +462,22 @@ class MSGapfill:
                 # number of genes that map to a reaction
                 nAG = len(idx_gene)
                 for iGene in range(0, nAG):
-                    subset = omics_data.iloc[idx_gene[iGene], 3:9].to_numpy()
+                    subset = restructured_anoot.iloc[idx_gene[iGene], 2:].to_numpy()
                     # Checking for non-empty elements in the subset
                     non_empty_check = np.vectorize(lambda x: x is not None and x == x)(
                         subset
-                    )  # x == x checks for NaN
+                    )
                     # Finding the maximum value between the non-empty check and the corresponding row in measuredGeneScore
                     max_value = np.maximum(
                         non_empty_check, measuredGeneScore[idx_gene[iGene], :]
                     )
                     # Multiplying by the weight and adding to nMG
                     nMG += max(sum((max_value * w)))
-                    selected_gene = omics_data["Gene"].iloc[idx_gene[iGene]]
+                    selected_gene = restructured_anoot["Gene"].iloc[idx_gene[iGene]]
 
                     # Finding reactions associated with genes that contain the selected gene
-                    associated_reactions = omics_data["Reactions"][
-                        omics_data["Gene"].str.contains(selected_gene)
+                    associated_reactions = restructured_anoot["Reactions"][
+                        restructured_anoot["Gene"].str.contains(selected_gene)
                     ]
                     # Checking if there are more than one unique reactions
                     if len(associated_reactions.unique()) > 1:
@@ -486,21 +485,10 @@ class MSGapfill:
 
                 p[rxn] = (nMG / nAG) * (1 / (1 + (nCG / nAG)))
 
-            # format table
-            new_row = {
-                "iRxn": rxn,
-                "nMG": nMG,
-                "nCG": nCG,
-                "nAG": nAG,
-                "Values": p[rxn],  # Values is equivalent to Var5 in the MatLab Code
-            }
+            # Add item to output rxn hash dictionary
+            computed_weights[restructured_anoot.iloc[rxn, 0]] = p[rxn]
 
-            # Append the new row to the table
-            t = t.append(new_row, ignore_index=True)
-            # Add item to output rxn dictionary
-            rxn_hash[omics_data.iloc[rxn, 0]] = p[rxn]
-
-        return rxn_hash
+        return computed_weights
 
     @staticmethod
     def gapfill(
