@@ -21,10 +21,10 @@ from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
-    logging.WARNING
+    logging.INFO
 )  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
-base_blacklist = {}
+base_blacklist = {}#{"rxn00062":"="}
 zero_threshold = 1e-8
 
 
@@ -74,7 +74,7 @@ class GapfillingPkg(BaseFBAPkg):
             parameters,
             [],
             {
-                "auto_sink": ["cpd02701", "cpd11416", "cpd15302", "cpd03091"],
+                "auto_sink": ["cpd01042","cpd02701", "cpd11416", "cpd15302", "cpd03091"],
                 "extend_with_template": 1,
                 "model_penalty": 1,
                 "default_gapfill_models": [],
@@ -119,7 +119,7 @@ class GapfillingPkg(BaseFBAPkg):
 
         # Creating the gapfilling objective function and saving it under self.parameters["gfobj"]
         self.build_gapfilling_objective_function()
-
+        
     def extend_model_for_gapfilling(self):
         """Extends the model for gapfilling
         Parameters
@@ -191,20 +191,25 @@ class GapfillingPkg(BaseFBAPkg):
             reaction_scores = self.parameters["reaction_scores"]
         for reaction in self.gapfilling_penalties:
             rxnid = reaction.split("_")[0]
+            highest_score = 0
             if rxnid in reaction_scores:
-                highest_score = 0
                 for gene in reaction_scores[rxnid]:
-                    if highest_score < reaction_scores[rxnid][gene]:
-                        highest_score = reaction_scores[rxnid][gene]
-                factor = 0.1
-                if "reverse" in self.gapfilling_penalties[reaction]:
-                    self.gapfilling_penalties[reaction]["reverse"] = (
-                        factor * self.gapfilling_penalties[reaction]["reverse"]
-                    )
-                if "forward" in self.gapfilling_penalties[reaction]:
-                    self.gapfilling_penalties[reaction]["forward"] = (
-                        factor * self.gapfilling_penalties[reaction]["forward"]
-                    )
+                    score = None
+                    if isinstance(reaction_scores[rxnid][gene], dict):
+                        score = reaction_scores[rxnid][gene]["probability"]
+                    else:
+                        score = reaction_scores[rxnid][gene]
+                    if highest_score < score:
+                        highest_score = score
+            factor = 2-highest_score
+            if "reverse" in self.gapfilling_penalties[reaction]:
+                self.gapfilling_penalties[reaction]["reverse"] = (
+                    factor * self.gapfilling_penalties[reaction]["reverse"]
+                )
+            if "forward" in self.gapfilling_penalties[reaction]:
+                self.gapfilling_penalties[reaction]["forward"] = (
+                    factor * self.gapfilling_penalties[reaction]["forward"]
+                )
 
     def build_gapfilling_objective_function(self):
         """Builds gapfilling objective function for model
@@ -460,7 +465,7 @@ class GapfillingPkg(BaseFBAPkg):
         new_exchange, new_demand = self.extend_model_with_template_metabolites(
             template, index
         )
-
+        
         for template_reaction in template.reactions:
             if template_reaction.reference_id in self.parameters["blacklist"]:
                 continue
@@ -711,8 +716,10 @@ class GapfillingPkg(BaseFBAPkg):
     def test_gapfill_database(self):
         self.reset_objective_minimum(0,False)
         self.model.objective = self.original_objective
+        with open("test_gapfill_database.lp", "w") as out:
+            out.write(str(self.model.solver))
         solution = self.model.optimize()
-        logger.debug(
+        logger.info(
             "Objective with gapfill database:"
             + str(solution.objective_value)
             + "; min objective:"

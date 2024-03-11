@@ -236,6 +236,8 @@ class MSModelUtil:
         self.metabolite_hash = {}
         self.search_metabolite_hash = {}
         for met in self.model.metabolites:
+            if len(met.id.split("_")) == 2:
+                self.add_name_to_metabolite_hash(met.id.split("_")[0],met)
             self.add_name_to_metabolite_hash(met.id, met)
             self.add_name_to_metabolite_hash(met.name, met)
             for anno in met.annotation:
@@ -248,11 +250,13 @@ class MSModelUtil:
     def add_name_to_metabolite_hash(self, name, met):
         if name not in self.metabolite_hash:
             self.metabolite_hash[name] = []
-        self.metabolite_hash[name].append(met)
+        if met not in self.metabolite_hash[name]:
+            self.metabolite_hash[name].append(met)
         sname = MSModelUtil.search_name(name)
         if sname not in self.search_metabolite_hash:
             self.search_metabolite_hash[sname] = []
-        self.search_metabolite_hash[sname].append(met)
+        if met not in self.search_metabolite_hash[sname]:
+            self.search_metabolite_hash[sname].append(met)
 
     def find_met(self, name, compartment=None):
         if self.metabolite_hash == None:
@@ -898,7 +902,7 @@ class MSModelUtil:
             logger.debug("Failed high:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
             return False
         elif value <= condition["threshold"] and not condition["is_max_threshold"]:
-            logger.info("Failed low:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
+            print("Failed low:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
             return False
         self.test_objective = new_objective
         logger.debug("Passed:"+condition["media"].id+":"+str(new_objective)+";"+str(condition["threshold"]))
@@ -1148,10 +1152,10 @@ class MSModelUtil:
                                 if reaction_list[i][0] == self.breaking_reaction:
                                     del reaction_list[i]
                                     break
-                            self.breaking_reaction = None
                             if not self.check_if_solution_exists(reaction_list, condition, currmodel):
                                 print("No solution exists after retaining breaking reaction:"+self.breaking_reaction.id)
                                 return None
+                            self.breaking_reaction = None
                 else:
                     new_filtered = self.linear_expansion_test(
                         reaction_list, condition, currmodel,positive_growth=positive_growth
