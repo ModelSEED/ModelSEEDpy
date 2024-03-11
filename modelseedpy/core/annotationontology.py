@@ -340,20 +340,21 @@ class AnnotationOntology:
         prioritized_event_list=None,
         ontologies=None,
         merge_all=False,
-        cds_features=False,
+        feature_type=None,
         translate_to_rast=True,
     ):
         output = {}
         feature_hash = self.genes
-        if len(self.genes) == 0 or (cds_features and len(self.cdss) == 0):
+        if len(self.genes) == 0 or (feature_type == "cds" and len(self.cdss) > 0):
             feature_hash = self.cdss
         for feature_id in feature_hash:
-            feature = feature_hash[feature_id]
-            if feature not in output:
-                output[feature] = {}
-            output[feature] = feature.get_associated_terms(
-                prioritized_event_list, ontologies, merge_all, translate_to_rast
-            )
+            if not feature_type or feature_type == self.feature_types[feature_id]:
+                feature = feature_hash[feature_id]
+                if feature not in output:
+                    output[feature] = {}
+                output[feature] = feature.get_associated_terms(
+                    prioritized_event_list, ontologies, merge_all, translate_to_rast
+                )
         return output
 
     def get_reaction_gene_hash(
