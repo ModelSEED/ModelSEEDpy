@@ -15,7 +15,6 @@ from zipfile import ZipFile, ZIP_LZMA
 from itertools import chain
 from typing import Union, Iterable
 from copy import deepcopy
-from icecream import ic
 
 # from cplex import Cplex
 import logging, json, os, re

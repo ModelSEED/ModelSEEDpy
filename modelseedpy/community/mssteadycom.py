@@ -1,5 +1,3 @@
-from icecream import ic
-
 from modelseedpy import FBAHelper
 from modelseedpy.core.exceptions import (
     ObjectAlreadyDefinedError,

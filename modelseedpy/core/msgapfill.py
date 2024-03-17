@@ -485,7 +485,7 @@ class MSGapfill:
                     if gapfilling_mode == "Cumulative":
                         self.gfpkgmgr.getpkg("GapfillingPkg").compute_gapfilling_penalties(exclusion_solution=cumulative_solution,reaction_scores=self.reaction_scores)
                         self.gfpkgmgr.getpkg("GapfillingPkg").build_gapfilling_objective_function()
-        if gapfilling_mode == "Global":b
+        if gapfilling_mode == "Global":
             #Now we run simultaneous gapfilling on a combination of all our various gapfilled models
             full_solution = self.run_global_gapfilling(
                 media_list,

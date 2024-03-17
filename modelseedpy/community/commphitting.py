@@ -32,7 +32,6 @@ from pandas import DataFrame
 from itertools import chain
 from pprint import pprint
 from h5py import File
-from icecream import ic
 import numpy as np
 import cobra.io
 
