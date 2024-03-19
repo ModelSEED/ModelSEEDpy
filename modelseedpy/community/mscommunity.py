@@ -149,7 +149,7 @@ class MSCommunity:
         ) = self.kinetic_coeff = self.modelseed_db_path = None
         self.species = DictList()
         # Computing data from model
-        msid_cobraid_hash = FBAHelper.msid_hash(model)
+        msid_cobraid_hash = self.mdlutl.msid_hash()
         if "cpd11416" not in msid_cobraid_hash:
             logger.critical("Could not find biomass compound")
         other_biomass_cpds = []
@@ -240,7 +240,7 @@ class MSCommunity:
                         met.id = output[0] + "_" + output[1] + str(index)
                 if met.id not in newmodel.metabolites:
                     new_metabolites.append(met)
-                    if met.id == "cpd11416":
+                    if newutl.metabolite_msid(met) == "cpd11416":
                         biomass_compounds.append(met)
             # Rename reactions
             for rxn in model.reactions:
