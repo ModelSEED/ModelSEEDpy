@@ -134,8 +134,15 @@ class MSCommunity:
         lp_filename=None,  # specify a filename to create an lp file
     ):
         # Setting model and package manager
-        self.model, self.lp_filename, self.pfba = model, lp_filename, pfba
-        self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.mdlutl = model
+        else:
+            self.model = model
+            self.mdlutl = MSModelUtil.get(model)
+        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)        
+        self.lp_filename = lp_filename
+        self.pfba = pfba
         self.gapfillings = {}
         # Define Data attributes as None
         self.solution = (
@@ -151,7 +158,7 @@ class MSCommunity:
         ) = self.kinetic_coeff = self.modelseed_db_path = None
         self.species = DictList()
         # Computing data from model
-        msid_cobraid_hash = FBAHelper.msid_hash(model)
+        msid_cobraid_hash = self.mdlutl.msid_hash()
         if "cpd11416" not in msid_cobraid_hash:
             logger.critical("Could not find biomass compound")
             raise KeyError("Could not find biomass compound for the model.")
@@ -314,7 +321,7 @@ class MSCommunity:
         newutl = MSModelUtil(newmodel)
         newutl.add_exchanges_for_metabolites([comm_biomass], 0, 100, "SK_")
         return (
-            MSCommunity(model=newmodel, names=names, abundances=abundances),
+            MSCommunity(model=newutl, names=names, abundances=abundances),
             biomass_indices_dict,
         )
 
