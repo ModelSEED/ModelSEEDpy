@@ -156,18 +156,18 @@ class MSCommunity:
             logger.critical("Could not find biomass compound")
             raise KeyError("Could not find biomass compound for the model.")
         other_biomass_cpds = []
-        for self.biomass_cpd in msid_cobraid_hash["cpd11416"]:
-            print(self.biomass_cpd)
-            if self.biomass_cpd.compartment == "c0":
+        for biomass_cpd in msid_cobraid_hash["cpd11416"]:
+            if biomass_cpd.compartment == "c0":
+                self.biomass_cpd = biomass_cpd
                 for reaction in self.model.reactions:
-                    if self.biomass_cpd in reaction.metabolites:
+                    if biomass_cpd in reaction.metabolites:
                         if (
-                            reaction.metabolites[self.biomass_cpd] == 1
+                            reaction.metabolites[biomass_cpd] == 1
                             and len(reaction.metabolites) > 1
                         ):
                             self.primary_biomass = reaction
                         elif (
-                            reaction.metabolites[self.biomass_cpd] < 0
+                            reaction.metabolites[biomass_cpd] < 0
                             and len(reaction.metabolites) == 1
                         ):
                             self.biomass_drain = reaction
