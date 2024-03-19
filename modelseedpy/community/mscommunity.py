@@ -207,6 +207,7 @@ class MSCommunity:
             newmodel = basemodel
         else:
             newmodel = Model(mdlid, name)
+        newutl = MSModelUtil.get(newmodel)
         biomass_compounds = []
         index = 1
         biomass_index = 2
