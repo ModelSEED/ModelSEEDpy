@@ -112,7 +112,6 @@ class MSCommunity:
         ids=None,
         abundances=None,
         kinetic_coeff=2000,
-        flux_limit=300,
         lp_filename=None,
         printing=False,
     ):
@@ -136,8 +135,6 @@ class MSCommunity:
         self.pkgmgr = MSPackageManager.get_pkg_mgr(self.util.model)
         msid_cobraid_hash = self.util.msid_hash()
         # print(msid_cobraid_hash)
-        write_sbml_model(model, "test_comm.xml")
-
         if "cpd11416" not in msid_cobraid_hash:
             raise KeyError("Could not find biomass compound for the model.")
         other_biomass_cpds = []
@@ -185,26 +182,6 @@ class MSCommunity:
         if isinstance(abundances, dict):
             self.set_abundance(abundances)
         self.pkgmgr.getpkg("CommKineticPkg").build_package(kinetic_coeff, self)
-        for member in self.members:
-            vars_coef = {}
-            for rxn in self.util.model.reactions:
-                if (
-                    "EX_" not in rxn.id
-                    and member.index == FBAHelper.rxn_compartment(rxn)[1:]
-                ):
-                    vars_coef[rxn.forward_variable] = vars_coef[
-                        rxn.reverse_variable
-                    ] = 1
-            print(member.id, flux_limit, member.abundance)
-            self.util.create_constraint(
-                Constraint(
-                    Zero,
-                    lb=0,
-                    ub=flux_limit * member.abundance,
-                    name=f"{member.id}_resource_balance",
-                ),
-                coef=vars_coef,
-            )
 
     # Manipulation functions
     def set_abundance(self, abundances):
