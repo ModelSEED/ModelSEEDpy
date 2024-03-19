@@ -321,7 +321,7 @@ class MSCommunity:
         newmodel.add_reactions([comm_biorxn])
 
         # create a biomass sink reaction
-        newutl = MSModelUtil(newmodel)
+        newutl = MSModelUtil.get(newmodel)
         newutl.add_exchanges_for_metabolites([comm_biomass], 0, 100, "SK_")
         return (
             MSCommunity(model=newutl, names=names, abundances=abundances),
