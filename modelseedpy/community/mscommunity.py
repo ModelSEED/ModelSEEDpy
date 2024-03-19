@@ -128,7 +128,6 @@ class MSCommunity:
     def __init__(
         self,
         model=None,  # the model that will be defined
-        models: list = None,  # the list of models that will be assembled into a community
         names=[],
         abundances=None,  # names and abundances of the community species
         pfba=True,  # specify whether parsimonious FBA will be simulated
@@ -210,15 +209,15 @@ class MSCommunity:
         ------
         """
         # compatabilize the models
-        mscompat = MSCompatibility(modelseed_db_path=msdb_path)
-        models = mscompat.align_exchanges(
-            models, conflicts_file_name="exchanges_conflicts.json", model_names=names
-        )
-        models = mscompat.standardize(
-            models,
-            conflicts_file_name="standardized_exchange_metabolites.json",
-            model_names=names,
-        )
+        #mscompat = MSCompatibility(modelseed_db_path=msdb_path)
+        #models = mscompat.align_exchanges(
+        #    models, conflicts_file_name="exchanges_conflicts.json", model_names=names
+        #)
+        #models = mscompat.standardize(
+        #    models,
+        #    conflicts_file_name="standardized_exchange_metabolites.json",
+        #    model_names=names,
+        #)
 
         # construct the new model
         newmodel = Model(mdlid, name)
