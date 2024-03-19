@@ -188,7 +188,7 @@ class MSCommunity:
 
     @staticmethod
     def build_from_species_models(
-        models, mdlid=None, name=None, names=[], abundances=None
+        models, mdlid=None, name=None, names=[], abundances=None,basemodel=None
     ):
         """Merges the input list of single species metabolic models into a community metabolic model
 
@@ -227,7 +227,10 @@ class MSCommunity:
         #)
 
         # construct the new model
-        newmodel = Model(mdlid, name)
+        if basemodel:
+            newmodel = basemodel
+        else:
+            newmodel = Model(mdlid, name)
         newutl = MSModelUtil(newmodel)
         biomass_compounds = []
         biomass_index = 2
