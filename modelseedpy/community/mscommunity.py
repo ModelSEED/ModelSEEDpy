@@ -313,8 +313,6 @@ class MSCommunity:
         # create a biomass sink reaction
         newutl = MSModelUtil(newmodel)
         newutl.add_exchanges_for_metabolites([comm_biomass], 0, 100, "SK_")
-        if cobra_model:
-            return newmodel, biomass_indices_dict
         return (
             MSCommunity(model=newmodel, names=names, abundances=abundances),
             biomass_indices_dict,
