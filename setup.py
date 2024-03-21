@@ -35,7 +35,7 @@ setup(
     ],
     install_requires=[
         "networkx >= 2.4",
-        "cobra >= 0.17.1",
+        "cobra >= 0.28.0",
         "scikit-learn == 1.2.0",  # version lock for pickle ML models
         "scipy >= 1.5.4",
         "chemicals >= 1.0.13",

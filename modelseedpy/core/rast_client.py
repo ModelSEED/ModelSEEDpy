@@ -52,10 +52,8 @@ class RastClient:
         )
         self.stages = [
             {"name": "annotate_proteins_kmer_v2", "kmer_v2_parameters": {}},
-            {
-                "name": "annotate_proteins_kmer_v1",
-                "kmer_v1_parameters": {"annotate_hypothetical_only": 1},
-            },
+            # {"name": "annotate_proteins_kmer_v1",
+            # "kmer_v1_parameters": {"annotate_hypothetical_only": 1},},
             {
                 "name": "annotate_proteins_similarity",
                 "similarity_parameters": {"annotate_hypothetical_only": 1},
