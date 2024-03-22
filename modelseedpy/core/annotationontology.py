@@ -7,6 +7,7 @@ import sys
 import pandas as pd
 import cobra
 from cobra import DictList
+from modelseedpy.core.msgenome import MSGenome
 
 # from builtins import None
 
@@ -443,3 +444,9 @@ class AnnotationOntology:
         if feature_or_id.id not in feature_hash:
             feature_hash[feature_or_id.id] = feature_or_id
         return feature_hash[feature_or_id.id]
+
+    def get_msgenome(self,annoont,prioritized_event_list=None,ontologies=None,merge_all=False,feature_type=None,translate_to_rast=True):
+        return MSGenome.from_annotation_ontology(
+            self, prioritized_event_list, ontologies, merge_all,feature_type, translate_to_rast
+        )
+        

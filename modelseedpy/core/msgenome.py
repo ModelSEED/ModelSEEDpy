@@ -103,6 +103,22 @@ class MSGenome:
         self.features += feature_list
 
     @staticmethod
+    def from_annotation_ontology(
+        annoont, prioritized_event_list=None, ontologies=None, merge_all=False,feature_type=None, translate_to_rast=True
+    ):
+        gene_hash = annoont.get_gene_term_hash()
+        genome = MSGenome()
+        features = []
+        for gene in gene_hash:
+            feature = MSFeature(gene.id,"")
+            for term in gene_hash[gene]:
+                feature.add_ontology_term(term.ontology.id, term.id)
+                if term.ontology.id == "SSO":
+                    feature.add_ontology_term("RAST",annoont.get_term_name(term))
+        genome.add_features(features)
+        return genome
+
+    @staticmethod
     def from_fasta(
         filename, contigs=0, split="|", h_func=None
     ):  # !!! the contigs argument is never used
