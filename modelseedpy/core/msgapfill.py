@@ -452,13 +452,13 @@ class MSGapfill:
         # Precompute gene reaction lookups
         gene_reaction_lookup = {}
         for idx, row in restructured_anoot.iterrows():
-            gene = row['Gene']
-            reaction = row['Reactions']
+            gene = row["Gene"]
+            reaction = row["Reactions"]
             if gene in gene_reaction_lookup:
                 gene_reaction_lookup[gene].append(reaction)
             else:
                 gene_reaction_lookup[gene] = [reaction]
-        
+
         for rxn in range(0, len(restructured_anoot)):
             substr_rxns = [rxn for rxn in restructured_anoot["Reactions"][[rxn]]]
             # Get the indices of the rows where the condition is True
@@ -487,7 +487,7 @@ class MSGapfill:
 
                     # Finding reactions associated with genes that contain the selected gene
                     associated_reactions = gene_reaction_lookup.get(selected_gene, [])
-                    
+
                     # Checking if there are more than one unique reactions
                     if len(associated_reactions) > 1:
                         nCG += 1
