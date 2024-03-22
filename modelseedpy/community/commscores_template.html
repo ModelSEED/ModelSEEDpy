@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <title>CommScores Results</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+        <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+
+        <script type="text/x-mathjax-config">
+            MathJax = {
+              tex: {
+                inlineMath: [['<i>', '<i>'], ["\\(", "\\)"]],
+                processEscapes: true,
+              }
+            }
+          </script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <style>
+            h2, table, p {
+                padding-top: 40px;
+            }
+            table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            }
+            th, td {
+            padding: 5px;
+            }
+            th {
+            text-align: center;
+            }
+        </style>
+    </head>
+    <body class="container">
+        <h1>CommScores Results</h1>
+        <ul class="nav nav-tabs" id="nav-tab" role="tablist">
+            <li><a class="nav-item nav-link active" id="nav-table-tab" data-toggle="tab" href="#nav-table" role="tab" aria-controls="nav-table" aria-selected="true">Full Table</a> </li>
+            <li><a class="nav-item nav-link" id="nav-mets-tab" data-toggle="tab" href="#nav-mets" role="tab" aria-controls="nav-mets" aria-selected="true">Metabolites</a> </li>
+            <li><a class="nav-item nav-link" id="nav-heatmap-tab" data-toggle="tab" href="#nav-heatmap" role="tab" aria-controls="nav-heatmap" aria-selected="true">Heatmap</a> </li>
+            <li><a class="nav-item nav-link" id="nav-info-tab" data-toggle="tab" href="#nav-info" role="tab" aria-controls="nav-info" aria-selected="true">Score Information</a> </li>
+            <!-- <li><a class="nav-item nav-link" id="nav-mets-tab" data-toggle="tab" href="#nav-mets" role="tab" aria-controls="nav-mets" aria-selected="true">Interacted mets</a> </li> -->
+        </ul>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-table" role="tabpanel" aria-labelledby="nav-table-tab">
+                <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
+                <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+                <script type="text/javascript">
+                    $(document).ready( function(){  $('#main').DataTable(); } );
+                </script>
+                <p>
+                    Blank cells signify scores that failed to simulate in the given conditions.
+                    The biomass yields are expressed in [gm/hr*(gm CDW)]
+                </p>
+                {{ table|safe }}
+            </div>
+            <div class="tab-pane fade" id="nav-mets" role="tabpanel" aria-labelledby="nav-mets-tab">
+                <p>The <i>MRO metabolites</i> entries are the metabolites that are under competition in the simulated system.
+                    The <i>MIP model1 metabolites</i> and <i>MIP model2 metabolites</i> entries are the metabolites that are donated by Model1 or Model2 and consumed by Model2 or Model1, respectively.
+                    The <i>CIP metabolites</i> entries are the combined set of metabolites that the models excrete during their maximal growths.</p>
+                {{ mets_table|safe }}
+            </div>
+            <div class="tab-pane fade" id="nav-heatmap" role="tabpanel" aria-labelledby="nav-heatmap-tab">
+                <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
+                <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+                <script type="text/javascript">
+                    $(document).ready( function(){  $('#heat').DataTable(); } );
+                </script>
+                <p><i>c_MIP1</i> and <i>c_MIP2</i> represent the costless MIP sub-score for Model1 and Model2, respectively.</p>
+                {{ heatmap|safe }}
+            </div>
+            <div class="tab-pane fade" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab">
+                <br> 
+                <h3>Novel scores</h3><br>
+
+                <h4>Functional Complementarity (FC)</h4>    
+                <p>
+                    The <b>FC</b> score is calculated as the Jiccard Index of ontologies <i>O</i> from either RAST or another annotation software available on KBase
+                    <div class="latex">
+                        \[ FC= \left( \frac{O_1 \cap O_2}{O_1 \cup O_2} \right)~~. \]
+                    </div>
+                    This score captures the potential for niche overlap and therefore negative interactions. The broad assessment of the entire genome further captures secondary metabolic interactions as well as the primary metabolism that is embodied in genome-scale metabolic models.
+                </p>
+
+                <h4>Growth Yield Difference (GYD)</h4>    
+                <p>
+                    The <b>GYD</b> score evaluates the disparity in growth rate between the isolated members
+                    <div class="latex">
+                        \[ GYD = \frac{abs(G_{1}-G_{2})}{min(G_{1}, G_{2})}~~, \]
+                    </div>
+                    by normalizing the difference in the member's growth rates by the growth rate of the slower growing member. A relatively large disparity in the isolate growth rates may foreshadow a negative interaction when the members are combined, where one member rapidly begins dominating the environment and media consumption which leaves the other member potentially starved and possibly launching antibiotic warfare in desparation to survive.
+                </p>
+
+                <h4>Costless Interaction Potential (CIP)</h4>    
+                <p>
+                    The <b>CIP</b> score quantifies the union of costless excreta <i>CE</i> (compounds that are excreted at maximal growth and therefore have no fitness cost associated with their excretion) in the isolated members
+                    <div class="latex">
+                        \[ CIP = len(CE_1 \cup CE_2)~~, \]
+                    </div>
+                    which may contextualize syntrophic exchanges in their likelihood for exchange based on the fitness expense of their excretion. Our curation of the MIP score can be further contextualized with costless excreta via the intersection of exchanged compounds in the MIP score and the CIP for the same member pair. 
+                </p>
+
+                <h4>Biological Interaction Potential (BIT)</h4>
+                <p>
+                    The <b>BIT</b> score categorizes the member interaction into one of the classical descriptions -- competitive, amensalism, neutral, parasitism, commensalism, and mutualism -- based on relative growth of the members as isolates <i>G<sub>1</sub></i> versus in the community environment <i>G<sub>1,comm</sub></i>
+                    <div class="latex">
+                        \[ BIT_1 = G_{1,comm}-G_1 \]
+                    </div>
+                    <div class="latex">
+                        \[ BIT_2 = G_{2,comm}-G_2 \]
+                    </div>
+                    which provides a tangible biological description of the member interaction based on growth through the primary metabolism.
+                </p>
+
+                <h3>Curated scores</h3><br> 
+
+                <h4>MRO</h4>
+                <p>
+                    The <i><b>M</b>etabolic <b>R</b>esource <b>O</b>verlap</i> (MRO) score is in the SMETANA suite and was published in several earlier studies as well, albeit with slight algorithmic variations. The MRO quantifies the fraction of a member's nutritional requirements, in a given media or the complete media by default, that overlap with the other member's nutritional requirements 
+                        <div class="latex">\[ MRO= \frac{|M_1 \cap M_2|}{|M_1|} \]</div>
+                    and is importantly directional (by replacing the denominator member), which can capture directional dependencies of interactions (e.g. lawn versus spot). The minimal media <i>M</i> of each member is determined by minimizing the total exchange flux.
+                </p>
+
+                <h4>MIP</h4>
+                <p>
+                    The <i><b>M</b>etabolic <b>I</b>nteraction <b>P</b>otential</i> (MIP) score is also in the SMETANA suite and earlier studies. This score quantifies syntrophic exchanges between the members. Our curation computes the MIP as the difference in exchanged compounds versus transported compounds in the compartmentalized community model
+                        <div class="latex">\[ MIP=M_{transports}-M_{exchanges}~~, \]</div>
+                    where compounds that the members are transporting but the community is not exchanging with the media must be sourced from syntrophy. The MIP compounds that are costlessly excreted can also be quantified as a subscore of the MIP, and may better represent the compounds that are favorably exchanged in the community.
+                </p>
+
+                <h4>PC</h4>
+                <p>
+                    The <i><b>P</b>otential <b>C</b>ooperation</i> (PC) score quantifies the net effect of co-growth relative to isolate growth, and in our curation is determined as the ratio of community growth to the sum of isolated member growths
+                        <div class="latex">\[ PC = \frac{G_{comm}}{G_1+G_2}~~, \]</div>
+                    and is therefore essentially a continuous quantitative representation of the discrete qualitative BIT score.
+                </p>
+
+                <h4>BSS</h4>
+                <p>
+                    The <i><b>B</b>iosynthetic <b>S</b>upport <b>S</b>core</i> (BSS) score quantifies the capacity of a member to parasitize another member by topologically evaluating the proportion of a member's nutritional requirements that are in the other member's cytoplasmic metabolites
+                        <div class="latex">\[ BSS = \frac{M_i \cap R_j}{M_i}~~. \]</div>
+                    This score therefore quantifies the capacity or incentive for negative interaction.
+                </p>
+            </div>
+            <!-- <div class="tab-pane fade" id="nav-mets" role="tabpanel" aria-labelledby="nav-mets-tab">
+                {{ mets|safe }}
+            </div> -->
+        </div>
+    </body>
+</html>
