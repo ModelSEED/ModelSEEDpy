@@ -114,6 +114,7 @@ class MSGenome:
         features = []
         for gene in gene_hash:
             feature = MSFeature(gene.id,"")
+            features.append(feature)
             for term in gene_hash[gene]:
                 feature.add_ontology_term(term.ontology.id, term.id)
                 if term.ontology.id == "SSO":
