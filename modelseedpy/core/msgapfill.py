@@ -13,6 +13,7 @@ from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.exceptions import GapfillingError
 from collections import defaultdict
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(
     logging.INFO  # WARNING
@@ -131,9 +132,9 @@ class MSGapfill:
         if before_filtering:
             filter_msg = " before filtering "
             note = "FBF"
-        gf_sensitivity[media.id][target][note] = (
-            self.mdlutl.find_unproducible_biomass_compounds(target)
-        )
+        gf_sensitivity[media.id][target][
+            note
+        ] = self.mdlutl.find_unproducible_biomass_compounds(target)
         if target != "rxn00062_c0":
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         logger.warning(
@@ -388,10 +389,10 @@ class MSGapfill:
                 gf_sensitivity[solution["media"].id] = {}
             if solution["target"] not in gf_sensitivity[solution["media"].id]:
                 gf_sensitivity[solution["media"].id][solution["target"]] = {}
-            gf_sensitivity[solution["media"].id][solution["target"]]["success"] = (
-                self.mdlutl.find_unproducible_biomass_compounds(
-                    solution["target"], cumulative_solution
-                )
+            gf_sensitivity[solution["media"].id][solution["target"]][
+                "success"
+            ] = self.mdlutl.find_unproducible_biomass_compounds(
+                solution["target"], cumulative_solution
             )
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)
