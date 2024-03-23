@@ -85,7 +85,7 @@ class MSGenome:
     def __init__(self):
         self.features = DictList()
         self.id = None
-        self.info = None
+        self.annoont = None
         self.scientific_name = None
 
     def add_features(self, feature_list: list):

@@ -310,6 +310,7 @@ class AnnotationOntology:
         self.noncodings = {}
         self.feature_types = {}
         self.term_names = {}
+        self.info = None
 
     def get_term_name(self, term):
         if term.ontology.id not in self.term_names:
@@ -446,7 +447,9 @@ class AnnotationOntology:
         return feature_hash[feature_or_id.id]
 
     def get_msgenome(self,prioritized_event_list=None,ontologies=None,merge_all=False,feature_type=None,translate_to_rast=True):
-        return MSGenome.from_annotation_ontology(
+        newgenome = MSGenome.from_annotation_ontology(
             self, prioritized_event_list, ontologies, merge_all,feature_type, translate_to_rast
         )
+        newgenome.annoont = self
+        return newgenome
         
