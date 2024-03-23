@@ -108,6 +108,7 @@ class MSGenome:
     def create_new_feature(self,id,sequence):
         newftr = MSFeature(id,sequence)
         self.add_features([newftr])
+        return newftr
 
     @staticmethod
     def from_annotation_ontology(
