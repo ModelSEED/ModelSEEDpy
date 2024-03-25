@@ -30,7 +30,8 @@ class CommKineticPkg(BaseFBAPkg):
 
     def build_constraint(self, species):
         coef = {
-            species.biomasses[0].forward_variable: -1 * self.parameters["kinetic_coef"]
+            species.biomasses[0].forward_variable: -1 * self.parameters["kinetic_coef"],
+            species.biomasses[0].reverse_variable: self.parameters["kinetic_coef"]
         }
         for reaction in self.model.reactions:
             if (

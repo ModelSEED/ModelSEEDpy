@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
 import logging
 from chemicals import periodic_table
 import re
@@ -12,7 +11,6 @@ from cobra.core import (
 )  # !!! Gene, Metabolite, and Model are never used
 from cobra.util import solver as sutil  # !!! sutil is never used
 import time
-from modelseedpy.biochem import from_local
 from scipy.odr.odrpack import Output  # !!! Output is never used
 from chemw import ChemMW
 from warnings import warn
@@ -117,16 +115,26 @@ class FBAHelper:
 
     @staticmethod
     def metabolite_mw(metabolite):
+        fixed_masses = {"cpd11416": 1, "cpd17041": 0, "cpd17042": 0, "cpd17043": 0}
+        msid = FBAHelper.modelseed_id_from_cobra_metabolite(metabolite)
+        if msid in fixed_masses:
+            return fixed_masses[msid]
+        if not metabolite.formula:
+            return 0
+        formula = re.sub("R\d*", "", metabolite.formula)
         try:
-            chem_mw = ChemMW()
-            chem_mw.mass(metabolite.formula)
+            chem_mw = ChemMW(printing=False)
+            chem_mw.mass(formula)
             return chem_mw.raw_mw
         except:
-            warn(
+            logger.warn(
                 "The compound "
                 + metabolite.id
-                + " possesses an unconventional formula {metabolite.formula}; hence, the MW cannot be computed."
+                + " possesses an unconventional formula "
+                + metabolite.formula
+                + "; hence, the MW cannot be computed."
             )
+            return 0
 
     @staticmethod
     def elemental_mass():
@@ -134,6 +142,8 @@ class FBAHelper:
 
     @staticmethod
     def get_modelseed_db_api(modelseed_path):
+        from modelseedpy.biochem import from_local
+
         return from_local(modelseed_path)
 
     @staticmethod
@@ -171,7 +181,7 @@ class FBAHelper:
         output = {}
         for met in model.metabolites:
             msid = FBAHelper.modelseed_id_from_cobra_metabolite(met)
-            if msid != None:
+            if msid is not None:
                 if msid not in output:
                     output[msid] = []
                 output[msid].append(met)
@@ -266,6 +276,11 @@ class FBAHelper:
         return None
 
     @staticmethod
+    def id_from_ref(ref):
+        array = ref.split("/")
+        return array[-1]
+
+    @staticmethod
     def medianame(media):
         if media == None:
             return "Complete"
@@ -280,6 +295,54 @@ class FBAHelper:
             if key not in dictionary:
                 dictionary[key] = optional_keys[key]
         return dictionary
+
+    @staticmethod
+    def parse_media(media):
+        return [cpd.id for cpd in media.data["mediacompounds"]]
+
+    def get_reframed_model(
+        kbase_model,
+    ):
+        from reframed import from_cobrapy
+
+        reframed_model = from_cobrapy(kbase_model)
+        if hasattr(kbase_model, "id"):
+            reframed_model.id = kbase_model.id
+        reframed_model.compartments.e0.external = True
+        return reframed_model
+
+    @staticmethod
+    def add_vars_cons(model, vars_cons):
+        model.add_cons_vars(vars_cons)
+        model.solver.update()
+        return model
+
+    @staticmethod
+    def update_model_media(model, media):
+        medium = {}
+        model_reactions = [rxn.id for rxn in model.reactions]
+        for cpd in media.data["mediacompounds"]:
+            ex_rxn = f"EX_{cpd.id}"
+            if ex_rxn not in model_reactions:
+                model.add_boundary(
+                    metabolite=Metabolite(id=cpd.id, name=cpd.name, compartment="e0"),
+                    type="exchange",
+                    lb=cpd.minFlux,
+                    ub=cpd.maxFlux,
+                )
+            medium[ex_rxn] = cpd.maxFlux
+        model.medium = medium
+        return model
+
+    @staticmethod
+    def filter_cobra_set(cobra_set):
+        unique_ids = set(obj.id for obj in cobra_set)
+        unique_objs = set()
+        for obj in cobra_set:
+            if obj.id in unique_ids:
+                unique_objs.add(obj)
+                unique_ids.remove(obj.id)
+        return unique_objs
 
     @staticmethod
     def get_reframed_model(

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import re
+import traceback
 from cobra.core import Model
 from pyeda.inter import (
     expr,
@@ -113,6 +114,7 @@ def get_set_set(expr_str):  # !!! this currently returns dictionaries, not sets?
         return {frozenset({str(x) for x in dnf.inputs})}
     else:
         return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
+    return {}
 
 
 class MSModel(Model):
@@ -120,27 +122,27 @@ class MSModel(Model):
         """
         Class representation for a ModelSEED model.
         """
-        super().__init__(self, id_or_model)
+        super().__init__(id_or_model)
         if genome:
-            self.genome_object = genome
+            self._genome = genome
         if template:
-            self.template_object = template
+            self._template = template
 
     @property
     def template(self):
-        return self.template_object
+        return self._template
 
     @template.setter
     def template(self, template):
-        self.template_object = template
+        self._template = template
 
     @property
     def genome(self):
-        return self.genome_object
+        return self._genome
 
     @genome.setter
     def genome(self, genome):
-        self.genome_object = genome
+        self._genome = genome
 
     def _set_genome_to_model(self, genome):
         # TODO: implement genome assignment checks if features matches genes

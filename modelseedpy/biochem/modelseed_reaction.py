@@ -2,6 +2,7 @@
 import math
 from modelseedpy.biochem.seed_object import ModelSEEDObject
 from cobra.core import Reaction
+from modelseedpy.core.mstemplate import MSTemplateReaction
 
 
 def to_str2(rxn, cmp_replace=None, cpd_replace={}):
@@ -145,10 +146,20 @@ class ModelSEEDReaction2(Reaction):
         self.status = status
 
         self.is_obsolete = is_obsolete
+        if self.is_obsolete:
+            self.is_obsolete = True
+        else:
+            self.is_obsolete = False
         self.is_abstract = is_abstract
 
-        self.delta_g = delta_g
-        self.delta_g_error = delta_g_error
+        self.delta_g = float(delta_g) if delta_g else None
+        self.delta_g_error = float(delta_g_error) if delta_g_error else None
+
+        # removing symbolic high values representing null/none
+        if self.delta_g and self.delta_g > 10000:
+            self.delta_g = None
+        if self.delta_g_error and self.delta_g_error > 10000:
+            self.delta_g_error = None
 
         self.flags = set()
         if flags:
@@ -156,7 +167,7 @@ class ModelSEEDReaction2(Reaction):
 
     @property
     def compound_ids(self):
-        pass
+        return None
 
     def to_template_reaction(self, compartment_setup=None):
         if compartment_setup is None:
@@ -178,10 +189,11 @@ class ModelSEEDReaction2(Reaction):
 
         # if len(str(index)) > 0:
         #    name = f'{self.name} [{compartment}]'
-        reaction = Reaction(
-            rxn_id, name, self.subsystem, self.lower_bound, self.upper_bound
+        reaction = MSTemplateReaction(
+            rxn_id, self.id, name, self.subsystem, self.lower_bound, self.upper_bound
         )
         reaction.add_metabolites(metabolites)
+        reaction.annotation.update(self.annotation)
         return reaction
 
     @property

@@ -3,364 +3,44 @@
 from __future__ import absolute_import
 
 import logging
+import sys
 import re
 import json
 from optlang.symbolics import Zero, add
 from cobra import Model, Reaction, Metabolite
+from cobra.io import (
+    load_json_model,
+    save_json_model,
+    load_matlab_model,
+    save_matlab_model,
+    read_sbml_model,
+    write_sbml_model,
+)
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
 
 logger = logging.getLogger(__name__)
+logger.setLevel(
+    logging.INFO
+)  # When debugging - set this to INFO then change needed messages below from DEBUG to INFO
 
-default_blacklist = [
-    "rxn12985",
-    "rxn00238",
-    "rxn07058",
-    "rxn05305",
-    "rxn00154",
-    "rxn09037",
-    "rxn10643",
-    "rxn11317",
-    "rxn05254",
-    "rxn05257",
-    "rxn05258",
-    "rxn05259",
-    "rxn05264",
-    "rxn05268",
-    "rxn05269",
-    "rxn05270",
-    "rxn05271",
-    "rxn05272",
-    "rxn05273",
-    "rxn05274",
-    "rxn05275",
-    "rxn05276",
-    "rxn05277",
-    "rxn05278",
-    "rxn05279",
-    "rxn05280",
-    "rxn05281",
-    "rxn05282",
-    "rxn05283",
-    "rxn05284",
-    "rxn05285",
-    "rxn05286",
-    "rxn05963",
-    "rxn05964",
-    "rxn05971",
-    "rxn05989",
-    "rxn05990",
-    "rxn06041",
-    "rxn06042",
-    "rxn06043",
-    "rxn06044",
-    "rxn06045",
-    "rxn06046",
-    "rxn06079",
-    "rxn06080",
-    "rxn06081",
-    "rxn06086",
-    "rxn06087",
-    "rxn06088",
-    "rxn06089",
-    "rxn06090",
-    "rxn06091",
-    "rxn06092",
-    "rxn06138",
-    "rxn06139",
-    "rxn06140",
-    "rxn06141",
-    "rxn06145",
-    "rxn06217",
-    "rxn06218",
-    "rxn06219",
-    "rxn06220",
-    "rxn06221",
-    "rxn06222",
-    "rxn06223",
-    "rxn06235",
-    "rxn06362",
-    "rxn06368",
-    "rxn06378",
-    "rxn06474",
-    "rxn06475",
-    "rxn06502",
-    "rxn06562",
-    "rxn06569",
-    "rxn06604",
-    "rxn06702",
-    "rxn06706",
-    "rxn06715",
-    "rxn06803",
-    "rxn06811",
-    "rxn06812",
-    "rxn06850",
-    "rxn06901",
-    "rxn06971",
-    "rxn06999",
-    "rxn07123",
-    "rxn07172",
-    "rxn07254",
-    "rxn07255",
-    "rxn07269",
-    "rxn07451",
-    "rxn09037",
-    "rxn10018",
-    "rxn10077",
-    "rxn10096",
-    "rxn10097",
-    "rxn10098",
-    "rxn10099",
-    "rxn10101",
-    "rxn10102",
-    "rxn10103",
-    "rxn10104",
-    "rxn10105",
-    "rxn10106",
-    "rxn10107",
-    "rxn10109",
-    "rxn10111",
-    "rxn10403",
-    "rxn10410",
-    "rxn10416",
-    "rxn11313",
-    "rxn11316",
-    "rxn11318",
-    "rxn11353",
-    "rxn05224",
-    "rxn05795",
-    "rxn05796",
-    "rxn05797",
-    "rxn05798",
-    "rxn05799",
-    "rxn05801",
-    "rxn05802",
-    "rxn05803",
-    "rxn05804",
-    "rxn05805",
-    "rxn05806",
-    "rxn05808",
-    "rxn05812",
-    "rxn05815",
-    "rxn05832",
-    "rxn05836",
-    "rxn05851",
-    "rxn05857",
-    "rxn05869",
-    "rxn05870",
-    "rxn05884",
-    "rxn05888",
-    "rxn05896",
-    "rxn05898",
-    "rxn05900",
-    "rxn05903",
-    "rxn05904",
-    "rxn05905",
-    "rxn05911",
-    "rxn05921",
-    "rxn05925",
-    "rxn05936",
-    "rxn05947",
-    "rxn05956",
-    "rxn05959",
-    "rxn05960",
-    "rxn05980",
-    "rxn05991",
-    "rxn05992",
-    "rxn05999",
-    "rxn06001",
-    "rxn06014",
-    "rxn06017",
-    "rxn06021",
-    "rxn06026",
-    "rxn06027",
-    "rxn06034",
-    "rxn06048",
-    "rxn06052",
-    "rxn06053",
-    "rxn06054",
-    "rxn06057",
-    "rxn06059",
-    "rxn06061",
-    "rxn06102",
-    "rxn06103",
-    "rxn06127",
-    "rxn06128",
-    "rxn06129",
-    "rxn06130",
-    "rxn06131",
-    "rxn06132",
-    "rxn06137",
-    "rxn06146",
-    "rxn06161",
-    "rxn06167",
-    "rxn06172",
-    "rxn06174",
-    "rxn06175",
-    "rxn06187",
-    "rxn06189",
-    "rxn06203",
-    "rxn06204",
-    "rxn06246",
-    "rxn06261",
-    "rxn06265",
-    "rxn06266",
-    "rxn06286",
-    "rxn06291",
-    "rxn06294",
-    "rxn06310",
-    "rxn06320",
-    "rxn06327",
-    "rxn06334",
-    "rxn06337",
-    "rxn06339",
-    "rxn06342",
-    "rxn06343",
-    "rxn06350",
-    "rxn06352",
-    "rxn06358",
-    "rxn06361",
-    "rxn06369",
-    "rxn06380",
-    "rxn06395",
-    "rxn06415",
-    "rxn06419",
-    "rxn06420",
-    "rxn06421",
-    "rxn06423",
-    "rxn06450",
-    "rxn06457",
-    "rxn06463",
-    "rxn06464",
-    "rxn06466",
-    "rxn06471",
-    "rxn06482",
-    "rxn06483",
-    "rxn06486",
-    "rxn06492",
-    "rxn06497",
-    "rxn06498",
-    "rxn06501",
-    "rxn06505",
-    "rxn06506",
-    "rxn06521",
-    "rxn06534",
-    "rxn06580",
-    "rxn06585",
-    "rxn06593",
-    "rxn06609",
-    "rxn06613",
-    "rxn06654",
-    "rxn06667",
-    "rxn06676",
-    "rxn06693",
-    "rxn06730",
-    "rxn06746",
-    "rxn06762",
-    "rxn06779",
-    "rxn06790",
-    "rxn06791",
-    "rxn06792",
-    "rxn06793",
-    "rxn06794",
-    "rxn06795",
-    "rxn06796",
-    "rxn06797",
-    "rxn06821",
-    "rxn06826",
-    "rxn06827",
-    "rxn06829",
-    "rxn06839",
-    "rxn06841",
-    "rxn06842",
-    "rxn06851",
-    "rxn06866",
-    "rxn06867",
-    "rxn06873",
-    "rxn06885",
-    "rxn06891",
-    "rxn06892",
-    "rxn06896",
-    "rxn06938",
-    "rxn06939",
-    "rxn06944",
-    "rxn06951",
-    "rxn06952",
-    "rxn06955",
-    "rxn06957",
-    "rxn06960",
-    "rxn06964",
-    "rxn06965",
-    "rxn07086",
-    "rxn07097",
-    "rxn07103",
-    "rxn07104",
-    "rxn07105",
-    "rxn07106",
-    "rxn07107",
-    "rxn07109",
-    "rxn07119",
-    "rxn07179",
-    "rxn07186",
-    "rxn07187",
-    "rxn07188",
-    "rxn07195",
-    "rxn07196",
-    "rxn07197",
-    "rxn07198",
-    "rxn07201",
-    "rxn07205",
-    "rxn07206",
-    "rxn07210",
-    "rxn07244",
-    "rxn07245",
-    "rxn07253",
-    "rxn07275",
-    "rxn07299",
-    "rxn07302",
-    "rxn07651",
-    "rxn07723",
-    "rxn07736",
-    "rxn07878",
-    "rxn11417",
-    "rxn11582",
-    "rxn11593",
-    "rxn11597",
-    "rxn11615",
-    "rxn11617",
-    "rxn11619",
-    "rxn11620",
-    "rxn11624",
-    "rxn11626",
-    "rxn11638",
-    "rxn11648",
-    "rxn11651",
-    "rxn11665",
-    "rxn11666",
-    "rxn11667",
-    "rxn11698",
-    "rxn11983",
-    "rxn11986",
-    "rxn11994",
-    "rxn12006",
-    "rxn12007",
-    "rxn12014",
-    "rxn12017",
-    "rxn12022",
-    "rxn12160",
-    "rxn12161",
-    "rxn01267",
-    "rxn05294",
-    "rxn04656",
-]
+base_blacklist = {}#{"rxn00062":"="}
+zero_threshold = 1e-8
 
 
 class GapfillingPkg(BaseFBAPkg):
     """ """
 
     def __init__(self, model):
-        BaseFBAPkg.__init__(self, model, "gapfilling", {}, {})
+        BaseFBAPkg.__init__(
+            self,
+            model,
+            "gapfilling",
+            {"rmaxf": "reaction", "fmaxf": "reaction"},
+            {"rmaxfc": "reaction", "fmaxfc": "reaction"},
+        )
         self.gapfilling_penalties = None
+        self.maxflux_variables = {}
 
     def build(self, template, minimum_objective=0.01):
         parameters = {
@@ -394,7 +74,7 @@ class GapfillingPkg(BaseFBAPkg):
             parameters,
             [],
             {
-                "auto_sink": ["cpd02701", "cpd11416", "cpd15302"],
+                "auto_sink": ["cpd01042","cpd02701", "cpd11416", "cpd15302", "cpd03091"],
                 "extend_with_template": 1,
                 "model_penalty": 1,
                 "default_gapfill_models": [],
@@ -405,12 +85,17 @@ class GapfillingPkg(BaseFBAPkg):
                 "gapfill_all_indecies_with_default_templates": 1,
                 "gapfill_all_indecies_with_default_models": 1,
                 "default_excretion": 100,
-                "default_uptake": -100,
+                "default_uptake": 0,
                 "minimum_obj": 0.01,
-                "set_objective": 1,
-                "blacklist": default_blacklist,
-            },
+                "minimize_exchanges": False,
+                "blacklist": [],
+                "base_media": None,
+                "objective":self.model.objective,
+                "base_media_target_element": "C",
+                "default_exchange_penalty":0.1
+            }
         )
+        
         # Adding model reactions to original reaction list
         self.parameters["original_reactions"] = []
         for rxn in self.model.reactions:
@@ -422,17 +107,29 @@ class GapfillingPkg(BaseFBAPkg):
                 self.parameters["original_reactions"].append([rxn, "<"])
             if rxn.upper_bound > 0:
                 self.parameters["original_reactions"].append([rxn, ">"])
+        
         # Adding constraint for target reaction
-        self.parameters["origobj"] = self.model.objective
-        self.pkgmgr.getpkg("ObjConstPkg").build_package(
-            self.parameters["minimum_obj"], None
-        )
+        self.set_base_objective(self.parameters["objective"],self.parameters["minimum_obj"])
 
+        #Extending model
+        self.extend_model_for_gapfilling()
+        
+        #Computing gapfilling penalties
+        self.compute_gapfilling_penalties()
+
+        # Creating the gapfilling objective function and saving it under self.parameters["gfobj"]
+        self.build_gapfilling_objective_function()
+        
+    def extend_model_for_gapfilling(self):
+        """Extends the model for gapfilling
+        Parameters
+        ----------
+        None
+        """
         # Determine all indecies that should be gapfilled
         indexhash = self.get_model_index_hash()
-
         # Iterating over all indecies with more than 10 intracellular compounds:
-        self.gapfilling_penalties = dict()
+        self.base_gapfilling_penalties = dict()
         for index in indexhash:
             if indexhash[index] > 10:
                 if index == "none":
@@ -440,12 +137,12 @@ class GapfillingPkg(BaseFBAPkg):
                         new_penalties = self.extend_model_with_template_for_gapfilling(
                             template, index
                         )
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.base_gapfilling_penalties.update(new_penalties)
                     for gfmdl in self.parameters["default_gapfill_models"]:
                         new_penalties = self.extend_model_with_model_for_gapfilling(
                             gfmdl, index
                         )
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.base_gapfilling_penalties.update(new_penalties)
                 if index in self.parameters["gapfill_templates_by_index"]:
                     for template in self.parameters["gapfill_templates_by_index"][
                         index
@@ -453,67 +150,158 @@ class GapfillingPkg(BaseFBAPkg):
                         new_penalties = self.extend_model_with_template_for_gapfilling(
                             template, index
                         )
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.base_gapfilling_penalties.update(new_penalties)
                 if index in self.parameters["gapfill_models_by_index"]:
                     for gfmdl in self.parameters["gapfill_models_by_index"]:
                         new_penalties = self.extend_model_with_model_for_gapfilling(
                             gfmdl, index
                         )
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.base_gapfilling_penalties.update(new_penalties)
                 if self.parameters["gapfill_all_indecies_with_default_templates"]:
                     for template in self.parameters["default_gapfill_templates"]:
                         new_penalties = self.extend_model_with_template_for_gapfilling(
                             template, index
                         )
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.base_gapfilling_penalties.update(new_penalties)
                 if self.parameters["gapfill_all_indecies_with_default_models"]:
                     for gfmdl in self.parameters["default_gapfill_models"]:
                         new_penalties = self.extend_model_with_model_for_gapfilling(
                             gfmdl, index
                         )
-                        self.gapfilling_penalties.update(new_penalties)
+                        self.base_gapfilling_penalties.update(new_penalties)
+
+    def compute_gapfilling_penalties(self,exclusion_solution=None,reaction_scores=None):
+        """Builds gapfilling objective function for model
+        Parameters
+        ----------
+        exclusion_solution : [string rxn_id,string direction]
+            Solution with reaction directions that should be removed from the gapfilling objective function
+        """
+        self.gapfilling_penalties = self.base_gapfilling_penalties.copy()
+        #Removing exclusion solution reactions from penalties dictionary
+        if exclusion_solution:
+            for item in exclusion_solution:
+                if item[0] in self.gapfilling_penalties:
+                    if item[1] == ">" and "forward" in self.gapfilling_penalties[item[0]]:
+                        del self.gapfilling_penalties[item[0]]["forward"]
+                    elif item[1] == "<" and "reverse" in self.gapfilling_penalties[item[0]]:
+                        del self.gapfilling_penalties[item[0]]["reverse"]
         # Rescaling penalties by reaction scores and saving genes
+        if not reaction_scores:
+            reaction_scores = self.parameters["reaction_scores"]
         for reaction in self.gapfilling_penalties:
             rxnid = reaction.split("_")[0]
-            if rxnid in self.parameters["reaction_scores"]:
-                highest_score = 0
-                for gene in self.parameters["reaction_scores"][rxnid]:
-                    if highest_score < self.parameters["reaction_scores"][rxnid][gene]:
-                        highest_score = self.parameters["reaction_scores"][rxnid][gene]
-                factor = 0.1
-                if "reverse" in self.gapfilling_penalties[reaction]:
-                    self.gapfilling_penalties[reaction]["reverse"] = (
-                        factor * self.gapfilling_penalties[reaction]["reverse"]
+            highest_score = 0
+            if rxnid in reaction_scores:
+                for gene in reaction_scores[rxnid]:
+                    score = None
+                    if isinstance(reaction_scores[rxnid][gene], dict):
+                        score = reaction_scores[rxnid][gene]["probability"]
+                    else:
+                        score = reaction_scores[rxnid][gene]
+                    if highest_score < score:
+                        highest_score = score
+            factor = 2-highest_score
+            if "reverse" in self.gapfilling_penalties[reaction]:
+                self.gapfilling_penalties[reaction]["reverse"] = (
+                    factor * self.gapfilling_penalties[reaction]["reverse"]
+                )
+            if "forward" in self.gapfilling_penalties[reaction]:
+                self.gapfilling_penalties[reaction]["forward"] = (
+                    factor * self.gapfilling_penalties[reaction]["forward"]
+                )
+
+    def build_gapfilling_objective_function(self):
+        """Builds gapfilling objective function for model
+        """
+        reaction_objective = self.model.problem.Objective(Zero, direction="min")
+        obj_coef = dict()
+        for reaction in self.model.reactions:
+            if reaction.id in self.gapfilling_penalties:
+                # Minimizing gapfilled reactions
+                if "reverse" in self.gapfilling_penalties[reaction.id]:
+                    obj_coef[reaction.reverse_variable] = abs(
+                        self.gapfilling_penalties[reaction.id]["reverse"]
                     )
-                if "forward" in self.gapfilling_penalties[reaction]:
-                    self.gapfilling_penalties[reaction]["forward"] = (
-                        factor * self.gapfilling_penalties[reaction]["forward"]
+                if "forward" in self.gapfilling_penalties[reaction.id]:
+                    obj_coef[reaction.forward_variable] = abs(
+                        self.gapfilling_penalties[reaction.id]["forward"]
+                    )
+            else:
+                obj_coef[reaction.forward_variable] = 0
+                obj_coef[reaction.reverse_variable] = 0
+        self.model.objective = reaction_objective
+        reaction_objective.set_linear_coefficients(obj_coef)
+        self.parameters["gfobj"] = self.model.objective
+
+    def create_max_flux_variables(self):
+        """Creates max flux variables needed for the global gapfilling formulation
+        Parameters
+        ----------
+        """           
+        for reaction in self.model.reactions:
+            if reaction.id in self.gapfilling_penalties:
+                if "reverse" in self.gapfilling_penalties[reaction.id]:
+                    self.maxflux_variables[reaction.id][
+                        "reverse"
+                    ] = self.build_variable(
+                        "rmaxf", 0, 1000, "continuous", reaction
+                    )
+                    self.build_constraint(
+                        "rmaxfc",
+                        0,
+                        None,
+                        {
+                            reaction.reverse_variable: -1,
+                            self.maxflux_variables[reaction.id]["reverse"]: 1,
+                        },
+                        reaction,
+                    )
+                if "forward" in self.gapfilling_penalties[reaction.id]:
+                    self.maxflux_variables[reaction.id][
+                        "forward"
+                    ] = self.build_variable(
+                        "fmaxf", 0, 1000, "continuous", reaction
+                    )
+                    self.build_constraint(
+                        "fmaxfc",
+                        0,
+                        None,
+                        {
+                            reaction.forward_variable: -1,
+                            self.maxflux_variables[reaction.id]["forward"]: 1,
+                        },
+                        reaction,
                     )
 
-        self.model.solver.update()
-        if self.parameters["set_objective"] == 1:
-            reaction_objective = self.model.problem.Objective(Zero, direction="min")
-            obj_coef = dict()
-            for reaction in self.model.reactions:
-                if reaction.id in self.gapfilling_penalties:
-                    # Minimizing gapfilled reactions
-                    if "reverse" in self.gapfilling_penalties[reaction.id]:
-                        obj_coef[reaction.reverse_variable] = abs(
-                            self.gapfilling_penalties[reaction.id]["reverse"]
-                        )
-                    # elif default_penalty != 0:
-                    #    obj_coef[reaction.reverse_variable] = 0
-                    if "forward" in self.gapfilling_penalties[reaction.id]:
-                        obj_coef[reaction.forward_variable] = abs(
-                            self.gapfilling_penalties[reaction.id]["forward"]
-                        )
-                    # elif default_penalty != 0:
-                    #    obj_coef[reaction.forward_variable] = 0
-                else:
-                    obj_coef[reaction.forward_variable] = 0
-                    obj_coef[reaction.reverse_variable] = 0
-            self.model.objective = reaction_objective
-            reaction_objective.set_linear_coefficients(obj_coef)
+    def set_base_objective(self,objective,minobjective):
+        """Sets the base objective for the model
+        Parameters
+        ----------
+        objective : string | model.objective
+            ID of reaction to be maximized as the objective or model objective object
+        minobjective : float
+            Minimal objective value to be used
+        """
+        #Setting the objective based on the objective argument
+        if isinstance(objective, str):
+            self.model.objective = self.model.reactions.get_by_id(objective).flux_expression
+            self.model.objective.direction = "max"
+        else:
+            self.model.objective = objective
+        #Setting original objective field
+        self.original_objective = self.model.objective
+        #Setting minimal objective constraint
+        self.pkgmgr.getpkg("ObjConstPkg").clear()
+        if minobjective:
+            if self.model.objective.direction == "max":
+                self.pkgmgr.getpkg("ObjConstPkg").build_package(
+                    minobjective, None
+                )
+            else:
+                self.pkgmgr.getpkg("ObjConstPkg").build_package(
+                    None, minobjective
+                )
 
     def extend_model_with_model_for_gapfilling(self, source_model, index):
         new_metabolites = {}
@@ -550,6 +338,11 @@ class GapfillingPkg(BaseFBAPkg):
             if re.search("(.+)_([a-z])\d+$", modelreaction.id) != None:
                 m = re.search("(.+)_([a-z])\d+$", modelreaction.id)
                 if m[1] not in self.parameters["blacklist"]:
+                    if m[1] in base_blacklist:
+                        if base_blacklist[m[1]] == ">" or base_blacklist[m[1]] == "=":
+                            cobra_reaction.upper_bound = 0
+                        if base_blacklist[m[1]] == "<" or base_blacklist[m[1]] == "=":
+                            cobra_reaction.lower_bound = 0
                     cobra_reaction = modelreaction.copy()
                     cobra_reaction.id = groups[1] + "_" + groups[2] + index
                     if (
@@ -672,13 +465,24 @@ class GapfillingPkg(BaseFBAPkg):
         new_exchange, new_demand = self.extend_model_with_template_metabolites(
             template, index
         )
-
+        
         for template_reaction in template.reactions:
             if template_reaction.reference_id in self.parameters["blacklist"]:
                 continue
             cobra_reaction = self.convert_template_reaction(
                 template_reaction, index, template, 1
             )  # TODO: move function out
+            if template_reaction.reference_id in base_blacklist:
+                if (
+                    base_blacklist[template_reaction.reference_id] == ">"
+                    or base_blacklist[template_reaction.reference_id] == "="
+                ):
+                    cobra_reaction.upper_bound = 0
+                if (
+                    base_blacklist[template_reaction.reference_id] == "<"
+                    or base_blacklist[template_reaction.reference_id] == "="
+                ):
+                    cobra_reaction.lower_bound = 0
             new_penalties[cobra_reaction.id] = dict()
             if (
                 cobra_reaction.id not in self.model.reactions
@@ -718,7 +522,7 @@ class GapfillingPkg(BaseFBAPkg):
             self.parameters["default_excretion"],
         )
         for ex in exchanges:
-            new_penalties[ex.id] = {"added": 1, "reverse": 1, "forward": 1}
+            new_penalties[ex.id] = {"added": 1, "reverse": self.parameters["default_exchange_penalty"], "forward": self.parameters["default_exchange_penalty"]}
 
         # Only run this on new demands so we don't readd for all exchanges
         exchanges = self.modelutl.add_exchanges_for_metabolites(
@@ -728,7 +532,7 @@ class GapfillingPkg(BaseFBAPkg):
             "DM_",
         )
         for ex in exchanges:
-            new_penalties[ex.id] = {"added": 1, "reverse": 1, "forward": 1}
+            new_penalties[ex.id] = {"added": 1, "reverse": self.parameters["default_exchange_penalty"], "forward": self.parameters["default_exchange_penalty"]}
 
         # Adding all new reactions to the model at once (much faster than one at a time)
         self.model.add_reactions(new_reactions.values())
@@ -802,6 +606,19 @@ class GapfillingPkg(BaseFBAPkg):
 
         return cobra_reaction
 
+    def set_media(self, media):
+        if self.parameters["base_media"]:
+            reaction_exceptions = []
+            for mediacpd in media.mediacompounds:
+                if not self.parameters["base_media"].find_mediacpd(mediacpd.id):
+                    ex_hash = mediacpd.get_mdl_exchange_hash(self.modelutl)
+                    for mdlcpd in ex_hash:
+                        reaction_exceptions.append(ex_hash[mdlcpd])
+            self.modelutl.pkgmgr.getpkg("ElementUptakePkg").build_package(
+                {self.parameters["base_media_target_element"]:1}, exception_reactions=reaction_exceptions
+            )
+        self.modelutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media, self.parameters["default_uptake"], self.parameters["default_excretion"])
+
     def binary_check_gapfilling_solution(self, solution=None, flux_values=None):
         if solution is None:
             solution = self.compute_gapfilled_solution()
@@ -843,12 +660,12 @@ class GapfillingPkg(BaseFBAPkg):
             if rxnobj.id in self.gapfilling_penalties:
                 if (
                     "reverse" in self.gapfilling_penalties[rxnobj.id]
-                    and flux_values[rxnobj.id]["reverse"] <= Zero
+                    and flux_values[rxnobj.id]["reverse"] <= zero_threshold
                 ):
                     rxnobj.lower_bound = 0
                 if (
                     "forward" in self.gapfilling_penalties[rxnobj.id]
-                    and flux_values[rxnobj.id]["forward"] <= Zero
+                    and flux_values[rxnobj.id]["forward"] <= zero_threshold
                 ):
                     rxnobj.upper_bound = 0
                 rxnobj.update_variable_bounds()
@@ -869,7 +686,7 @@ class GapfillingPkg(BaseFBAPkg):
         with self.model:
             # Setting all gapfilled reactions not in the solution to zero
             self.knockout_gf_reactions_outside_solution(solution)
-            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+            self.reset_objective_minimum(0,False)
             for condition in condition_list:
                 condition["change"] = True
             filtered_list = self.modelutl.reaction_expansion_test(
@@ -879,7 +696,7 @@ class GapfillingPkg(BaseFBAPkg):
                 condition["change"] = False
         if len(filtered_list) > 0:
             if max_iterations > 0:
-                print("Gapfilling test failed " + str(11 - max_iterations))
+                logger.warning("Gapfilling test failed " + str(11 - max_iterations))
                 # Forcing filtered reactions to zero
                 for item in filtered_list:
                     if item[1] == ">":
@@ -887,9 +704,7 @@ class GapfillingPkg(BaseFBAPkg):
                     else:
                         self.model.reactions.get_by_id(item[0].id).lower_bound = 0
                 # Restoring lower bound on biomass constraint
-                self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"][
-                    "1"
-                ].lb = self.parameters["minimum_obj"]
+                self.reset_objective_minimum(self.parameters["minimum_obj"])
                 # Reoptimizing
                 self.model.optimize()
                 return self.run_test_conditions(
@@ -898,7 +713,48 @@ class GapfillingPkg(BaseFBAPkg):
             return None
         return solution
 
-    def filter_database_based_on_tests(self, test_conditions):
+    def test_gapfill_database(self):
+        self.reset_objective_minimum(0,False)
+        self.model.objective = self.original_objective
+        with open("test_gapfill_database.lp", "w") as out:
+            out.write(str(self.model.solver))
+        solution = self.model.optimize()
+        logger.info(
+            "Objective with gapfill database:"
+            + str(solution.objective_value)
+            + "; min objective:"
+            + str(self.parameters["minimum_obj"])
+        )
+        self.reset_objective_minimum(self.parameters["minimum_obj"])
+        self.model.objective = self.parameters["gfobj"]
+        if solution.objective_value < self.parameters["minimum_obj"]:
+            return False
+        return True
+
+    def reset_objective_minimum(self, min_objective,reset_params=True):
+        if reset_params and min_objective != 0:
+            self.parameters["minimum_obj"] = min_objective
+        if "1" not in self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]:
+            self.pkgmgr.getpkg("ObjConstPkg").build_package(min_objective, None)
+        if min_objective == 0:
+            if self.parameters["minimum_obj"] > 0:
+                self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+            if self.parameters["minimum_obj"] < 0:
+                self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].ub = 0        
+        else:
+            if min_objective > 0:
+                self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = min_objective
+            if min_objective < 0:
+                self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].ub = min_objective
+
+    def filter_database_based_on_tests(self, test_conditions,growth_conditions=[]):
+        #Saving the current media
+        current_media = self.current_media()
+        #Clearing element uptake constraints
+        self.pkgmgr.getpkg("ElementUptakePkg").clear()
+        # Setting the minimal growth constraint to zero
+        self.reset_objective_minimum(0,False)
+        # Filtering the database of any reactions that violate the specified tests
         filetered_list = []
         with self.model:
             rxnlist = []
@@ -908,33 +764,22 @@ class GapfillingPkg(BaseFBAPkg):
                         rxnlist.append([reaction, "<"])
                     if "forward" in self.gapfilling_penalties[reaction.id]:
                         rxnlist.append([reaction, ">"])
-            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+
             filtered_list = self.modelutl.reaction_expansion_test(
                 rxnlist, test_conditions
             )
         # Now constraining filtered reactions to zero
         for item in filtered_list:
-            logger.debug("Filtering:", item[0].id, item[1])
+            logger.debug("Filtering:" + item[0].id + item[1])
             if item[1] == ">":
                 self.model.reactions.get_by_id(item[0].id).upper_bound = 0
             else:
                 self.model.reactions.get_by_id(item[0].id).lower_bound = 0
         # Now testing if the gapfilling minimum objective can still be achieved
-        gfobj = self.model.objective
-        self.model.objective = self.parameters["origobj"]
-        solution = self.model.optimize()
-        # Restoring the minimum objective constraint
-        self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = self.parameters[
-            "minimum_obj"
-        ]
-        print(
-            "Objective after filtering:",
-            solution.objective_value,
-            "; min objective:",
-            self.parameters["minimum_obj"],
-        )
-        if solution.objective_value < self.parameters["minimum_obj"]:
+        if not self.test_gapfill_database():
             # Now we need to restore a minimal set of filtered reactions such that we permit the minimum objective to be reached
+            # Restoring the minimum objective constraint
+            self.reset_objective_minimum(self.parameters["minimum_obj"])
             new_objective = self.model.problem.Objective(Zero, direction="min")
             filterobjcoef = dict()
             for item in filtered_list:
@@ -945,7 +790,6 @@ class GapfillingPkg(BaseFBAPkg):
                 else:
                     filterobjcoef[rxn.reverse_variable] = item[3]
                     rxn.lower_bound = item[2]
-
             self.model.objective = new_objective
             new_objective.set_linear_coefficients(filterobjcoef)
             solution = self.model.optimize()
@@ -967,22 +811,24 @@ class GapfillingPkg(BaseFBAPkg):
                     else:
                         count += -1
                         rxn.lower_bound = 0
-            print("Reactions unfiltered:", count)
+            logger.debug("Reactions unfiltered:" + str(count))
             # Checking for model reactions that can be removed to enable all tests to pass
-            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"]["1"].lb = 0
+            self.reset_objective_minimum(0,False)
             filtered_list = self.modelutl.reaction_expansion_test(
-                self.parameters["original_reactions"], test_conditions
+                self.parameters["original_reactions"], test_conditions,positive_growth=growth_conditions
             )
             for item in filtered_list:
-                logger.debug("Filtering:", item[0].id, item[1])
+                logger.debug("Filtering:" + item[0].id + item[1])
                 if item[1] == ">":
                     self.model.reactions.get_by_id(item[0].id).upper_bound = 0
                 else:
                     self.model.reactions.get_by_id(item[0].id).lower_bound = 0
-            self.pkgmgr.getpkg("ObjConstPkg").constraints["objc"][
-                "1"
-            ].lb = self.parameters["minimum_obj"]
-        self.model.objective = gfobj
+        # Restoring gapfilling objective function and minimal objective constraint
+        self.reset_objective_minimum(self.parameters["minimum_obj"])
+        self.model.objective = self.parameters["gfobj"]
+        if current_media:
+            self.set_media(current_media)
+        return True
 
     def compute_gapfilled_solution(self, flux_values=None):
         if flux_values is None:
@@ -991,19 +837,23 @@ class GapfillingPkg(BaseFBAPkg):
         for reaction in self.model.reactions:
             if reaction.id in self.gapfilling_penalties:
                 if (
-                    flux_values[reaction.id]["forward"] > Zero
+                    flux_values[reaction.id]["forward"] > zero_threshold
                     and "forward" in self.gapfilling_penalties[reaction.id]
                 ):
                     if "added" in self.gapfilling_penalties[reaction.id]:
+                        logger.debug(f"New gapfilled reaction: {reaction.id} >")
                         output["new"][reaction.id] = ">"
                     else:
+                        logger.debug(f"Reversed gapfilled reaction: {reaction.id} >")
                         output["reversed"][reaction.id] = ">"
                 elif (
-                    flux_values[reaction.id]["reverse"] > Zero
+                    flux_values[reaction.id]["reverse"] > zero_threshold
                     and "reverse" in self.gapfilling_penalties[reaction.id]
                 ):
                     if "added" in self.gapfilling_penalties[reaction.id]:
+                        logger.debug(f"New gapfilled reaction: {reaction.id} <")
                         output["new"][reaction.id] = "<"
                     else:
+                        logger.debug(f"Reversed gapfilled reaction: {reaction.id} <")
                         output["reversed"][reaction.id] = "<"
         return output

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ModelSEED Reconstruction</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        /* Style the tab */
+        div.tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        div.tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        /* Change background color of buttons on hover */
+        div.tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        div.tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            -webkit-animation: fadeEffect 1s;
+            animation: fadeEffect 1s;
+            border-top: none;
+        }
+
+        /* Fade in tabs */
+        @-webkit-keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <ul class="nav nav-tabs" id="nav-tab" role="tablist">
+            <li><a class="nav-item nav-link active" id="nav-overview-tab" data-toggle="tab" href="#nav-overview" role="tab" aria-controls="nav-overview" aria-selected="true">Overview</a></li>
+            <li><a class="nav-item nav-link" id="nav-reactions-tab" data-toggle="tab" href="#nav-reactions" role="tab" aria-controls="nav-reactions" aria-selected="false">Reactions</a> </li>
+            <li><a class="nav-item nav-link" id="nav-compounds-tab" data-toggle="tab" href="#nav-compounds" role="tab" aria-controls="nav-compounds" aria-selected="false">Compounds</a> </li>
+            <li><a class="nav-item nav-link" id="nav-genes-tab" data-toggle="tab" href="#nav-genes" role="tab" aria-controls="nav-genes" aria-selected="false">Genes</a> </li>
+            <li><a class="nav-item nav-link" id="nav-biomass-tab" data-toggle="tab" href="#nav-biomass" role="tab" aria-controls="nav-biomass" aria-selected="false">Biomass</a> </li>
+            <li><a class="nav-item nav-link" id="nav-gapfilling-tab" data-toggle="tab" href="#nav-gapfilling" role="tab" aria-controls="nav-gapfilling" aria-selected="false">Gapfilling</a> </li>
+            <li><a class="nav-item nav-link" id="nav-atpanalysis-tab" data-toggle="tab" href="#nav-atpanalysis" role="tab" aria-controls="nav-atpanalysis" aria-selected="false">ATP analysis</a> </li>
+        </ul>
+        <div class="tab-content" id="nav-tabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="nav-overview" role="tabpanel" aria-labelledby="nav-overview-tab">
+                <table id="overview" class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th>Model ID</th>
+                            <td>{{ overview['Model ID'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Full Gapfilling and ATP Analysis Report</th>
+                            <td><a href="gapfilling_atp_analysis_report.html" target="_blank">VIEW REPORT IN SEPARATE WINDOW</a></td>
+                        </tr>
+                        <tr>
+                            <th>Genome Scale Template</th>
+                            <td>{{ overview['Genome Scale Template'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Core Gapfilling Media</th>
+                            <td>{{ overview['Core Gapfilling Media'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Gapfilling Media</th>
+                            <td>{{ overview['Gapfilling Media'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Source Genome</th>
+                            <td>{{ overview['Source Genome'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Number of reactions</th>
+                            <td>{{ overview['Total Number of reactions'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Number compounds</th>
+                            <td>{{ overview['Number compounds'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Number compartments</th>
+                            <td>{{ overview['Number compartments'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Number biomass</th>
+                            <td>{{ overview['Number biomass'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Number gapfills</th>
+                            <td>{{ overview['Number gapfills'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <!-- Reactions Tab -->
+            <div class="tab-pane fade" id="nav-reactions" role="tabpanel" aria-labelledby="nav-reactions-tab">
+                <table width="100%" id="reactions">
+                    <thead>
+                        <tr>
+                            <th>Reaction ID</th>
+                            <th>Name</th>
+                            <th>Equation</th>
+                            <th>Genes</th>
+                            <th>Gapfilling</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Compounds Tab -->
+            <div class="tab-pane fade" id="nav-compounds" role="tabpanel" aria-labelledby="nav-compounds-tab">
+                <table width="100%" id="compounds">
+                    <thead>
+                        <tr>
+                            <th>Compound ID</th>
+                            <th>Name</th>
+                            <th>Formula</th>
+                            <th>Charge</th>
+                            <th>Compartment</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Genes Tab -->
+            <div class="tab-pane fade" id="nav-genes" role="tabpanel" aria-labelledby="nav-genes-tab">
+                <table width="100%" id="genes">
+                    <thead>
+                        <tr>
+                            <th>Gene</th>
+                            <th>Reactions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Biomass Tab -->
+            <div class="tab-pane fade" id="nav-biomass" role="tabpanel" aria-labelledby="nav-biomass-tab">
+                <table width="100%" id="biomass">
+                    <thead>
+                        <tr>
+                            <th>Biomass Reaction ID</th>
+                            <th>Compound ID</th>
+                            <th>Name</th>
+                            <th>Coefficient</th>
+                            <th>Compartment</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Gapfilling Tab -->
+            <div class="tab-pane fade" id="nav-gapfilling" role="tabpanel" aria-labelledby="nav-gapfilling-tab">
+                {% if gapfilling and gapfilling|length > 0 %}
+                    <table width="100%" id="gapfilling">
+                        <thead>
+                            <tr>
+                                <th>Reaction ID</th>
+                                <th>Reaction Name</th>
+                                <th>Media</th>
+                                <th>Direction</th>
+                                <th>Target</th>
+                                <th>Gapfilling Sensitivity ID</th>
+                                <th>Gapfilling Sensitivity Name</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                {% else %}
+                    <div class="alert alert-warning">
+                        No gapfilling data found! If you were expecting gapfilling results, please ensure the gapfilling parameter is ON for model reconstruction. Alternatively, you can run gapfilling on the current model for any condition of choice.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ATP Analysis Tab -->
+            <div class="tab-pane fade" id="nav-atpanalysis" role="tabpanel" aria-labelledby="nav-atpanalysis-tab">
+                {% if atpanalysis and atpanalysis|length > 0 %}
+                    <table width="100%" id="atpanalysis">
+                        <thead>
+                            <tr>
+                                <th>No of Gapfilled reactions</th>
+                                <th>Media</th>
+                                <th>ATP Production</th>
+                                <th>Gapfilled reactions</th>
+                                <th>Reversed reaction by gapfilling</th>
+                                <th>Filtered Reactions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                {% else %}
+                    <div class="alert alert-warning">
+                        No ATP analysis data found! If you were expecting ATP analysis results, please ensure the "ATP safe" or "apply ATP check" parameter is ON for model reconstruction or when run gapfilling for any condition of choice.
+                    </div>
+                {% endif %}
+            </div>
+
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                /* Uncomment for dummy data
+                const overview = [
+                    { 'Model': 'Model 1', 'Genome': 'Genome A' },
+                    { 'Model': 'Model 2', 'Genome': 'Genome B' }
+                ];
+                const reactions = [
+                    { 'id': 'R001', 'name': 'Reaction A', 'equation': 'A + B -> C + D', 'genes': 'Gene1; Gene2', 'gapfilling': 'Yes' },
+                    { 'id': 'R002', 'name': 'Reaction B', 'equation': 'E + F -> G + H', 'genes': 'Gene3', 'gapfilling': 'No' }
+                ];
+                const compounds = [
+                    { 'id': 'C001', 'name': 'Compound A', 'formula': 'H2O', 'charge': '-1', 'compartment': 'cytosol' },
+                    { 'id': 'C002', 'name': 'Compound B', 'formula': 'CO2', 'charge': '0', 'compartment': 'extracellular' }
+                ];
+                const genes = [
+                    { 'gene': 'Gene1', 'reactions': 'R001; R003' },
+                    { 'gene': 'Gene2', 'reactions': 'R001; R004' }
+                ];
+                const biomass = [
+                    { 'biomass_compound_id': 'BM001', 'name': 'Biomass Compound A', 'coefficient': '0.5', 'compartment': 'cytosol' },
+                    { 'biomass_compound_id': 'BM002', 'name': 'Biomass Compound B', 'coefficient': '0.3', 'compartment': 'mitochondria' }
+                ];
+                const gapfilling = [
+                    { 'reaction_id': 'R003', 'reaction_name': 'Reaction C', 'media': 'LB', 'direction': 'forward', 'target': 'growth', 'gapfilling_sensitivity': 'High' },
+                    { 'reaction_id': 'R004', 'reaction_name': 'Reaction D', 'media': 'M9', 'direction': 'reverse', 'target': 'ATP production', 'gapfilling_sensitivity': 'Low' }
+                ];
+                const atpanalysis = [
+                    { 'no_of_gapfilled_reactions': 5, 'media': 'LB', 'atp_production': 'High', 'gapfilled_reactions': 'R005; R006', 'reversed_reaction_by_gapfilling': 'R007', 'filtered_reactions': 'R008; R009' }
+                ];
+                */
+
+                // Using Jinja2 templating to fill in the data
+                const overview = {{ overview|tojson }};
+                const reactions = {{ reactions|tojson }};
+                const compounds = {{ compounds|tojson }};
+                const genes = {{ genes|tojson }};
+                const biomass = {{ biomass|tojson }};
+                const gapfilling = {{ gapfilling|tojson }};
+                const atpanalysis = {{ atpanalysis|tojson }};
+
+                $('#reactions').DataTable({
+                    "data": reactions,
+                    "columns": [
+                        { 'data': 'id' },
+                        { 'data': 'name' },
+                        { 'data': 'equation' },
+                        { 'data': 'genes' },
+                        { 'data': 'gapfilling' }
+                    ]
+                });
+
+                $('#compounds').DataTable({
+                    "data": compounds,
+                    "columns": [
+                        { 'data': 'id' },
+                        { 'data': 'name' },
+                        { 'data': 'formula' },
+                        { 'data': 'charge' },
+                        { 'data': 'compartment' }
+                    ]
+                });
+
+                $('#genes').DataTable({
+                    "data": genes,
+                    "columns": [
+                        { 'data': 'gene' },
+                        { 'data': 'reactions' }
+                    ]
+                });
+
+                $('#biomass').DataTable({
+                    "data": biomass,
+                    "columns": [
+                        { 'data': 'biomass_reaction_id' },
+                        { 'data': 'biomass_compound_id' },
+                        { 'data': 'name' },
+                        { 'data': 'coefficient' },
+                        { 'data': 'compartment' }
+                    ]
+                });
+
+                $('#gapfilling').DataTable({
+                    "data": gapfilling,
+                    "columns": [
+                        { 'data': 'reaction_id' },
+                        { 'data': 'reaction_name' },
+                        { 'data': 'media' },
+                        { 'data': 'direction' },
+                        { 'data': 'target' },
+                        { 'data': 'gapfilling_sensitivity_id' },
+                        { 'data': 'gapfilling_sensitivity_name' }
+                    ]
+                });
+
+                $('#atpanalysis').DataTable({
+                    "data": atpanalysis,
+                    "columns": [
+                        { 'data': 'no_of_gapfilled_reactions' },
+                        { 'data': 'media' },
+                        { 'data': 'atp_production' },
+                        { 'data': 'gapfilled_reactions' },
+                        { 'data': 'reversed_reaction_by_gapfilling' },
+                        { 'data': 'filtered_reactions' }
+                    ]
+                });
+            });
+        </script>
+    </div>
+</body>
+
+</html>

@@ -125,8 +125,15 @@ class MSCommunity:
         lp_filename=None,  # specify a filename to create an lp file
     ):
         # Setting model and package manager
-        self.model, self.lp_filename, self.pfba = model, lp_filename, pfba
-        self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.mdlutl = model
+        else:
+            self.model = model
+            self.mdlutl = MSModelUtil.get(model)
+        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
+        self.lp_filename = lp_filename
+        self.pfba = pfba
         self.gapfillings = {}
         # Define Data attributes as None
         self.solution = (
@@ -142,7 +149,7 @@ class MSCommunity:
         ) = self.kinetic_coeff = self.modelseed_db_path = None
         self.species = DictList()
         # Computing data from model
-        msid_cobraid_hash = FBAHelper.msid_hash(model)
+        msid_cobraid_hash = self.mdlutl.msid_hash()
         if "cpd11416" not in msid_cobraid_hash:
             logger.critical("Could not find biomass compound")
         other_biomass_cpds = []
@@ -171,7 +178,7 @@ class MSCommunity:
 
     @staticmethod
     def build_from_species_models(
-        models, mdlid=None, name=None, names=[], abundances=None
+        models, mdlid=None, name=None, names=[], abundances=None,basemodel=None
     ):
         """Merges the input list of single species metabolic models into a community metabolic model
 
@@ -196,8 +203,11 @@ class MSCommunity:
         Raises
         ------
         """
-        newmodel = Model(mdlid, name)
-        newutl = MSModelUtil(newmodel)
+        if basemodel:
+            newmodel = basemodel
+        else:
+            newmodel = Model(mdlid, name)
+        newutl = MSModelUtil.get(newmodel)
         biomass_compounds = []
         index = 1
         biomass_index = 2
@@ -230,7 +240,7 @@ class MSCommunity:
                         met.id = output[0] + "_" + output[1] + str(index)
                 if met.id not in newmodel.metabolites:
                     new_metabolites.append(met)
-                    if met.id == "cpd11416":
+                    if newutl.metabolite_msid(met) == "cpd11416":
                         biomass_compounds.append(met)
             # Rename reactions
             for rxn in model.reactions:

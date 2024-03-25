@@ -3,13 +3,20 @@
 from __future__ import absolute_import
 
 import logging
-import re
-from optlang.symbolics import Zero, add
-import json as _json
-from cobra.core import Gene, Metabolite, Model, Reaction
+import re  # !!! import is never used
+from optlang.symbolics import Zero, add  # !!! add is never used
+import json as _json  # !!! import is never used
+from cobra.core import (
+    Gene,
+    Metabolite,
+    Model,
+    Reaction,
+)  # !!! none of these imports are used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.exceptions import FeasibilityError
 
+logger = logging.getLogger(__name__)
 
 # Adding a few exception classes to handle different types of errors
 class FeasibilityError(Exception):
@@ -26,17 +33,26 @@ class BaseFBAPkg:
     def __init__(
         self, model, name, variable_types={}, constraint_types={}, reaction_types={}
     ):
-        self.model = model
-        self.modelutl = MSModelUtil(model)
+        if isinstance(model, MSModelUtil):
+            self.model = model.model
+            self.modelutl = model
+        else:
+            self.model = model
+            self.modelutl = MSModelUtil.get(model)
+
         self.name = name
+
         self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
         if self.pkgmgr is None:
             self.pkgmgr = MSPackageManager.get_pkg_mgr(model, 1)
         self.pkgmgr.addpkgobj(self)
-        self.constraints = dict()
-        self.variables = dict()
-        self.parameters = dict()
-        self.new_reactions = dict()
+
+        self.constraints, self.variables, self.parameters, self.new_reactions = (
+            {},
+            {},
+            {},
+            {},
+        )
         self.variable_types = variable_types
         self.constraint_types = constraint_types
 
@@ -53,53 +69,72 @@ class BaseFBAPkg:
         self.parameters.update(params)  # replace defaults with params
 
     def clear(self):
-        objects = []
-        for type in self.variables:
-            for object in self.variables[type]:
-                objects.append(self.variables[type][object])
-        for type in self.constraints:
-            for object in self.constraints[type]:
-                objects.append(self.constraints[type][object])
-        self.model.remove_cons_vars(objects)
-        self.variables = {}
-        self.constraints = {}
+        cobra_objs = []
+        for obj_type in self.variables:
+            for cobra_obj in self.variables[obj_type]:
+                cobra_objs.append(self.variables[obj_type][cobra_obj])
+            self.variables[obj_type] = {}
+        for obj_type in self.constraints:
+            for cobra_obj in self.constraints[obj_type]:
+                cobra_objs.append(self.constraints[obj_type][cobra_obj])
+            self.constraints[obj_type] = {}
+        self.model.remove_cons_vars(cobra_objs)
 
-    def build_variable(self, type, lower_bound, upper_bound, vartype, object=None):
+    def build_variable(
+        self, obj_type, lower_bound, upper_bound, vartype, cobra_obj=None
+    ):
         name = None
-        if self.variable_types[type] == "none":
-            count = len(self.variables[type])
+        if self.variable_types[obj_type] == "none":
+            count = len(self.variables[obj_type])
             name = str(count + 1)
-        elif self.variable_types[type] == "string":
-            name = object
+        elif self.variable_types[obj_type] == "string":
+            name = cobra_obj
         else:
-            name = object.id
-        if name not in self.variables[type]:
-            self.variables[type][name] = self.model.problem.Variable(
-                name + "_" + type, lb=lower_bound, ub=upper_bound, type=vartype
+            name = cobra_obj.id
+        if name not in self.variables[obj_type]:
+            self.variables[obj_type][name] = self.model.problem.Variable(
+                name + "_" + obj_type, lb=lower_bound, ub=upper_bound, type=vartype
             )
-            self.model.add_cons_vars(self.variables[type][name])
-        return self.variables[type][name]
+            self.model.add_cons_vars(self.variables[obj_type][name])
+        return self.variables[obj_type][name]
 
-    def build_constraint(self, type, lower_bound, upper_bound, coef={}, object=None):
+    def build_constraint(
+        self, obj_type, lower_bound, upper_bound, coef={}, cobra_obj=None
+    ):
         name = None
-        if self.constraint_types[type] == "none":
-            count = len(self.constraints[type])
+        if self.constraint_types[obj_type] == "none":
+            count = len(self.constraints[obj_type])
             name = str(count + 1)
-        elif self.constraint_types[type] == "string":
-            name = object
+        elif self.constraint_types[obj_type] == "string":
+            name = cobra_obj
         else:
-            name = object.id
-        if name in self.constraints[type]:
-            self.model.remove_cons_vars(self.constraints[type][name])
-        self.constraints[type][name] = self.model.problem.Constraint(
-            Zero, lb=lower_bound, ub=upper_bound, name=name + "_" + type
+            name = cobra_obj.id
+        if name in self.constraints[obj_type]:
+            self.model.remove_cons_vars(self.constraints[obj_type][name])
+        self.constraints[obj_type][name] = self.model.problem.Constraint(
+            Zero, lb=lower_bound, ub=upper_bound, name=name + "_" + obj_type
         )
-        self.model.add_cons_vars(self.constraints[type][name])
+        self.model.add_cons_vars(self.constraints[obj_type][name])
         self.model.solver.update()
         if len(coef) > 0:
-            self.constraints[type][name].set_linear_coefficients(coef)
+            self.constraints[obj_type][name].set_linear_coefficients(coef)
         self.model.solver.update()
-        return self.constraints[type][name]
+        return self.constraints[obj_type][name]
+
+    # Utility functions
+    def print_lp(self, filename=None):
+        if filename is None:
+            filename = self.lp_filename
+        if filename is not None:
+            with open(filename + ".lp", "w") as out:
+                complete_line = ""
+                for line in str(self.model.solver).splitlines():
+                    if ":" in line:
+                        if complete_line != "":
+                            out.write(complete_line)
+                        complete_line = ""
+                    else:
+                        complete_line += line
 
     def all_variables(self):
         return self.pkgmgr.all_variables()
@@ -118,3 +153,6 @@ class BaseFBAPkg:
             self.constraints[name] = dict()
         if name not in self.constraint_types:
             self.constraint_types[name] = type
+
+    def current_media(self):
+        return self.pkgmgr.getpkg("KBaseMediaPkg").current_media

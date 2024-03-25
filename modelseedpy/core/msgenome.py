@@ -15,8 +15,14 @@ def normalize_role(s):
 
 
 def read_fasta(f, split=DEFAULT_SPLIT, h_func=None):
-    with open(f, "r") as fh:
-        return parse_fasta_str(fh.read(), split, h_func)
+    if f.endswith(".gz"):
+        import gzip
+
+        with gzip.open(f, "rb") as fh:
+            return parse_fasta_str(fh.read().decode("utf-8"), split, h_func)
+    else:
+        with open(f, "r") as fh:
+            return parse_fasta_str(fh.read(), split, h_func)
 
 
 def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
@@ -48,7 +54,7 @@ def parse_fasta_str(faa_str, split=DEFAULT_SPLIT, h_func=None):
 
 
 class MSFeature:
-    def __init__(self, feature_id, sequence, description=None):
+    def __init__(self, feature_id, sequence, description=None, aliases=None):
         """
 
         @param feature_id: identifier for the protein coding feature
@@ -60,7 +66,7 @@ class MSFeature:
         self.seq = sequence
         self.description = description  # temporary replace with proper parsing
         self.ontology_terms = {}
-        self.aliases = []
+        self.aliases = aliases
 
     def add_ontology_term(self, ontology_term, value):
         """
@@ -78,6 +84,9 @@ class MSFeature:
 class MSGenome:
     def __init__(self):
         self.features = DictList()
+        self.id = None
+        self.annoont = None
+        self.scientific_name = None
 
     def add_features(self, feature_list: list):
         """
@@ -96,6 +105,28 @@ class MSGenome:
 
         self.features += feature_list
 
+    def create_new_feature(self,id,sequence):
+        newftr = MSFeature(id,sequence)
+        self.add_features([newftr])
+        return newftr
+
+    @staticmethod
+    def from_annotation_ontology(
+        annoont, prioritized_event_list=None, ontologies=None, merge_all=False,feature_type=None, translate_to_rast=True
+    ):
+        gene_hash = annoont.get_gene_term_hash()
+        genome = MSGenome()
+        features = []
+        for gene in gene_hash:
+            feature = MSFeature(gene.id,"")
+            features.append(feature)
+            for term in gene_hash[gene]:
+                feature.add_ontology_term(term.ontology.id, term.id)
+                if term.ontology.id == "SSO":
+                    feature.add_ontology_term("RAST",annoont.get_term_name(term))
+        genome.add_features(features)
+        return genome
+
     @staticmethod
     def from_fasta(
         filename, contigs=0, split="|", h_func=None
@@ -103,6 +134,20 @@ class MSGenome:
         genome = MSGenome()
         genome.features += read_fasta(filename, split, h_func)
         return genome
+
+    def to_fasta(self, filename, l=80, fn_header=None):
+        with open(filename, "w") as fh:
+            for feature in self.features:
+                h = f">{feature.id}\n"
+                if fn_header:
+                    h = fn_header(feature)
+                fh.write(h)
+                lines = [
+                    feature.seq[i : i + l] + "\n" for i in range(0, len(feature.seq), l)
+                ]
+                for line in lines:
+                    fh.write(line)
+        return filename
 
     @staticmethod
     def from_dna_fasta(filename):
