@@ -11,6 +11,8 @@ from modelseedpy.core import FBAHelper  # !!! the import is never used
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.exceptions import GapfillingError
+from collections import defaultdict
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(
@@ -130,9 +132,9 @@ class MSGapfill:
         if before_filtering:
             filter_msg = " before filtering "
             note = "FBF"
-        gf_sensitivity[media.id][target][note] = (
-            self.mdlutl.find_unproducible_biomass_compounds(target)
-        )
+        gf_sensitivity[media.id][target][
+            note
+        ] = self.mdlutl.find_unproducible_biomass_compounds(target)
         if target != "rxn00062_c0":
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         logger.warning(
@@ -387,10 +389,10 @@ class MSGapfill:
                 gf_sensitivity[solution["media"].id] = {}
             if solution["target"] not in gf_sensitivity[solution["media"].id]:
                 gf_sensitivity[solution["media"].id][solution["target"]] = {}
-            gf_sensitivity[solution["media"].id][solution["target"]]["success"] = (
-                self.mdlutl.find_unproducible_biomass_compounds(
-                    solution["target"], cumulative_solution
-                )
+            gf_sensitivity[solution["media"].id][solution["target"]][
+                "success"
+            ] = self.mdlutl.find_unproducible_biomass_compounds(
+                solution["target"], cumulative_solution
             )
             self.mdlutl.save_attributes(gf_sensitivity, "gf_sensitivity")
         self.cumulative_gapfilling.extend(cumulative_solution)
@@ -447,12 +449,21 @@ class MSGapfill:
         p = np.zeros(len(restructured_anoot["Reactions"]))
         # computed_weights is the rxn_hash ({rxn: weight, ...})
         computed_weights = {}
+
+        # Precompute gene reaction lookups
+        gene_reaction_lookup = {}
+        for idx, row in restructured_anoot.iterrows():
+            gene = row["Gene"]
+            reaction = row["Reactions"]
+            if gene in gene_reaction_lookup:
+                gene_reaction_lookup[gene].append(reaction)
+            else:
+                gene_reaction_lookup[gene] = [reaction]
+
         for rxn in range(0, len(restructured_anoot)):
             substr_rxns = [rxn for rxn in restructured_anoot["Reactions"][[rxn]]]
             # Get the indices of the rows where the condition is True
-            mask = restructured_anoot["Reactions"].apply(
-                lambda x: any(substr in x for substr in substr_rxns)
-            )
+            mask = restructured_anoot["Reactions"] == substr_rxns[0]
             idx_gene = mask[mask].index
             nAG = 0
             nMG = 0
@@ -476,11 +487,10 @@ class MSGapfill:
                     selected_gene = restructured_anoot["Gene"].iloc[idx_gene[iGene]]
 
                     # Finding reactions associated with genes that contain the selected gene
-                    associated_reactions = restructured_anoot["Reactions"][
-                        restructured_anoot["Gene"].str.contains(selected_gene)
-                    ]
+                    associated_reactions = gene_reaction_lookup.get(selected_gene, [])
+
                     # Checking if there are more than one unique reactions
-                    if len(associated_reactions.unique()) > 1:
+                    if len(associated_reactions) > 1:
                         nCG += 1
 
                 p[rxn] = (nMG / nAG) * (1 / (1 + (nCG / nAG)))
