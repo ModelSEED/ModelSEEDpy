@@ -466,7 +466,7 @@ class MSGapfill:
         integrate_solutions=True,
         remove_unneeded_reactions=True
     ):
-        """Run gapfilling across an array of media conditions ultimately using different integration policies: simultaneous gapfilling, independent gapfilling, cumulative gapfilling
+        """Run gapfilling across an array of media conditions using one of three integration policies: Sequential, Independent, or Global.
         Parameters
         ----------
         media_list : [MSMedia]
@@ -484,7 +484,23 @@ class MSGapfill:
         check_for_growth : bool
             Indicates if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
         gapfilling_mode : string
-            Indicates the integration policy to be used: Global, Independent, and Cumulative
+            Indicates the integration policy to be used. Must be one of:
+              - "Sequential" (default): additions accumulate across media. Each media is
+                gapfilled in turn; its solution is integrated into the model, and the
+                gapfilling objective is then adjusted so prior-media additions are no
+                longer penalized when gapfilling the next media. Produces a single model
+                that grows on every medium in the list. (Older versions of this docstring
+                called this mode "Cumulative".)
+              - "Independent": each media is gapfilled independently from the original
+                draft. Prior-media additions are removed (bounds zeroed) before
+                integrating the next media's solution.
+              - "Global": one simultaneous MILP solves across all media at once, then the
+                combined solution is integrated for each media. (Older versions of this
+                docstring called this mode "Simultaneous".)
+            NOTE: "Cumulative" and "Simultaneous" are NOT recognized values. They were
+            earlier names; the current code only branches on "Sequential", "Independent",
+            and "Global". Passing an unrecognized value silently produces a no-op (no
+            per-media gapfilling is performed).
         run_sensitivity_analysis : bool
             Indicates if sensitivity analysis should be run on the gapfilling solution to determine biomass dependency
         """
@@ -536,12 +552,12 @@ class MSGapfill:
                         check_for_growth=check_for_growth,
                         gapfilling_mode=gapfilling_mode
                     )
-                    #If we are doing cumulative gapfilling, then we need adjust the gapfilling objective so it no longer penalizes using the current solution reactions
+                    #If we are doing Sequential gapfilling, then we need adjust the gapfilling objective so it no longer penalizes using the current solution reactions
                     if gapfilling_mode == "Sequential":
                         self.gfpkgmgr.getpkg("GapfillingPkg").compute_gapfilling_penalties(exclusion_solution=cumulative_solution,reaction_scores=self.reaction_scores)
                         self.gfpkgmgr.getpkg("GapfillingPkg").build_gapfilling_objective_function()
         if gapfilling_mode == "Global":
-            #Now we run simultaneous gapfilling on a combination of all our various gapfilled models
+            #Now we run Global gapfilling on a combination of all our various gapfilled models (one MILP across all media)
             logger.debug("Running global gapfilling!")
             full_solution = self.run_global_gapfilling(
                 medias=test_output["medias"],
@@ -654,8 +670,20 @@ class MSGapfill:
             Indicate where unneeded reactions should be removed from the model
         check_for_growth : bool
             Indicate if the model should be checked to ensure that the resulting gapfilling solution produces a nonzero objective
-        gapfilling_mode : Cumulative, Independent, Simultaneous
-            Specify what the gapfilling mode is because this determines how integration is performed
+        gapfilling_mode : string
+            Specify what the gapfilling mode is because this determines how integration
+            is performed. Must be one of:
+              - "Sequential" (default): integrate the new solution on top of the
+                accumulating cumulative_solution; prior-media additions are kept.
+              - "Independent": zero the bounds of all reactions in cumulative_solution
+                before integrating the current solution, so each media's gapfill is
+                independent of the others.
+              - "Global": integrate the combined cross-media MILP solution for the
+                current media without removing unneeded reactions (they may be needed
+                for other media).
+            NOTE: "Cumulative" and "Simultaneous" are NOT recognized values. They were
+            earlier names for "Sequential" and "Global" respectively; only the three
+            labels above are honored by the integration logic.
         """
         logger.debug(f"Initial solution: {str(solution)}")
         original_objective = self.mdlutl.model.objective
