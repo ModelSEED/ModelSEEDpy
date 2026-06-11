@@ -323,6 +323,160 @@ class MSGapfill:
         self.last_solution["binary_check"] = binary_check
         return self.last_solution
     
+    def run_comprehensive_gapfilling(
+        self,
+        media,
+        target=None,
+        minimum_obj=None,
+        binary_check=False,
+        prefilter=True,
+        activation_cap=0.001,
+        activation_rxn_filter=None,
+    ):
+        """Run comprehensive gapfilling: maximize the number of the model's own reactions
+        that are simultaneously active (Stage 1), then lock those directions and find the
+        minimum-cost database additions that sustain them while still producing biomass
+        (Stage 2). Returns a solution dict in the same shape as run_gapfilling, or None.
+
+        Parameters
+        ----------
+        media : MSMedia
+            Complete media in which to perform activation maximization and gapfilling.
+        target : string, optional
+            Biomass reaction id to maximize; defaults to self.default_target.
+        minimum_obj : float, optional
+            Minimum biomass threshold; defaults to self.default_minimum_objective.
+        binary_check : bool
+            If True, post-process Stage 2 solution to ensure minimality.
+        prefilter : bool
+            If True, prefilter the gapfilling database via test_conditions before
+            running. Pass False when caller (run_multi_gapfill) has already prefiltered.
+        activation_cap : float
+            Upper bound for fra/rra activation variables (default 0.001). A reaction
+            direction is considered active when its variable reaches this value.
+        activation_rxn_filter : set of str, optional
+            If provided, restrict activation maximization to this set of reaction ids
+            rather than all original-model reactions. Mainly useful for testing with
+            solvers that cannot handle large MILPs (e.g., GLPK with many binary vars).
+            In production, leave as None (default) to maximize over all model reactions.
+        """
+        # --- Setup ---
+        if not target:
+            target = self.default_target
+        if not minimum_obj:
+            minimum_obj = self.default_minimum_objective
+
+        gfpkg = self.gfpkgmgr.getpkg("GapfillingPkg")
+        # Install biomass >= minimum_obj constraint and standard gapfilling objective
+        gfpkg.set_base_objective(target, minimum_obj)
+        # Set media on the gapfilling model
+        gfpkg.set_media(media)
+
+        # --- Feasibility / prefilter guard (mirrors run_gapfilling) ---
+        if not self.test_gapfill_database(media, target, before_filtering=prefilter):
+            return None
+        if prefilter:
+            self.prefilter(growth_conditions=[{
+                "media": media,
+                "is_max_threshold": False,
+                "threshold": minimum_obj,
+                "objective": target,
+            }])
+            if not self.test_gapfill_database(media, target, before_filtering=False):
+                return None
+
+        # --- Build activation constraints, filtered to original model's own reactions ---
+        # Use reaction ids from self.model (the original, not the candidate-extended gfmodel)
+        orig_ids = set(r.id for r in self.model.reactions)
+        # Intersect with gfmodel reactions for safety (gfmodel may lack some if bounds were zeroed)
+        gfmodel_ids = set(r.id for r in self.gfmodel.reactions)
+        rxn_filter = orig_ids & gfmodel_ids
+        # Optionally restrict to a subset (e.g. for testing with solvers limited to small MILPs)
+        if activation_rxn_filter is not None:
+            rxn_filter = rxn_filter & set(activation_rxn_filter)
+
+        rapkg = self.gfpkgmgr.getpkg("ReactionActivationPkg")
+        # build_package also builds RevBinPkg over the same filter — required for
+        # direction-preserving correctness (prevents net-zero futile activation)
+        rapkg.build_package(rxn_filter=rxn_filter, max_value=activation_cap)
+
+        # --- Stage 1: maximize coverage (number of active native reaction directions) ---
+        saved_objective = self.gfmodel.objective
+        activation_obj = self.gfmodel.problem.Objective(Zero, direction="max")
+        obj_coef = {}
+        for rxn_id, var in rapkg.variables["fra"].items():
+            obj_coef[var] = 1
+        for rxn_id, var in rapkg.variables["rra"].items():
+            obj_coef[var] = 1
+        self.gfmodel.objective = activation_obj
+        activation_obj.set_linear_coefficients(obj_coef)
+
+        sol1 = self.gfmodel.optimize()
+        if sol1.status != "optimal":
+            logger.warning("Comprehensive gapfilling Stage 1 infeasible for %s", media)
+            # Restore objective before returning
+            self.gfmodel.objective = saved_objective
+            return None
+
+        # --- Lock: set lb = activation_cap for active directions ---
+        locked_vars = []
+        for rxn_id, var in rapkg.variables["fra"].items():
+            if var.primal >= activation_cap - 1e-9:
+                var.lb = activation_cap
+                locked_vars.append(var)
+        for rxn_id, var in rapkg.variables["rra"].items():
+            if var.primal >= activation_cap - 1e-9:
+                var.lb = activation_cap
+                locked_vars.append(var)
+        logger.debug(
+            "Comprehensive gapfilling: locked %d activation variables", len(locked_vars)
+        )
+
+        # --- Stage 2: minimize gapfilling cost under activation locks ---
+        # Restore standard gapfilling objective (biomass constraint + minimization)
+        gfpkg.set_base_objective(target, minimum_obj)
+
+        sol2 = self.gfmodel.optimize()
+        if sol2.status != "optimal":
+            logger.warning("Comprehensive gapfilling Stage 2 infeasible for %s", media)
+            # Release locks before returning
+            for var in locked_vars:
+                var.lb = 0
+            return None
+
+        self.last_solution = gfpkg.compute_gapfilled_solution()
+
+        # Test conditions (ATP safety etc.) — mirrors run_gapfilling
+        if self.test_conditions:
+            self.last_solution = gfpkg.run_test_conditions(
+                self.test_conditions,
+                self.last_solution,
+                self.test_condition_iteration_limit,
+            )
+            if self.last_solution is None:
+                logger.warning(
+                    "Comprehensive gapfilling: no solution satisfying all test conditions"
+                )
+                for var in locked_vars:
+                    var.lb = 0
+                return None
+
+        # Binary check to reduce to minimal reaction solution
+        if binary_check:
+            self.last_solution = gfpkg.binary_check_gapfilling_solution()
+
+        # Attach metadata so the dict matches run_gapfilling's shape
+        self.last_solution["media"] = media
+        self.last_solution["target"] = target
+        self.last_solution["minobjective"] = minimum_obj
+        self.last_solution["binary_check"] = binary_check
+
+        # --- Cleanup: release activation locks so gfmodel is reusable ---
+        for var in locked_vars:
+            var.lb = 0
+
+        return self.last_solution
+
     def run_global_gapfilling(
         self,
         medias,
@@ -497,10 +651,15 @@ class MSGapfill:
               - "Global": one simultaneous MILP solves across all media at once, then the
                 combined solution is integrated for each media. (Older versions of this
                 docstring called this mode "Simultaneous".)
+              - "Comprehensive": two-stage gapfilling that first maximizes the number of
+                the model's own reactions that can carry flux (activation maximization),
+                then finds the minimum-cost database additions that sustain those active
+                reactions while still producing biomass. Integrates cumulatively across
+                media (like Sequential).
             NOTE: "Cumulative" and "Simultaneous" are NOT recognized values. They were
             earlier names; the current code only branches on "Sequential", "Independent",
-            and "Global". Passing an unrecognized value silently produces a no-op (no
-            per-media gapfilling is performed).
+            "Global", and "Comprehensive". Passing an unrecognized value silently
+            produces a no-op (no per-media gapfilling is performed).
         run_sensitivity_analysis : bool
             Indicates if sensitivity analysis should be run on the gapfilling solution to determine biomass dependency
         """
@@ -556,6 +715,29 @@ class MSGapfill:
                     if gapfilling_mode == "Sequential":
                         self.gfpkgmgr.getpkg("GapfillingPkg").compute_gapfilling_penalties(exclusion_solution=cumulative_solution,reaction_scores=self.reaction_scores)
                         self.gfpkgmgr.getpkg("GapfillingPkg").build_gapfilling_objective_function()
+            elif gapfilling_mode == "Comprehensive":
+                logger.debug("Running Comprehensive gapfilling!")
+                # prefilter=False because test_and_adjust_gapfilling_conditions already handled it
+                solution = self.run_comprehensive_gapfilling(
+                    media,
+                    test_output["targets"][i],
+                    test_output["thresholds"][i],
+                    binary_check,
+                    prefilter=False,
+                )
+                # Integrate with Sequential (cumulative) semantics
+                if solution:
+                    solution_dictionary[media] = self.integrate_gapfill_solution(
+                        solution,
+                        cumulative_solution=cumulative_solution,
+                        remove_unneeded_reactions=remove_unneeded_reactions,
+                        check_for_growth=check_for_growth,
+                        gapfilling_mode="Sequential",
+                    )
+                    # Between-media penalty recompute (same as Sequential) so already-added
+                    # reactions are not re-penalized when gapfilling the next medium
+                    self.gfpkgmgr.getpkg("GapfillingPkg").compute_gapfilling_penalties(exclusion_solution=cumulative_solution,reaction_scores=self.reaction_scores)
+                    self.gfpkgmgr.getpkg("GapfillingPkg").build_gapfilling_objective_function()
         if gapfilling_mode == "Global":
             #Now we run Global gapfilling on a combination of all our various gapfilled models (one MILP across all media)
             logger.debug("Running global gapfilling!")
@@ -592,7 +774,7 @@ class MSGapfill:
                 do_not_remove_list=[]
             )#Returns reactions in cumulative solution that are not needed for growth
             logger.debug("Unneeded in global gapfill: %s", unneeded)
-        elif gapfilling_mode == "Sequential":
+        elif gapfilling_mode == "Sequential" or gapfilling_mode == "Comprehensive":
             #Restoring the gapfilling objective function
             self.gfpkgmgr.getpkg("GapfillingPkg").compute_gapfilling_penalties(reaction_scores=self.reaction_scores)
             self.gfpkgmgr.getpkg("GapfillingPkg").build_gapfilling_objective_function()
