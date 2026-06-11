@@ -432,50 +432,46 @@ class MSGapfill:
             "Comprehensive gapfilling: locked %d activation variables", len(locked_vars)
         )
 
-        # --- Stage 2: minimize gapfilling cost under activation locks ---
-        # Restore standard gapfilling objective (biomass constraint + minimization)
-        gfpkg.set_base_objective(target, minimum_obj)
+        try:
+            # --- Stage 2: minimize gapfilling cost under activation locks ---
+            # Restore standard gapfilling objective (biomass constraint + minimization)
+            gfpkg.set_base_objective(target, minimum_obj)
 
-        sol2 = self.gfmodel.optimize()
-        if sol2.status != "optimal":
-            logger.warning("Comprehensive gapfilling Stage 2 infeasible for %s", media)
-            # Release locks before returning
-            for var in locked_vars:
-                var.lb = 0
-            return None
-
-        self.last_solution = gfpkg.compute_gapfilled_solution()
-
-        # Test conditions (ATP safety etc.) — mirrors run_gapfilling
-        if self.test_conditions:
-            self.last_solution = gfpkg.run_test_conditions(
-                self.test_conditions,
-                self.last_solution,
-                self.test_condition_iteration_limit,
-            )
-            if self.last_solution is None:
-                logger.warning(
-                    "Comprehensive gapfilling: no solution satisfying all test conditions"
-                )
-                for var in locked_vars:
-                    var.lb = 0
+            sol2 = self.gfmodel.optimize()
+            if sol2.status != "optimal":
+                logger.warning("Comprehensive gapfilling Stage 2 infeasible for %s", media)
                 return None
 
-        # Binary check to reduce to minimal reaction solution
-        if binary_check:
-            self.last_solution = gfpkg.binary_check_gapfilling_solution()
+            self.last_solution = gfpkg.compute_gapfilled_solution()
 
-        # Attach metadata so the dict matches run_gapfilling's shape
-        self.last_solution["media"] = media
-        self.last_solution["target"] = target
-        self.last_solution["minobjective"] = minimum_obj
-        self.last_solution["binary_check"] = binary_check
+            # Test conditions (ATP safety etc.) — mirrors run_gapfilling
+            if self.test_conditions:
+                self.last_solution = gfpkg.run_test_conditions(
+                    self.test_conditions,
+                    self.last_solution,
+                    self.test_condition_iteration_limit,
+                )
+                if self.last_solution is None:
+                    logger.warning(
+                        "Comprehensive gapfilling: no solution satisfying all test conditions"
+                    )
+                    return None
 
-        # --- Cleanup: release activation locks so gfmodel is reusable ---
-        for var in locked_vars:
-            var.lb = 0
+            # Binary check to reduce to minimal reaction solution
+            if binary_check:
+                self.last_solution = gfpkg.binary_check_gapfilling_solution()
 
-        return self.last_solution
+            # Attach metadata so the dict matches run_gapfilling's shape
+            self.last_solution["media"] = media
+            self.last_solution["target"] = target
+            self.last_solution["minobjective"] = minimum_obj
+            self.last_solution["binary_check"] = binary_check
+
+            return self.last_solution
+        finally:
+            # --- Cleanup (guaranteed): release activation locks so gfmodel is reusable ---
+            for var in locked_vars:
+                var.lb = 0
 
     def run_global_gapfilling(
         self,
