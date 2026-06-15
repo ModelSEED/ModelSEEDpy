@@ -299,6 +299,13 @@ class GapfillingPkg(BaseFBAPkg):
         #Setting minimal objective constraint
         self.pkgmgr.getpkg("ObjConstPkg").clear()
         if minobjective:
+            # Keep parameters["minimum_obj"] in sync with the requested minimum so
+            # later reset_objective_minimum(self.parameters["minimum_obj"]) calls
+            # (e.g. inside test_gapfill_database) restore the correct biomass floor
+            # rather than the stale construction-time default. Without this, a
+            # run_gapfilling(minimum_obj=X) with X above the default is silently
+            # relaxed back to the default before the final optimization.
+            self.parameters["minimum_obj"] = minobjective
             if self.model.objective.direction == "max":
                 self.pkgmgr.getpkg("ObjConstPkg").build_package(
                     minobjective, None
