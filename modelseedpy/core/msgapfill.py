@@ -659,6 +659,18 @@ class MSGapfill:
         run_sensitivity_analysis : bool
             Indicates if sensitivity analysis should be run on the gapfilling solution to determine biomass dependency
         """
+        #Comprehensive gapfilling activates the model's native reactions as a collectively-necessary
+        #set; the per-reaction knockout pruning behind remove_unneeded_reactions classifies each one as
+        #individually redundant (an alternative path exists when the others are present) and strips them,
+        #leaving the model unable to grow. Force the flag off for this mode so callers cannot accidentally
+        #defeat the activation by leaving the default True in place.
+        if gapfilling_mode == "Comprehensive" and remove_unneeded_reactions:
+            logger.warning(
+                "Comprehensive gapfilling does not support remove_unneeded_reactions=True "
+                "(comprehensive-added reactions are collectively, not individually, necessary); "
+                "forcing remove_unneeded_reactions=False."
+            )
+            remove_unneeded_reactions = False
         #If not integrating, backing up and replacing self.mdlutl
         oldmdlutl = self.mdlutl
         if not integrate_solutions:
