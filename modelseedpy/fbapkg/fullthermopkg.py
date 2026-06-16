@@ -81,8 +81,8 @@ class FullThermoPkg(BaseFBAPkg):
                 "custom_concentrations": {},
                 "custom_deltaG_error": {"cpd00067": 0},
                 "compartment_potential": {
-                    "e0": 0,  # Extracellular MUST be the zero reference for compartment electrochemical potential (so community modeling works)
-                    "c0": -160,  # mV = 0.33 (pHint - pHext) - 143.33 where pHint = 7 and pHext = 6.5
+                    "e0": 0,    # mV — extracellular MUST be the zero reference for compartment electrochemical potential (so community modeling works)
+                    "c0": -160, # mV = 0.33*(pHint - pHext) - 143.33 where pHint=7, pHext=6.5
                 },
                 "temperature": 298,  # K
                 "filter": None,
@@ -202,11 +202,14 @@ class FullThermoPkg(BaseFBAPkg):
 
     def build_gibbs_constraint(self, object):
         msid = self.modelutl.metabolite_msid(object)
-        
-        # potential(i) (KJ/mol) = deltaG(i) (KJ/mol) + R * T(K) * lnconc(i) + charge(i) * compartment_potential
+
+        # potential(i) (kJ/mol) = deltaG(i) (kJ/mol) + R*T(K)*lnconc(i)
+        #                         + charge(i) * Faraday(kC/mol) * compartment_potential(mV) / 1000
+        # compartment_potential is in mV throughout (build_package default: e0=0 mV, c0=-160 mV).
+        # Dividing by 1000 converts mV -> V so that kC/mol * V = kJ/mol.
         if object.id not in self.pkgmgr.getpkg("SimpleThermoPkg").variables["potential"]:
             return None
-        
+
         pos_deltagerr_variable = self.variables["pdgerr"][object.id]
         neg_deltagerr_variable = self.variables["ndgerr"][object.id]
         potential_variable = self.pkgmgr.getpkg("SimpleThermoPkg").variables["potential"][object.id]
@@ -232,13 +235,34 @@ class FullThermoPkg(BaseFBAPkg):
             return None
         if msid == "cpd00067": #Adding pH7 concentration to deltaG so H+ concentration cancels unless it's different from pH7
             deltag += -1 * RValue * self.parameters["temperature"] * np.log(0.0000001)/4.184 #Dividing by 4.184 here because we multiply by this value later
-        Faraday = 96.485 # kC/mol
-        compartment_potential = 0
+        Faraday = 96.485  # kC/mol
+        compartment_potential = 0  # mV
         if object.compartment in self.parameters["compartment_potential"]:
             compartment_potential = self.parameters["compartment_potential"][
                 object.compartment
             ]
-        constant = deltag * 4.184 + object.charge * Faraday * compartment_potential
+        # Sanity-check: compartment_potential is expected in mV.
+        # Typical biological membrane potentials are well under 300 mV in magnitude.
+        # Values above 300 mV are suspicious (possible volts/mV unit slip; e.g. 0.16 V
+        # mis-entered as 160 would not trigger this, but -160 mV correctly does not).
+        # Values above 1000 mV are egregiously non-physical.
+        abs_cp = abs(compartment_potential)
+        if abs_cp > 1000:
+            logging.warning(
+                "compartment_potential for '%s' is %.1f mV, which is egregiously "
+                "non-physical (|V| > 1000 mV). Verify units — expected mV.",
+                object.compartment, compartment_potential,
+            )
+        elif abs_cp > 300:
+            logging.warning(
+                "compartment_potential for '%s' is %.1f mV, which is unusually large "
+                "(|V| > 300 mV). Typical biological membrane potentials sit well under "
+                "300 mV; verify that mV (not V) was supplied.",
+                object.compartment, compartment_potential,
+            )
+        # Divide compartment_potential by 1000 to convert mV -> V.
+        # Faraday (kC/mol) * V = kJ/mol, matching the kJ/mol scale of deltaG.
+        constant = deltag * 4.184 + object.charge * Faraday * (compartment_potential / 1000)
         coef = {
             potential_variable: 1,
             pos_deltagerr_variable: -1,
