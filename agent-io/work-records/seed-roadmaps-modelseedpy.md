@@ -7,7 +7,7 @@ seed-roadmaps-modelseedpy
 conductor/seed-roadmaps
 
 ## commit_shas
-(filled after commit)
+- 55b7d9eb8b7a53b3cd422d9b60ff232ee8aa1f9e
 
 ## summary
 Created the seed roadmap document for ModelSEEDpy's Energy Loop Analysis arc at
