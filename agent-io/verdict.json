@@ -1,0 +1,20 @@
+{
+  "verdict": "pass",
+  "reason": "Parse check passes: 6 milestones, 2 grouped under g1, all status enums valid; file is byte-for-byte identical to AIAssistant fixture; diff adds only the roadmap and work-record.",
+  "criteria": {
+    "file_exists": "pass",
+    "parse_no_error": "pass",
+    "milestone_count_6": "pass",
+    "parallel_group_exactly_one_id_g1": "pass",
+    "milestone_ids_m1a_m1b_grouped": "pass",
+    "schema_matches_fixture": "pass",
+    "roadmap_level_fields_valid": "pass",
+    "diff_scope_clean": "pass"
+  },
+  "tests_run": [
+    {
+      "cmd": "PYTHONPATH=src python3 -c \"from assistant.state.roadmap import load_roadmap; r=load_roadmap(...)\"",
+      "outcome": "milestones 6 | grouped 2 ids [\"g1\"] | status enum ok True | project modelseedpy | arc energy-loop-analysis | status not_started | total_estimate 6w"
+    }
+  ]
+}
