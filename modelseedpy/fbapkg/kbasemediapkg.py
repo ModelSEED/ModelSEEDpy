@@ -16,6 +16,7 @@ class KBaseMediaPkg(BaseFBAPkg):
 
     def __init__(self, model):
         BaseFBAPkg.__init__(self, model, "kbase media", {}, {})
+        self.current_media = None
 
     def build_package(
         self, media_or_parameters, default_uptake=None, default_excretion=None
@@ -40,14 +41,21 @@ class KBaseMediaPkg(BaseFBAPkg):
                 self.parameters["default_uptake"] = 0
             if self.parameters["default_excretion"] is None:
                 self.parameters["default_excretion"] = 100
-        if self.parameters["media"] is None and self.parameters["default_uptake"] == 0:
+        self.current_media = self.parameters["media"]
+        if (
+            self.parameters["media"] and self.parameters["media"].name == "Complete"
+        ) and self.parameters["default_uptake"] == 0:
             self.parameters["default_uptake"] = 100
 
         # First initializing all exchanges to default uptake and excretion
         exchange_list = self.modelutl.exchange_list()
         for reaction in exchange_list:
-            reaction.lower_bound = -1 * self.parameters["default_uptake"]
-            reaction.upper_bound = self.parameters["default_excretion"]
+            if -1 * self.parameters["default_uptake"] > reaction.upper_bound:
+                reaction.upper_bound = self.parameters["default_excretion"]
+                reaction.lower_bound = -1 * self.parameters["default_uptake"]
+            else:
+                reaction.lower_bound = -1 * self.parameters["default_uptake"]
+                reaction.upper_bound = self.parameters["default_excretion"]
 
         # Now constraining exchanges for specific compounds specified in the media
         if self.parameters["media"]:

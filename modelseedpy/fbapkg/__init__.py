@@ -17,5 +17,8 @@ from modelseedpy.fbapkg.flexiblebiomasspkg import FlexibleBiomassPkg
 from modelseedpy.fbapkg.problemreplicationpkg import ProblemReplicationPkg
 from modelseedpy.fbapkg.fullthermopkg import FullThermoPkg
 from modelseedpy.fbapkg.objconstpkg import ObjConstPkg
+from modelseedpy.fbapkg.objectivepkg import ObjectivePkg
 from modelseedpy.fbapkg.changeoptpkg import ChangeOptPkg
 from modelseedpy.fbapkg.elementuptakepkg import ElementUptakePkg
+from modelseedpy.fbapkg.expressionactivationpkg import ExpressionActivationPkg
+from modelseedpy.fbapkg.reactionactivationpkg import ReactionActivationPkg

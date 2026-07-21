@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
-
 import logging
-from optlang.symbolics import Zero, add
+
+logger = logging.getLogger(__name__)
+from optlang.symbolics import Zero, add  # !!! add is never used
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
+from modelseedpy.core.fbahelper import FBAHelper
 
 # Base class for FBA packages
 class ReactionUsePkg(BaseFBAPkg):
@@ -22,62 +24,70 @@ class ReactionUsePkg(BaseFBAPkg):
             },
         )
 
-    def build_package(self, filter=None, reversibility=0):
-        for reaction in self.model.reactions:
+    def build_package(self, rxn_filter=None, reversibility=False):
+        for rxn in self.model.reactions:
             # Checking that reaction passes input filter if one is provided
-            if filter == None:
-                self.build_variable(reaction, "=")
-                self.build_constraint(reaction, reversibility)
-            elif reaction.id in filter:
-                self.build_variable(reaction, filter[reaction.id])
-                self.build_constraint(reaction, reversibility)
+            if rxn_filter == None:
+                self.build_variable(rxn, "=")
+                self.build_constraint(rxn, reversibility)
+            elif rxn.id in rxn_filter:
+                self.build_variable(rxn, rxn_filter[rxn.id])
+                self.build_constraint(rxn, reversibility)
 
-    def build_variable(self, object, direction):
+    def build_variable(self, cobra_obj, direction):
         variable = None
         if (
             (direction == ">" or direction == "=")
-            and object.upper_bound > 0
-            and object.id not in self.variables["fu"]
+            and cobra_obj.upper_bound > 0
+            and cobra_obj.id not in self.variables["fu"]
         ):
-            variable = BaseFBAPkg.build_variable(self, "fu", 0, 1, "binary", object)
+            variable = BaseFBAPkg.build_variable(self, "fu", 0, 1, "binary", cobra_obj)
         if (
             (direction == "<" or direction == "=")
-            and object.lower_bound < 0
-            and object.id not in self.variables["ru"]
+            and cobra_obj.lower_bound < 0
+            and cobra_obj.id not in self.variables["ru"]
         ):
-            variable = BaseFBAPkg.build_variable(self, "ru", 0, 1, "binary", object)
+            variable = BaseFBAPkg.build_variable(self, "ru", 0, 1, "binary", cobra_obj)
         return variable
 
-    def build_constraint(self, object, reversibility):
+    def build_constraint(self, cobra_obj, reversibility):
         constraint = None
         if (
-            object.id not in self.constraints["fu"]
-            and object.id in self.variables["fu"]
+            cobra_obj.id not in self.constraints["fu"]
+            and cobra_obj.id in self.variables["fu"]
         ):
             constraint = BaseFBAPkg.build_constraint(
                 self,
                 "fu",
                 0,
                 None,
-                {self.variables["fu"][object.id]: 1000, object.forward_variable: -1},
-                object,
+                {
+                    self.variables["fu"][cobra_obj.id]: 1000,
+                    cobra_obj.forward_variable: -1,
+                },
+                cobra_obj,
             )
         if (
-            object.id not in self.constraints["ru"]
-            and object.id in self.variables["ru"]
+            cobra_obj.id not in self.constraints["ru"]
+            and cobra_obj.id in self.variables["ru"]
         ):
             constraint = BaseFBAPkg.build_constraint(
                 self,
                 "ru",
                 0,
                 None,
-                {self.variables["ru"][object.id]: 1000, object.reverse_variable: -1},
-                object,
+                {
+                    self.variables["ru"][cobra_obj.id]: 1000,
+                    cobra_obj.reverse_variable: -1,
+                },
+                cobra_obj,
             )
-        if (
-            reversibility == 1
-            and object.id in self.variables["ru"]
-            and object.id in self.variables["fu"]
+        if all(
+            [
+                reversibility,
+                cobra_obj.id in self.variables["ru"],
+                cobra_obj.id in self.variables["fu"],
+            ]
         ):
             constraint = BaseFBAPkg.build_constraint(
                 self,
@@ -85,24 +95,25 @@ class ReactionUsePkg(BaseFBAPkg):
                 None,
                 1,
                 {
-                    self.variables["ru"][object.id]: 1,
-                    self.variables["fu"][object.id]: 1,
+                    self.variables["ru"][cobra_obj.id]: 1,
+                    self.variables["fu"][cobra_obj.id]: 1,
                 },
-                object,
+                cobra_obj,
             )
         return constraint
 
     def build_exclusion_constraint(self, flux_values=None):
-        if flux_values == None:
-            flux_values = FBAHelper.compute_flux_values_from_variables(self.model)
+        flux_values = flux_values or FBAHelper.compute_flux_values_from_variables(
+            self.model
+        )
         count = len(self.constraints["exclusion"])
         solution_coef = {}
         solution_size = 0
-        for rxnid in flux_values:
-            if flux_values[rxnid] > Zero:
+        for rxnid, flux in flux_values.items():
+            if flux > Zero:
                 solution_size += 1
                 solution_coef[self.variables["fu"][rxnid]] = 1
-            elif flux_values[rxnid] < -1 * Zero:
+            elif flux < -1 * Zero:
                 solution_size += 1
                 solution_coef[self.variables["ru"][rxnid]] = 1
         if len(solution_coef) > 0:

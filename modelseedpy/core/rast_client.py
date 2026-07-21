@@ -52,17 +52,15 @@ class RastClient:
         )
         self.stages = [
             {"name": "annotate_proteins_kmer_v2", "kmer_v2_parameters": {}},
-            {
-                "name": "annotate_proteins_kmer_v1",
-                "kmer_v1_parameters": {"annotate_hypothetical_only": 1},
-            },
+            # {"name": "annotate_proteins_kmer_v1",
+            # "kmer_v1_parameters": {"annotate_hypothetical_only": 1},},
             {
                 "name": "annotate_proteins_similarity",
                 "similarity_parameters": {"annotate_hypothetical_only": 1},
             },
         ]
 
-    def annotate_genome(self, genome):
+    def annotate_genome(self, genome, split_terms=True):
         p_features = []
         for f in genome.features:
             if f.seq and len(f.seq) > 0:
@@ -72,9 +70,13 @@ class RastClient:
         for o in res[0]["features"]:
             feature = genome.features.get_by_id(o["id"])
             if "function" in o:
-                functions = re.split("; | / | @ | => ", o["function"])
-                for function in functions:
-                    feature.add_ontology_term("RAST", function)
+                rast_function = o["function"]
+                if split_terms:
+                    functions = re.split("; | / | @", rast_function)
+                    for function in functions:
+                        feature.add_ontology_term("RAST", function)
+                else:
+                    feature.add_ontology_term("RAST", rast_function)
 
         return res[0]["analysis_events"]
 
@@ -83,6 +85,14 @@ class RastClient:
         res = self.annotate_genome(genome)
 
         return genome, res
+
+    def annotate_protein_sequence(self, protein_id: str, protein_seq: str):
+        p_features = [{"id": protein_id, "protein_translation": protein_seq}]
+        return self.f(p_features)
+
+    def annotate_protein_sequences(self, protein_seqs: dict):
+        p_features = [{"id": protein_id, "protein_translation": protein_seq}]
+        return self.f(p_features)
 
     def f1(self, protein_id, protein_seq):
         p_features = [{"id": protein_id, "protein_translation": protein_seq}]

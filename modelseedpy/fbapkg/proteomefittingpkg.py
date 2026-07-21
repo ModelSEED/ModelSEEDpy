@@ -7,7 +7,7 @@ import math
 from optlang.symbolics import Zero, add
 from modelseedpy.fbapkg.basefbapkg import BaseFBAPkg
 from modelseedpy.core.fbahelper import FBAHelper
-from modelseedpy.multiomics.msexpression import MSExpression, GENOME, MODEL, COLUMN_NORM
+from modelseedpy.multiomics.msexpression import MSExpression
 
 # Options for default behavior
 LOWEST = 10
@@ -45,7 +45,7 @@ class ProteomeFittingPkg(BaseFBAPkg):
         )
         objvars = []
         # Converting genome proteome to reaction proteome if necessary
-        if self.parameters["proteome"].type == GENOME:
+        if self.parameters["proteome"].type == "genome":
             self.parameters["proteome"] = self.parameters[
                 "proteome"
             ].build_reaction_expression(
@@ -123,7 +123,7 @@ class ProteomeFittingPkg(BaseFBAPkg):
             # kvfit(i) = kapp(i)*ProtCoef*Prot(i) - v(i)
             # Pulling expression value for selected condition and reaction
             expval = self.parameters["proteome"].get_value(
-                object.id, self.parameters["condition"], COLUMN_NORM
+                object.id, self.parameters["condition"], "column_norm"
             )
             if expval is None and self.parameters["default_expression"] is not None:
                 if self.parameters["default_expression"] == LOWEST:

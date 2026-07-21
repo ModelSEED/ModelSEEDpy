@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <title>SteadyCom Results</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+        <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+        <style>
+            h2, table, p {
+                padding-top: 40px;
+            }
+            table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            }
+            th, td {
+            padding: 5px;
+            }
+            th {
+            text-align: center;
+            }
+        </style>
+    </head>
+    <body class="container">
+        <h1>SteadyCom Results</h1>
+        <ul class="nav nav-tabs" id="nav-tab" role="tablist">
+            <li><a class="nav-item nav-link active" id="nav-flux-tab" data-toggle="tab" href="#nav-flux" role="tab" aria-controls="nav-flux" aria-selected="true">Flux exchanges</a> </li>
+            <li><a class="nav-item nav-link" id="nav-total-tab" data-toggle="tab" href="#nav-total" role="tab" aria-controls="nav-total" aria-selected="true">Total exchanged flux</a> </li>
+            <li><a class="nav-item nav-link" id="nav-mets-tab" data-toggle="tab" href="#nav-mets" role="tab" aria-controls="nav-mets" aria-selected="true">Exchanged metabolites</a> </li>
+        </ul>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-flux" role="tabpanel" aria-labelledby="nav-summary-tab">
+                <!-- <h2>Flux exchanges</h2> -->
+                <p>The fluxes are expressed in [mmol/hr*(gm CDW)]</p>
+                {{ flux_table|safe }}
+            </div>
+            <div class="tab-pane fade" id="nav-total" role="tabpanel" aria-labelledby="nav-total-tab">
+                <!-- <h2>Flux total</h2> -->
+                <p>The fluxes are expressed in [mmol/hr*(gm CDW)]</p>
+                {{ total_table|safe }}
+            </div>
+            <div class="tab-pane fade" id="nav-mets" role="tabpanel" aria-labelledby="nav-mets-tab">
+                <!-- <h2>Primary exchanged metabolites</h2> -->
+                {{ exchanged_mets|safe }}
+            </div>
+        </div>
+    </body>
+</html>

@@ -1196,7 +1196,6 @@ class GapfillingHelper:
     def test_reaction_additions_againt_limits(self, reactions, directions, tests):
         filtered_rxn = []
         filtered_direction = []
-
         # Using "with" to ensure we don't alter the model with these tests
         model = self.cobramodel
         with model:

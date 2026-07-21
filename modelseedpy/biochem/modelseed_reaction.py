@@ -2,6 +2,7 @@
 import math
 from modelseedpy.biochem.seed_object import ModelSEEDObject
 from cobra.core import Reaction
+from modelseedpy.core.mstemplate import MSTemplateReaction
 
 
 def to_str2(rxn, cmp_replace=None, cpd_replace={}):
@@ -133,6 +134,7 @@ class ModelSEEDReaction2(Reaction):
         status=None,
         source=None,
         flags=None,
+        pathways=None,
     ):
 
         super().__init__(rxn_id, name, subsystem, lower_bound, upper_bound)
@@ -145,26 +147,41 @@ class ModelSEEDReaction2(Reaction):
         self.status = status
 
         self.is_obsolete = is_obsolete
+        if self.is_obsolete:
+            self.is_obsolete = True
+        else:
+            self.is_obsolete = False
         self.is_abstract = is_abstract
 
-        self.delta_g = delta_g
-        self.delta_g_error = delta_g_error
+        self.delta_g = float(delta_g) if delta_g is not None else None
+        self.delta_g_error = float(delta_g_error) if delta_g_error is not None else None
+
+        # removing symbolic high values representing null/none
+        if self.delta_g is not None and self.delta_g > 10000:
+            self.delta_g = None
+        if self.delta_g_error is not None and self.delta_g_error > 10000:
+            self.delta_g_error = None
 
         self.flags = set()
         if flags:
             self.flags |= set(flags)
 
+        self.pathways = pathways
+
     @property
     def compound_ids(self):
-        pass
+        return None
 
     def to_template_reaction(self, compartment_setup=None):
         if compartment_setup is None:
             raise ValueError("invalid compartment setup")
         from modelseedpy.core.msmodel import get_cmp_token
 
+        rxn_id = f"{self.id}"
         reaction_compartment = get_cmp_token(compartment_setup.values())
-        rxn_id = f"{self.id}_{reaction_compartment}"
+        if reaction_compartment:
+            rxn_id += f"_{reaction_compartment}"
+
         name = f"{self.name}"
         metabolites = {}
         for m, v in self.metabolites.items():
@@ -178,10 +195,11 @@ class ModelSEEDReaction2(Reaction):
 
         # if len(str(index)) > 0:
         #    name = f'{self.name} [{compartment}]'
-        reaction = Reaction(
-            rxn_id, name, self.subsystem, self.lower_bound, self.upper_bound
+        reaction = MSTemplateReaction(
+            rxn_id, self.id, name, self.subsystem, self.lower_bound, self.upper_bound
         )
         reaction.add_metabolites(metabolites)
+        reaction.annotation.update(self.annotation)
         return reaction
 
     @property

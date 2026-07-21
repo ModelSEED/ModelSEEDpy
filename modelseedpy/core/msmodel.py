@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 import re
-from cobra.core import Model
-from pyeda.inter import (
-    expr,
-)  # wheels must be specially downloaded and installed for Windows https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyeda
+from sympy.logic.inference import satisfiable
+from sympy import Symbol
+import sympy.logic.boolalg as spl
+from cobra.core import Model, GPR
+
+# from pyeda.inter import expr
 
 logger = logging.getLogger(__name__)
 
@@ -103,16 +105,35 @@ def get_cmp_token(compartments):
     return None
 
 
-def get_set_set(expr_str):  # !!! this currently returns dictionaries, not sets??
+def get_set_set_pyeda(expr_str: str, pyeda_expr):
     if len(expr_str.strip()) == 0:
         return {}
     expr_str = expr_str.replace(" or ", " | ")
     expr_str = expr_str.replace(" and ", " & ")
-    dnf = expr(expr_str).to_dnf()
+    dnf = pyeda_expr(expr_str).to_dnf()
     if len(dnf.inputs) == 1 or dnf.NAME == "And":
         return {frozenset({str(x) for x in dnf.inputs})}
     else:
         return {frozenset({str(x) for x in o.inputs}) for o in dnf.xs}
+
+
+def get_set_set(expr_str: str):
+    if expr_str is None or len(expr_str.strip()) == 0:
+        return {}
+    gpr = GPR.from_string(expr_str)
+    expr = gpr.as_symbolic()
+    expr_model = list(satisfiable(expr, all_models=True))
+    dnf = spl.SOPform(tuple(gpr.genes), list(expr_model))
+    if type(dnf) == spl.And or type(dnf) == Symbol:
+        variable_set = set()
+        variable_set.add(frozenset({atom.name for atom in dnf.atoms()}))
+        return frozenset(variable_set)
+    elif type(dnf) == spl.Or:
+        return frozenset(
+            {frozenset({atom.name for atom in x.atoms()}) for x in dnf.args}
+        )
+    else:
+        raise ValueError(f"unable to decode {expr_str} found token of type {type(dnf)}")
 
 
 class MSModel(Model):
@@ -120,27 +141,27 @@ class MSModel(Model):
         """
         Class representation for a ModelSEED model.
         """
-        super().__init__(self, id_or_model)
+        super().__init__(id_or_model)
         if genome:
-            self.genome_object = genome
+            self._genome = genome
         if template:
-            self.template_object = template
+            self._template = template
 
     @property
     def template(self):
-        return self.template_object
+        return self._template
 
     @template.setter
     def template(self, template):
-        self.template_object = template
+        self._template = template
 
     @property
     def genome(self):
-        return self.genome_object
+        return self._genome
 
     @genome.setter
     def genome(self, genome):
-        self.genome_object = genome
+        self._genome = genome
 
     def _set_genome_to_model(self, genome):
         # TODO: implement genome assignment checks if features matches genes

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Community FBA</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        /* Style the tab */
+        div.tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        div.tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        /* Change background color of buttons on hover */
+        div.tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        div.tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            -webkit-animation: fadeEffect 1s;
+            animation: fadeEffect 1s;
+            border-top: none;
+        }
+
+        /* Fade in tabs */
+        @-webkit-keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <ul class="nav nav-tabs" id="nav-tab" role="tablist">
+            <li><a class="nav-item nav-link active" id="nav-overview-tab" data-toggle="tab" href="#nav-overview" role="tab" aria-controls="nav-overview" aria-selected="true">Overview</a></li>
+            <li><a class="nav-item nav-link" id="nav-reactions-tab" data-toggle="tab" href="#nav-reactions" role="tab" aria-controls="nav-reactions" aria-selected="false">Reactions</a> </li>
+            <li><a class="nav-item nav-link" id="nav-exchange-tab" data-toggle="tab" href="#nav-exchange" role="tab" aria-controls="nav-exchange" aria-selected="false">Environment exchanges</a> </li>
+            <li><a class="nav-item nav-link" id="nav-interaction-tab" data-toggle="tab" href="#nav-interaction" role="tab" aria-controls="nav-interaction" aria-selected="false">Species interactions</a> </li>
+        </ul>
+        <div class="tab-content" id="nav-tabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="nav-overview" role="tabpanel" aria-labelledby="nav-overview-tab">
+                <table id="overview" class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th>Community model ID</th>
+                            <td>{{ overview['Model ID'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Media ID</th>
+                            <td>{{ overview['Media ID'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Target reaction</th>
+                            <td>{{ overview['Target reaction'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Gene knockouts</th>
+                            <td>{{ overview['Gene knockouts'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Reaction knockouts</th>
+                            <td>{{ overview['Reaction knockouts'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Exchange limits</th>
+                            <td>{{ overview['Exchange limits'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Kinetics coefficient</th>
+                            <td>{{ overview['Kinetics coefficient'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Objective fraction</th>
+                            <td>{{ overview['Objective fraction'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>prFBA</th>
+                            <td>{{ overview['prFBA'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Max growth</th>
+                            <td>{{ overview['Number biomass'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <!-- Reactions Tab -->
+            <div class="tab-pane fade" id="nav-reactions" role="tabpanel" aria-labelledby="nav-reactions-tab">
+                <table width="100%" id="reactions">
+                    <thead>
+                        <tr>
+                            <th>Reaction ID</th>
+                            <th>Name</th>
+                            <th>Equation</th>
+                            <th>Flux</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Compounds Tab -->
+            <div class="tab-pane fade" id="nav-exchange" role="tabpanel" aria-labelledby="nav-exchange-tab">
+                <table width="100%" id="exchange">
+                    <thead>
+                        <tr>
+                            <th>Compound ID</th>
+                            <th>Name</th>
+                            <th>Formula</th>
+                            <th>Uptake/excretion</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Genes Tab -->
+            <div class="tab-pane fade" id="nav-interaction" role="tabpanel" aria-labelledby="nav-interaction-tab">
+                <table width="100%" id="interaction">
+                    <thead>
+                        <tr>
+                            <th>Species 1</th>
+                            <th>Species 2</th>
+                            <th>1->2 metabolites</th>
+                            <th>1->2 flux</th>
+                            <th>2->1 metabolites</th>
+                            <th>2->1 flux</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                // Using Jinja2 templating to fill in the data
+                const overview = {{ overview|tojson }};
+                const reactions = {{ reactions|tojson }};
+                const exchange = {{ exchange|tojson }};
+                const interaction = {{ interaction|tojson }};
+
+                $('#reactions').DataTable({
+                    "data": reactions,
+                    "columns": [
+                        { 'data': 'id' },
+                        { 'data': 'name' },
+                        { 'data': 'equation' },
+                        { 'data': 'flux' }
+                    ]
+                });
+
+                $('#compounds').DataTable({
+                    "data": exchange,
+                    "columns": [
+                        { 'data': 'id' },
+                        { 'data': 'name' },
+                        { 'data': 'formula' },
+                        { 'data': 'uptakeexcretion' }
+                    ]
+                });
+
+                $('#genes').DataTable({
+                    "data": interaction,
+                    "columns": [
+                        { 'data': 'species1' },
+                        { 'data': 'species2' },
+                        { 'data': '1to2metabolites' },
+                        { 'data': '1to2flux' },
+                        { 'data': '2to1metabolites' },
+                        { 'data': '2to1flux' }
+                    ]
+                });
+            });
+        </script>
+    </div>
+</body>
+
+</html>
