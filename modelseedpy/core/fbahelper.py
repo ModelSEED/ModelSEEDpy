@@ -16,6 +16,7 @@ from modelseedpy.biochem import from_local
 from scipy.odr.odrpack import Output  # !!! Output is never used
 from chemw import ChemMW
 from warnings import warn
+from modelseedpy.core.exceptions import ObjectiveError
 
 # from Carbon.Aliases import false
 
@@ -353,3 +354,76 @@ class FBAHelper:
         return array(
             dtype=object, object=[array(df.index), array(df.columns), df.to_numpy()]
         )
+
+    # --- helpers required by MSCommunity -------------------------------------
+    @staticmethod
+    def isnumber(string):
+        if str(string) in ["nan", "inf", "True", "False"]:
+            return False
+        try:
+            float(string)
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def mediaName(media):
+        if media == None:
+            return "Complete"
+        return media.id
+
+    @staticmethod
+    def rxn_mets_list(rxn):
+        return [met for met in rxn.reactants + rxn.products]
+
+    @staticmethod
+    def solution_to_variables_dict(solution, model):
+        return {model.variables.get(key): flux for key, flux in solution.fluxes.items()}
+
+    @staticmethod
+    def convert_kbase_media(kbase_media, uniform_uptake=1000):
+        if uniform_uptake is None:
+            return {
+                "EX_" + exID: -bound[0]
+                for exID, bound in kbase_media.get_media_constraints().items()
+            }
+        return {
+            "EX_" + exID: uniform_uptake
+            for exID in kbase_media.get_media_constraints().keys()
+        }
+
+
+# --- FBA solution helpers required by MSCommunity ---------------------------
+
+
+def bioFlux_check(model, sol=None, sol_dict=None, min_growth=0.1):
+    """Verify that a solution maintains the requested minimal biomass flux.
+
+    :param model: the cobra model that produced the solution
+    :param sol: a cobra Solution, used when ``sol_dict`` is not supplied
+    :param sol_dict: a {variable: flux} mapping, computed from ``sol`` if absent
+    :param min_growth: the biomass flux the solution was required to maintain
+    :raises ObjectiveError: when the simulated growth falls below ``min_growth``
+    :return: the {variable: flux} mapping
+    """
+    sol_dict = sol_dict or FBAHelper.solution_to_variables_dict(sol, model)
+    simulated_growth = sum(
+        [flux for var, flux in sol_dict.items() if re.search(r"(^bio\d+$)", var.name)]
+    )
+    if simulated_growth < min_growth * 0.9999 and simulated_growth + min_growth > 1e-8:
+        raise ObjectiveError(
+            f"The assigned minimal_growth of {min_growth} was not maintained during "
+            f"the simulation, where the observed growth value was {simulated_growth}."
+        )
+    if sol is not None and sol.status != "optimal":
+        logger.warning(f"The solution is {sol.status}, not optimal.")
+    return sol_dict
+
+
+def minimizeFlux_withGrowth(model_util, min_growth, obj):
+    """Minimize ``obj`` subject to maintaining at least ``min_growth`` biomass flux."""
+    model_util.add_minimal_objective_cons(min_growth, name="min_growth")
+    model_util.add_objective(obj, "min")
+    sol = model_util.model.optimize()
+    sol_dict = bioFlux_check(model_util.model, sol, None, min_growth)
+    return sol, sol_dict

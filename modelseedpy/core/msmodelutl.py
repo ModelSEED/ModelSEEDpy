@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from math import isclose
 import re
 import time
 import json
@@ -8,6 +9,7 @@ from cobra import Model, Reaction, Metabolite
 from modelseedpy.fbapkg.mspackagemanager import MSPackageManager
 from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
 from modelseedpy.core.fbahelper import FBAHelper
+from modelseedpy.core.exceptions import ModelError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -93,9 +95,36 @@ class MSModelUtil:
         else:
             return None
 
-    def __init__(self, model):
+    def __init__(self, model, copy=False, environment=None, climit=None, o2limit=None):
+        """
+        :param model: the cobra model to wrap
+        :param copy: work on an objective-preserving copy rather than the model itself
+        :param environment: a media dict applied to the model before anything else
+        :param climit: total carbon uptake cap, in mmol/gDW/h; False disables
+        :param o2limit: oxygen uptake cap, in mmol/gDW/h; False disables
+
+        The four keyword arguments all default to the previous no-op behaviour,
+        so existing callers of ``MSModelUtil(model)`` are unaffected.
+        """
         self.model = model
-        self.pkgmgr = MSPackageManager.get_pkg_mgr(model)
+        if environment is not None:
+            self.add_medium(environment)
+        self.id = model.id
+        if copy:
+            org_obj_val = model.slim_optimize()
+            self.model = model.copy()
+            self.model.objective = model.objective
+            new_obj_val = self.model.slim_optimize()
+            if (
+                not isclose(org_obj_val, new_obj_val, rel_tol=1e-2)
+                and org_obj_val > 1e-2
+            ):
+                raise ModelError(
+                    f"The {model.id} objective value is corrupted by being copied, "
+                    f"where the original objective value is {org_obj_val} and the "
+                    f"new objective value is {new_obj_val}."
+                )
+        self.pkgmgr = MSPackageManager.get_pkg_mgr(self.model)
         self.atputl = None
         self.gfutl = None
         self.metabolite_hash = None
@@ -104,6 +133,28 @@ class MSModelUtil:
         self.reaction_scores = None
         self.score = None
         self.integrated_gapfillings = []
+        self.apply_uptake_limits(climit, o2limit)
+
+    def apply_uptake_limits(self, climit=None, o2limit=None):
+        """Cap total carbon and oxygen uptake.
+
+        Passing ``False`` for both is an explicit opt-out and returns immediately;
+        passing ``None`` for both leaves the model untouched, which is the
+        behaviour callers that predate these arguments rely on.
+        """
+        if climit is False and o2limit is False:
+            return
+        if climit is None and o2limit is None:
+            return
+        if not FBAHelper.isnumber(climit) and FBAHelper.isnumber(o2limit):
+            climit = 3 * o2limit
+        elif not FBAHelper.isnumber(climit):
+            climit = 60
+        if not FBAHelper.isnumber(o2limit):
+            o2limit = climit / 3
+        self.pkgmgr.getpkg("ElementUptakePkg").build_package({"C": climit})
+        if "EX_cpd00007_e0" in [rxn.id for rxn in self.model.reactions]:
+            self.model.reactions.get_by_id("EX_cpd00007_e0").lower_bound = -o2limit
 
     def compute_automated_reaction_scores(self):
         """
@@ -938,3 +989,113 @@ class MSModelUtil:
             m = re.search("(.+)_([a-z]+)(\d*)$", object.id)
             return (m[1], m[2], m[3])
         return None
+
+    # --- helpers required by MSCommunity -------------------------------------
+    def add_medium(self, media, uniform_uptake=None):
+        # add the new media and its flux constraints
+        exIDs = [exRXN.id for exRXN in self.exchange_list()]
+        if not hasattr(media, "items"):
+            media = FBAHelper.convert_kbase_media(media)
+        elif not any(["EX_" in x for x in list(media.keys())]):
+            media = {"EX_" + k + "_e0": v for k, v in media.items()}
+        self.model.medium = {ex: uptake for ex, uptake in media.items() if ex in exIDs}
+        if uniform_uptake is not None:
+            self.model.medium = dict(
+                zip(
+                    list(self.model.medium.keys()),
+                    [uniform_uptake] * len(self.model.medium),
+                )
+            )
+        return self.model.medium
+
+    def add_minimal_objective_cons(
+        self, min_value=0.1, objective_expr=None, name="min_value"
+    ):
+        if name not in self.model.constraints:
+            objective_expr = objective_expr or self.model.objective.expression
+            self.create_constraint(
+                self.model.problem.Constraint(
+                    objective_expr, lb=min_value, ub=None, name=name
+                )
+            )
+            # print(self.model.constraints["min_value"])
+        else:
+            print(
+                f"The {name} constraint already exists in {self.model.id}, "
+                f"hence the lb is simply updated from"
+                f" {self.model.constraints[name].lb} to {min_value}.\n"
+            )
+            self.model.constraints[name].lb = min_value
+
+    def add_objective(self, objective, direction="max", coef=None):
+        self.model.objective = self.model.problem.Objective(
+            objective, direction=direction
+        )
+        self.model.solver.update()
+        if coef:
+            self.model.objective.set_linear_coefficients(coef)
+            self.model.solver.update()
+
+    def carbon_exchange_list(self, include_unknown=True):
+        if not include_unknown:
+            return [
+                ex for ex in self.exchange_list() if "C" in ex.reactants[0].elements
+            ]
+        return [
+            ex
+            for ex in self.exchange_list()
+            if not ex.reactants[0].elements or "C" in ex.reactants[0].elements
+        ]
+
+    def carbon_exchange_mets_list(self, include_unknown=True):
+        return self.metabolites_set(self.carbon_exchange_list(include_unknown))
+
+    def create_constraint(self, constraint, coef=None, sloppy=False, printing=False):
+        # if printing:   print(coef)
+        self.model.add_cons_vars(constraint, sloppy=sloppy)
+        self.model.solver.update()
+        if coef:
+            constraint.set_linear_coefficients(coef)
+        self.model.solver.update()
+
+    def exchange_mets_list(self):
+        return self.metabolites_set(self.exchange_list())
+
+    def remove_constraint(self, consName):
+        for cons in self.model.constraints:
+            if consName not in cons.name:
+                continue
+            # if self.printing:   print(f"Removing {consName} from {self.model.id}")
+            self.model.remove_cons_vars(cons)
+
+    def run_fba(self, media=None, pfba=False, fva_reactions=None):
+        from cobra import flux_analysis
+
+        if media:
+            self.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        if pfba:
+            return flux_analysis.pfba(self.model)
+        if fva_reactions is not None:
+            return flux_analysis.variability.flux_variability_analysis(
+                self.model, fva_reactions
+            )
+        return self.model.optimize()
+
+    def standard_exchanges(self):
+        for ex in self.exchange_list():
+            if len(ex.reactants) != 1 and len(ex.products) != 0:
+                raise ModelError(
+                    f"The ex {ex.id} possesses {len(ex.reactants)} reactants and "
+                    f"{len(ex.products)} products, which are non-standard and are incompatible"
+                    f" with various ModelSEED operations."
+                )
+
+    def metabolites_set(self, reactions_set=None, ids=False):
+        rxns = reactions_set or self.model.reactions
+        if ids:
+            return {met.id for rxn in rxns for met in rxn.metabolites}
+        return {met for rxn in rxns for met in rxn.metabolites}
+
+    def remove_cons_vars(self, vars_cons):
+        self.model.remove_cons_vars(vars_cons)
+        self.model.solver.update()
