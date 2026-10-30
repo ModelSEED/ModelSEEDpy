@@ -520,8 +520,28 @@ class MSATPCorrection:
         Raises
         ------
         """
-        #Checking if ATP stats have been run yet and if not, running them
-        if not self.selected_media:
+        # Checking if ATP stats have been run yet and if not, running them.
+        #
+        # The test MUST be ``is None`` and not truthiness. ``selected_media``
+        # starts as None (never computed) and ``determine_growth_media`` sets it
+        # to a list before appending, so an EMPTY list means "computed, and no
+        # medium qualified" -- a real answer, not a missing one. Under the old
+        # truthiness test those two cases were indistinguishable, and the
+        # consequence was severe: ``run_atp_correction`` ends with
+        # ``return self.build_tests()``, i.e. AFTER
+        # ``expand_model_to_genome_scale`` has applied the ATP expansion filter
+        # by zeroing one direction of each cycle-forming reaction. When no
+        # medium had been selected this branch re-fired and its
+        # ``restore_noncore_reactions()`` wrote ``original_bounds`` back over
+        # every non-core reaction -- erasing that filter and returning
+        # energy-generating cycles to the delivered model, silently. Measured on
+        # KBDL builds: rxn08941_c0 went from blocked back to [-1000, 1000] and
+        # free ATP from 0 to 1000 (KBDLJobRunningPrototype#28, cause 2).
+        #
+        # With ``is None`` the branch still runs for a caller that asks for tests
+        # before any evaluation, which is its purpose, and no longer runs a
+        # second time at the end of ``run_atp_correction``.
+        if self.selected_media is None:
             logger.warning("ATP tests not yet computed - running without allowing for model changes!")
             self.evaluate_growth_media(no_gapfilling=True)
             self.determine_growth_media()

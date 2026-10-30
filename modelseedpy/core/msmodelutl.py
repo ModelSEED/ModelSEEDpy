@@ -498,7 +498,6 @@ class MSModelUtil:
                 forced_media=forced_media,
                 default_media_path=atp_media_filename
             )
-            self.atputl = MSATPCorrection(self.model)
         return self.atputl
     
     def get_atp_tests(self,core_template=None,atp_media_filename=None,recompute=False,remake_atputil=False):
