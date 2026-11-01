@@ -786,7 +786,10 @@ class MSBuilder:
         for rxn in model_or_id.reactions:
             probability = None
             for gene in rxn.genes():
-                annoont_gene = anno_ont.get_feature(gene.id)
+                # AnnotationOntology has no `get_feature` method; the feature
+                # is keyed in `genes` or `cdss` depending on its type. Fall
+                # through both so we don't silently drop CDS-keyed features.
+                annoont_gene = anno_ont.genes.get(gene.id) or anno_ont.cdss.get(gene.id)
                 if annoont_gene and annoont_gene in gene_term_hash:
                     for term in gene_term_hash[annoont_gene]:
                         if rxn.id[0:-3] in term.msrxns:

@@ -300,6 +300,89 @@ class AnnotationOntology:
                 self.events += [AnnotationOntologyEvent.from_data(event, self)]
         return self
 
+    @staticmethod
+    def from_prd_input(
+        genome_id,
+        annotations,
+        data_dir,
+        translator,
+        method="PRD",
+        method_version="1.0",
+        timestamp=None,
+    ):
+        """Build an AnnotationOntology from a probabilistic-annotation input dict.
+
+        Mirrors ``from_kbase_data`` for the upstream-translated path: this
+        factory is the equivalent entry point for inputs whose ontology
+        terms have NOT yet been translated to ModelSEED reaction IDs.
+        The supplied ``translator`` callable performs that lookup so the
+        factory itself stays decoupled from any specific translation
+        backend (KBUtilLib, a fake for tests, etc.).
+
+        Parameters
+        ----------
+        genome_id:
+            Identifier for the genome whose annotations are being loaded.
+            Stored on the returned object as ``genome_ref``.
+        annotations:
+            Mapping ``{gene_id: {ontology_type: [{term, score}, ...]}}``.
+            ``ontology_type`` examples: "SSO", "EC", "KO". ``score`` should
+            be in [0.0, 1.0] (evidence/probability). A gene may carry
+            multiple terms across multiple ontology types.
+        data_dir:
+            Path to ModelSEED ontology data directory (same value the
+            existing ``__init__`` and ``get_term_name`` expect; used by
+            downstream consumers, not by this factory).
+        translator:
+            Callable ``(namespaced_term: str) -> list[str]`` returning
+            MSRXN ids for a given namespaced term (e.g. ``"KO:K00001"``).
+            ``KBUtilLib.KBAnnotationUtils.translate_term_to_modelseed`` is
+            the canonical implementation. Return an empty list when no
+            reactions are known for the term; the term is still recorded
+            (matches the "retain unmapped" requirement) with an empty
+            ``msrxns`` set.
+        method, method_version, timestamp:
+            Provenance fields applied to the synthesized
+            :class:`AnnotationOntologyEvent` records (one event per
+            ontology type).
+        """
+        self = AnnotationOntology(genome_id, data_dir)
+        # One synthesized event per ontology type, so downstream
+        # priority-list logic can target individual ontologies.
+        events_by_ontology = {}
+        for gene_id, ont_dict in annotations.items():
+            feature = self.add_feature(gene_id)
+            self.feature_types[gene_id] = "gene"
+            for ontology_type, term_list in ont_dict.items():
+                if ontology_type not in events_by_ontology:
+                    event = AnnotationOntologyEvent(
+                        self,
+                        event_id=method + ":" + ontology_type,
+                        ontology_id=ontology_type,
+                        method=method,
+                        method_version=method_version,
+                        timestamp=timestamp,
+                    )
+                    self.events += [event]
+                    events_by_ontology[ontology_type] = event
+                event = events_by_ontology[ontology_type]
+                event.add_feature(feature)
+                for term_entry in term_list:
+                    term_id = term_entry["term"]
+                    score = float(term_entry.get("score", 1.0))
+                    term = self.add_term(term_id, event.ontology)
+                    feature.add_event_term(
+                        event,
+                        term,
+                        scores={"probability": score},
+                        probability=score,
+                    )
+                    namespaced = ontology_type + ":" + term_id
+                    msrxn_ids = translator(namespaced)
+                    if msrxn_ids:
+                        term.add_msrxns(msrxn_ids)
+        return self
+
     def __init__(self, genome_ref, data_dir):
         self.genome_ref = genome_ref
         self.events = DictList()
