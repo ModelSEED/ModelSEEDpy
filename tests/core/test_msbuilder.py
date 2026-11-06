@@ -28,6 +28,27 @@ def test_get_direction_from_constraints6():
     assert get_direction_from_constraints(0, 0) == "?"
 
 
+def test_apply_gapfill_reversals():
+    from cobra.core import Model, Metabolite, Reaction
+
+    model = Model("test")
+    a = Metabolite("a_c0", compartment="c0")
+    b = Metabolite("b_c0", compartment="c0")
+    for rxn_id, lb, ub in [("r1_c0", 0, 1000), ("r2_c0", -5, 0), ("r3_c0", 0, 2000)]:
+        rxn = Reaction(rxn_id, lower_bound=lb, upper_bound=ub)
+        rxn.add_metabolites({a: -1, b: 1})
+        model.add_reactions([rxn])
+
+    applied = MSBuilder.apply_gapfill_reversals(
+        model, {"r1_c0": "<", "r2_c0": ">", "r3_c0": ">", "r4_c0": "<"}
+    )
+
+    assert applied == ["r1_c0", "r2_c0", "r3_c0"]
+    assert model.reactions.r1_c0.bounds == (-1000, 1000)
+    assert model.reactions.r2_c0.bounds == (-5, 1000)
+    assert model.reactions.r3_c0.bounds == (0, 2000)
+
+
 def test_some_gpr():
     # using this for later
     reaction_complex_role_gene_mapping = {
