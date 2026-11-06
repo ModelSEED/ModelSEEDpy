@@ -107,3 +107,28 @@ def test_template_add_reaction(empty_template):
 
     assert len(empty_template.reactions) == 1
     assert empty_template.reactions.rxn_pie_k.check_mass_balance() == {}
+
+
+def test_template_builder_from_dict_drain_list():
+    """
+    MSTemplateBuilder.from_dict must load drain_list (written by MSTemplate.get_data)
+    """
+    import os
+    import json
+    from modelseedpy.core.mstemplate import MSTemplateBuilder
+
+    with open(
+        os.path.join(
+            os.path.dirname(__file__), "..", "test_data", "template_core_bigg.json"
+        ),
+        "r",
+    ) as fh:
+        template_data = json.load(fh)
+    drains = {"pyr_c": (0, 1000), "glc__D_e": (-1000, 0)}
+    template_data["drain_list"] = {k: list(v) for k, v in drains.items()}
+
+    template = MSTemplateBuilder.from_dict(template_data).build()
+    assert {c.id: tuple(t) for c, t in template.drains.items()} == drains
+
+    template = MSTemplateBuilder.from_dict(template.get_data()).build()
+    assert {c.id: tuple(t) for c, t in template.drains.items()} == drains

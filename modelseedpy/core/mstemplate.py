@@ -1527,6 +1527,7 @@ class MSTemplateBuilder:
         builder.reactions = d["reactions"]
         builder.biochemistry_ref = d["biochemistry_ref"]
         builder.biomasses = d["biomasses"]
+        builder.drains = d.get("drain_list", {})
 
         return builder
 
