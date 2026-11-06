@@ -296,8 +296,11 @@ class MSGapfill:
             default_minimum_objective = self.default_minimum_objective
         solution_dictionary = {}
         if simultaneous_gapfilling:
-            for item in media_list:
-                pass
+            raise NotImplementedError(
+                "MSGapfill.run_multi_gapfill: simultaneous_gapfilling=True is not "
+                "implemented; use simultaneous_gapfilling=False (independent "
+                "gapfilling per media)"
+            )
         else:
             first = True
             for item in media_list:
@@ -315,9 +318,9 @@ class MSGapfill:
                     )
                 else:
                     solution_dictionary[item] = self.run_gapfilling(
-                        item, None, minimum_obj, binary_check, False, check_for_growth
+                        item, target, minimum_obj, binary_check, False, check_for_growth
                     )
-                false = False
+                first = False
             return solution_dictionary
 
     def integrate_gapfill_solution(

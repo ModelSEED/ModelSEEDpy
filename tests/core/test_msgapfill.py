@@ -3,6 +3,7 @@ import os
 import pytest
 import json
 import cobra
+from unittest.mock import patch
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy import MSGapfill, MSMedia
 
@@ -76,6 +77,22 @@ def media_glucose_aerobic():
     )
 
 
+@pytest.fixture
+def media_acetate_aerobic():
+
+    return MSMedia.from_dict(
+        {
+            "ac": (-10, 1000),
+            "o2": (-1000, 1000),
+            "h": (-1000, 1000),
+            "h2o": (-1000, 1000),
+            "pi": (-1000, 1000),
+            "co2": (-1000, 1000),
+            "nh4": (-1000, 1000),
+        }
+    )
+
+
 def test_model_default(get_model):
     solution = get_model([]).optimize()
     assert solution.status == "optimal"
@@ -117,3 +134,57 @@ def test_ms_gap_fill2(template, get_model, media_glucose_aerobic):
     assert "CYTBD_c0" in result["new"] and result["new"]["CYTBD_c0"] == ">"
     assert "NADH16_c0" in result["new"] and result["new"]["NADH16_c0"] == ">"
     assert "O2t_c0" in result["new"] and result["new"]["O2t_c0"] == ">"
+
+
+def test_run_multi_gapfill_prefilters_only_first_media(
+    template, get_model, media_glucose_aerobic, media_acetate_aerobic
+):
+    """
+    run_multi_gapfill should prefilter the gapfilling database on the first media only;
+    later media keep the same target but skip the prefilter
+    """
+    target = "BIOMASS_Ecoli_core_w_GAM_c0"
+    gap_fill = MSGapfill(get_model(["GLCpts_c0"]), [template])
+    with patch.object(gap_fill, "run_gapfilling", return_value={}) as run_gapfilling:
+        gap_fill.run_multi_gapfill(
+            [media_glucose_aerobic, media_acetate_aerobic],
+            target,
+            {media_acetate_aerobic: 0.2},
+            default_minimum_objective=0.1,
+        )
+    assert [c.args for c in run_gapfilling.call_args_list] == [
+        (media_glucose_aerobic, target, 0.1, False, True, True),
+        (media_acetate_aerobic, target, 0.2, False, False, True),
+    ]
+
+
+def test_run_multi_gapfill_simultaneous_not_implemented(template, get_model):
+    """
+    simultaneous_gapfilling=True is not implemented and must not silently return None
+    """
+    gap_fill = MSGapfill(get_model(["GLCpts_c0"]), [template])
+    with pytest.raises(NotImplementedError):
+        gap_fill.run_multi_gapfill(
+            [], "BIOMASS_Ecoli_core_w_GAM_c0", simultaneous_gapfilling=True
+        )
+
+
+def test_run_multi_gapfill_matches_single_runs(
+    template, get_model, media_glucose_aerobic, media_acetate_aerobic
+):
+    """
+    run_multi_gapfill on an MSGapfill without default_target gives the same solutions
+    as independent run_gapfilling calls on each media
+    """
+    ko = ["CYTBD_c0", "NADH16_c0", "GLCpts_c0", "O2t_c0"]
+    target = "BIOMASS_Ecoli_core_w_GAM_c0"
+    media_list = [media_glucose_aerobic, media_acetate_aerobic]
+    multi = MSGapfill(get_model(ko), [template]).run_multi_gapfill(
+        media_list, target, default_minimum_objective=0.1
+    )
+    for media in media_list:
+        single = MSGapfill(get_model(ko), [template]).run_gapfilling(
+            media, target, minimum_obj=0.1
+        )
+        assert multi[media]["new"] == single["new"]
+        assert multi[media]["reversed"] == single["reversed"]
