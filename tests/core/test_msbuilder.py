@@ -62,3 +62,33 @@ def test_build():
     expect = mock_model()
 
     pass
+
+
+def test_build_metabolic_model_builds_base_model(monkeypatch):
+    """
+    MSBuilder.build_metabolic_model must pass its arguments to build_base_model
+    (build() takes gapfill_media as its second argument and returns a tuple)
+    """
+    from cobra.core import Model
+    from modelseedpy.core.msgenome import MSGenome
+
+    calls = []
+
+    def build_base_model(self, *args):
+        calls.append(args)
+        return Model(args[0])
+
+    monkeypatch.setattr(MSBuilder, "build_base_model", build_base_model)
+
+    model = MSBuilder.build_metabolic_model(
+        "test",
+        MSGenome(),
+        index="1",
+        allow_all_non_grp_reactions=True,
+        annotate_with_rast=False,
+        gapfill_model=False,
+        classic_biomass=True,
+    )
+
+    assert model.id == "test"
+    assert calls == [("test", "1", True, False, True)]
