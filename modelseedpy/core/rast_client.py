@@ -1,48 +1,7 @@
 # -*- coding: utf-8 -*-
 from modelseedpy.core.rpcclient import RPCClient
-from modelseedpy.core.msgenome import MSFeature  # !!! import is never used
 import re
-from modelseedpy.core.msgenome import (
-    MSGenome,
-    read_fasta,
-    normalize_role,
-)  # move this to this lib     # !!! read_fasta is never used
-
-### delete this after ####
-def aux_rast_result(res, g):
-    search_name_to_genes = {}
-    search_name_to_orginal = {}
-    for f in res[0]["features"]:
-        function = f["function"] if "function" in f else None
-        if not function:
-            function = g.features.get_by_id(f["id"]).description
-
-        if function and len(function) > 0:
-            functions = re.split("; | / | @ | => ", function)
-            for f_ in functions:
-                f_norm = normalize_role(f_)
-                if f_norm not in search_name_to_genes:
-                    search_name_to_genes[f_norm] = set()
-                    search_name_to_orginal[f_norm] = set()
-                search_name_to_orginal[f_norm].add(f_)
-                search_name_to_genes[f_norm].add(f["id"])
-
-    return search_name_to_genes, search_name_to_orginal
-
-
-### delete this after ####
-def aux_template(template):
-    rxn_roles = {}
-    roles = dict(map(lambda x: (x["id"], x), template.roles))
-    for r in template.reactions:
-        rxn_roles[r.id] = set()
-        complex_roles = r.get_complex_roles()
-        if len(complex_roles) > 0:
-            for cpx_id in complex_roles:
-                for role_id in complex_roles[cpx_id]:
-                    rxn_roles[r.id].add(normalize_role(roles[role_id]["name"]))
-                    # print(role_id, normalize_role(roles[role_id]['name']))
-    return rxn_roles
+from modelseedpy.core.msgenome import MSGenome, normalize_role
 
 
 def split_annotation(annotation) -> list[str]:
@@ -53,6 +12,7 @@ def split_annotation(annotation) -> list[str]:
 
 
 class RastClient:
+
     def __init__(self):
         self.rpc_client = RPCClient(
             "https://tutorial.theseed.org/services/genome_annotation"
