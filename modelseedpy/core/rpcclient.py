@@ -32,7 +32,6 @@ class ServerError(Exception):
 
 
 class RPCClient:
-
     def __init__(
         self,
         url,

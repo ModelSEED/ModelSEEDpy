@@ -12,7 +12,6 @@ def split_annotation(annotation) -> list[str]:
 
 
 class RastClient:
-
     def __init__(self):
         self.rpc_client = RPCClient(
             "https://tutorial.theseed.org/services/genome_annotation"
