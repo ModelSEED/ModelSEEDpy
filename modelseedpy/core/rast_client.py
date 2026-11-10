@@ -5,9 +5,9 @@ from modelseedpy.core.msgenome import MSGenome, normalize_role
 
 
 def split_annotation(annotation) -> list[str]:
-    if annotation:
-        functions = re.split("; | / | @", annotation)
-        return functions
+    if annotation and annotation.strip():
+        functions = re.split(" / | @ |; ", annotation.strip())
+        return [f.strip() for f in functions]
     return []
 
 

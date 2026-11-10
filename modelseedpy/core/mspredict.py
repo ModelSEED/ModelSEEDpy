@@ -17,6 +17,7 @@ class MSGenomeClass(Enum):
 
 
 class MSPredict:
+    
     def __init__(self, classifier="knn_ACNP_RAST_filter_01_17_2023"):
         logger.debug(f"Initializing MSPredict with classifier: {classifier}")
         self.genome_classifier = get_classifier(classifier)
