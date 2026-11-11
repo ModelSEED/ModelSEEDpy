@@ -71,8 +71,15 @@ class RPCClient:
         if ret.status_code == 500:
             if ret.headers.get("content-type") == "application/json":
                 err = ret.json()
-                if "error" in err:
-                    raise ServerError(**err["error"])
+                error = err.get("error") if isinstance(err, dict) else None
+                if isinstance(error, dict):
+                    raise ServerError(
+                        error.get("name", "Unknown"),
+                        error.get("code", 0),
+                        error.get("message"),
+                        error.get("data"),
+                        error.get("error"),
+                    )
                 else:
                     raise ServerError("Unknown", 0, ret.text)
             else:
