@@ -16,9 +16,17 @@ class MSGenomeClass(Enum):
     A = "Archaea"
 
 
+DEFAULT_CLASSIFIER = "linear_svc_ACNP_RAST_full_11_11_2026"
+
+
 class MSPredict:
-    
-    def __init__(self, classifier="knn_ACNP_RAST_filter_01_17_2023"):
+    def __init__(self, classifier=DEFAULT_CLASSIFIER):
+        """
+        :param classifier: classifier id in the data/ml folder. The default is a linear SVM on
+            all RAST roles (33,382), stored as numpy arrays; scikit-learn is not needed.
+            The previous default, "knn_ACNP_RAST_filter_01_17_2023", is still loadable
+            (downloaded on first use; its pickle requires scikit-learn 1.2.0).
+        """
         logger.debug(f"Initializing MSPredict with classifier: {classifier}")
         self.genome_classifier = get_classifier(classifier)
 

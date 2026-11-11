@@ -20,7 +20,7 @@ setup(
     license=license,
     packages=find_packages(exclude=("docs")),
     package_data={
-        "modelseedpy": ["config.cfg", "data/*"],
+        "modelseedpy": ["config.cfg", "data/*", "data/templates/*", "data/ml/*"],
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -36,7 +36,10 @@ setup(
         "networkx >= 2.4",
         "cobra >= 0.29.0",
         "pandas >= 2.2.2",
-        "scikit-learn == 1.2.0",  # version lock for pickle ML models
+        "numpy >= 1.24",
+        # the default genome classifier (data/ml/*.npz) needs only numpy; scikit-learn is used by
+        # modelseedpy.ml. Legacy pickle classifiers (*_01_17_2023) still need scikit-learn 1.2.0.
+        "scikit-learn >= 1.2.0",
         "scipy >= 1.5.4",
         "chemicals >= 1.0.13",
         "chemw >= 0.3.2",
