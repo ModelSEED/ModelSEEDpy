@@ -87,6 +87,38 @@ def test_model_no_solution(get_model):
     assert solution.status == "infeasible"
 
 
+def test_build_applies_gapfill_reversals(
+    monkeypatch, template, get_model, media_glucose_aerobic
+):
+    """
+    MSBuilder.build must apply the "reversed" part of the gapfilling solution, not only "new".
+    GAPD_c0 is blocked in the direction glycolysis needs, so gapfilling reverses it
+    """
+    import modelseedpy.core.msatpcorrection
+    from modelseedpy.core.msbuilder import MSBuilder
+    from modelseedpy.core.msgenome import MSGenome
+
+    model = get_model()
+    model.reactions.BIOMASS_Ecoli_core_w_GAM_c0.id = "bio1"
+    model.repair()
+    model.reactions.ATPM_c0.lower_bound = 0
+    model.reactions.GAPD_c0.bounds = (-1000, 0)
+    # build_base_model needs an annotated genome and the default ATP media use ModelSEED ids
+    monkeypatch.setattr(MSBuilder, "build_base_model", lambda self, *args: model)
+    monkeypatch.setattr(
+        modelseedpy.core.msatpcorrection, "load_default_medias", lambda: []
+    )
+
+    builder = MSBuilder(MSGenome(), template, template_core=template)
+    model_gapfilled, _, _, gap_sol = builder.build(
+        "test", media_glucose_aerobic, annotate_with_rast=False
+    )
+
+    assert gap_sol == {}
+    assert model_gapfilled.reactions.GAPD_c0.bounds == (-1000, 1000)
+    assert model_gapfilled.slim_optimize() > 0.1
+
+
 def test_ms_gap_fill1(template, get_model, media_glucose_aerobic):
     """
     Test gap filling with glucose aerobic requesting minimal growth value
