@@ -77,7 +77,9 @@ def load_classifier_from_npz(path):
         model_type = str(data["model_type"])
         if model_type != "linear":
             raise ValueError(f"unsupported classifier model_type: {model_type}")
-        model = MSLinearModel(data["coef"], data["intercept"], data["classes"].astype(str))
+        model = MSLinearModel(
+            data["coef"], data["intercept"], data["classes"].astype(str)
+        )
         features = data["features"].astype(str).tolist()
     return MSGenomeClassifier(model, features)
 
