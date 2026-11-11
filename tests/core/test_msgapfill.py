@@ -102,6 +102,27 @@ def test_ms_gap_fill1(template, get_model, media_glucose_aerobic):
     assert result["new"]["GLCpts_c0"] == ">"
 
 
+def test_integrate_gapfill_solution_keeps_reaction_with_infeasible_knockout(
+    template, get_model, media_glucose_aerobic
+):
+    """
+    Integrating a solution must keep a gapfilled reaction whose knockout makes the model infeasible
+    (e_coli_core ATPM has a lower bound, so without GLCpts_c0 the problem is infeasible, not zero)
+    """
+    model = get_model(["GLCpts_c0"])
+    gap_fill = MSGapfill(model, [template])
+    result = gap_fill.run_gapfilling(
+        media_glucose_aerobic, "BIOMASS_Ecoli_core_w_GAM_c0", minimum_obj=0.1
+    )
+    assert result["new"] == {"GLCpts_c0": ">"}
+
+    gap_fill.integrate_gapfill_solution(result, [], link_gaps_to_objective=False)
+
+    assert "GLCpts_c0" in model.reactions
+    assert result["new"] == {"GLCpts_c0": ">"}
+    assert model.slim_optimize() > 0.1
+
+
 def test_ms_gap_fill2(template, get_model, media_glucose_aerobic):
     """
     Test gap filling with glucose aerobic requesting higher growth value
