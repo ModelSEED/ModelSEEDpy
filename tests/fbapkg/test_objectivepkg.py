@@ -117,7 +117,9 @@ def test_build_package_without_setting_objective(model):
     """set_objective=False caches the objective without applying it to the model."""
     pkg = ObjectivePkg(model)
     before = model.objective.direction
-    pkg.build_package("MIN{(1)+rxn00001_c0}", objective_name="dry_run", set_objective=False)
+    pkg.build_package(
+        "MIN{(1)+rxn00001_c0}", objective_name="dry_run", set_objective=False
+    )
 
     assert "dry_run" in pkg.objective_data_cache
     assert model.objective.direction == before
