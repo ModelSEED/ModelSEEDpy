@@ -4,6 +4,7 @@ import re
 import time
 import json
 import sys
+import math
 import pandas as pd
 import cobra
 from cobra import Model, Reaction, Metabolite
@@ -557,7 +558,7 @@ class MSModelUtil:
                     original_bound = rxnobj.upper_bound
                     rxnobj.upper_bound = 0
                     objective = tempmodel.slim_optimize()
-                    if objective < solution["minobjective"]:
+                    if math.isnan(objective) or objective < solution["minobjective"]:
                         logger.info(
                             rxn_id
                             + solution[key][rxn_id]
@@ -580,7 +581,7 @@ class MSModelUtil:
                     original_bound = rxnobj.lower_bound
                     rxnobj.lower_bound = 0
                     objective = tempmodel.slim_optimize()
-                    if objective < solution["minobjective"]:
+                    if math.isnan(objective) or objective < solution["minobjective"]:
                         logger.info(
                             rxn_id
                             + solution[key][rxn_id]
