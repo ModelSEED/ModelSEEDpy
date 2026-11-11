@@ -17,12 +17,10 @@ class ObjConstPkg(BaseFBAPkg):
         coef = self.model.solver.objective.get_linear_coefficients(
             self.model.solver.objective.variables
         )
-        #Check if the constraint already exists and if so, just updating bounds in place
+        # Check if the constraint already exists and if so, just updating bounds in place
         for name in self.constraints["objc"]:
             constraint = self.constraints["objc"][name]
-            existing_coef = constraint.get_linear_coefficients(
-                constraint.variables
-            )
+            existing_coef = constraint.get_linear_coefficients(constraint.variables)
             if coef == existing_coef:
                 constraint.lb = lower_bound
                 constraint.ub = upper_bound
