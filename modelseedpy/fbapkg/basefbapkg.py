@@ -73,12 +73,12 @@ class BaseFBAPkg:
         for obj_type in self.variables:
             for cobra_obj in self.variables[obj_type]:
                 cobra_objs.append(self.variables[obj_type][cobra_obj])
+            self.variables[obj_type] = {}
         for obj_type in self.constraints:
             for cobra_obj in self.constraints[obj_type]:
                 cobra_objs.append(self.constraints[obj_type][cobra_obj])
+            self.constraints[obj_type] = {}
         self.model.remove_cons_vars(cobra_objs)
-        self.variables = {}
-        self.constraints = {}
 
     def build_variable(
         self, obj_type, lower_bound, upper_bound, vartype, cobra_obj=None
@@ -153,3 +153,12 @@ class BaseFBAPkg:
             self.constraints[name] = dict()
         if name not in self.constraint_types:
             self.constraint_types[name] = type
+
+    def get_current_media(self):
+        """The media currently applied to this model, or None if none has been.
+
+        Not named ``current_media``: ``KBaseMediaPkg`` -- itself a
+        ``BaseFBAPkg`` -- holds the media in an instance ATTRIBUTE of that
+        name, which would shadow this method on that one subclass.
+        """
+        return self.pkgmgr.getpkg("KBaseMediaPkg").current_media
