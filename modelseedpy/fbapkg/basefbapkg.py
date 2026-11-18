@@ -31,7 +31,13 @@ class BaseFBAPkg:
     """
 
     def __init__(
-        self, model, name, variable_types={}, constraint_types={}, reaction_types={}
+        self,
+        model,
+        name,
+        variable_types={},
+        constraint_types={},
+        reaction_types={},
+        adopt_existing=False,
     ):
         if isinstance(model, MSModelUtil):
             self.model = model.model
@@ -60,6 +66,40 @@ class BaseFBAPkg:
             self.variables[type] = dict()
         for type in constraint_types:
             self.constraints[type] = dict()
+
+        if adopt_existing:
+            self.adopt_existing_objects()
+
+    def adopt_existing_objects(self):
+        """Rebind this package to matching objects already on the model's solver.
+
+        A package reconstructed for a model whose solver already carries its
+        constraints and variables starts out empty and will rebuild them. Calling
+        this adopts what is already there instead, by matching the final
+        underscore-delimited segment of each solver object's name against this
+        package's registered types -- the inverse of the ``name + "_" + obj_type``
+        scheme ``build_variable`` and ``build_constraint`` use.
+
+        This is OPT-IN because the match is on the name alone, so it adopts any
+        solver object whose name ends in ``_<registered type>`` whether or not
+        this package created it. On a model holding an ordinary reaction called
+        ``rxn00042_tf``, ``TotalFluxPkg`` adopts that reaction's own flux
+        variable as the total-flux variable for ``rxn00042``; ``build_package``
+        then skips building the real one, no ``tf`` coupling constraint is
+        created, and ``clear()`` would delete the reaction's variable from the
+        solver. Only call this where the model's naming is known not to collide.
+        """
+        for constraint in self.model.solver.constraints:
+            obj_type = constraint.name.split("_")[-1]
+            if obj_type in self.constraints:
+                name = "_".join(constraint.name.split("_")[0:-1])
+                self.constraints[obj_type][name] = constraint
+
+        for variable in self.model.solver.variables:
+            obj_type = variable.name.split("_")[-1]
+            if obj_type in self.variables:
+                name = "_".join(variable.name.split("_")[0:-1])
+                self.variables[obj_type][name] = variable
 
     def validate_parameters(self, params, required, defaults):
         for item in required:
